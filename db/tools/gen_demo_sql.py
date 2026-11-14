@@ -1,0 +1,223 @@
+﻿#!/usr/bin/env python3
+"""生成 db/02-schema-with-demo.sql：表结构 + 教学种子数据。
+
+为什么要脚本生成：
+  60 个商品、100 条相册、20 条明细都有强规则（SKU 模板、库存边界、状态分布），
+  手写 SQL 极易出现「数量对不上」「边界样例缺失」的问题。脚本保证可复现，
+  产物仍是纯 SQL，可以直接用 mysql 客户端执行，不依赖 Python。
+
+用法：
+  python db/tools/gen_demo_sql.py
+"""
+
+from __future__ import annotations
+
+import pathlib
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+SCHEMA = ROOT / "db" / "01-schema.sql"
+OUTPUT = ROOT / "db" / "02-schema-with-demo.sql"
+
+# ---------------------------------------------------------------- 基础数据
+
+IPS = [
+    {"code": "STARLINE", "cn": "星轨列车", "en": "STARLINE", "sort": 1},
+    {"code": "MISTPORT", "cn": "雾港侦探", "en": "MISTPORT", "sort": 2},
+    {"code": "ONIGIRI", "cn": "饭团小馆", "en": "ONIGIRI", "sort": 3},
+    {"code": "IRONWOOD", "cn": "机械之森", "en": "IRONWOOD", "sort": 4},
+    {"code": "CICADA", "cn": "夏夜蝉鸣", "en": "CICADA", "sort": 5},
+]
+
+# (用户名, 显示名, 角色, 状态, 邮箱, BCrypt 散列) —— 明文均为 Cartoon123!
+USERS = [
+    ("alice", "爱丽丝", "CUSTOMER", "ENABLED", "alice@example.com",
+     "$2a$10$j/75MLefRUs.J6CnH/rosemt5nzlyPmP8ZqxiTvOHWGQx6yIhAB96"),
+    ("bob", "鲍勃", "CUSTOMER", "ENABLED", "bob@example.com",
+     "$2a$10$FLGRU.yNTnPKj7C2Sh0.c.p0//xTFpIiXw2j8AwQMTOLgB.HBTLbW"),
+    ("carol", "卡萝", "CUSTOMER", "DISABLED", "carol@example.com",
+     "$2a$10$55myfBkMkG8w08nnWw4.y.glTUMWdfUNJFBdNFDuLVJK9uM5GWQUK"),
+    ("admin", "店长", "ADMIN", "ENABLED", "admin@example.com",
+     "$2a$10$hJrmVNne3wWlQhSr/ndtyemGq9r00m4n2R6UhRk1eIews6E4Gr0u2"),
+]
+
+VOLUME_PRICE = [28, 28, 30, 30, 32, 34]
+VOLUME_SUM = [
+    "故事从一列永不到站的列车开始。",
+    "车窗外是不断被重写的星空。",
+    "乘客名单上出现了自己的名字。",
+    "终点站原来根本没有站台。",
+    "有人在中途下了车，再也没回来。",
+    "最后一卷，列车驶入黎明。",
+]
+
+# 周边：(名称, 价格, 库存, 状态)
+MERCH = {
+    "STARLINE": [
+        ("列车长亚克力立牌", 89, 0, "ON_SALE"),
+        ("车票金属徽章", 39, 8, "ON_SALE"),
+        ("星空帆布袋", 69, 9, "ON_SALE"),
+        ("线路图线圈本", 29, 10, "ON_SALE"),
+        ("列车钥匙扣", 45, 11, "ON_SALE"),
+        ("全彩设定画集", 128, 6, "DRAFT"),
+    ],
+    "MISTPORT": [
+        ("侦探风衣立牌", 89, 3, "ON_SALE"),
+        ("雾港地图海报", 49, 9, "ON_SALE"),
+        ("怀表造型挂件", 59, 10, "ON_SALE"),
+        ("案件档案文件夹", 25, 11, "ON_SALE"),
+        ("主角徽章套装", 45, 12, "ON_SALE"),
+        ("雾港设定集", 118, 7, "ON_SALE"),
+    ],
+    "ONIGIRI": [
+        ("饭团造型抱枕", 99, 1, "ON_SALE"),
+        ("小馆围裙", 79, 8, "ON_SALE"),
+        ("菜单贴纸包", 19, 9, "ON_SALE"),
+        ("陶瓷马克杯", 59, 10, "ON_SALE"),
+        ("店长亚克力立牌", 69, 11, "ON_SALE"),
+        ("料理手账本", 35, 6, "ON_SALE"),
+    ],
+    "IRONWOOD": [
+        ("机械鹿拼装模型", 199, 5, "ON_SALE"),
+        ("齿轮金属徽章", 45, 8, "ON_SALE"),
+        ("森林夜光海报", 55, 9, "ON_SALE"),
+        ("工装短T", 89, 10, "ON_SALE"),
+        ("机械书签套装", 29, 11, "ON_SALE"),
+        ("机械设定画集", 138, 6, "ON_SALE"),
+    ],
+    "CICADA": [
+        ("蝉鸣主题T恤", 89, 4, "ON_SALE"),
+        ("星空风铃", 69, 0, "ON_SALE"),
+        ("蝉翼亚克力挂件", 39, 9, "ON_SALE"),
+        ("夏日明信片组", 25, 10, "ON_SALE"),
+        ("主角亚克力立牌", 79, 11, "ON_SALE"),
+        ("夏日画集", 108, 6, "ON_SALE"),
+    ],
+}
+
+# 让「新品上架」与「精选推荐」各有确定的样例
+NEWEST_AGE = {"CICADA-M04": 0, "ONIGIRI-C04": 1, "MISTPORT-M05": 2}
+FEATURED_SORT = {"STARLINE-C01": 1, "MISTPORT-C01": 2, "IRONWOOD-M01": 3, "CICADA-C05": 4}
+# 库存边界：上架商品里 3 件售罄、2 件只剩 1 件
+VOLUME_STOCK = {"STARLINE-C02": 1, "MISTPORT-C03": 0}
+
+CATEGORY_IDS = {ip["code"]: (i + 1) * 1 for i, ip in enumerate(IPS)}  # 1..5
+
+
+def esc(text: str) -> str:
+    """单引号转义，避免名称里的引号破坏 SQL。"""
+    return text.replace("\\", "\\\\").replace("'", "''")
+
+
+def build_products():
+    rows = []
+    for idx, ip in enumerate(IPS):
+        comic_id = 100 + idx * 2
+        merch_id = 101 + idx * 2
+        for n in range(1, 7):
+            sku = f"{ip['code']}-C{n:02d}"
+            status = "DRAFT" if n == 6 else "ON_SALE"
+            rows.append({
+                "sku": sku,
+                "cat": comic_id,
+                "name": f"《{ip['cn']}》第{n}卷",
+                "summary": VOLUME_SUM[n - 1],
+                "desc": f"《{ip['cn']}》第{n}卷正文，官方单行本。教学演示数据，非真实出版物。",
+                "price": VOLUME_PRICE[n - 1],
+                "stock": 0 if status == "DRAFT" else VOLUME_STOCK.get(sku, 11 + n),
+                "status": status,
+                "sort": FEATURED_SORT.get(sku, 100),
+                "age": NEWEST_AGE.get(sku, 5 + idx * 6 + n),
+            })
+        for j, (name, price, stock, status) in enumerate(MERCH[ip["code"]], start=1):
+            sku = f"{ip['code']}-M{j:02d}"
+            rows.append({
+                "sku": sku,
+                "cat": merch_id,
+                "name": f"{ip['cn']} {name}",
+                "summary": "官方授权周边，随书附赠收藏卡。",
+                "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",
+                "price": price,
+                "stock": stock,
+                "status": status,
+                "sort": FEATURED_SORT.get(sku, 100),
+                "age": NEWEST_AGE.get(sku, 5 + idx * 6 + j + 2),
+            })
+    return rows
+
+
+def main() -> None:
+    schema_text = SCHEMA.read_text(encoding="utf-8")
+    marker = "-- ===== 七张表的统一结构开始 ====="
+    ddl = schema_text[schema_text.index(marker):]
+
+    out = []
+    out.append("-- MyCartoonStore 实验一：表结构与演示数据（独立完整脚本）")
+    out.append("-- 由 db/tools/gen_demo_sql.py 生成，请勿手工修改；改数据请改生成器后重跑。")
+    out.append("-- 与 01-schema.sql 二选一，不按编号依次执行；此文件已包含完整表结构。")
+    out.append("-- 在空的 MyCartoonStore 库中首次执行；不 DROP、不清空、不覆盖已有表。")
+    out.append("-- 教学账号统一明文 Cartoon123!，BCrypt cost=10，每个账号独立盐。")
+    out.append("-- 演示数据仅用于教学，商品、订单、金额均为虚构。")
+    out.append("")
+    out.append("SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;")
+    out.append("SET SESSION time_zone = '+08:00';")
+    out.append("")
+    out.append("CREATE DATABASE IF NOT EXISTS MyCartoonStore")
+    out.append("    CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;")
+    out.append("USE MyCartoonStore;")
+    out.append("")
+    out.append(ddl.rstrip())
+    out.append("")
+    out.append("-- ===== 演示数据开始 =====")
+    out.append("")
+
+    # ---- 账号
+    out.append("-- 1. 教学账号：4 个，其中 carol 为禁用样例")
+    out.append("INSERT INTO store_user (username, password_hash, display_name, role, status, email) VALUES")
+    out.append(",\n".join(
+        f"('{u[0]}', '{u[5]}', '{u[1]}', '{u[2]}', '{u[3]}', '{u[4]}')" for u in USERS
+    ) + ";")
+    out.append("")
+
+    # ---- 分类
+    out.append("-- 2. 分类：5 个一级（作品）+ 10 个二级（单行本 / 官方周边）")
+    out.append("INSERT INTO category (id, code, parent_id, name, sort_order) VALUES")
+    primary = ",\n".join(
+        f"({CATEGORY_IDS[ip['code']]}, '{ip['code']}', NULL, '{ip['cn']}', {ip['sort']})" for ip in IPS
+    )
+    out.append(primary + ";")
+    out.append("")
+    out.append("INSERT INTO category (id, code, parent_id, name, sort_order) VALUES")
+    secondary = []
+    for idx, ip in enumerate(IPS):
+        secondary.append(f"({100 + idx * 2}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")
+        secondary.append(f"({101 + idx * 2}, '{ip['code']}-MERCH', {CATEGORY_IDS[ip['code']]}, '官方周边', 2)")
+    out.append(",\n".join(secondary) + ";")
+    out.append("")
+
+    # ---- 商品
+    products = build_products()
+    out.append("-- 3. 商品：60 件 = 5 部作品 ×（6 卷单行本 + 6 件周边）")
+    out.append("--    54 上架 / 6 下架；其中 3 件上架售罄、2 件库存为 1（边界样例）")
+    out.append("INSERT INTO product (sku, category_id, name, summary, description, cover_image, price, stock, status, sort_order, created_at) VALUES")
+    value_rows = []
+    for p in products:
+        value_rows.append(
+            "('{sku}', {cat}, '{name}', '{summary}', '{desc}', 'images/products/{sku}/cover.svg', "
+            "{price:.2f}, {stock}, '{status}', {sort}, DATE_SUB(NOW(), INTERVAL {age} DAY))".format(
+                sku=p["sku"], cat=p["cat"], name=esc(p["name"]), summary=esc(p["summary"]),
+                desc=esc(p["desc"]), price=p["price"], stock=p["stock"], status=p["status"],
+                sort=p["sort"], age=p["age"],
+            )
+        )
+    out.append(",\n".join(value_rows) + ";")
+    out.append("")
+    out.append("-- ===== 演示数据结束 =====")
+    out.append("")
+
+    OUTPUT.write_text("\n".join(out), encoding="utf-8")
+    print(f"written: {OUTPUT}")
+    print(f"products: {len(products)}, categories: 15, users: {len(USERS)}")
+
+
+if __name__ == "__main__":
+    main()

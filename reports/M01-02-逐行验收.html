@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M01-02 · 分类与商品种子 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M01-02 · 分类与商品种子（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码（注释行原位绿字），右列是该行的说明。</p>
+<nav>
+<a href="#gen">gen_demo_sql.py</a>
+<a href="#sql">02-schema-with-demo.sql（种子段）</a>
+</nav>
+</header>
+<main>
+<p class="note">所属模块：M01 数据库与实体 / 任务 M01-02。依据 docs/03 §5 种子数据规格、docs/08 §4 改动清单。
+验证：空库执行后 4 账号 / 15 分类 / 60 商品，54 上架 + 6 下架，3 件售罄、2 件库存 1；4 个账号 BCrypt 校验全部 matches=true。
+SQL 的建表段（第 15–220 行）来自 01-schema.sql，见 M01-01 逐行验收，此处不重复。</p>
+
+<section id="gen">
+<h2>gen_demo_sql.py<small>种子生成器 · 223 行</small></h2>
+<p class="path">db/tools/gen_demo_sql.py</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>﻿#!/usr/bin/env python3</pre></td><td class="explain">允许 ./gen_demo_sql.py 直接执行，不依赖调用方式。</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>"""生成 db/02-schema-with-demo.sql：表结构 + 教学种子数据。</pre></td><td class="explain">模块 docstring：产物路径与用途。</td></tr>
+<tr class="gap"><td class="line">3</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>为什么要脚本生成：</pre></td><td class="explain">说明为什么要用脚本生成，避免后来者当成多余文件删掉。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre>  60 个商品、100 条相册、20 条明细都有强规则（SKU 模板、库存边界、状态分布），</pre></td><td class="explain">列出三条强规则：SKU 模板、库存边界、状态分布。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>  手写 SQL 极易出现「数量对不上」「边界样例缺失」的问题。脚本保证可复现，</pre></td><td class="explain">手写 60 行 INSERT 时，数量与边界最容易对不上。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>  产物仍是纯 SQL，可以直接用 mysql 客户端执行，不依赖 Python。</pre></td><td class="explain">强调产物是纯 SQL：执行不需要 Python。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>用法：</pre></td><td class="explain">用法。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>  python db/tools/gen_demo_sql.py</pre></td><td class="explain">唯一入口命令。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>"""</pre></td><td class="explain">docstring 结束。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">from</span> __future__ <span class="kw">import</span> annotations</pre></td><td class="explain">延迟注解求值，兼容低版本 Python。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> pathlib</pre></td><td class="explain">只用标准库，不引入第三方依赖。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>ROOT = pathlib.Path(__file__).resolve().parents[2]</pre></td><td class="explain">以 __file__ 定位仓库根：从任何工作目录运行都指向同一处。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>SCHEMA = ROOT / "db" / "01-schema.sql"</pre></td><td class="explain">DDL 唯一来源：02 的建表语句从这里摘录，避免两份手抄漂移。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>OUTPUT = ROOT / "db" / "02-schema-with-demo.sql"</pre></td><td class="explain">输出路径固定，重跑即覆盖。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"># ---------------------------------------------------------------- 基础数据</pre></td><td class="explain">数据区开始。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>IPS = [</pre></td><td class="explain">五部作品；列表顺序决定一级分类 id（1–5）与首页顺序。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    {"code": "STARLINE", "cn": "星轨列车", "en": "STARLINE", "sort": 1},</pre></td><td class="explain">第 1 部：星轨列车，code 用作 SKU 与分类编码前缀。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    {"code": "MISTPORT", "cn": "雾港侦探", "en": "MISTPORT", "sort": 2},</pre></td><td class="explain">第 2 部：雾港侦探。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    {"code": "ONIGIRI", "cn": "饭团小馆", "en": "ONIGIRI", "sort": 3},</pre></td><td class="explain">第 3 部：饭团小馆。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    {"code": "IRONWOOD", "cn": "机械之森", "en": "IRONWOOD", "sort": 4},</pre></td><td class="explain">第 4 部：机械之森。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    {"code": "CICADA", "cn": "夏夜蝉鸣", "en": "CICADA", "sort": 5},</pre></td><td class="explain">第 5 部：夏夜蝉鸣。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>]</pre></td><td class="explain">列表结束。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline"># (用户名, 显示名, 角色, 状态, 邮箱, BCrypt 散列) —— 明文均为 Cartoon123!</pre></td><td class="explain">账号区开始。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>USERS = [</pre></td><td class="explain">6 元组：用户名、显示名、角色、状态、邮箱、BCrypt 散列。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    ("alice", "爱丽丝", "CUSTOMER", "ENABLED", "alice@example.com",</pre></td><td class="explain">alice：CUSTOMER/ENABLED，口令 Cartoon123! 的 BCrypt 散列</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>     "$2a$10$j/75MLefRUs.J6CnH/rosemt5nzlyPmP8ZqxiTvOHWGQx6yIhAB96"),</pre></td><td class="explain">散列续行：$2a$10$ 前缀表示 BCrypt cost=10，盐已内置在串里。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    ("bob", "鲍勃", "CUSTOMER", "ENABLED", "bob@example.com",</pre></td><td class="explain">bob：CUSTOMER/ENABLED，口令 Cartoon123! 的 BCrypt 散列</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>     "$2a$10$FLGRU.yNTnPKj7C2Sh0.c.p0//xTFpIiXw2j8AwQMTOLgB.HBTLbW"),</pre></td><td class="explain">散列续行（bob，独立盐）。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    ("carol", "卡萝", "CUSTOMER", "DISABLED", "carol@example.com",</pre></td><td class="explain">carol：CUSTOMER/DISABLED，禁用样例</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>     "$2a$10$55myfBkMkG8w08nnWw4.y.glTUMWdfUNJFBdNFDuLVJK9uM5GWQUK"),</pre></td><td class="explain">散列续行（carol，独立盐）。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    ("admin", "店长", "ADMIN", "ENABLED", "admin@example.com",</pre></td><td class="explain">admin：ADMIN/ENABLED，口令 Cartoon123! 的 BCrypt 散列</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>     "$2a$10$hJrmVNne3wWlQhSr/ndtyemGq9r00m4n2R6UhRk1eIews6E4Gr0u2"),</pre></td><td class="explain">散列续行（admin，独立盐）。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>]</pre></td><td class="explain">账号列表结束。</td></tr>
+<tr class="gap"><td class="line">42</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>VOLUME_PRICE = [28, 28, 30, 30, 32, 34]</pre></td><td class="explain">6 卷价格：后两卷略高，覆盖不同价位。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>VOLUME_SUM = [</pre></td><td class="explain">每卷一句简介，避免 60 个商品共用同一句。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    "故事从一列永不到站的列车开始。",</pre></td><td class="explain">第 1 卷的一句话简介。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    "车窗外是不断被重写的星空。",</pre></td><td class="explain">第 2 卷简介。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    "乘客名单上出现了自己的名字。",</pre></td><td class="explain">第 3 卷简介。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    "终点站原来根本没有站台。",</pre></td><td class="explain">第 4 卷简介。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    "有人在中途下了车，再也没回来。",</pre></td><td class="explain">第 5 卷简介。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    "最后一卷，列车驶入黎明。",</pre></td><td class="explain">第 6 卷（完结卷）简介。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>]</pre></td><td class="explain">简介列表结束。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline"># 周边：(名称, 价格, 库存, 状态)</pre></td><td class="explain">周边区开始：键为作品 code，值为 (名称, 价格, 库存, 状态)。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>MERCH = {</pre></td><td class="explain">周边数据。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    "STARLINE": [</pre></td><td class="explain">星轨列车：6 件周边。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        ("列车长亚克力立牌", 89, 0, "ON_SALE"),</pre></td><td class="explain">列车长亚克力立牌：¥89，库存 0（售罄样例）</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        ("车票金属徽章", 39, 8, "ON_SALE"),</pre></td><td class="explain">车票金属徽章：¥39，库存 8</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        ("星空帆布袋", 69, 9, "ON_SALE"),</pre></td><td class="explain">星空帆布袋：¥69，库存 9</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        ("线路图线圈本", 29, 10, "ON_SALE"),</pre></td><td class="explain">线路图线圈本：¥29，库存 10</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        ("列车钥匙扣", 45, 11, "ON_SALE"),</pre></td><td class="explain">列车钥匙扣：¥45，库存 11</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        ("全彩设定画集", 128, 6, "DRAFT"),</pre></td><td class="explain">全彩设定画集：¥128，库存 6（下架样例）</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    ],</pre></td><td class="explain">星轨列车组结束。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    "MISTPORT": [</pre></td><td class="explain">雾港侦探：6 件周边。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        ("侦探风衣立牌", 89, 3, "ON_SALE"),</pre></td><td class="explain">侦探风衣立牌：¥89，库存 3</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        ("雾港地图海报", 49, 9, "ON_SALE"),</pre></td><td class="explain">雾港地图海报：¥49，库存 9</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        ("怀表造型挂件", 59, 10, "ON_SALE"),</pre></td><td class="explain">怀表造型挂件：¥59，库存 10</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        ("案件档案文件夹", 25, 11, "ON_SALE"),</pre></td><td class="explain">案件档案文件夹：¥25，库存 11</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        ("主角徽章套装", 45, 12, "ON_SALE"),</pre></td><td class="explain">主角徽章套装：¥45，库存 12</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        ("雾港设定集", 118, 7, "ON_SALE"),</pre></td><td class="explain">雾港设定集：¥118，库存 7</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    ],</pre></td><td class="explain">雾港侦探组结束。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    "ONIGIRI": [</pre></td><td class="explain">饭团小馆：6 件周边。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        ("饭团造型抱枕", 99, 1, "ON_SALE"),</pre></td><td class="explain">饭团造型抱枕：¥99，库存 1</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        ("小馆围裙", 79, 8, "ON_SALE"),</pre></td><td class="explain">小馆围裙：¥79，库存 8</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        ("菜单贴纸包", 19, 9, "ON_SALE"),</pre></td><td class="explain">菜单贴纸包：¥19，库存 9</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        ("陶瓷马克杯", 59, 10, "ON_SALE"),</pre></td><td class="explain">陶瓷马克杯：¥59，库存 10</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        ("店长亚克力立牌", 69, 11, "ON_SALE"),</pre></td><td class="explain">店长亚克力立牌：¥69，库存 11</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        ("料理手账本", 35, 6, "ON_SALE"),</pre></td><td class="explain">料理手账本：¥35，库存 6</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    ],</pre></td><td class="explain">饭团小馆组结束。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    "IRONWOOD": [</pre></td><td class="explain">机械之森：6 件周边。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        ("机械鹿拼装模型", 199, 5, "ON_SALE"),</pre></td><td class="explain">机械鹿拼装模型：¥199，库存 5</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        ("齿轮金属徽章", 45, 8, "ON_SALE"),</pre></td><td class="explain">齿轮金属徽章：¥45，库存 8</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        ("森林夜光海报", 55, 9, "ON_SALE"),</pre></td><td class="explain">森林夜光海报：¥55，库存 9</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        ("工装短T", 89, 10, "ON_SALE"),</pre></td><td class="explain">工装短T：¥89，库存 10</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        ("机械书签套装", 29, 11, "ON_SALE"),</pre></td><td class="explain">机械书签套装：¥29，库存 11</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        ("机械设定画集", 138, 6, "ON_SALE"),</pre></td><td class="explain">机械设定画集：¥138，库存 6</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    ],</pre></td><td class="explain">机械之森组结束。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    "CICADA": [</pre></td><td class="explain">夏夜蝉鸣：6 件周边。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        ("蝉鸣主题T恤", 89, 4, "ON_SALE"),</pre></td><td class="explain">蝉鸣主题T恤：¥89，库存 4</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        ("星空风铃", 69, 0, "ON_SALE"),</pre></td><td class="explain">星空风铃：¥69，库存 0（售罄样例）</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        ("蝉翼亚克力挂件", 39, 9, "ON_SALE"),</pre></td><td class="explain">蝉翼亚克力挂件：¥39，库存 9</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        ("夏日明信片组", 25, 10, "ON_SALE"),</pre></td><td class="explain">夏日明信片组：¥25，库存 10</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        ("主角亚克力立牌", 79, 11, "ON_SALE"),</pre></td><td class="explain">主角亚克力立牌：¥79，库存 11</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        ("夏日画集", 108, 6, "ON_SALE"),</pre></td><td class="explain">夏日画集：¥108，库存 6</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    ],</pre></td><td class="explain">夏夜蝉鸣组结束。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>}</pre></td><td class="explain">周边数据结束。</td></tr>
+<tr class="gap"><td class="line">96</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre class="cmtline"># 让「新品上架」与「精选推荐」各有确定的样例</pre></td><td class="explain">验收所需的样例分布，集中放在一处，改样例时不用翻 60 行数据。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>NEWEST_AGE = {"CICADA-M04": 0, "ONIGIRI-C04": 1, "MISTPORT-M05": 2}</pre></td><td class="explain">三条最新：CICADA-M04 / ONIGIRI-C04 / MISTPORT-M05，用于首页「新品上架」。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>FEATURED_SORT = {"STARLINE-C01": 1, "MISTPORT-C01": 2, "IRONWOOD-M01": 3, "CICADA-C05": 4}</pre></td><td class="explain">四条精选，数值越小越靠前；用于首页「精选推荐」。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre class="cmtline"># 库存边界：上架商品里 3 件售罄、2 件只剩 1 件</pre></td><td class="explain">库存边界常量：3 件售罄、2 件只剩 1 件。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>VOLUME_STOCK = {"STARLINE-C02": 1, "MISTPORT-C03": 0}</pre></td><td class="explain">单行本库存覆盖：制造「库存 1」与「售罄」两个边界。</td></tr>
+<tr class="gap"><td class="line">102</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>CATEGORY_IDS = {ip["code"]: (i + 1) * 1 <span class="kw">for</span> i, ip <span class="kw">in</span> enumerate(IPS)}  # 1..5</pre></td><td class="explain">一级分类 id = 1–5，与 IPS 顺序绑定。</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr class="gap"><td class="line">105</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre><span class="kw">def</span> esc(text: str) -&gt; str:</pre></td><td class="explain">SQL 字符串转义。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    """单引号转义，避免名称里的引号破坏 SQL。"""</pre></td><td class="explain">docstring：单引号转义，防止名称里的引号破坏 SQL。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    <span class="kw">return</span> text.replace("\\", "\\\\").replace("'", "''")</pre></td><td class="explain">先转反斜杠再转单引号，顺序不能反；MySQL 把 '' 当转义单引号。</td></tr>
+<tr class="gap"><td class="line">109</td><td></td><td></td></tr>
+<tr class="gap"><td class="line">110</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre><span class="kw">def</span> build_products():</pre></td><td class="explain">返回 60 条 dict，与 SQL 输出解耦，M01-03 可复用。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>    rows = []</pre></td><td class="explain">结果容器。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>    <span class="kw">for</span> idx, ip <span class="kw">in</span> enumerate(IPS):</pre></td><td class="explain">idx 同时用于分类 id 与时间偏移。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        comic_id = 100 + idx * 2</pre></td><td class="explain">单行本二级分类：100/102/104/106/108（偶数）。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        merch_id = 101 + idx * 2</pre></td><td class="explain">周边二级分类：101/103/105/107/109（奇数）。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        <span class="kw">for</span> n <span class="kw">in</span> range(1, 7):</pre></td><td class="explain">每部作品六卷。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>            sku = f"{ip['code']}-C{n:02d}"</pre></td><td class="explain">两位补零，保证字符串排序与卷次一致。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>            status = "DRAFT" <span class="kw">if</span> n == 6 <span class="kw">else</span> "ON_SALE"</pre></td><td class="explain">第 6 卷统一下架。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>            rows.append({</pre></td><td class="explain">单行本记录。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>                "sku": sku,</pre></td><td class="explain">SKU。</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>                "cat": comic_id,</pre></td><td class="explain">一定落在二级分类上。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>                "name": f"《{ip['cn']}》第{n}卷",</pre></td><td class="explain">书名号 + 卷次。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>                "summary": VOLUME_SUM[n - 1],</pre></td><td class="explain">卷简介，按卷次取数组。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>                "desc": f"《{ip['cn']}》第{n}卷正文，官方单行本。教学演示数据，非真实出版物。",</pre></td><td class="explain">声明演示数据，避免被当成真实出版物。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>                "price": VOLUME_PRICE[n - 1],</pre></td><td class="explain">卷价格。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>                "stock": 0 <span class="kw">if</span> status == "DRAFT" <span class="kw">else</span> VOLUME_STOCK.get(sku, 11 + n),</pre></td><td class="explain">下架库存 0；上架默认 12–17，两件由覆盖表指定。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>                "status": status,</pre></td><td class="explain">上架 / 下架。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>                "sort": FEATURED_SORT.get(sku, 100),</pre></td><td class="explain">默认 100：精选按升序取前 4，默认值必须大于 4。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                "age": NEWEST_AGE.get(sku, 5 + idx * 6 + n),</pre></td><td class="explain">距今天数，保证有唯一的三条最新。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>            })</pre></td><td class="explain">记录结束。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>        <span class="kw">for</span> j, (name, price, stock, status) <span class="kw">in</span> enumerate(MERCH[ip["code"]], start=1):</pre></td><td class="explain">周边数据自带库存与状态，避免再写分支。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>            sku = f"{ip['code']}-M{j:02d}"</pre></td><td class="explain">周边 SKU。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>            rows.append({</pre></td><td class="explain">周边记录。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>                "sku": sku,</pre></td><td class="explain">SKU。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>                "cat": merch_id,</pre></td><td class="explain">周边二级分类。</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>                "name": f"{ip['cn']} {name}",</pre></td><td class="explain">作品名 + 空格 + 周边名。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>                "summary": "官方授权周边，随书附赠收藏卡。",</pre></td><td class="explain">统一简介。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>                "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",</pre></td><td class="explain">描述里带上作品名与周边名。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>                "price": price,</pre></td><td class="explain">价格来自数据表。</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>                "stock": stock,</pre></td><td class="explain">直接取数据。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                "status": status,</pre></td><td class="explain">状态来自数据表。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                "sort": FEATURED_SORT.get(sku, 100),</pre></td><td class="explain">与单行本共用精选规则。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                "age": NEWEST_AGE.get(sku, 5 + idx * 6 + j + 2),</pre></td><td class="explain">+2 让周边时间与单行本错开。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>            })</pre></td><td class="explain">记录结束。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    <span class="kw">return</span> rows</pre></td><td class="explain">返回 60 条。</td></tr>
+<tr class="gap"><td class="line">146</td><td></td><td></td></tr>
+<tr class="gap"><td class="line">147</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre><span class="kw">def</span> main() -&gt; <span class="kw">None</span>:</pre></td><td class="explain">输出入口。</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    schema_text = SCHEMA.read_text(encoding="utf-8")</pre></td><td class="explain">显式 UTF-8：Windows 默认 GBK 会把中文读乱。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    marker = "-- ===== 七张表的统一结构开始 ====="</pre></td><td class="explain">用注释行作分割标记，比按行号截取稳定。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>    ddl = schema_text[schema_text.index(marker):]</pre></td><td class="explain">从这里截到文件尾，正好是完整 DDL。</td></tr>
+<tr class="gap"><td class="line">152</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>    out = []</pre></td><td class="explain">逐行拼装，避免多处 print 造成顺序错乱。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    out.append("-- MyCartoonStore 实验一：表结构与演示数据（独立完整脚本）")</pre></td><td class="explain">第一行说明这是独立脚本。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>    out.append("-- 由 db/tools/gen_demo_sql.py 生成，请勿手工修改；改数据请改生成器后重跑。")</pre></td><td class="explain">防止有人直接改 02，下次重跑被覆盖。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>    out.append("-- 与 01-schema.sql 二选一，不按编号依次执行；此文件已包含完整表结构。")</pre></td><td class="explain">与 01 的「二选一」口径一致。</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    out.append("-- 在空的 MyCartoonStore 库中首次执行；不 DROP、不清空、不覆盖已有表。")</pre></td><td class="explain">空库执行、不覆盖的约定。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    out.append("-- 教学账号统一明文 Cartoon123!，BCrypt cost=10，每个账号独立盐。")</pre></td><td class="explain">交代教学口令，方便验收。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>    out.append("-- 演示数据仅用于教学，商品、订单、金额均为虚构。")</pre></td><td class="explain">虚构声明。</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>    out.append("SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci;")</pre></td><td class="explain">客户端字符集与排序规则。</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    out.append("SET SESSION time_zone = '+08:00';")</pre></td><td class="explain">业务时间按东八区解释。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    out.append("CREATE DATABASE IF NOT EXISTS MyCartoonStore")</pre></td><td class="explain">建库。</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>    out.append("    CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;")</pre></td><td class="explain">字符集与排序规则，与 01 一致。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    out.append("USE MyCartoonStore;")</pre></td><td class="explain">后续 DDL 与数据都落在这个库。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>    out.append(ddl.rstrip())</pre></td><td class="explain">rstrip 去掉尾部空白，保证下一行只有一个空行。</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>    out.append("-- ===== 演示数据开始 =====")</pre></td><td class="explain">数据段起点，便于人眼定位。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr class="gap"><td class="line">172</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre class="cmtline">    # ---- 账号</pre></td><td class="explain">账号段注释。</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>    out.append("-- 1. 教学账号：4 个，其中 carol 为禁用样例")</pre></td><td class="explain">账号段标题。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>    out.append("INSERT INTO store_user (username, password_hash, display_name, role, status, email) VALUES")</pre></td><td class="explain">不写 id 交给自增；显式列名，防表结构变化时错位。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>    out.append(",\n".join(</pre></td><td class="explain">用「逗号+换行」连接，产出一行一个元组。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        f"('{u[0]}', '{u[5]}', '{u[1]}', '{u[2]}', '{u[3]}', '{u[4]}')" <span class="kw">for</span> u <span class="kw">in</span> USERS</pre></td><td class="explain">元组顺序与列名对齐：用户名、散列、显示名、角色、状态、邮箱。</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    ) + ";")</pre></td><td class="explain">末尾补分号。</td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr class="gap"><td class="line">180</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre class="cmtline">    # ---- 分类</pre></td><td class="explain">分类段注释。</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    out.append("-- 2. 分类：5 个一级（作品）+ 10 个二级（单行本 / 官方周边）")</pre></td><td class="explain">分类段标题。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>    out.append("INSERT INTO category (id, code, parent_id, name, sort_order) VALUES")</pre></td><td class="explain">这里写 id：商品要引用，必须固定。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>    primary = ",\n".join(</pre></td><td class="explain">一级分类文本拼装。</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        f"({CATEGORY_IDS[ip['code']]}, '{ip['code']}', NULL, '{ip['cn']}', {ip['sort']})" <span class="kw">for</span> ip <span class="kw">in</span> IPS</pre></td><td class="explain">一级分类：parent_id 为 NULL。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>    )</pre></td><td class="explain">join 参数结束。</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>    out.append(primary + ";")</pre></td><td class="explain">写入并补分号。</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>    out.append("INSERT INTO category (id, code, parent_id, name, sort_order) VALUES")</pre></td><td class="explain">二级分类单独一条 INSERT，便于阅读。</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>    secondary = []</pre></td><td class="explain">二级分类容器。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    <span class="kw">for</span> idx, ip <span class="kw">in</span> enumerate(IPS):</pre></td><td class="explain">遍历作品。</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        secondary.append(f"({100 + idx * 2}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")</pre></td><td class="explain">偶数 id，code 以 -COMIC 结尾（类型判定依据）。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        secondary.append(f"({101 + idx * 2}, '{ip['code']}-MERCH', {CATEGORY_IDS[ip['code']]}, '官方周边', 2)")</pre></td><td class="explain">奇数 id，-MERCH 结尾。</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>    out.append(",\n".join(secondary) + ";")</pre></td><td class="explain">写入二级分类。</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr class="gap"><td class="line">196</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre class="cmtline">    # ---- 商品</pre></td><td class="explain">商品段注释。</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>    products = build_products()</pre></td><td class="explain">生成 60 条商品。</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>    out.append("-- 3. 商品：60 件 = 5 部作品 ×（6 卷单行本 + 6 件周边）")</pre></td><td class="explain">商品段标题。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>    out.append("--    54 上架 / 6 下架；其中 3 件上架售罄、2 件库存为 1（边界样例）")</pre></td><td class="explain">把验收依赖的分布写进脚本，改数据时不会忘。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>    out.append("INSERT INTO product (sku, category_id, name, summary, description, cover_image, price, stock, status, sort_order, created_at) VALUES")</pre></td><td class="explain">列名显式，顺序与下面模板一一对应。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>    value_rows = []</pre></td><td class="explain">商品行容器。</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>    <span class="kw">for</span> p <span class="kw">in</span> products:</pre></td><td class="explain">遍历 60 条。</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>        value_rows.append(</pre></td><td class="explain">拼一行。</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>            "('{sku}', {cat}, '{name}', '{summary}', '{desc}', 'images/products/{sku}/cover.svg', "</pre></td><td class="explain">前 6 列；封面路径按 SKU 拼，一商品一图。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>            "{price:.2f}, {stock}, '{status}', {sort}, DATE_SUB(NOW(), INTERVAL {age} DAY))".format(</pre></td><td class="explain">价格两位小数；created_at 用相对时间，任何一天跑都合理。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>                sku=p["sku"], cat=p["cat"], name=esc(p["name"]), summary=esc(p["summary"]),</pre></td><td class="explain">文本字段统一过 esc。</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>                desc=esc(p["desc"]), price=p["price"], stock=p["stock"], status=p["status"],</pre></td><td class="explain">format 参数续行。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>                sort=p["sort"], age=p["age"],</pre></td><td class="explain">format 参数续行。</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>            )</pre></td><td class="explain">format 参数结束。</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>        )</pre></td><td class="explain">append 结束。</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    out.append(",\n".join(value_rows) + ";")</pre></td><td class="explain">写入商品 VALUES。</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>    out.append("-- ===== 演示数据结束 =====")</pre></td><td class="explain">与第 170 行呼应。</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr class="gap"><td class="line">216</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>    OUTPUT.write_text("\n".join(out), encoding="utf-8")</pre></td><td class="explain">写文件，UTF-8 无 BOM。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>    print(f"written: {OUTPUT}")</pre></td><td class="explain">输出路径，便于确认写到了哪。</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    print(f"products: {len(products)}, categories: 15, users: {len(USERS)}")</pre></td><td class="explain">打印数量，跑完立刻能对账。</td></tr>
+<tr class="gap"><td class="line">220</td><td></td><td></td></tr>
+<tr class="gap"><td class="line">221</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre><span class="kw">if</span> __name__ == "__main__":</pre></td><td class="explain">可被 import 而不执行。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>    main()</pre></td><td class="explain">入口调用。</td></tr>
+</tbody></table>
+</section>
+
+<section id="sql">
+<h2>02-schema-with-demo.sql<small>种子段（第 224–314 行）</small></h2>
+<p class="path">db/02-schema-with-demo.sql</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre><span class="kw">INSERT</span> <span class="kw">INTO</span> store_user (username, password_hash, display_name, role, status, email) <span class="kw">VALUES</span></pre></td><td class="explain">账号段：不写 id 交给自增。</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>('alice', '$2a$10$j/75MLefRUs.J6CnH/rosemt5nzlyPmP8ZqxiTvOHWGQx6yIhAB96', '爱丽丝', 'CUSTOMER', 'ENABLED', 'alice@example.com'),</pre></td><td class="explain">alice：CUSTOMER/ENABLED，口令 Cartoon123! 的 BCrypt 散列</td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>('bob', '$2a$10$FLGRU.yNTnPKj7C2Sh0.c.p0//xTFpIiXw2j8AwQMTOLgB.HBTLbW', '鲍勃', 'CUSTOMER', 'ENABLED', 'bob@example.com'),</pre></td><td class="explain">bob：CUSTOMER/ENABLED，口令 Cartoon123! 的 BCrypt 散列</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>('carol', '$2a$10$55myfBkMkG8w08nnWw4.y.glTUMWdfUNJFBdNFDuLVJK9uM5GWQUK', '卡萝', 'CUSTOMER', 'DISABLED', 'carol@example.com'),</pre></td><td class="explain">carol：CUSTOMER/DISABLED，禁用样例</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>('admin', '$2a$10$hJrmVNne3wWlQhSr/ndtyemGq9r00m4n2R6UhRk1eIews6E4Gr0u2', '店长', 'ADMIN', 'ENABLED', 'admin@example.com');</pre></td><td class="explain">末行带分号；carol 为 DISABLED。</td></tr>
+<tr class="gap"><td class="line">229</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre class="cmtline">-- 2. 分类：5 个一级（作品）+ 10 个二级（单行本 / 官方周边）</pre></td><td class="explain">分类段标题：5 个一级 + 10 个二级。</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre><span class="kw">INSERT</span> <span class="kw">INTO</span> category (id, code, parent_id, name, sort_order) <span class="kw">VALUES</span></pre></td><td class="explain">一级分类：parent_id 为 NULL，id 1–5。</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>(1, 'STARLINE', <span class="kw">NULL</span>, '星轨列车', 1),</pre></td><td class="explain">一级分类 id=1：星轨列车（code=STARLINE，排序 1）</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>(2, 'MISTPORT', <span class="kw">NULL</span>, '雾港侦探', 2),</pre></td><td class="explain">一级分类 id=2：雾港侦探（code=MISTPORT，排序 2）</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>(3, 'ONIGIRI', <span class="kw">NULL</span>, '饭团小馆', 3),</pre></td><td class="explain">一级分类 id=3：饭团小馆（code=ONIGIRI，排序 3）</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>(4, 'IRONWOOD', <span class="kw">NULL</span>, '机械之森', 4),</pre></td><td class="explain">一级分类 id=4：机械之森（code=IRONWOOD，排序 4）</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>(5, 'CICADA', <span class="kw">NULL</span>, '夏夜蝉鸣', 5);</pre></td><td class="explain">末行带分号。</td></tr>
+<tr class="gap"><td class="line">237</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre><span class="kw">INSERT</span> <span class="kw">INTO</span> category (id, code, parent_id, name, sort_order) <span class="kw">VALUES</span></pre></td><td class="explain">二级分类：每部作品一对，父 id 指向上表。</td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>(100, 'STARLINE-COMIC', 1, '单行本', 1),</pre></td><td class="explain">偶数 id，-COMIC 结尾。</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>(101, 'STARLINE-MERCH', 1, '官方周边', 2),</pre></td><td class="explain">奇数 id，-MERCH 结尾。</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>(102, 'MISTPORT-COMIC', 2, '单行本', 1),</pre></td><td class="explain">二级分类 id=102：单行本（漫画，父 id=2）</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>(103, 'MISTPORT-MERCH', 2, '官方周边', 2),</pre></td><td class="explain">二级分类 id=103：官方周边（周边，父 id=2）</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>(104, 'ONIGIRI-COMIC', 3, '单行本', 1),</pre></td><td class="explain">二级分类 id=104：单行本（漫画，父 id=3）</td></tr>
+<tr tabindex="0" data-line="244"><td class="line">244</td><td class="code"><pre>(105, 'ONIGIRI-MERCH', 3, '官方周边', 2),</pre></td><td class="explain">二级分类 id=105：官方周边（周边，父 id=3）</td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>(106, 'IRONWOOD-COMIC', 4, '单行本', 1),</pre></td><td class="explain">二级分类 id=106：单行本（漫画，父 id=4）</td></tr>
+<tr tabindex="0" data-line="246"><td class="line">246</td><td class="code"><pre>(107, 'IRONWOOD-MERCH', 4, '官方周边', 2),</pre></td><td class="explain">二级分类 id=107：官方周边（周边，父 id=4）</td></tr>
+<tr tabindex="0" data-line="247"><td class="line">247</td><td class="code"><pre>(108, 'CICADA-COMIC', 5, '单行本', 1),</pre></td><td class="explain">二级分类 id=108：单行本（漫画，父 id=5）</td></tr>
+<tr tabindex="0" data-line="248"><td class="line">248</td><td class="code"><pre>(109, 'CICADA-MERCH', 5, '官方周边', 2);</pre></td><td class="explain">末行带分号。</td></tr>
+<tr class="gap"><td class="line">249</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="250"><td class="line">250</td><td class="code"><pre class="cmtline">-- 3. 商品：60 件 = 5 部作品 ×（6 卷单行本 + 6 件周边）</pre></td><td class="explain">商品段标题：60 件 = 5 部作品 ×（6 卷 + 6 周边）。</td></tr>
+<tr tabindex="0" data-line="251"><td class="line">251</td><td class="code"><pre class="cmtline">--    54 上架 / 6 下架；其中 3 件上架售罄、2 件库存为 1（边界样例）</pre></td><td class="explain">把验收依赖的分布写在注释里：54 上架 / 6 下架 / 3 售罄 / 2 件库存 1。</td></tr>
+<tr tabindex="0" data-line="252"><td class="line">252</td><td class="code"><pre><span class="kw">INSERT</span> <span class="kw">INTO</span> product (sku, category_id, name, summary, description, cover_image, price, stock, status, sort_order, created_at) <span class="kw">VALUES</span></pre></td><td class="explain">商品段：11 列显式列出，顺序与每行一一对应。</td></tr>
+<tr tabindex="0" data-line="253"><td class="line">253</td><td class="code"><pre>('STARLINE-C01', 100, '《星轨列车》第1卷', '故事从一列永不到站的列车开始。', '《星轨列车》第1卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/STARLINE-C01/cover.svg', 28.00, 12, 'ON_SALE', 1, DATE_SUB(NOW(), INTERVAL 6 DAY)),</pre></td><td class="explain">《星轨列车》第1卷｜分类 100，¥28.00，库存 12，sort=1，6 天前上架</td></tr>
+<tr tabindex="0" data-line="254"><td class="line">254</td><td class="code"><pre>('STARLINE-C02', 100, '《星轨列车》第2卷', '车窗外是不断被重写的星空。', '《星轨列车》第2卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/STARLINE-C02/cover.svg', 28.00, 1, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 7 DAY)),</pre></td><td class="explain">《星轨列车》第2卷｜分类 100，¥28.00，库存 1，仅剩 1 件，sort=100，7 天前上架</td></tr>
+<tr tabindex="0" data-line="255"><td class="line">255</td><td class="code"><pre>('STARLINE-C03', 100, '《星轨列车》第3卷', '乘客名单上出现了自己的名字。', '《星轨列车》第3卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/STARLINE-C03/cover.svg', 30.00, 14, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 8 DAY)),</pre></td><td class="explain">《星轨列车》第3卷｜分类 100，¥30.00，库存 14，sort=100，8 天前上架</td></tr>
+<tr tabindex="0" data-line="256"><td class="line">256</td><td class="code"><pre>('STARLINE-C04', 100, '《星轨列车》第4卷', '终点站原来根本没有站台。', '《星轨列车》第4卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/STARLINE-C04/cover.svg', 30.00, 15, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 9 DAY)),</pre></td><td class="explain">《星轨列车》第4卷｜分类 100，¥30.00，库存 15，sort=100，9 天前上架</td></tr>
+<tr tabindex="0" data-line="257"><td class="line">257</td><td class="code"><pre>('STARLINE-C05', 100, '《星轨列车》第5卷', '有人在中途下了车，再也没回来。', '《星轨列车》第5卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/STARLINE-C05/cover.svg', 32.00, 16, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 10 DAY)),</pre></td><td class="explain">《星轨列车》第5卷｜分类 100，¥32.00，库存 16，sort=100，10 天前上架</td></tr>
+<tr tabindex="0" data-line="258"><td class="line">258</td><td class="code"><pre>('STARLINE-C06', 100, '《星轨列车》第6卷', '最后一卷，列车驶入黎明。', '《星轨列车》第6卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/STARLINE-C06/cover.svg', 34.00, 0, 'DRAFT', 100, DATE_SUB(NOW(), INTERVAL 11 DAY)),</pre></td><td class="explain">《星轨列车》第6卷｜分类 100，¥34.00，库存 0，下架，sort=100，11 天前上架</td></tr>
+<tr tabindex="0" data-line="259"><td class="line">259</td><td class="code"><pre>('STARLINE-M01', 101, '星轨列车 列车长亚克力立牌', '官方授权周边，随书附赠收藏卡。', '星轨列车「列车长亚克力立牌」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/STARLINE-M01/cover.svg', 89.00, 0, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 8 DAY)),</pre></td><td class="explain">星轨列车 列车长亚克力立牌｜分类 101，¥89.00，库存 0，售罄，sort=100，8 天前上架</td></tr>
+<tr tabindex="0" data-line="260"><td class="line">260</td><td class="code"><pre>('STARLINE-M02', 101, '星轨列车 车票金属徽章', '官方授权周边，随书附赠收藏卡。', '星轨列车「车票金属徽章」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/STARLINE-M02/cover.svg', 39.00, 8, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 9 DAY)),</pre></td><td class="explain">星轨列车 车票金属徽章｜分类 101，¥39.00，库存 8，sort=100，9 天前上架</td></tr>
+<tr tabindex="0" data-line="261"><td class="line">261</td><td class="code"><pre>('STARLINE-M03', 101, '星轨列车 星空帆布袋', '官方授权周边，随书附赠收藏卡。', '星轨列车「星空帆布袋」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/STARLINE-M03/cover.svg', 69.00, 9, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 10 DAY)),</pre></td><td class="explain">星轨列车 星空帆布袋｜分类 101，¥69.00，库存 9，sort=100，10 天前上架</td></tr>
+<tr tabindex="0" data-line="262"><td class="line">262</td><td class="code"><pre>('STARLINE-M04', 101, '星轨列车 线路图线圈本', '官方授权周边，随书附赠收藏卡。', '星轨列车「线路图线圈本」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/STARLINE-M04/cover.svg', 29.00, 10, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 11 DAY)),</pre></td><td class="explain">星轨列车 线路图线圈本｜分类 101，¥29.00，库存 10，sort=100，11 天前上架</td></tr>
+<tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>('STARLINE-M05', 101, '星轨列车 列车钥匙扣', '官方授权周边，随书附赠收藏卡。', '星轨列车「列车钥匙扣」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/STARLINE-M05/cover.svg', 45.00, 11, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 12 DAY)),</pre></td><td class="explain">星轨列车 列车钥匙扣｜分类 101，¥45.00，库存 11，sort=100，12 天前上架</td></tr>
+<tr tabindex="0" data-line="264"><td class="line">264</td><td class="code"><pre>('STARLINE-M06', 101, '星轨列车 全彩设定画集', '官方授权周边，随书附赠收藏卡。', '星轨列车「全彩设定画集」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/STARLINE-M06/cover.svg', 128.00, 6, 'DRAFT', 100, DATE_SUB(NOW(), INTERVAL 13 DAY)),</pre></td><td class="explain">星轨列车 全彩设定画集｜分类 101，¥128.00，库存 6，下架，sort=100，13 天前上架</td></tr>
+<tr tabindex="0" data-line="265"><td class="line">265</td><td class="code"><pre>('MISTPORT-C01', 102, '《雾港侦探》第1卷', '故事从一列永不到站的列车开始。', '《雾港侦探》第1卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/MISTPORT-C01/cover.svg', 28.00, 12, 'ON_SALE', 2, DATE_SUB(NOW(), INTERVAL 12 DAY)),</pre></td><td class="explain">《雾港侦探》第1卷｜分类 102，¥28.00，库存 12，sort=2，12 天前上架</td></tr>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre>('MISTPORT-C02', 102, '《雾港侦探》第2卷', '车窗外是不断被重写的星空。', '《雾港侦探》第2卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/MISTPORT-C02/cover.svg', 28.00, 13, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 13 DAY)),</pre></td><td class="explain">《雾港侦探》第2卷｜分类 102，¥28.00，库存 13，sort=100，13 天前上架</td></tr>
+<tr tabindex="0" data-line="267"><td class="line">267</td><td class="code"><pre>('MISTPORT-C03', 102, '《雾港侦探》第3卷', '乘客名单上出现了自己的名字。', '《雾港侦探》第3卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/MISTPORT-C03/cover.svg', 30.00, 0, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 14 DAY)),</pre></td><td class="explain">《雾港侦探》第3卷｜分类 102，¥30.00，库存 0，售罄，sort=100，14 天前上架</td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>('MISTPORT-C04', 102, '《雾港侦探》第4卷', '终点站原来根本没有站台。', '《雾港侦探》第4卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/MISTPORT-C04/cover.svg', 30.00, 15, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 15 DAY)),</pre></td><td class="explain">《雾港侦探》第4卷｜分类 102，¥30.00，库存 15，sort=100，15 天前上架</td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>('MISTPORT-C05', 102, '《雾港侦探》第5卷', '有人在中途下了车，再也没回来。', '《雾港侦探》第5卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/MISTPORT-C05/cover.svg', 32.00, 16, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 16 DAY)),</pre></td><td class="explain">《雾港侦探》第5卷｜分类 102，¥32.00，库存 16，sort=100，16 天前上架</td></tr>
+<tr tabindex="0" data-line="270"><td class="line">270</td><td class="code"><pre>('MISTPORT-C06', 102, '《雾港侦探》第6卷', '最后一卷，列车驶入黎明。', '《雾港侦探》第6卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/MISTPORT-C06/cover.svg', 34.00, 0, 'DRAFT', 100, DATE_SUB(NOW(), INTERVAL 17 DAY)),</pre></td><td class="explain">《雾港侦探》第6卷｜分类 102，¥34.00，库存 0，下架，sort=100，17 天前上架</td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre>('MISTPORT-M01', 103, '雾港侦探 侦探风衣立牌', '官方授权周边，随书附赠收藏卡。', '雾港侦探「侦探风衣立牌」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/MISTPORT-M01/cover.svg', 89.00, 3, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 14 DAY)),</pre></td><td class="explain">雾港侦探 侦探风衣立牌｜分类 103，¥89.00，库存 3，sort=100，14 天前上架</td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>('MISTPORT-M02', 103, '雾港侦探 雾港地图海报', '官方授权周边，随书附赠收藏卡。', '雾港侦探「雾港地图海报」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/MISTPORT-M02/cover.svg', 49.00, 9, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 15 DAY)),</pre></td><td class="explain">雾港侦探 雾港地图海报｜分类 103，¥49.00，库存 9，sort=100，15 天前上架</td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre>('MISTPORT-M03', 103, '雾港侦探 怀表造型挂件', '官方授权周边，随书附赠收藏卡。', '雾港侦探「怀表造型挂件」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/MISTPORT-M03/cover.svg', 59.00, 10, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 16 DAY)),</pre></td><td class="explain">雾港侦探 怀表造型挂件｜分类 103，¥59.00，库存 10，sort=100，16 天前上架</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>('MISTPORT-M04', 103, '雾港侦探 案件档案文件夹', '官方授权周边，随书附赠收藏卡。', '雾港侦探「案件档案文件夹」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/MISTPORT-M04/cover.svg', 25.00, 11, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 17 DAY)),</pre></td><td class="explain">雾港侦探 案件档案文件夹｜分类 103，¥25.00，库存 11，sort=100，17 天前上架</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>('MISTPORT-M05', 103, '雾港侦探 主角徽章套装', '官方授权周边，随书附赠收藏卡。', '雾港侦探「主角徽章套装」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/MISTPORT-M05/cover.svg', 45.00, 12, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 2 DAY)),</pre></td><td class="explain">雾港侦探 主角徽章套装｜分类 103，¥45.00，库存 12，sort=100，2 天前上架</td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>('MISTPORT-M06', 103, '雾港侦探 雾港设定集', '官方授权周边，随书附赠收藏卡。', '雾港侦探「雾港设定集」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/MISTPORT-M06/cover.svg', 118.00, 7, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 19 DAY)),</pre></td><td class="explain">雾港侦探 雾港设定集｜分类 103，¥118.00，库存 7，sort=100，19 天前上架</td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>('ONIGIRI-C01', 104, '《饭团小馆》第1卷', '故事从一列永不到站的列车开始。', '《饭团小馆》第1卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/ONIGIRI-C01/cover.svg', 28.00, 12, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 18 DAY)),</pre></td><td class="explain">《饭团小馆》第1卷｜分类 104，¥28.00，库存 12，sort=100，18 天前上架</td></tr>
+<tr tabindex="0" data-line="278"><td class="line">278</td><td class="code"><pre>('ONIGIRI-C02', 104, '《饭团小馆》第2卷', '车窗外是不断被重写的星空。', '《饭团小馆》第2卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/ONIGIRI-C02/cover.svg', 28.00, 13, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 19 DAY)),</pre></td><td class="explain">《饭团小馆》第2卷｜分类 104，¥28.00，库存 13，sort=100，19 天前上架</td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>('ONIGIRI-C03', 104, '《饭团小馆》第3卷', '乘客名单上出现了自己的名字。', '《饭团小馆》第3卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/ONIGIRI-C03/cover.svg', 30.00, 14, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 20 DAY)),</pre></td><td class="explain">《饭团小馆》第3卷｜分类 104，¥30.00，库存 14，sort=100，20 天前上架</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>('ONIGIRI-C04', 104, '《饭团小馆》第4卷', '终点站原来根本没有站台。', '《饭团小馆》第4卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/ONIGIRI-C04/cover.svg', 30.00, 15, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 1 DAY)),</pre></td><td class="explain">《饭团小馆》第4卷｜分类 104，¥30.00，库存 15，sort=100，1 天前上架</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>('ONIGIRI-C05', 104, '《饭团小馆》第5卷', '有人在中途下了车，再也没回来。', '《饭团小馆》第5卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/ONIGIRI-C05/cover.svg', 32.00, 16, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 22 DAY)),</pre></td><td class="explain">《饭团小馆》第5卷｜分类 104，¥32.00，库存 16，sort=100，22 天前上架</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>('ONIGIRI-C06', 104, '《饭团小馆》第6卷', '最后一卷，列车驶入黎明。', '《饭团小馆》第6卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/ONIGIRI-C06/cover.svg', 34.00, 0, 'DRAFT', 100, DATE_SUB(NOW(), INTERVAL 23 DAY)),</pre></td><td class="explain">《饭团小馆》第6卷｜分类 104，¥34.00，库存 0，下架，sort=100，23 天前上架</td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre>('ONIGIRI-M01', 105, '饭团小馆 饭团造型抱枕', '官方授权周边，随书附赠收藏卡。', '饭团小馆「饭团造型抱枕」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/ONIGIRI-M01/cover.svg', 99.00, 1, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 20 DAY)),</pre></td><td class="explain">饭团小馆 饭团造型抱枕｜分类 105，¥99.00，库存 1，仅剩 1 件，sort=100，20 天前上架</td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>('ONIGIRI-M02', 105, '饭团小馆 小馆围裙', '官方授权周边，随书附赠收藏卡。', '饭团小馆「小馆围裙」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/ONIGIRI-M02/cover.svg', 79.00, 8, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 21 DAY)),</pre></td><td class="explain">饭团小馆 小馆围裙｜分类 105，¥79.00，库存 8，sort=100，21 天前上架</td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>('ONIGIRI-M03', 105, '饭团小馆 菜单贴纸包', '官方授权周边，随书附赠收藏卡。', '饭团小馆「菜单贴纸包」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/ONIGIRI-M03/cover.svg', 19.00, 9, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 22 DAY)),</pre></td><td class="explain">饭团小馆 菜单贴纸包｜分类 105，¥19.00，库存 9，sort=100，22 天前上架</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>('ONIGIRI-M04', 105, '饭团小馆 陶瓷马克杯', '官方授权周边，随书附赠收藏卡。', '饭团小馆「陶瓷马克杯」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/ONIGIRI-M04/cover.svg', 59.00, 10, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 23 DAY)),</pre></td><td class="explain">饭团小馆 陶瓷马克杯｜分类 105，¥59.00，库存 10，sort=100，23 天前上架</td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>('ONIGIRI-M05', 105, '饭团小馆 店长亚克力立牌', '官方授权周边，随书附赠收藏卡。', '饭团小馆「店长亚克力立牌」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/ONIGIRI-M05/cover.svg', 69.00, 11, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 24 DAY)),</pre></td><td class="explain">饭团小馆 店长亚克力立牌｜分类 105，¥69.00，库存 11，sort=100，24 天前上架</td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>('ONIGIRI-M06', 105, '饭团小馆 料理手账本', '官方授权周边，随书附赠收藏卡。', '饭团小馆「料理手账本」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/ONIGIRI-M06/cover.svg', 35.00, 6, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 25 DAY)),</pre></td><td class="explain">饭团小馆 料理手账本｜分类 105，¥35.00，库存 6，sort=100，25 天前上架</td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre>('IRONWOOD-C01', 106, '《机械之森》第1卷', '故事从一列永不到站的列车开始。', '《机械之森》第1卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/IRONWOOD-C01/cover.svg', 28.00, 12, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 24 DAY)),</pre></td><td class="explain">《机械之森》第1卷｜分类 106，¥28.00，库存 12，sort=100，24 天前上架</td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>('IRONWOOD-C02', 106, '《机械之森》第2卷', '车窗外是不断被重写的星空。', '《机械之森》第2卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/IRONWOOD-C02/cover.svg', 28.00, 13, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 25 DAY)),</pre></td><td class="explain">《机械之森》第2卷｜分类 106，¥28.00，库存 13，sort=100，25 天前上架</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>('IRONWOOD-C03', 106, '《机械之森》第3卷', '乘客名单上出现了自己的名字。', '《机械之森》第3卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/IRONWOOD-C03/cover.svg', 30.00, 14, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 26 DAY)),</pre></td><td class="explain">《机械之森》第3卷｜分类 106，¥30.00，库存 14，sort=100，26 天前上架</td></tr>
+<tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre>('IRONWOOD-C04', 106, '《机械之森》第4卷', '终点站原来根本没有站台。', '《机械之森》第4卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/IRONWOOD-C04/cover.svg', 30.00, 15, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 27 DAY)),</pre></td><td class="explain">《机械之森》第4卷｜分类 106，¥30.00，库存 15，sort=100，27 天前上架</td></tr>
+<tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>('IRONWOOD-C05', 106, '《机械之森》第5卷', '有人在中途下了车，再也没回来。', '《机械之森》第5卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/IRONWOOD-C05/cover.svg', 32.00, 16, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 28 DAY)),</pre></td><td class="explain">《机械之森》第5卷｜分类 106，¥32.00，库存 16，sort=100，28 天前上架</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>('IRONWOOD-C06', 106, '《机械之森》第6卷', '最后一卷，列车驶入黎明。', '《机械之森》第6卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/IRONWOOD-C06/cover.svg', 34.00, 0, 'DRAFT', 100, DATE_SUB(NOW(), INTERVAL 29 DAY)),</pre></td><td class="explain">《机械之森》第6卷｜分类 106，¥34.00，库存 0，下架，sort=100，29 天前上架</td></tr>
+<tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>('IRONWOOD-M01', 107, '机械之森 机械鹿拼装模型', '官方授权周边，随书附赠收藏卡。', '机械之森「机械鹿拼装模型」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/IRONWOOD-M01/cover.svg', 199.00, 5, 'ON_SALE', 3, DATE_SUB(NOW(), INTERVAL 26 DAY)),</pre></td><td class="explain">机械之森 机械鹿拼装模型｜分类 107，¥199.00，库存 5，sort=3，26 天前上架</td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>('IRONWOOD-M02', 107, '机械之森 齿轮金属徽章', '官方授权周边，随书附赠收藏卡。', '机械之森「齿轮金属徽章」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/IRONWOOD-M02/cover.svg', 45.00, 8, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 27 DAY)),</pre></td><td class="explain">机械之森 齿轮金属徽章｜分类 107，¥45.00，库存 8，sort=100，27 天前上架</td></tr>
+<tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre>('IRONWOOD-M03', 107, '机械之森 森林夜光海报', '官方授权周边，随书附赠收藏卡。', '机械之森「森林夜光海报」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/IRONWOOD-M03/cover.svg', 55.00, 9, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 28 DAY)),</pre></td><td class="explain">机械之森 森林夜光海报｜分类 107，¥55.00，库存 9，sort=100，28 天前上架</td></tr>
+<tr tabindex="0" data-line="298"><td class="line">298</td><td class="code"><pre>('IRONWOOD-M04', 107, '机械之森 工装短T', '官方授权周边，随书附赠收藏卡。', '机械之森「工装短T」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/IRONWOOD-M04/cover.svg', 89.00, 10, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 29 DAY)),</pre></td><td class="explain">机械之森 工装短T｜分类 107，¥89.00，库存 10，sort=100，29 天前上架</td></tr>
+<tr tabindex="0" data-line="299"><td class="line">299</td><td class="code"><pre>('IRONWOOD-M05', 107, '机械之森 机械书签套装', '官方授权周边，随书附赠收藏卡。', '机械之森「机械书签套装」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/IRONWOOD-M05/cover.svg', 29.00, 11, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 30 DAY)),</pre></td><td class="explain">机械之森 机械书签套装｜分类 107，¥29.00，库存 11，sort=100，30 天前上架</td></tr>
+<tr tabindex="0" data-line="300"><td class="line">300</td><td class="code"><pre>('IRONWOOD-M06', 107, '机械之森 机械设定画集', '官方授权周边，随书附赠收藏卡。', '机械之森「机械设定画集」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/IRONWOOD-M06/cover.svg', 138.00, 6, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 31 DAY)),</pre></td><td class="explain">机械之森 机械设定画集｜分类 107，¥138.00，库存 6，sort=100，31 天前上架</td></tr>
+<tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre>('CICADA-C01', 108, '《夏夜蝉鸣》第1卷', '故事从一列永不到站的列车开始。', '《夏夜蝉鸣》第1卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/CICADA-C01/cover.svg', 28.00, 12, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 30 DAY)),</pre></td><td class="explain">《夏夜蝉鸣》第1卷｜分类 108，¥28.00，库存 12，sort=100，30 天前上架</td></tr>
+<tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>('CICADA-C02', 108, '《夏夜蝉鸣》第2卷', '车窗外是不断被重写的星空。', '《夏夜蝉鸣》第2卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/CICADA-C02/cover.svg', 28.00, 13, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 31 DAY)),</pre></td><td class="explain">《夏夜蝉鸣》第2卷｜分类 108，¥28.00，库存 13，sort=100，31 天前上架</td></tr>
+<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>('CICADA-C03', 108, '《夏夜蝉鸣》第3卷', '乘客名单上出现了自己的名字。', '《夏夜蝉鸣》第3卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/CICADA-C03/cover.svg', 30.00, 14, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 32 DAY)),</pre></td><td class="explain">《夏夜蝉鸣》第3卷｜分类 108，¥30.00，库存 14，sort=100，32 天前上架</td></tr>
+<tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>('CICADA-C04', 108, '《夏夜蝉鸣》第4卷', '终点站原来根本没有站台。', '《夏夜蝉鸣》第4卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/CICADA-C04/cover.svg', 30.00, 15, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 33 DAY)),</pre></td><td class="explain">《夏夜蝉鸣》第4卷｜分类 108，¥30.00，库存 15，sort=100，33 天前上架</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>('CICADA-C05', 108, '《夏夜蝉鸣》第5卷', '有人在中途下了车，再也没回来。', '《夏夜蝉鸣》第5卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/CICADA-C05/cover.svg', 32.00, 16, 'ON_SALE', 4, DATE_SUB(NOW(), INTERVAL 34 DAY)),</pre></td><td class="explain">《夏夜蝉鸣》第5卷｜分类 108，¥32.00，库存 16，sort=4，34 天前上架</td></tr>
+<tr tabindex="0" data-line="306"><td class="line">306</td><td class="code"><pre>('CICADA-C06', 108, '《夏夜蝉鸣》第6卷', '最后一卷，列车驶入黎明。', '《夏夜蝉鸣》第6卷正文，官方单行本。教学演示数据，非真实出版物。', 'images/products/CICADA-C06/cover.svg', 34.00, 0, 'DRAFT', 100, DATE_SUB(NOW(), INTERVAL 35 DAY)),</pre></td><td class="explain">《夏夜蝉鸣》第6卷｜分类 108，¥34.00，库存 0，下架，sort=100，35 天前上架</td></tr>
+<tr tabindex="0" data-line="307"><td class="line">307</td><td class="code"><pre>('CICADA-M01', 109, '夏夜蝉鸣 蝉鸣主题T恤', '官方授权周边，随书附赠收藏卡。', '夏夜蝉鸣「蝉鸣主题T恤」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/CICADA-M01/cover.svg', 89.00, 4, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 32 DAY)),</pre></td><td class="explain">夏夜蝉鸣 蝉鸣主题T恤｜分类 109，¥89.00，库存 4，sort=100，32 天前上架</td></tr>
+<tr tabindex="0" data-line="308"><td class="line">308</td><td class="code"><pre>('CICADA-M02', 109, '夏夜蝉鸣 星空风铃', '官方授权周边，随书附赠收藏卡。', '夏夜蝉鸣「星空风铃」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/CICADA-M02/cover.svg', 69.00, 0, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 33 DAY)),</pre></td><td class="explain">夏夜蝉鸣 星空风铃｜分类 109，¥69.00，库存 0，售罄，sort=100，33 天前上架</td></tr>
+<tr tabindex="0" data-line="309"><td class="line">309</td><td class="code"><pre>('CICADA-M03', 109, '夏夜蝉鸣 蝉翼亚克力挂件', '官方授权周边，随书附赠收藏卡。', '夏夜蝉鸣「蝉翼亚克力挂件」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/CICADA-M03/cover.svg', 39.00, 9, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 34 DAY)),</pre></td><td class="explain">夏夜蝉鸣 蝉翼亚克力挂件｜分类 109，¥39.00，库存 9，sort=100，34 天前上架</td></tr>
+<tr tabindex="0" data-line="310"><td class="line">310</td><td class="code"><pre>('CICADA-M04', 109, '夏夜蝉鸣 夏日明信片组', '官方授权周边，随书附赠收藏卡。', '夏夜蝉鸣「夏日明信片组」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/CICADA-M04/cover.svg', 25.00, 10, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 0 DAY)),</pre></td><td class="explain">夏夜蝉鸣 夏日明信片组｜分类 109，¥25.00，库存 10，sort=100，0 天前上架</td></tr>
+<tr tabindex="0" data-line="311"><td class="line">311</td><td class="code"><pre>('CICADA-M05', 109, '夏夜蝉鸣 主角亚克力立牌', '官方授权周边，随书附赠收藏卡。', '夏夜蝉鸣「主角亚克力立牌」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/CICADA-M05/cover.svg', 79.00, 11, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 36 DAY)),</pre></td><td class="explain">夏夜蝉鸣 主角亚克力立牌｜分类 109，¥79.00，库存 11，sort=100，36 天前上架</td></tr>
+<tr tabindex="0" data-line="312"><td class="line">312</td><td class="code"><pre>('CICADA-M06', 109, '夏夜蝉鸣 夏日画集', '官方授权周边，随书附赠收藏卡。', '夏夜蝉鸣「夏日画集」，官方授权周边。材质与规格以实物为准，教学演示数据。', 'images/products/CICADA-M06/cover.svg', 108.00, 6, 'ON_SALE', 100, DATE_SUB(NOW(), INTERVAL 37 DAY));</pre></td><td class="explain">夏夜蝉鸣 夏日画集｜分类 109，¥108.00，库存 6，sort=100，37 天前上架</td></tr>
+<tr class="gap"><td class="line">313</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre class="cmtline">-- ===== 演示数据结束 =====</pre></td><td class="explain">与第 170 行呼应；M01-03 会在此之前插入相册段。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M01-02 · 生成器 223 行（非空 198）、种子段 91 行（非空 87）；逐行说明覆盖 198/198 与 87/87。
+完整汇报见同目录 M01-02-分类商品种子.md。</footer>
+</body></html>
