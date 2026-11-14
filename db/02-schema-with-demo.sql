@@ -414,4 +414,72 @@ INSERT INTO product_image (product_id, image_path, alt_text, sort_order) VALUES
 ((SELECT id FROM product WHERE sku='CICADA-M02'), 'images/products/CICADA-M02/1.svg', '夏夜蝉鸣 星空风铃 图1', 1),
 ((SELECT id FROM product WHERE sku='CICADA-M02'), 'images/products/CICADA-M02/2.svg', '夏夜蝉鸣 星空风铃 图2', 2);
 
+-- 5. 购物车：10 条（alice 6 条含 2 条失效，bob 4 条）
+INSERT INTO cart_item (user_id, product_id, quantity) VALUES
+((SELECT id FROM store_user WHERE username='alice'), (SELECT id FROM product WHERE sku='STARLINE-C01'), 1),
+((SELECT id FROM store_user WHERE username='alice'), (SELECT id FROM product WHERE sku='MISTPORT-C02'), 2),
+((SELECT id FROM store_user WHERE username='alice'), (SELECT id FROM product WHERE sku='ONIGIRI-M03'), 1),
+((SELECT id FROM store_user WHERE username='alice'), (SELECT id FROM product WHERE sku='STARLINE-M02'), 3),
+((SELECT id FROM store_user WHERE username='alice'), (SELECT id FROM product WHERE sku='STARLINE-C06'), 2),
+((SELECT id FROM store_user WHERE username='alice'), (SELECT id FROM product WHERE sku='MISTPORT-C03'), 5),
+((SELECT id FROM store_user WHERE username='bob'), (SELECT id FROM product WHERE sku='CICADA-C01'), 1),
+((SELECT id FROM store_user WHERE username='bob'), (SELECT id FROM product WHERE sku='IRONWOOD-M01'), 2),
+((SELECT id FROM store_user WHERE username='bob'), (SELECT id FROM product WHERE sku='ONIGIRI-C02'), 1),
+((SELECT id FROM store_user WHERE username='bob'), (SELECT id FROM product WHERE sku='STARLINE-M03'), 1);
+
+-- 6. 订单：10 张（alice/bob 各 5 张，五种状态各 2 张；6 张带 MOCK 凭证）
+--    金额仅商品合计，无运费/优惠；时间满足既有 CHECK 的先后顺序
+INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, receiver_phone, receiver_address, created_at, payment_method, payment_no, paid_at, cancelled_at, shipped_at, completed_at) VALUES
+('DEMO-202611-0001', (SELECT id FROM store_user WHERE username='alice'), 'PENDING_PAYMENT', 105.00, '爱丽丝', '13800000001', '湖南省长沙市岳麓区麓山南路 932 号 3 栋 502', DATE_SUB(NOW(), INTERVAL 1 DAY), NULL, NULL, NULL, NULL, NULL, NULL),
+('DEMO-202611-0002', (SELECT id FROM store_user WHERE username='alice'), 'PAID', 138.00, '爱丽丝', '13800000001', '湖南省长沙市岳麓区麓山南路 932 号 3 栋 502', DATE_SUB(NOW(), INTERVAL 2 DAY), 'MOCK', 'PAY202611150002', (DATE_SUB(NOW(), INTERVAL 2 DAY) + INTERVAL 1 HOUR), NULL, NULL, NULL),
+('DEMO-202611-0003', (SELECT id FROM store_user WHERE username='alice'), 'SHIPPED', 97.00, '爱丽丝', '13800000001', '湖南省长沙市岳麓区麓山南路 932 号 3 栋 502', DATE_SUB(NOW(), INTERVAL 4 DAY), 'MOCK', 'PAY202611150003', (DATE_SUB(NOW(), INTERVAL 4 DAY) + INTERVAL 1 HOUR), NULL, ((DATE_SUB(NOW(), INTERVAL 4 DAY) + INTERVAL 1 HOUR) + INTERVAL 2 DAY), NULL),
+('DEMO-202611-0004', (SELECT id FROM store_user WHERE username='alice'), 'COMPLETED', 115.00, '爱丽丝', '13800000001', '湖南省长沙市岳麓区麓山南路 932 号 3 栋 502', DATE_SUB(NOW(), INTERVAL 7 DAY), 'MOCK', 'PAY202611150004', (DATE_SUB(NOW(), INTERVAL 7 DAY) + INTERVAL 1 HOUR), NULL, ((DATE_SUB(NOW(), INTERVAL 7 DAY) + INTERVAL 1 HOUR) + INTERVAL 2 DAY), (((DATE_SUB(NOW(), INTERVAL 7 DAY) + INTERVAL 1 HOUR) + INTERVAL 2 DAY) + INTERVAL 1 DAY)),
+('DEMO-202611-0005', (SELECT id FROM store_user WHERE username='alice'), 'CANCELLED', 186.00, '爱丽丝', '13800000001', '湖南省长沙市岳麓区麓山南路 932 号 3 栋 502', DATE_SUB(NOW(), INTERVAL 3 DAY), NULL, NULL, NULL, (DATE_SUB(NOW(), INTERVAL 3 DAY) + INTERVAL 1 HOUR), NULL, NULL),
+('DEMO-202611-0006', (SELECT id FROM store_user WHERE username='bob'), 'PENDING_PAYMENT', 88.00, '鲍勃', '13900000002', '湖南省长沙市开福区芙蓉中路 88 号 12 楼', DATE_SUB(NOW(), INTERVAL 1 DAY), NULL, NULL, NULL, NULL, NULL, NULL),
+('DEMO-202611-0007', (SELECT id FROM store_user WHERE username='bob'), 'PAID', 86.00, '鲍勃', '13900000002', '湖南省长沙市开福区芙蓉中路 88 号 12 楼', DATE_SUB(NOW(), INTERVAL 3 DAY), 'MOCK', 'PAY202611150007', (DATE_SUB(NOW(), INTERVAL 3 DAY) + INTERVAL 1 HOUR), NULL, NULL, NULL),
+('DEMO-202611-0008', (SELECT id FROM store_user WHERE username='bob'), 'SHIPPED', 75.00, '鲍勃', '13900000002', '湖南省长沙市开福区芙蓉中路 88 号 12 楼', DATE_SUB(NOW(), INTERVAL 5 DAY), 'MOCK', 'PAY202611150008', (DATE_SUB(NOW(), INTERVAL 5 DAY) + INTERVAL 1 HOUR), NULL, ((DATE_SUB(NOW(), INTERVAL 5 DAY) + INTERVAL 1 HOUR) + INTERVAL 2 DAY), NULL),
+('DEMO-202611-0009', (SELECT id FROM store_user WHERE username='bob'), 'COMPLETED', 165.00, '鲍勃', '13900000002', '湖南省长沙市开福区芙蓉中路 88 号 12 楼', DATE_SUB(NOW(), INTERVAL 8 DAY), 'MOCK', 'PAY202611150009', (DATE_SUB(NOW(), INTERVAL 8 DAY) + INTERVAL 1 HOUR), NULL, ((DATE_SUB(NOW(), INTERVAL 8 DAY) + INTERVAL 1 HOUR) + INTERVAL 2 DAY), (((DATE_SUB(NOW(), INTERVAL 8 DAY) + INTERVAL 1 HOUR) + INTERVAL 2 DAY) + INTERVAL 1 DAY)),
+('DEMO-202611-0010', (SELECT id FROM store_user WHERE username='bob'), 'CANCELLED', 94.00, '鲍勃', '13900000002', '湖南省长沙市开福区芙蓉中路 88 号 12 楼', DATE_SUB(NOW(), INTERVAL 2 DAY), NULL, NULL, NULL, (DATE_SUB(NOW(), INTERVAL 2 DAY) + INTERVAL 1 HOUR), NULL, NULL);
+
+-- 7. 明细：20 条，保存成交快照；line_amount = unit_price × quantity
+INSERT INTO sales_order_item (order_id, product_id, sku_snapshot, product_name_snapshot, cover_image_snapshot, unit_price, quantity, line_amount) VALUES
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0001'), (SELECT id FROM product WHERE sku='STARLINE-C01'), 'STARLINE-C01', '《星轨列车》第1卷', 'images/products/STARLINE-C01/cover.svg', 28.00, 2, 56.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0001'), (SELECT id FROM product WHERE sku='MISTPORT-M02'), 'MISTPORT-M02', '雾港侦探 雾港地图海报', 'images/products/MISTPORT-M02/cover.svg', 49.00, 1, 49.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0002'), (SELECT id FROM product WHERE sku='ONIGIRI-C02'), 'ONIGIRI-C02', '《饭团小馆》第2卷', 'images/products/ONIGIRI-C02/cover.svg', 28.00, 1, 28.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0002'), (SELECT id FROM product WHERE sku='IRONWOOD-M03'), 'IRONWOOD-M03', '机械之森 森林夜光海报', 'images/products/IRONWOOD-M03/cover.svg', 55.00, 2, 110.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0003'), (SELECT id FROM product WHERE sku='CICADA-C01'), 'CICADA-C01', '《夏夜蝉鸣》第1卷', 'images/products/CICADA-C01/cover.svg', 28.00, 1, 28.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0003'), (SELECT id FROM product WHERE sku='STARLINE-M03'), 'STARLINE-M03', '星轨列车 星空帆布袋', 'images/products/STARLINE-M03/cover.svg', 69.00, 1, 69.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0004'), (SELECT id FROM product WHERE sku='MISTPORT-C01'), 'MISTPORT-C01', '《雾港侦探》第1卷', 'images/products/MISTPORT-C01/cover.svg', 28.00, 2, 56.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0004'), (SELECT id FROM product WHERE sku='ONIGIRI-M04'), 'ONIGIRI-M04', '饭团小馆 陶瓷马克杯', 'images/products/ONIGIRI-M04/cover.svg', 59.00, 1, 59.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0005'), (SELECT id FROM product WHERE sku='IRONWOOD-C02'), 'IRONWOOD-C02', '《机械之森》第2卷', 'images/products/IRONWOOD-C02/cover.svg', 28.00, 1, 28.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0005'), (SELECT id FROM product WHERE sku='CICADA-M05'), 'CICADA-M05', '夏夜蝉鸣 主角亚克力立牌', 'images/products/CICADA-M05/cover.svg', 79.00, 2, 158.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0006'), (SELECT id FROM product WHERE sku='IRONWOOD-C03'), 'IRONWOOD-C03', '《机械之森》第3卷', 'images/products/IRONWOOD-C03/cover.svg', 30.00, 1, 30.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0006'), (SELECT id FROM product WHERE sku='STARLINE-M04'), 'STARLINE-M04', '星轨列车 线路图线圈本', 'images/products/STARLINE-M04/cover.svg', 29.00, 2, 58.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0007'), (SELECT id FROM product WHERE sku='CICADA-C02'), 'CICADA-C02', '《夏夜蝉鸣》第2卷', 'images/products/CICADA-C02/cover.svg', 28.00, 2, 56.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0007'), (SELECT id FROM product WHERE sku='ONIGIRI-C03'), 'ONIGIRI-C03', '《饭团小馆》第3卷', 'images/products/ONIGIRI-C03/cover.svg', 30.00, 1, 30.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0008'), (SELECT id FROM product WHERE sku='MISTPORT-C04'), 'MISTPORT-C04', '《雾港侦探》第4卷', 'images/products/MISTPORT-C04/cover.svg', 30.00, 1, 30.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0008'), (SELECT id FROM product WHERE sku='STARLINE-M05'), 'STARLINE-M05', '星轨列车 列车钥匙扣', 'images/products/STARLINE-M05/cover.svg', 45.00, 1, 45.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0009'), (SELECT id FROM product WHERE sku='STARLINE-C03'), 'STARLINE-C03', '《星轨列车》第3卷', 'images/products/STARLINE-C03/cover.svg', 30.00, 1, 30.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0009'), (SELECT id FROM product WHERE sku='IRONWOOD-M02'), 'IRONWOOD-M02', '机械之森 齿轮金属徽章', 'images/products/IRONWOOD-M02/cover.svg', 45.00, 3, 135.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0010'), (SELECT id FROM product WHERE sku='ONIGIRI-C05'), 'ONIGIRI-C05', '《饭团小馆》第5卷', 'images/products/ONIGIRI-C05/cover.svg', 32.00, 2, 64.00),
+((SELECT id FROM sales_order WHERE order_no='DEMO-202611-0010'), (SELECT id FROM product WHERE sku='CICADA-C03'), 'CICADA-C03', '《夏夜蝉鸣》第3卷', 'images/products/CICADA-C03/cover.svg', 30.00, 1, 30.00);
+
+-- 8. 净扣库存：只对未取消订单扣减，取消订单视为已恢复；版本号同步 +1
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'CICADA-C01';
+UPDATE product SET stock = stock - 2, version = version + 1 WHERE sku = 'CICADA-C02';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'IRONWOOD-C03';
+UPDATE product SET stock = stock - 3, version = version + 1 WHERE sku = 'IRONWOOD-M02';
+UPDATE product SET stock = stock - 2, version = version + 1 WHERE sku = 'IRONWOOD-M03';
+UPDATE product SET stock = stock - 2, version = version + 1 WHERE sku = 'MISTPORT-C01';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'MISTPORT-C04';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'MISTPORT-M02';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'ONIGIRI-C02';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'ONIGIRI-C03';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'ONIGIRI-M04';
+UPDATE product SET stock = stock - 2, version = version + 1 WHERE sku = 'STARLINE-C01';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'STARLINE-C03';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'STARLINE-M03';
+UPDATE product SET stock = stock - 2, version = version + 1 WHERE sku = 'STARLINE-M04';
+UPDATE product SET stock = stock - 1, version = version + 1 WHERE sku = 'STARLINE-M05';
+
 -- ===== 演示数据结束 =====

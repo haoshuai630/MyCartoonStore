@@ -43,38 +43,38 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>        )</pre></td><td class="explain">append 结束。</td></tr>
 <tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    out.append(",\n".join(value_rows) + ";")</pre></td><td class="explain">写入商品 VALUES。</td></tr>
 <tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
-<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>    out.append(render_images_sql())</pre></td><td class="explain">追加相册段（100 条）。</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>    out.append(render_images_sql())</pre></td><td class="explain">写入商品 VALUES。</td></tr>
 <tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
-<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>    out.append("-- ===== 演示数据结束 =====")</pre></td><td class="explain">演示数据结束标记。</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>    out.append(render_trade_sql())</pre></td><td class="explain">追加相册段（100 条）。</td></tr>
 <tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
-<tr class="gap"><td class="line">218</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    OUTPUT.write_text("\n".join(out), encoding="utf-8")</pre></td><td class="explain">写文件，UTF-8 无 BOM。</td></tr>
-<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>    print(f"written: {OUTPUT}")</pre></td><td class="explain">输出路径，便于确认写到了哪。</td></tr>
-<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>    print(f"products: {len(products)}, categories: 15, users: {len(USERS)}")</pre></td><td class="explain">打印数量，跑完立刻能对账。</td></tr>
-<tr class="gap"><td class="line">222</td><td></td><td></td></tr>
-<tr class="gap"><td class="line">223</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre><span class="kw">def</span> render_images_sql() -&gt; str:</pre></td><td class="explain">返回一段完整的 INSERT 文本，供 main 追加。</td></tr>
-<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>    """相册：每部作品 12 件中，前 4 件 3 张、中 4 件 2 张、后 4 件无相册（共 100 条）。</pre></td><td class="explain">docstring：说明 3/2/0 张的分布。</td></tr>
-<tr class="gap"><td class="line">226</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>    product_id 用 SKU 子查询取得，不依赖自增顺序；重复执行会因唯一性无关而重复插入，</pre></td><td class="explain">用 SKU 子查询取 product_id，不依赖自增顺序。</td></tr>
-<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    因此脚本只用于空库初始化。</pre></td><td class="explain">脚本只用于空库初始化；重复执行会重复插入相册。</td></tr>
-<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>    """</pre></td><td class="explain">docstring 结束。</td></tr>
-<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>    rows = []</pre></td><td class="explain">行容器。</td></tr>
-<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>    <span class="kw">for</span> idx, p <span class="kw">in</span> enumerate(build_products()):</pre></td><td class="explain">复用 build_products()，保证与商品插入顺序一致。</td></tr>
-<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        pos = idx % 12</pre></td><td class="explain">每部作品 12 件里的位置。</td></tr>
-<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        count = 3 <span class="kw">if</span> pos &lt; 4 <span class="kw">else</span> (2 <span class="kw">if</span> pos &lt; 8 <span class="kw">else</span> 0)</pre></td><td class="explain">前 4 件 3 张、中 4 件 2 张、后 4 件 0 张。</td></tr>
-<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>        <span class="kw">for</span> n <span class="kw">in</span> range(1, count + 1):</pre></td><td class="explain">逐张生成。</td></tr>
-<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>            rows.append(</pre></td><td class="explain">拼一行。</td></tr>
-<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>                "((SELECT id FROM product WHERE sku='{sku}'), 'images/products/{sku}/{n}.svg', "</pre></td><td class="explain">product_id 用子查询；路径按 SKU 与序号拼。</td></tr>
-<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>                "'{name} 图{n}', {n})".format(sku=p["sku"], name=p["name"], n=n)</pre></td><td class="explain">alt_text 用「商品名 图N」，sort_order 即序号。</td></tr>
-<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>            )</pre></td><td class="explain">append 结束。</td></tr>
-<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>    header = ("-- 4. 相册：100 条 = 20 件×3 张 + 20 件×2 张；另有 20 件无相册（用于回退封面）\n"</pre></td><td class="explain">段标题 + 列清单；注释里写明 100 条的构成。</td></tr>
-<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>              "INSERT INTO product_image (product_id, image_path, alt_text, sort_order) VALUES\n")</pre></td><td class="explain">第二条拼接行：INSERT 头部。</td></tr>
-<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>    <span class="kw">return</span> header + ",\n".join(rows) + ";"</pre></td><td class="explain">逗号换行连接，末尾补分号。</td></tr>
-<tr class="gap"><td class="line">242</td><td></td><td></td></tr>
-<tr class="gap"><td class="line">243</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="244"><td class="line">244</td><td class="code"><pre><span class="kw">if</span> __name__ == "__main__":</pre></td><td class="explain">可被 import 而不执行。</td></tr>
-<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>    main()</pre></td><td class="explain">入口调用。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>    out.append("-- ===== 演示数据结束 =====")</pre></td><td class="explain">演示数据结束标记。</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    out.append("")</pre></td><td class="explain">输出一个空行。</td></tr>
+<tr class="gap"><td class="line">220</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>    OUTPUT.write_text("\n".join(out), encoding="utf-8")</pre></td><td class="explain">写文件，UTF-8 无 BOM。</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>    print(f"written: {OUTPUT}")</pre></td><td class="explain">输出路径，便于确认写到了哪。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>    print(f"products: {len(products)}, categories: 15, users: {len(USERS)}")</pre></td><td class="explain">打印数量，跑完立刻能对账。</td></tr>
+<tr class="gap"><td class="line">224</td><td></td><td></td></tr>
+<tr class="gap"><td class="line">225</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre><span class="kw">def</span> render_images_sql() -&gt; str:</pre></td><td class="explain">返回一段完整的 INSERT 文本，供 main 追加。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>    """相册：每部作品 12 件中，前 4 件 3 张、中 4 件 2 张、后 4 件无相册（共 100 条）。</pre></td><td class="explain">docstring：说明 3/2/0 张的分布。</td></tr>
+<tr class="gap"><td class="line">228</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>    product_id 用 SKU 子查询取得，不依赖自增顺序；重复执行会因唯一性无关而重复插入，</pre></td><td class="explain">用 SKU 子查询取 product_id，不依赖自增顺序。</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>    因此脚本只用于空库初始化。</pre></td><td class="explain">脚本只用于空库初始化；重复执行会重复插入相册。</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>    """</pre></td><td class="explain">docstring 结束。</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>    rows = []</pre></td><td class="explain">行容器。</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>    <span class="kw">for</span> idx, p <span class="kw">in</span> enumerate(build_products()):</pre></td><td class="explain">复用 build_products()，保证与商品插入顺序一致。</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>        pos = idx % 12</pre></td><td class="explain">每部作品 12 件里的位置。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>        count = 3 <span class="kw">if</span> pos &lt; 4 <span class="kw">else</span> (2 <span class="kw">if</span> pos &lt; 8 <span class="kw">else</span> 0)</pre></td><td class="explain">前 4 件 3 张、中 4 件 2 张、后 4 件 0 张。</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>        <span class="kw">for</span> n <span class="kw">in</span> range(1, count + 1):</pre></td><td class="explain">逐张生成。</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>            rows.append(</pre></td><td class="explain">拼一行。</td></tr>
+<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>                "((SELECT id FROM product WHERE sku='{sku}'), 'images/products/{sku}/{n}.svg', "</pre></td><td class="explain">product_id 用子查询；路径按 SKU 与序号拼。</td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>                "'{name} 图{n}', {n})".format(sku=p["sku"], name=p["name"], n=n)</pre></td><td class="explain">alt_text 用「商品名 图N」，sort_order 即序号。</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>            )</pre></td><td class="explain">append 结束。</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>    header = ("-- 4. 相册：100 条 = 20 件×3 张 + 20 件×2 张；另有 20 件无相册（用于回退封面）\n"</pre></td><td class="explain">段标题 + 列清单；注释里写明 100 条的构成。</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>              "INSERT INTO product_image (product_id, image_path, alt_text, sort_order) VALUES\n")</pre></td><td class="explain">第二条拼接行：INSERT 头部。</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>    <span class="kw">return</span> header + ",\n".join(rows) + ";"</pre></td><td class="explain">逗号换行连接，末尾补分号。</td></tr>
+<tr class="gap"><td class="line">244</td><td></td><td></td></tr>
+<tr class="gap"><td class="line">245</td><td></td><td></td></tr>
 </tbody></table>
 </section>
 <section id="sql">
@@ -187,11 +187,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="413"><td class="line">413</td><td class="code"><pre>((<span class="kw">SELECT</span> id <span class="kw">FROM</span> product <span class="kw">WHERE</span> sku='CICADA-M01'), 'images/products/CICADA-M01/2.svg', '夏夜蝉鸣 蝉鸣主题T恤 图2', 2),</pre></td><td class="explain">CICADA-M01 第 2 张：images/products/CICADA-M01/2.svg（alt「夏夜蝉鸣 蝉鸣主题T恤 图2」）</td></tr>
 <tr tabindex="0" data-line="414"><td class="line">414</td><td class="code"><pre>((<span class="kw">SELECT</span> id <span class="kw">FROM</span> product <span class="kw">WHERE</span> sku='CICADA-M02'), 'images/products/CICADA-M02/1.svg', '夏夜蝉鸣 星空风铃 图1', 1),</pre></td><td class="explain">CICADA-M02 第 1 张：images/products/CICADA-M02/1.svg（alt「夏夜蝉鸣 星空风铃 图1」）</td></tr>
 <tr tabindex="0" data-line="415"><td class="line">415</td><td class="code"><pre>((<span class="kw">SELECT</span> id <span class="kw">FROM</span> product <span class="kw">WHERE</span> sku='CICADA-M02'), 'images/products/CICADA-M02/2.svg', '夏夜蝉鸣 星空风铃 图2', 2);</pre></td><td class="explain">CICADA-M02 第 2 张：images/products/CICADA-M02/2.svg（alt「夏夜蝉鸣 星空风铃 图2」）</td></tr>
-<tr class="gap"><td class="line">416</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="417"><td class="line">417</td><td class="code"><pre class="cmtline">-- ===== 演示数据结束 =====</pre></td><td class="explain">演示数据结束标记。</td></tr>
 </tbody></table>
 </section>
 </main>
-<footer>2026-11-15 · M01-03 · 生成器第 210 行起（非空 30，覆盖 30/30）、相册段（非空 103，覆盖 103/103）。
+<footer>2026-11-15 · M01-03 · 生成器第 210 行起（非空 30，覆盖 30/30）、相册段（非空 102，覆盖 102/102）。
 完整汇报见同目录 M01-03-相册种子.md。</footer>
 </body></html>

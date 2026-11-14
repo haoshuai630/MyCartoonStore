@@ -213,6 +213,8 @@ def main() -> None:
     out.append("")
     out.append(render_images_sql())
     out.append("")
+    out.append(render_trade_sql())
+    out.append("")
     out.append("-- ===== 演示数据结束 =====")
     out.append("")
 
@@ -239,6 +241,125 @@ def render_images_sql() -> str:
     header = ("-- 4. 相册：100 条 = 20 件×3 张 + 20 件×2 张；另有 20 件无相册（用于回退封面）\n"
               "INSERT INTO product_image (product_id, image_path, alt_text, sort_order) VALUES\n")
     return header + ",\n".join(rows) + ";"
+
+
+CART = [
+    ("alice", "STARLINE-C01", 1),
+    ("alice", "MISTPORT-C02", 2),
+    ("alice", "ONIGIRI-M03", 1),
+    ("alice", "STARLINE-M02", 3),
+    ("alice", "STARLINE-C06", 2),   # 已下架，失效条目
+    ("alice", "MISTPORT-C03", 5),   # 库存 0，失效条目
+    ("bob", "CICADA-C01", 1),
+    ("bob", "IRONWOOD-M01", 2),
+    ("bob", "ONIGIRI-C02", 1),
+    ("bob", "STARLINE-M03", 1),
+]
+
+RECEIVER = {
+    "alice": ("爱丽丝", "13800000001", "湖南省长沙市岳麓区麓山南路 932 号 3 栋 502"),
+    "bob": ("鲍勃", "13900000002", "湖南省长沙市开福区芙蓉中路 88 号 12 楼"),
+}
+
+# (订单号, 用户, 状态, 距今天数, [(SKU, 数量)], 是否已支付)
+ORDERS = [
+    ("DEMO-202611-0001", "alice", "PENDING_PAYMENT", 1, [("STARLINE-C01", 2), ("MISTPORT-M02", 1)]),
+    ("DEMO-202611-0002", "alice", "PAID", 2, [("ONIGIRI-C02", 1), ("IRONWOOD-M03", 2)]),
+    ("DEMO-202611-0003", "alice", "SHIPPED", 4, [("CICADA-C01", 1), ("STARLINE-M03", 1)]),
+    ("DEMO-202611-0004", "alice", "COMPLETED", 7, [("MISTPORT-C01", 2), ("ONIGIRI-M04", 1)]),
+    ("DEMO-202611-0005", "alice", "CANCELLED", 3, [("IRONWOOD-C02", 1), ("CICADA-M05", 2)]),
+    ("DEMO-202611-0006", "bob", "PENDING_PAYMENT", 1, [("IRONWOOD-C03", 1), ("STARLINE-M04", 2)]),
+    ("DEMO-202611-0007", "bob", "PAID", 3, [("CICADA-C02", 2), ("ONIGIRI-C03", 1)]),
+    ("DEMO-202611-0008", "bob", "SHIPPED", 5, [("MISTPORT-C04", 1), ("STARLINE-M05", 1)]),
+    ("DEMO-202611-0009", "bob", "COMPLETED", 8, [("STARLINE-C03", 1), ("IRONWOOD-M02", 3)]),
+    ("DEMO-202611-0010", "bob", "CANCELLED", 2, [("ONIGIRI-C05", 2), ("CICADA-C03", 1)]),
+]
+
+
+def render_trade_sql() -> str:
+    """购物车 10 条 + 订单 10 张 + 明细 20 条，并对未取消订单净扣库存。"""
+    products = {p["sku"]: p for p in build_products()}
+    out = []
+
+    # ---- 购物车
+    out.append("-- 5. 购物车：10 条（alice 6 条含 2 条失效，bob 4 条）")
+    out.append("INSERT INTO cart_item (user_id, product_id, quantity) VALUES")
+    cart_rows = []
+    for user, sku, qty in CART:
+        cart_rows.append(
+            f"((SELECT id FROM store_user WHERE username='{user}'), "
+            f"(SELECT id FROM product WHERE sku='{sku}'), {qty})"
+        )
+    out.append(",\n".join(cart_rows) + ";")
+    out.append("")
+
+    # ---- 订单
+    out.append("-- 6. 订单：10 张（alice/bob 各 5 张，五种状态各 2 张；6 张带 MOCK 凭证）")
+    out.append("--    金额仅商品合计，无运费/优惠；时间满足既有 CHECK 的先后顺序")
+    out.append("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "
+               "receiver_phone, receiver_address, created_at, payment_method, payment_no, "
+               "paid_at, cancelled_at, shipped_at, completed_at) VALUES")
+    order_rows = []
+    for idx, (no, user, status, age, items) in enumerate(ORDERS, start=1):
+        name, phone, addr = RECEIVER[user]
+        total = sum(products[sku]["price"] * qty for sku, qty in items)
+        created = f"DATE_SUB(NOW(), INTERVAL {age} DAY)"
+        paid = f"({created} + INTERVAL 1 HOUR)"
+        shipped = f"({paid} + INTERVAL 2 DAY)"
+        completed = f"({shipped} + INTERVAL 1 DAY)"
+        cancelled = f"({created} + INTERVAL 1 HOUR)"
+        method = "NULL"
+        pno = "NULL"
+        paid_at = "NULL"
+        cancel_at = "NULL"
+        ship_at = "NULL"
+        complete_at = "NULL"
+        if status in ("PAID", "SHIPPED", "COMPLETED"):
+            method = "'MOCK'"
+            pno = f"'PAY20261115{idx:04d}'"
+            paid_at = paid
+        if status == "SHIPPED":
+            ship_at = shipped
+        if status == "COMPLETED":
+            ship_at = shipped
+            complete_at = completed
+        if status == "CANCELLED":
+            cancel_at = cancelled
+        order_rows.append(
+            f"('{no}', (SELECT id FROM store_user WHERE username='{user}'), '{status}', {total:.2f}, "
+            f"'{name}', '{phone}', '{addr}', {created}, {method}, {pno}, {paid_at}, {cancel_at}, "
+            f"{ship_at}, {complete_at})"
+        )
+    out.append(",\n".join(order_rows) + ";")
+    out.append("")
+
+    # ---- 明细
+    out.append("-- 7. 明细：20 条，保存成交快照；line_amount = unit_price × quantity")
+    out.append("INSERT INTO sales_order_item (order_id, product_id, sku_snapshot, product_name_snapshot, "
+               "cover_image_snapshot, unit_price, quantity, line_amount) VALUES")
+    item_rows = []
+    for no, _user, _status, _age, items in ORDERS:
+        for sku, qty in items:
+            p = products[sku]
+            item_rows.append(
+                f"((SELECT id FROM sales_order WHERE order_no='{no}'), "
+                f"(SELECT id FROM product WHERE sku='{sku}'), '{sku}', '{p['name']}', "
+                f"'images/products/{sku}/cover.svg', {p['price']:.2f}, {qty}, {p['price'] * qty:.2f})"
+            )
+    out.append(",\n".join(item_rows) + ";")
+    out.append("")
+
+    # ---- 净扣库存
+    deduct = {}
+    for _no, _user, status, _age, items in ORDERS:
+        if status == "CANCELLED":
+            continue
+        for sku, qty in items:
+            deduct[sku] = deduct.get(sku, 0) + qty
+    out.append("-- 8. 净扣库存：只对未取消订单扣减，取消订单视为已恢复；版本号同步 +1")
+    for sku, qty in sorted(deduct.items()):
+        out.append(f"UPDATE product SET stock = stock - {qty}, version = version + 1 WHERE sku = '{sku}';")
+    return "\n".join(out)
 
 
 if __name__ == "__main__":

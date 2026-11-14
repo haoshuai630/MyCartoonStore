@@ -22,6 +22,7 @@ OUT = ROOT / "reports" / "M01-02-逐行验收.html"
 SCHEMA_FILE = ROOT / "db" / "01-schema.sql"
 OUT_SCHEMA = ROOT / "reports" / "M01-01-逐行验收.html"
 OUT_M03 = ROOT / "reports" / "M01-03-逐行验收.html"
+OUT_M04 = ROOT / "reports" / "M01-04-逐行验收.html"
 
 STYLE = """<style>
 *{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
@@ -390,7 +391,103 @@ PY3 = {
     244: "可被 import 而不执行。",
     245: "入口调用。",
 }
-EXPLAIN["py"].update(PY3)
+EXPLAIN["py"].update({k + 2: v for k, v in PY3.items() if k <= 241})
+
+# M01-04：购物车/订单/明细/扣库存
+PY4 = {
+    246: "购物车数据：(用户, SKU, 数量)，共 10 条。",
+    251: "已下架商品：进车后仍是失效条目，用于验证购物车提示。",
+    252: "库存 0 的商品：数量 5 > 库存，失效条目。",
+    257: "购物车数据结束。",
+    259: "收货人快照，下单时写入订单，不随用户资料变化。",
+    262: "收货信息结束。",
+    264: "订单数据：(订单号, 用户, 状态, 距今天数, 明细, ...)，10 张。",
+    265: "五状态各 2 张，编号 0001–0010。",
+    276: "订单数据结束。",
+    279: "返回四段 SQL：购物车、订单、明细、库存更新。",
+    280: "docstring：一段话说明产出。",
+    281: "SKU → 商品，便于取价格与名称。",
+    282: "输出缓冲。",
+    284: "购物车段开始。",
+    285: "段标题，写明失效条目数量。",
+    286: "显式列名，不写 id。",
+    287: "行容器。",
+    288: "遍历 10 条。",
+    289: "拼一行。",
+    290: "用户 id 用用户名子查询，不写死自增 id。",
+    291: "商品 id 用 SKU 子查询；数量直接写。",
+    292: "append 结束。",
+    293: "逗号换行连接，末尾分号。",
+    294: "输出空行。",
+    296: "订单段开始。",
+    297: "段标题：10 张、五状态各 2、6 张 MOCK。",
+    298: "写明金额口径与时间顺序要求。",
+    299: "列清单第一行。",
+    300: "列清单第二行。",
+    301: "列清单第三行。",
+    302: "订单行容器。",
+    303: "遍历订单，idx 从 1 起用于支付凭证编号。",
+    304: "取收货快照。",
+    305: "总额 = Σ 单价 × 数量，不手写。",
+    306: "创建时间：距今 N 天。",
+    307: "支付时间 = 创建 + 1 小时，满足 CHECK。",
+    308: "发货时间 = 支付 + 2 天。",
+    309: "完成时间 = 发货 + 1 天。",
+    310: "取消时间 = 创建 + 1 小时。",
+    311: "默认支付方式为空。",
+    312: "默认凭证为空。",
+    313: "默认支付时间为空。",
+    314: "默认取消时间为空。",
+    315: "默认发货时间为空。",
+    316: "默认完成时间为空。",
+    317: "已支付三种状态：写凭证三件套。",
+    318: "固定 MOCK，不伪造真实渠道。",
+    319: "凭证号含序号，保证唯一。",
+    320: "支付时间。",
+    321: "已发货：补发货时间。",
+    322: "已发货：只补发货时间，支付信息保持不变。",
+    323: "已完成：补发货与完成时间。",
+    324: "完成必须晚于发货。",
+    325: "已完成：完成时间必须晚于发货时间。",
+    326: "已取消：只写取消时间，支付字段保持空。",
+    327: "取消时间。",
+    328: "拼一行。",
+    329: "订单号、用户子查询、状态、总额。",
+    330: "收货快照与创建时间、支付信息。",
+    331: "取消/发货/完成时间。",
+    332: "append 结束。",
+    333: "连接并补分号。",
+    334: "输出空行。",
+    336: "明细段开始。",
+    337: "段标题：20 条快照。",
+    338: "列清单第一行。",
+    339: "列清单第二行。",
+    340: "明细行容器。",
+    341: "遍历订单。",
+    342: "遍历该订单的两件商品。",
+    343: "取商品价格与名称。",
+    344: "拼一行。",
+    345: "订单 id 用订单号子查询。",
+    346: "商品 id 用 SKU 子查询；快照名称。",
+    347: "封面快照、单价、数量、行金额。",
+    348: "append 结束。",
+    349: "连接并补分号。",
+    350: "输出空行。",
+    352: "扣库存段开始。",
+    353: "SKU → 扣减数量。",
+    354: "遍历订单。",
+    355: "取消订单不扣减。",
+    356: "跳过。",
+    357: "累加同 SKU 的数量。",
+    358: "累加。",
+    359: "段标题：只扣未取消订单。",
+    360: "按 SKU 排序，输出稳定。",
+    361: "一条 UPDATE，version 同步 +1。",
+    362: "返回完整 SQL 文本。",
+    365: "可被 import 而不执行。",
+    366: "入口调用。",
+}
+EXPLAIN["py"].update(PY4)
 
 SQL = {
     1: "与 01 的「仅表结构」区分：这份带演示数据。",
@@ -444,12 +541,34 @@ SQL2 = {
 }
 EXPLAIN["sql"].update(SQL2)
 
+SQL4 = {
+    417: "购物车段：10 条（alice 6 含 2 条失效，bob 4）。",
+    418: "不写 id；用户与商品都用于子查询。",
+    430: "订单段：10 张，五状态各 2，6 张带 MOCK。",
+    431: "金额口径与时间顺序说明。",
+    432: "14 列，含支付、取消、发货、完成时间。",
+    444: "明细段：20 条成交快照。",
+    445: "订单与商品都用子查询定位，不写死自增 id。",
+    467: "扣库存段：只扣未取消订单，取消视为已恢复。",
+    485: "演示数据结束标记。",
+}
+EXPLAIN["sql"].update(SQL4)
+
 
 def explain_py(n: int, line: str) -> str:
     fixed = EXPLAIN["py"].get(n)
     if fixed:
         return fixed
     s = line.strip()
+    m = re.match(r'\("(alice|bob)", "([A-Z]+-[CM]\d{2})", (\d+)\)', s)
+    if m:
+        return f"{m.group(1)} 加购 {m.group(2)} ×{m.group(3)}"
+    m = re.match(r'\("(DEMO-\d{6}-\d{4})", "(alice|bob)", "([A-Z_]+)", (\d+),', s)
+    if m:
+        return f"{m.group(1)}：{m.group(2)} / {m.group(3)}，创建于 {m.group(4)} 天前"
+    m = re.match(r'"(alice|bob)": \("([^"]+)", "([^"]+)", "([^"]+)"\),', s)
+    if m:
+        return f"{m.group(2)} 的收货信息（{m.group(1)} 下单时快照）"
     m = re.match(r'\{"code": "([A-Z]+)", "cn": "([^"]+)", "en": "([A-Z]+)", "sort": (\d+)\}', s)
     if m:
         return "第 {0} 部作品：{1}，code={2}，分类排序 {3}".format(m.group(4), m.group(2), m.group(1), m.group(4))
@@ -470,6 +589,18 @@ def explain_sql(n: int, line: str) -> str:
     if fixed:
         return fixed
     s = line.strip().rstrip(",").rstrip(";")
+    m = re.match(r"\(\(SELECT id FROM store_user WHERE username='(\w+)'\), \(SELECT id FROM product WHERE sku='([^']+)'\), (\d+)\)", s)
+    if m:
+        return f"{m.group(1)} 加购 {m.group(2)} ×{m.group(3)}"
+    m = re.match(r"\('(DEMO-\d{6}-\d{4})', \(SELECT id FROM store_user WHERE username='(\w+)'\), '([A-Z_]+)', ([\d.]+),", s)
+    if m:
+        return f"{m.group(1)}：{m.group(2)} / {m.group(3)}，合计 ¥{m.group(4)}"
+    m = re.match(r"\(\(SELECT id FROM sales_order WHERE order_no='([^']+)'\), \(SELECT id FROM product WHERE sku='([^']+)'\), '([^']+)',", s)
+    if m:
+        return f"{m.group(1)} 的明细：{m.group(3)}"
+    m = re.match(r"UPDATE product SET stock = stock - (\d+), version = version \+ 1 WHERE sku = '([^']+)'", s)
+    if m:
+        return f"{m.group(2)} 扣减 {m.group(1)} 件，version +1"
     m = re.match(r"\('([a-z]+)', '\$2a\$10\$[^']+', '([^']+)', '([A-Z]+)', '(ENABLED|DISABLED)', '([^']+)'\)", s)
     if m:
         note = "禁用样例" if m.group(4) == "DISABLED" else "口令 Cartoon123! 的 BCrypt 散列"
@@ -601,6 +732,7 @@ SQL 的建表段（第 15–220 行）来自 01-schema.sql，见 M01-01 逐行�
     print(f"M01-02 (frozen): py={py_exp}, sql={seed_exp}")
     write_m01_01()
     write_m01_03()
+    write_m01_04()
 
 
 def schema_explanations(lines: list[str]) -> dict[int, str]:
@@ -745,9 +877,9 @@ def write_m01_01() -> None:
     print(f"schema explained: {explained}/{nonblank}")
 
 
-def render_range(lines: list[str], start: int, explain_fn) -> tuple[str, int, int]:
+def render_range(lines: list[str], start: int, explain_fn, end: int | None = None) -> tuple[str, int, int]:
     rows, explained, nonblank = [], 0, 0
-    for n in range(start, len(lines) + 1):
+    for n in range(start, (end or len(lines)) + 1):
         line = lines[n - 1]
         if not line.strip():
             rows.append(f'<tr class="gap"><td class="line">{n}</td><td></td><td></td></tr>')
@@ -769,8 +901,8 @@ def render_range(lines: list[str], start: int, explain_fn) -> tuple[str, int, in
 def write_m01_03() -> None:
     py_lines = PY_FILE.read_text(encoding="utf-8").splitlines()
     sql_lines = SQL_FILE.read_text(encoding="utf-8").splitlines()
-    py_rows, py_exp, py_nb = render_range(py_lines, 210, explain_py)
-    sql_rows, sql_exp, sql_nb = render_range(sql_lines, 313, explain_sql)
+    py_rows, py_exp, py_nb = render_range(py_lines, 210, explain_py, 245)
+    sql_rows, sql_exp, sql_nb = render_range(sql_lines, 313, explain_sql, 415)
 
     doc = f"""<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="UTF-8">
@@ -812,6 +944,54 @@ def write_m01_03() -> None:
 """
     OUT_M03.write_text(doc, encoding="utf-8")
     print(f"written: {OUT_M03}  py={py_exp}/{py_nb}  sql={sql_exp}/{sql_nb}")
+
+
+def write_m01_04() -> None:
+    py_lines = PY_FILE.read_text(encoding="utf-8").splitlines()
+    sql_lines = SQL_FILE.read_text(encoding="utf-8").splitlines()
+    py_rows, py_exp, py_nb = render_range(py_lines, 246, explain_py)
+    sql_rows, sql_exp, sql_nb = render_range(sql_lines, 417, explain_sql)
+
+    doc = f"""<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M01-04 · 购物车与订单种子 逐行验收</title>
+{STYLE}</head>
+<body>
+<header>
+<h1>M01-04 · 购物车与订单（逐行验收）</h1>
+<p>只覆盖本任务新增的行；行号是文件中的真实行号。</p>
+<nav><a href="#gen">gen_demo_sql.py（第 246 行起）</a><a href="#sql">02-schema-with-demo.sql（第 417 行起）</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M01 数据库与实体 / 任务 M01-04。依据 docs/03 §5.5–5.6：10 条购物车、10 张订单（五状态各 2）、20 条明细，未取消订单净扣库存。
+验证：10/10/20；状态各 2；订单总额 = 明细合计（0 行不符）；16 个 SKU 扣减正确、4 个取消订单 SKU 未变；6 张 MOCK 凭证。</p>
+<section id="gen">
+<h2>gen_demo_sql.py<small>CART / RECEIVER / ORDERS / render_trade_sql()</small></h2>
+<p class="path">db/tools/gen_demo_sql.py</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+{py_rows}
+</tbody></table>
+</section>
+<section id="sql">
+<h2>02-schema-with-demo.sql<small>购物车 / 订单 / 明细 / 扣库存</small></h2>
+<p class="path">db/02-schema-with-demo.sql</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+{sql_rows}
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M01-04 · 生成器第 246 行起（非空 {py_nb}，覆盖 {py_exp}/{py_nb}）、交易段（非空 {sql_nb}，覆盖 {sql_exp}/{sql_nb}）。
+完整汇报见同目录 M01-04-交易种子.md。</footer>
+</body></html>
+"""
+    OUT_M04.write_text(doc, encoding="utf-8")
+    print(f"written: {OUT_M04}  py={py_exp}/{py_nb}  sql={sql_exp}/{sql_nb}")
 
 
 if __name__ == "__main__":
