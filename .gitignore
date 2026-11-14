@@ -37,3 +37,7 @@ build/
 _scratch/
 _dsh_tmp2/
 
+
+### 临时回收（不提交）
+_trash/
+
