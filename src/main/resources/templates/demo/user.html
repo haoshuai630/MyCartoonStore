@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户演示</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 2rem; }
+        table { border-collapse: collapse; margin-top: 1rem; }
+        th, td { border: 1px solid #ccc; padding: .35rem .8rem; text-align: left; }
+        form, .switch { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<h1 th:text="${message}">消息占位</h1>
+
+<form method="get" th:action="@{/demo/user/page}">
+    <label for="username">用户名：</label>
+    <input id="username" name="username" type="text" th:value="${user.username}">
+    <button type="submit">查询</button>
+</form>
+
+<p class="switch">
+    快速切换：
+    <a th:href="@{/demo/user/page(username='alice')}">alice</a>
+    <a th:href="@{/demo/user/page(username='bob')}">bob</a>
+</p>
+
+<table>
+    <caption>用户展示信息（不含密码散列）</caption>
+    <tbody>
+    <tr>
+        <th>id</th>
+        <td th:text="${user.id}">1</td>
+    </tr>
+    <tr>
+        <th>username</th>
+        <td th:text="${user.username}">alice</td>
+    </tr>
+    <tr>
+        <th>displayName</th>
+        <td th:text="${user.displayName}">林同学</td>
+    </tr>
+    <tr>
+        <th>role</th>
+        <td th:text="${user.role}">CUSTOMER</td>
+    </tr>
+    <tr>
+        <th>status</th>
+        <td th:text="${user.status}">ENABLED</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

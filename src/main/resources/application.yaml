@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: MyCartoonStoe
+  profiles:
+    # 未显式指定环境时默认激活 dev，本地开发配置位于 application-dev.yaml
+    default: dev

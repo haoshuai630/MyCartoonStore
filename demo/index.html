@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分类结构对比 | 漫屿 MANGA ISLE</title>
+<link rel="stylesheet" href="assets/store.css">
+</head>
+<body>
+<div class="topbar"><div class="wrap">
+  <span>漫屿 MANGA ISLE <span class="dot">/</span> 分类结构对比 Demo</span>
+  <span>同一套视觉、同一批作品，只有分类结构不同</span>
+</div></div>
+
+<div class="pick">
+  <span class="eyebrow" style="font-size:11px;letter-spacing:.28em;font-weight:900;color:#D93A2B">CLASSIFICATION MODEL</span>
+  <h1>两种两级分类，先点进去感受</h1>
+  <p class="lead">下面的两个站点是同一家漫画店，商品、配色、排版完全一样，唯一的区别是：<b>「作品」放在分类树的哪一层</b>。建议按同样的路线各走一遍：首页 → 找《星轨列车》→ 看它的周边。</p>
+
+  <div class="pick-grid">
+    <div class="pick-card">
+      <span class="k">方案 A · 推荐</span>
+      <h2>一级 = 作品，二级 = 漫画 / 周边</h2>
+      <p style="margin:0;color:#4a4237;font-size:13.5px">首页 5 张作品海报。点进去，单行本和周边在同一页，用「全部 / 漫画 / 周边」切换。</p>
+      <ul>
+        <li>分类 15 个：5 部作品 ×（漫画、周边）</li>
+        <li>商品 60 件：每部作品 6 卷 + 6 件周边</li>
+        <li>找「星轨列车的周边」：首页 → 作品 → 点「周边」，<b>2 步</b></li>
+        <li>「类型」天然来自二级分类，不需要新字段</li>
+      </ul>
+      <a class="btn btn-primary go" href="A/index.html">打开方案 A →</a>
+    </div>
+
+    <div class="pick-card">
+      <span class="k">方案 B · 备选</span>
+      <h2>一级 = 品类，二级 = 作品</h2>
+      <p style="margin:0;color:#4a4237;font-size:13.5px">首页 5 个品类入口。每部作品要在 5 个品类下各出现一次，想看全套得换 5 个地方。</p>
+      <ul>
+        <li>分类 30 个：5 品类 × 5 作品（+ 5 个一级）</li>
+        <li>商品 100 件：每个「品类 × 作品」4 件</li>
+        <li>找「星轨列车的周边」：手办 → 星轨列车 → 再回徽章 → 星轨列车 …… <b>4～6 步</b></li>
+        <li>「漫画 / 周边」按钮要靠硬编码把 5 个一级分类分成两组</li>
+      </ul>
+      <a class="btn go" href="B/index.html">打开方案 B →</a>
+    </div>
+  </div>
+
+  <div style="margin-top:40px;border:3px solid #16130F;background:#fff;box-shadow:8px 8px 0 #16130F">
+    <table style="width:100%;border-collapse:collapse;font-size:13.5px">
+      <thead>
+        <tr style="background:#16130F;color:#F6F1E7;text-align:left">
+          <th style="padding:12px 18px">对比项</th>
+          <th style="padding:12px 18px">方案 A</th>
+          <th style="padding:12px 18px">方案 B</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #ddd5c6"><td style="padding:11px 18px;font-weight:800">首页第一眼</td><td style="padding:11px 18px">5 部作品，像漫画站</td><td style="padding:11px 18px">5 个品类，像综合电商</td></tr>
+        <tr style="border-bottom:1px solid #ddd5c6"><td style="padding:11px 18px;font-weight:800">按作品浏览</td><td style="padding:11px 18px">一级就是作品，一次点击</td><td style="padding:11px 18px">作品不是树节点，只能搜索或逐品类翻</td></tr>
+        <tr style="border-bottom:1px solid #ddd5c6"><td style="padding:11px 18px;font-weight:800">类型过滤</td><td style="padding:11px 18px">父下两个子分类，规则干净</td><td style="padding:11px 18px">「漫画」= 第 1 个一级，「周边」= 其余 4 个，硬编码</td></tr>
+        <tr style="border-bottom:1px solid #ddd5c6"><td style="padding:11px 18px;font-weight:800">分类数量</td><td style="padding:11px 18px"><span class="badge-n">15</span></td><td style="padding:11px 18px"><span class="badge-n">30</span></td></tr>
+        <tr><td style="padding:11px 18px;font-weight:800">同名分类</td><td style="padding:11px 18px">没有</td><td style="padding:11px 18px">「星轨列车」出现 5 次</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top:28px;font-size:13px;color:#6B6257">两个站点顶部黄条写着当前方案名，右上角可以一键切到另一个方案，方便来回对比。所有页面都是静态的，不接后端，数据为结构演示而虚构。</p>
+</div>
+</body>
+</html>
