@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """生成 db/02-schema-with-demo.sql：表结构 + 教学种子数据。
 
 为什么要脚本生成：
@@ -211,12 +211,34 @@ def main() -> None:
         )
     out.append(",\n".join(value_rows) + ";")
     out.append("")
+    out.append(render_images_sql())
+    out.append("")
     out.append("-- ===== 演示数据结束 =====")
     out.append("")
 
     OUTPUT.write_text("\n".join(out), encoding="utf-8")
     print(f"written: {OUTPUT}")
     print(f"products: {len(products)}, categories: 15, users: {len(USERS)}")
+
+
+def render_images_sql() -> str:
+    """相册：每部作品 12 件中，前 4 件 3 张、中 4 件 2 张、后 4 件无相册（共 100 条）。
+
+    product_id 用 SKU 子查询取得，不依赖自增顺序；重复执行会因唯一性无关而重复插入，
+    因此脚本只用于空库初始化。
+    """
+    rows = []
+    for idx, p in enumerate(build_products()):
+        pos = idx % 12
+        count = 3 if pos < 4 else (2 if pos < 8 else 0)
+        for n in range(1, count + 1):
+            rows.append(
+                "((SELECT id FROM product WHERE sku='{sku}'), 'images/products/{sku}/{n}.svg', "
+                "'{name} 图{n}', {n})".format(sku=p["sku"], name=p["name"], n=n)
+            )
+    header = ("-- 4. 相册：100 条 = 20 件×3 张 + 20 件×2 张；另有 20 件无相册（用于回退封面）\n"
+              "INSERT INTO product_image (product_id, image_path, alt_text, sort_order) VALUES\n")
+    return header + ",\n".join(rows) + ";"
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ SQL_FILE = ROOT / "db" / "02-schema-with-demo.sql"
 OUT = ROOT / "reports" / "M01-02-逐行验收.html"
 SCHEMA_FILE = ROOT / "db" / "01-schema.sql"
 OUT_SCHEMA = ROOT / "reports" / "M01-01-逐行验收.html"
+OUT_M03 = ROOT / "reports" / "M01-03-逐行验收.html"
 
 STYLE = """<style>
 *{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
@@ -357,6 +358,40 @@ PY2 = {
 }
 EXPLAIN["py"].update(PY2)
 
+# M01-03 追加：行号在插入相册段后整体后移，这里按新行号覆盖
+PY3 = {
+    212: "写入商品 VALUES。",
+    213: "输出一个空行。",
+    214: "追加相册段（100 条）。",
+    215: "输出一个空行。",
+    216: "演示数据结束标记。",
+    217: "输出一个空行。",
+    219: "写文件，UTF-8 无 BOM。",
+    220: "输出路径，便于确认写到了哪。",
+    221: "打印数量，跑完立刻能对账。",
+    224: "返回一段完整的 INSERT 文本，供 main 追加。",
+    225: "docstring：说明 3/2/0 张的分布。",
+    226: "",
+    227: "用 SKU 子查询取 product_id，不依赖自增顺序。",
+    228: "脚本只用于空库初始化；重复执行会重复插入相册。",
+    229: "docstring 结束。",
+    230: "行容器。",
+    231: "复用 build_products()，保证与商品插入顺序一致。",
+    232: "每部作品 12 件里的位置。",
+    233: "前 4 件 3 张、中 4 件 2 张、后 4 件 0 张。",
+    234: "逐张生成。",
+    235: "拼一行。",
+    236: "product_id 用子查询；路径按 SKU 与序号拼。",
+    237: "alt_text 用「商品名 图N」，sort_order 即序号。",
+    238: "append 结束。",
+    239: "段标题 + 列清单；注释里写明 100 条的构成。",
+    240: "第二条拼接行：INSERT 头部。",
+    241: "逗号换行连接，末尾补分号。",
+    244: "可被 import 而不执行。",
+    245: "入口调用。",
+}
+EXPLAIN["py"].update(PY3)
+
 SQL = {
     1: "与 01 的「仅表结构」区分：这份带演示数据。",
     2: "生成物声明：改数据请改生成器。",
@@ -403,6 +438,9 @@ SQL2 = {
     230: "分类段标题：5 个一级 + 10 个二级。",
     250: "商品段标题：60 件 = 5 部作品 ×（6 卷 + 6 周边）。",
     251: "把验收依赖的分布写在注释里：54 上架 / 6 下架 / 3 售罄 / 2 件库存 1。",
+    314: "相册段标题：100 条 = 20 件×3 张 + 20 件×2 张，另 20 件无相册。",
+    315: "相册段：product_id 用 SKU 子查询，不依赖自增顺序。",
+    417: "演示数据结束标记。",
 }
 EXPLAIN["sql"].update(SQL2)
 
@@ -443,6 +481,9 @@ def explain_sql(n: int, line: str) -> str:
     if m:
         kind = "漫画" if m.group(3) == "COMIC" else "周边"
         return f"二级分类 id={m.group(1)}：{m.group(5)}（{kind}，父 id={m.group(4)}）"
+    m = re.match(r"\(\(SELECT id FROM product WHERE sku='([^']+)'\), '([^']+)', '([^']+)', (\d+)\)", s)
+    if m:
+        return f"{m.group(1)} 第 {m.group(4)} 张：{m.group(2)}（alt「{m.group(3)}」）"
     m = re.match(
         r"\('([A-Z]+-[CM]\d{2})', (\d+), '([^']*)', '([^']*)', '([^']*)', 'images/products/[^']+', "
         r"(\d+\.\d{2}), (\d+), '(ON_SALE|DRAFT)', (\d+), DATE_SUB\(NOW\(\), INTERVAL (\d+) DAY\)\)",
@@ -556,11 +597,10 @@ SQL 的建表段（第 15–220 行）来自 01-schema.sql，见 M01-01 逐行�
 完整汇报见同目录 M01-02-分类商品种子.md。</footer>
 </body></html>
 """
-    OUT.write_text(doc, encoding="utf-8")
-    print(f"written: {OUT}")
-    print(f"py explained: {py_exp}/{len(py_lines)}")
-    print(f"sql explained: {seed_exp}/{len(seed_lines)}")
+    # M01-02 的逐行验收已随该任务提交并冻结，不再重生成
+    print(f"M01-02 (frozen): py={py_exp}, sql={seed_exp}")
     write_m01_01()
+    write_m01_03()
 
 
 def schema_explanations(lines: list[str]) -> dict[int, str]:
@@ -703,6 +743,75 @@ def write_m01_01() -> None:
     OUT_SCHEMA.write_text(doc, encoding="utf-8")
     print(f"written: {OUT_SCHEMA}")
     print(f"schema explained: {explained}/{nonblank}")
+
+
+def render_range(lines: list[str], start: int, explain_fn) -> tuple[str, int, int]:
+    rows, explained, nonblank = [], 0, 0
+    for n in range(start, len(lines) + 1):
+        line = lines[n - 1]
+        if not line.strip():
+            rows.append(f'<tr class="gap"><td class="line">{n}</td><td></td><td></td></tr>')
+            continue
+        nonblank += 1
+        e = explain_fn(n, line)
+        if e:
+            explained += 1
+        cls = ' class="cmtline"' if line.lstrip().startswith(("#", "--")) else ""
+        hi = hi_py(line) if explain_fn is explain_py else hi_sql(line)
+        rows.append(
+            f'<tr tabindex="0" data-line="{n}"><td class="line">{n}</td>'
+            f'<td class="code"><pre{cls}>{hi}</pre></td>'
+            f'<td class="explain">{esc(e)}</td></tr>'
+        )
+    return "\n".join(rows), explained, nonblank
+
+
+def write_m01_03() -> None:
+    py_lines = PY_FILE.read_text(encoding="utf-8").splitlines()
+    sql_lines = SQL_FILE.read_text(encoding="utf-8").splitlines()
+    py_rows, py_exp, py_nb = render_range(py_lines, 210, explain_py)
+    sql_rows, sql_exp, sql_nb = render_range(sql_lines, 313, explain_sql)
+
+    doc = f"""<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M01-03 · 相册种子 逐行验收</title>
+{STYLE}</head>
+<body>
+<header>
+<h1>M01-03 · 相册 100 条（逐行验收）</h1>
+<p>只覆盖本任务新增/修改的行；行号是文件中的真实行号。</p>
+<nav><a href="#gen">gen_demo_sql.py（第 210 行起）</a><a href="#sql">02-schema-with-demo.sql（第 313 行起）</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M01 数据库与实体 / 任务 M01-03。依据 docs/03 §5.4：20 件×3 张 + 20 件×2 张 + 20 件无相册 = 100 条。
+验证：product_image 100 行；无相册商品 20 个；张数分布 0:20 / 2:20 / 3:20。</p>
+<section id="gen">
+<h2>gen_demo_sql.py<small>新增 render_images_sql() 与调用</small></h2>
+<p class="path">db/tools/gen_demo_sql.py</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+{py_rows}
+</tbody></table>
+</section>
+<section id="sql">
+<h2>02-schema-with-demo.sql<small>相册段</small></h2>
+<p class="path">db/02-schema-with-demo.sql</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+{sql_rows}
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M01-03 · 生成器第 210 行起（非空 {py_nb}，覆盖 {py_exp}/{py_nb}）、相册段（非空 {sql_nb}，覆盖 {sql_exp}/{sql_nb}）。
+完整汇报见同目录 M01-03-相册种子.md。</footer>
+</body></html>
+"""
+    OUT_M03.write_text(doc, encoding="utf-8")
+    print(f"written: {OUT_M03}  py={py_exp}/{py_nb}  sql={sql_exp}/{sql_nb}")
 
 
 if __name__ == "__main__":
