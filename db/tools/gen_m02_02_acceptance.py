@@ -47,6 +47,34 @@ def make_html_explainer(lines: list[str]):
         s = line.strip()
         if not s:
             return ""
+        if s.upper().startswith("<!DOCTYPE"):
+            return "HTML5 文档类型：浏览器按标准模式渲染"
+        if s.startswith("<html"):
+            return "根元素；xmlns:th 声明命名空间，模板里的 th:* 才生效"
+        if s == "<body>":
+            return "页面可见内容的起点"
+        if s in ("</body>", "</html>"):
+            return "文档结束"
+        if s.startswith("<!--"):
+            return "注释：说明本段的用途或约束"
+        if 'class="wrap"' in s or 'class="wrap ' in s:
+            return "内容宽度容器：统一左右留白与最大宽度"
+        if s == "<main>":
+            return "页面主体区"
+        if 'class="results"' in s:
+            return "结果区：工具栏、商品网格、分页"
+        if 'class="types"' in s:
+            return "类型切换：全部 / 单行本 / 周边"
+        if 'class="sorts"' in s:
+            return "排序切换：默认 / 价格升降 / 最新"
+        if 'class="result-meta"' in s:
+            return "结果总数，并在有关键字时回显"
+        if 'class="body"' in s:
+            return "卡片文字区：SKU、名称、价格、库存"
+        if 'class="foot"' in s:
+            return "卡片底部：价格与库存"
+        if 'class="filters"' in s:
+            return "筛选侧栏"
         if "th:fragment" in s:
             name = re.search(r'th:fragment="(\w+)', s)
             return f"定义可复用片段 {name.group(1)}，其他页面用 th:replace 引用"

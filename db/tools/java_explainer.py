@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import re
 
+from import_notes import IMPORT_NOTES
+
 EXTRA = {
     'this.catalogService = catalogService;': "构造器注入：保存 CatalogService 字段",
     'int n = 0, i = 0;': "计数器与游标",
@@ -61,11 +63,66 @@ def looks_like_method(s):
     )
 
 
+def brace_notes(lines):
+    """给单独的 } 标出它结束的是方法还是类（按花括号深度判断）。"""
+    notes = {}
+    depth = 0
+    for i, line in enumerate(lines, 1):
+        s = line.strip()
+        before = depth
+        depth += s.count("{") - s.count("}")
+        if s == "}":
+            notes[i] = "结束类定义" if depth == 0 else ("结束方法" if depth == 1 else "结束内部代码块")
+    return notes
+
+
 def make_java_explainer(lines):
+    braces = brace_notes(lines)
+
     def explain(n, line):
         s = line.strip()
         if not s:
             return ""
+        if s.startswith(".andExpect(status("):
+            return "断言 HTTP 状态码"
+        if s.startswith(".andExpect("):
+            return "断言响应内容"
+        if s.startswith("model.addAttribute("):
+            return "把数据放进模型，模板里可直接取"
+        if s.startswith("return n;"):
+            return "返回出现次数"
+        if s.startswith("while ((i = body.indexOf"):
+            return "寻找下一次出现的位置"
+        if s.startswith("insertProduct(String.format"):
+            return "循环插入 7 件单行本"
+        if s.startswith("private void insertProduct"):
+            return "插入商品的辅助方法"
+        if s.startswith("public String handleBiz"):
+            return "异常处理方法：设置状态码并返回错误页"
+        if s.startswith("?"):
+            return "三元分支：NOT_FOUND 给 404"
+        if s.startswith(": HttpServletResponse"):
+            return "其余按 400 处理"
+        if s.startswith("new BigDecimal(price)"):
+            return "价格用 BigDecimal 传入"
+        if s.startswith("sku, categoryId, name"):
+            return "对应 INSERT 的列值"
+        if s.startswith('+ "VALUES'):
+            return "SQL 续行：占位符与列数一一对应"
+        if s == "/**":
+            return "说明块开始：下面几行讲职责与约束"
+        if s == "*/":
+            return "说明块结束"
+        if s == "*":
+            return "说明续行"
+        if "mockMvc.perform(" in s:
+            return "发起请求，后面几条断言检查渲染结果"
+        if s == "}" and n in braces:
+            return braces[n]
+        if s.startswith("import "):
+            return IMPORT_NOTES.get(s.rstrip(";"), "")
+        if s in ANNOTATION_NOTES or s.split("(")[0] in ANNOTATION_NOTES:
+            return ANNOTATION_NOTES.get(s.split("(")[0], "")
         if s in EXTRA:
             return EXTRA[s]
 
@@ -107,3 +164,15 @@ def make_java_explainer(lines):
         return ""
 
     return explain
+
+ANNOTATION_NOTES = {
+    "@Test": "JUnit 用例：运行时由框架发现并执行",
+    "@DisplayName": "用例名：测试报告里显示这句，失败时先看它",
+    "@BeforeEach": "每个用例前执行，用来重置数据",
+    "@Autowired": "由 Spring 按类型注入",
+    "@AutoConfigureMockMvc": "开启 MockMvc，不占端口就能请求页面",
+    "@SpringBootTest": "启动完整上下文",
+    "@ActiveProfiles": "启用 test 配置",
+    "@ControllerAdvice": "全局异常处理类，所有控制器共享",
+    "@ExceptionHandler": "指定这个方法处理哪类异常",
+}

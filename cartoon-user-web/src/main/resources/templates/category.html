@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('全部商品')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <div class="wrap list-layout">
+
+        <!-- 侧栏：作品（一级）与其下的单行本/周边（二级） -->
+        <aside class="filters">
+            <h3>作品</h3>
+            <a class="filter-all" th:href="@{/category}">全部作品</a>
+            <div class="filter-group" th:each="t : ${categories}" th:if="${t.parentId == null}">
+                <a th:href="@{/category(categoryId=${t.id})}" th:text="${t.name}">作品</a>
+                <a class="sub" th:each="c : ${categories}" th:if="${c.parentId == t.id}"
+                   th:href="@{/category(categoryId=${c.id})}" th:text="${c.name}">子分类</a>
+            </div>
+        </aside>
+
+        <section class="results">
+            <!-- 类型与排序：链接形式，翻页/搜索时由服务端重新查询 -->
+            <div class="toolbar">
+                <div class="types">
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, sort=${query.sort}, productType='ALL')}"
+                       th:classappend="${query.productType == 'ALL'} ? 'on'">全部</a>
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, sort=${query.sort}, productType='COMIC')}"
+                       th:classappend="${query.productType == 'COMIC'} ? 'on'">单行本</a>
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, sort=${query.sort}, productType='MERCH')}"
+                       th:classappend="${query.productType == 'MERCH'} ? 'on'">周边</a>
+                </div>
+                <div class="sorts">
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, productType=${query.productType}, sort='DEFAULT')}"
+                       th:classappend="${query.sort == 'DEFAULT'} ? 'on'">默认</a>
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, productType=${query.productType}, sort='PRICE_ASC')}"
+                       th:classappend="${query.sort == 'PRICE_ASC'} ? 'on'">价格低到高</a>
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, productType=${query.productType}, sort='PRICE_DESC')}"
+                       th:classappend="${query.sort == 'PRICE_DESC'} ? 'on'">价格高到低</a>
+                    <a th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, productType=${query.productType}, sort='NEWEST')}"
+                       th:classappend="${query.sort == 'NEWEST'} ? 'on'">最新</a>
+                </div>
+            </div>
+
+            <p class="result-meta">
+                共 <b th:text="${page.total}">0</b> 件
+                <span th:if="${query.keyword != null and !query.keyword.isEmpty()}">，关键字「<b th:text="${query.keyword}">关键词</b>」</span>
+            </p>
+
+            <div class="grid" th:if="${!page.isEmpty()}">
+                <article class="card" th:each="p : ${page.items}">
+                    <a class="media" th:href="@{/product/{id}(id=${p.id})}">
+                        <img th:src="@{${p.coverImage}}" th:alt="${p.name}">
+                    </a>
+                    <div class="body">
+                        <span class="cat" th:text="${p.sku}">SKU</span>
+                        <h3><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">商品</a></h3>
+                        <div class="foot">
+                            <span class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}">¥0.00</span>
+                            <span class="stock" th:classappend="${p.stock == 0} ? 'zero'"
+                                  th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}">库存</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <p class="empty" th:if="${page.isEmpty()}">没有符合条件的商品，换个条件试试。</p>
+
+            <!-- 分页：上一页/下一页是否可点由 PageResult 判断，模板不自己算 -->
+            <nav class="pager" th:if="${page.totalPages() > 1}">
+                <a th:if="${page.hasPrevious()}"
+                   th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, productType=${query.productType}, sort=${query.sort}, page=${page.page - 1})}">上一页</a>
+                <span th:unless="${page.hasPrevious()}" class="disabled">上一页</span>
+                <span th:text="'第 ' + ${page.page} + ' / ' + ${page.totalPages()} + ' 页'">第 1 / 1 页</span>
+                <a th:if="${page.hasNext()}"
+                   th:href="@{/category(categoryId=${query.categoryId}, keyword=${query.keyword}, productType=${query.productType}, sort=${query.sort}, page=${page.page + 1})}">下一页</a>
+                <span th:unless="${page.hasNext()}" class="disabled">下一页</span>
+            </nav>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

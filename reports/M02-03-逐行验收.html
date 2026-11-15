@@ -41,15 +41,15 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档类型：浏览器按标准模式渲染</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">根元素；xmlns:th 声明命名空间，模板里的 th:* 才生效</td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('首页')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">复用公共 head 片段，标题传「首页」</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">页面可见内容的起点</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">复用页头：品牌、导航、搜索、购物车徽标</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="hero"&gt;</pre></td><td class="explain">品牌横幅：只做展示与入口，不直接下单</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap hero-inner"&gt;</pre></td><td class="explain">两栏栅格：左文案、右封面堆叠</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
@@ -69,9 +69,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="strip"&gt;</pre></td><td class="explain">作品入口区</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="strip-grid" th:if="${!#lists.isEmpty(categories)}"&gt;</pre></td><td class="explain">没有分类时不渲染空网格</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="strip-item" th:each="c : ${categories}"</pre></td><td class="explain">遍历一级分类（作品）</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                   th:href="@{/category(categoryId=${c.id})}"&gt;</pre></td><td class="explain">点作品进对应列表，带 categoryId</td></tr>
@@ -83,9 +83,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">42</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">新品栏目</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;NEW ARRIVAL&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;新品上架&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">栏目名固定；英文仅作装饰</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/category(sort='NEWEST')}"&gt;更多新品 →&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">带 sort=NEWEST 进列表</td></tr>
@@ -95,11 +95,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                    &lt;<span class="kw">a</span> class="media" th:href="@{/product/{id}(id=${p.id})}"&gt;</pre></td><td class="explain">进详情页，按 id 定位</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${p.coverImage}}" th:alt="${p.name}"&gt;</pre></td><td class="explain">封面路径来自 cover_image，不在模板里拼字符串</td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="body"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="body"&gt;</pre></td><td class="explain">卡片文字区：SKU、名称、价格、库存</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="cat" th:text="${p.sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">展示 SKU，便于与数据库核对</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                        &lt;h3&gt;&lt;<span class="kw">a</span> th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}"&gt;商品&lt;/<span class="kw">a</span>&gt;&lt;/h3&gt;</pre></td><td class="explain">商品名同时是详情入口</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="sum" th:text="${p.summary}"&gt;简介&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">一句话简介</td></tr>
-<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="foot"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="foot"&gt;</pre></td><td class="explain">卡片底部：价格与库存</td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">¥ + 两位小数，与全站金额口径一致</td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="stock" th:classappend="${p.stock == 0} ? 'zero'" th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}"&gt;库存&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">0 件时加 zero 样式并显示缺货</td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
@@ -110,9 +110,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">精选栏目</td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;EDITOR'S PICK&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;精选推荐&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">「精选推荐」由人工排序（sort_order）决定，不是销量</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/category}"&gt;全部商品 →&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">进列表，不带筛选</td></tr>
@@ -122,11 +122,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    &lt;<span class="kw">a</span> class="media" th:href="@{/product/{id}(id=${p.id})}"&gt;</pre></td><td class="explain">进详情页</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${p.coverImage}}" th:alt="${p.name}"&gt;</pre></td><td class="explain">封面来自 cover_image</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="body"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="body"&gt;</pre></td><td class="explain">卡片文字区：SKU、名称、价格、库存</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="cat" th:text="${p.sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">SKU</td></tr>
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                        &lt;h3&gt;&lt;<span class="kw">a</span> th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}"&gt;商品&lt;/<span class="kw">a</span>&gt;&lt;/h3&gt;</pre></td><td class="explain">商品名 + 详情入口</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="sum" th:text="${p.summary}"&gt;简介&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">简介</td></tr>
-<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="foot"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="foot"&gt;</pre></td><td class="explain">卡片底部：价格与库存</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">价格两位小数</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="stock" th:classappend="${p.stock == 0} ? 'zero'" th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}"&gt;库存&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">售罄样式与文案</td></tr>
 <tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
@@ -140,8 +140,8 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">97</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">复用页脚</td></tr>
 <tr class="gap"><td class="line">99</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">文档结束</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">文档结束</td></tr>
 </tbody></table>
 </section>
 <section id="s2">
@@ -153,17 +153,17 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.CatalogService;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.CatalogService;</pre></td><td class="explain">商品查询服务：分类树、分页搜索、详情</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">Spring MVC 注解，标记控制器</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">MVC 模型，控制器往里放数据给模板</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 首页控制器。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Controller</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> HomeController {</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
@@ -174,7 +174,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> HomeController(CatalogService catalogService) {</pre></td><td class="explain">只注入一个服务，控制器不直接碰 Mapper</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">保存引用</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 根路径与 /main 共用首页视图，装配作品入口与两个商品栏目 */</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @GetMapping({"/", "/main"})</pre></td><td class="explain">根路径与 /main 都进首页，logo 与直接输入都能到</td></tr>
@@ -183,8 +183,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        model.addAttribute("newest", catalogService.newest(NEWEST_LIMIT));</pre></td><td class="explain">3 条，SQL 里已过滤下架并按 created_at 倒序</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        model.addAttribute("featured", catalogService.featured(FEATURED_LIMIT));</pre></td><td class="explain">4 条，按 sort_order 升序（人工排序）</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        <span class="kw">return</span> "main";</pre></td><td class="explain">视图名对应 templates/main.html</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
 </section>
 <section id="s3">
@@ -196,37 +196,37 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">自动配置 MockMvc，用于不起端口发请求</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">模拟 MVC 请求，直接调控制器并拿到渲染结果</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.not;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">Hamcrest 匹配器：断言字符串包含某段文本</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.not;</pre></td><td class="explain">Hamcrest 匹配器：把断言取反</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET 请求</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre> * 首页渲染测试：验证作品入口、新品 3 条上限、精选 4 条与下架商品不可见。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc：不发真实 HTTP，直接调控制器并检查渲染结果</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">class</span> HomePageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">用来请求 /main 并断言返回的 HTML</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">直接写库准备数据，绕开 M06 之后才有的 Service</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Test</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @DisplayName("首页显示作品入口与上架商品，隐藏下架商品")</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @DisplayName("首页显示作品入口与上架商品，隐藏下架商品")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">void</span> homeShowsOnSaleOnly() throws Exception {</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory("TESTIP", "测试作品");</pre></td><td class="explain">造作品分类；code 用 TESTIP，避免与其它用例同名冲突</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        insertProduct("TEST-C01", categoryId, "测试商品A", "28.00", 10, "ON_SALE", 1, 1);</pre></td><td class="explain">上架商品：¥28、库存 10、排序 1、1 天前上架</td></tr>
@@ -238,10 +238,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                .andExpect(content().string(containsString("测试商品A")))</pre></td><td class="explain">上架商品要出现在新品/精选栏目</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(content().string(containsString("¥28.00")))</pre></td><td class="explain">价格渲染成两位小数，不是 28 或 28.0</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(content().string(not(containsString("测试商品B"))));</pre></td><td class="explain">下架商品一个栏目都不能出现</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">46</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("新品最多 3 条：第 4 新的商品不出现在「新品上架」")</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("新品最多 3 条：第 4 新的商品不出现在「新品上架」")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">void</span> newestIsLimitedToThree() throws Exception {</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory("LIMITIP", "限量作品");</pre></td><td class="explain">另一组分类，保证只有这 4 件参与排序</td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        insertProduct("L-01", categoryId, "新品一", "28.00", 10, "ON_SALE", 10, 1);</pre></td><td class="explain">最新：1 天前，排序 10</td></tr>
@@ -250,7 +250,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        insertProduct("L-04", categoryId, "新品四", "28.00", 10, "ON_SALE", 10, 4);</pre></td><td class="explain">4 天前，应被 3 条上限挡在新品栏外</td></tr>
 <tr class="gap"><td class="line">55</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        String body = mockMvc.perform(get("/main"))</pre></td><td class="explain">先拿到整页 HTML，再按出现次数判断</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">以字符串读取，避免编码与流关闭问题</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        // 前三条在「新品上架」和「精选推荐」各出现一次；第四条只在精选里出现</pre></td><td class="explain">—</td></tr>
@@ -258,21 +258,21 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        assertThat(count(body, "新品二")).isEqualTo(4);</pre></td><td class="explain">同上</td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(count(body, "新品三")).isEqualTo(4);</pre></td><td class="explain">同上</td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThat(count(body, "新品四")).isEqualTo(2);</pre></td><td class="explain">新品四只进精选栏 = 2 次，证明新品上限 3 生效</td></tr>
-<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">66</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    @Test</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    @DisplayName("空库时首页显示空状态，而不是报错")</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    @DisplayName("空库时首页显示空状态，而不是报错")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">void</span> homeShowsEmptyState() throws Exception {</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        mockMvc.perform(get("/main"))</pre></td><td class="explain">空库直接请求首页</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">空数据也必须 200</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andExpect(content().string(containsString("暂无上架商品")));</pre></td><td class="explain">空状态是模板给的文案，不是异常页</td></tr>
-<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">74</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> count(String body, String word) {</pre></td><td class="explain">统计子串出现次数：判断同一商品出现在几个栏目</td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        <span class="kw">int</span> n = 0, i = 0;</pre></td><td class="explain">计数器与游标</td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        while ((i = body.indexOf(word, i)) &gt;= 0) { n++; i += word.length(); }</pre></td><td class="explain">命中后跳过词长，避免重叠计数</td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        <span class="kw">return</span> n;</pre></td><td class="explain">返回出现次数</td></tr>
-<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">80</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedCategory(String code, String name) {</pre></td><td class="explain">建一级 + 二级分类，返回二级 id 供商品挂载</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, name);</pre></td><td class="explain">一级分类：parent_id 为空，排序 1</td></tr>
@@ -280,7 +280,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)",</pre></td><td class="explain">二级 code 用一级 code 加 -COMIC，父指向一级</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                code + "-COMIC", parentId, "单行本");</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code + "-COMIC");</pre></td><td class="explain">返回二级 id</td></tr>
-<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">88</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String name, String price, <span class="kw">int</span> stock,</pre></td><td class="explain">统一插入商品；created_at 用相对天数，便于控制「最新」顺序</td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                               String status, <span class="kw">int</span> sortOrder, <span class="kw">int</span> daysAgo) {</pre></td><td class="explain">—</td></tr>
@@ -288,8 +288,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                        + "sort_order, created_at) VALUES (?,?,?,?,?,?,?,?,?, DATE_SUB(NOW(), INTERVAL ? DAY))",</pre></td><td class="explain">相对天数作为参数传入，不写死日期</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                sku, categoryId, name, "测试简介", "images/products/" + sku + "/cover.svg",</pre></td><td class="explain">封面路径按 SKU 拼，与数据库里的约定一致</td></tr>
 <tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal(price), stock, status, sortOrder, daysAgo);</pre></td><td class="explain">价格用 BigDecimal，避免 double 精度问题</td></tr>
-<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    }</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>}</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
 </section>
 </main>

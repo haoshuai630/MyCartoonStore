@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('出错了')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap error-box">
+            <h1>出了点问题</h1>
+            <p class="error-message" th:text="${message}">错误信息</p>
+            <p><a class="btn btn-primary" th:href="@{/main}">回首页</a>
+               <a class="btn btn-ghost" th:href="@{/category}">去逛逛</a></p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
