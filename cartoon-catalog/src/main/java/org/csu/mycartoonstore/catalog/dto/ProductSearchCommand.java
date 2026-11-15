@@ -19,10 +19,16 @@ public class ProductSearchCommand {
     /** 作品（一级分类）id；作品页用它限定范围 */
     private String workId;
 
-    /** ALL / COMIC / MERCH，可为空 */
+    /**
+     * 商品类型：留空等同 ALL；COMIC 只查单行本，MERCH 查全部周边。
+     * 非法值由 Service 转 400，控制器不判断。
+     */
     private String productType;
 
-    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空 */
+    /**
+     * 排序方式：留空等同 DEFAULT（按人工 sort_order）；PRICE_ASC / PRICE_DESC 按价格；
+     * NEWEST 按上架时间倒序。非法值转 400。
+     */
     private String sort;
 
     /** 名称关键字，可为空 */

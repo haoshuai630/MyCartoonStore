@@ -27,10 +27,16 @@ import java.util.Set;
 @Service
 public class CatalogService {
 
-    /** 商品类型白名单：ALL 表示不过滤 */
+    /**
+     * 商品类型白名单。只接受这三个值，其它一律 400：
+     * 白名单既防止用户输入拼进 SQL，也让错误在入口就暴露，而不是查不到数据时才发现。
+     */
     private static final Set<String> TYPES = Set.of("ALL", "COMIC", "MERCH");
 
-    /** 排序白名单，与 ProductMapper.xml 的 choose 分支一一对应 */
+    /**
+     * 排序白名单，必须与 ProductMapper.xml 的 choose 分支一一对应；
+     * 增加新排序时两边要同时改，否则白名单会放过 SQL 不认识的值。
+     */
     private static final Set<String> SORTS = Set.of("DEFAULT", "PRICE_ASC", "PRICE_DESC", "NEWEST");
 
     /** 商品列表默认每页 6 条 */

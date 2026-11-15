@@ -17,13 +17,19 @@ public class ProductQuery {
     /** 作品（一级分类）id；指定时只查该作品下的全部品类 */
     private Long workId;
 
-    /** ALL / COMIC / MERCH */
+    /**
+     * 商品类型过滤：ALL 不过滤；COMIC 只查单行本（分类 code 以 -COMIC 结尾）；
+     * MERCH 查其余全部周边品类。取值由 CatalogService 的白名单校验，非法值返回 400。
+     */
     private String productType;
 
     /** 商品名称关键字，已去首尾空白；为空表示不搜索 */
     private String keyword;
 
-    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */
+    /**
+     * 排序方式：DEFAULT 按人工排序 sort_order；PRICE_ASC / PRICE_DESC 按价格；
+     * NEWEST 按上架时间倒序。SQL 侧用 choose 映射到固定列，非法值返回 400。
+     */
     private String sort;
 
     /** 当前页数量 */

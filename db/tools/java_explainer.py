@@ -49,7 +49,7 @@ def javadoc_above(lines, idx):
             i -= 1
             continue
         break
-    text = " ".join(block)
+    text = " ".join(reversed(block))
     text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip()
     text = re.sub(r"<[^>]+>", "", text)
     return re.sub(r"\s+", " ", text)
