@@ -50,42 +50,35 @@ VOLUME_SUM = [
     "最后一卷，列车驶入黎明。",
 ]
 
-# 周边：按品类分组。模型 / 抱枕 单列，其余归「其他周边」
+# 周边：按行业通用品类分组（谷子/电商口径），名称里的 {w} 会替换成作品名
+MERCH_GROUPS = [
+    ("BADGE", "徽章", 2),
+    ("STAND", "亚克力立牌", 3),
+    ("CHARM", "挂件钥匙扣", 4),
+    ("PAPER", "色纸明信片", 5),
+    ("TICKET", "镭射票", 6),
+    ("PLUSH", "毛绒抱枕", 7),
+    ("FIGURE", "手办模型", 8),
+    ("ARTBOOK", "画集设定集", 9),
+    ("APPAREL", "服装包袋", 10),
+    ("STATIONERY", "文具杂货", 11),
+]
+
+# 每个品类 1-2 件：(名称模板, 价格, 库存, 状态)
 MERCH = {
-    "STARLINE": {
-        "MODEL": [("列车拼装模型", 169, 5, "ON_SALE"), ("列车头摆件", 129, 7, "ON_SALE")],
-        "PILLOW": [("星空列车抱枕", 99, 8, "ON_SALE")],
-        "OTHER": [("车票金属徽章", 39, 8, "ON_SALE"), ("星空帆布袋", 69, 9, "ON_SALE"),
-                  ("全彩设定画集", 128, 6, "DRAFT")],
-    },
-    "MISTPORT": {
-        "MODEL": [("雾港街景拼装模型", 179, 4, "ON_SALE"), ("侦探手办", 139, 6, "ON_SALE")],
-        "PILLOW": [("雾港夜雨抱枕", 99, 9, "ON_SALE")],
-        "OTHER": [("案件档案文件夹", 25, 11, "ON_SALE"), ("主角徽章套装", 45, 12, "ON_SALE"),
-                  ("雾港设定集", 118, 7, "ON_SALE")],
-    },
-    "ONIGIRI": {
-        "MODEL": [("饭团小馆微缩模型", 129, 5, "ON_SALE"), ("店长手办", 119, 6, "ON_SALE")],
-        "PILLOW": [("饭团造型抱枕", 99, 1, "ON_SALE")],
-        "OTHER": [("小馆围裙", 79, 8, "ON_SALE"), ("菜单贴纸包", 19, 9, "ON_SALE"),
-                  ("料理手账本", 35, 6, "ON_SALE")],
-    },
-    "IRONWOOD": {
-        "MODEL": [("机械鹿拼装模型", 199, 5, "ON_SALE"), ("齿轮机械手办", 149, 6, "ON_SALE")],
-        "PILLOW": [("森林夜色抱枕", 99, 8, "ON_SALE")],
-        "OTHER": [("齿轮金属徽章", 45, 8, "ON_SALE"), ("机械书签套装", 29, 11, "ON_SALE"),
-                  ("机械设定画集", 138, 6, "ON_SALE")],
-    },
-    "CICADA": {
-        "MODEL": [("蝉翼拼装模型", 159, 5, "ON_SALE"), ("主角手办", 129, 7, "ON_SALE")],
-        "PILLOW": [("夏日蝉鸣抱枕", 99, 9, "ON_SALE")],
-        "OTHER": [("夏日明信片组", 25, 10, "ON_SALE"), ("主角亚克力立牌", 79, 11, "ON_SALE"),
-                  ("夏日画集", 108, 6, "ON_SALE")],
-    },
+    "BADGE": [("{w}主角吧唧", 25, 30, "ON_SALE"), ("{w}金属徽章套装", 45, 18, "ON_SALE")],
+    "STAND": [("{w}主角亚克力立牌", 79, 15, "ON_SALE"), ("{w}场景立牌", 89, 9, "ON_SALE")],
+    "CHARM": [("{w}亚克力挂件", 39, 25, "ON_SALE"), ("{w}金属钥匙扣", 45, 12, "ON_SALE")],
+    "PAPER": [("{w}明信片组", 25, 20, "ON_SALE")],
+    "TICKET": [("{w}镭射票", 35, 0, "ON_SALE")],
+    "PLUSH": [("{w}角色抱枕", 99, 6, "ON_SALE")],
+    "FIGURE": [("{w}拼装模型", 169, 4, "ON_SALE")],
+    "ARTBOOK": [("{w}官方画集", 118, 5, "ON_SALE")],
+    "APPAREL": [("{w}主题T恤", 89, 0, "ON_SALE")],
+    "STATIONERY": [("{w}线圈笔记本", 29, 22, "ON_SALE")],
 }
 
 # 二级分类：品类代码 → (id 偏移, 名称, 排序)
-MERCH_GROUPS = [("MODEL", 1, "模型", 2), ("PILLOW", 2, "抱枕", 3), ("OTHER", 3, "其他周边", 4)]
 
 # 让「新品上架」与「精选推荐」各有确定的样例
 NEWEST_AGE = {"CICADA-M04": 0, "ONIGIRI-C04": 1, "MISTPORT-M05": 2}
@@ -104,7 +97,7 @@ def esc(text: str) -> str:
 def build_products():
     rows = []
     for idx, ip in enumerate(IPS):
-        comic_id = 100 + idx * 4
+        comic_id = 100 + idx * 11
         for n in range(1, 7):
             sku = f"{ip['code']}-C{n:02d}"
             status = "DRAFT" if n == 6 else "ON_SALE"
@@ -121,23 +114,23 @@ def build_products():
                 "age": NEWEST_AGE.get(sku, 5 + idx * 6 + n),
             })
         j = 0
-        for group, offset, _cname, _order in MERCH_GROUPS:
-            for name, price, stock, status in MERCH[ip["code"]][group]:
+        for group, _cname, order in MERCH_GROUPS:
+            for tmpl, price, stock, status in MERCH[group]:
                 j += 1
-                merch_cat = 100 + idx * 4 + offset
                 sku = f"{ip['code']}-M{j:02d}"
+                name = tmpl.format(w=ip["cn"])
                 rows.append({
                     "sku": sku,
-                    "cat": merch_cat,
-                "name": f"《{ip['cn']}》{name}",
-                "summary": "官方授权周边，随书附赠收藏卡。",
-                "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",
-                "price": price,
-                "stock": stock,
-                "status": status,
-                "sort": FEATURED_SORT.get(sku, 100),
-                "age": NEWEST_AGE.get(sku, 5 + idx * 6 + j + 2),
-            })
+                    "cat": 100 + idx * 11 + order,
+                    "name": f"《{ip['cn']}》{name}",
+                    "summary": "官方授权周边，随书附赠收藏卡。",
+                    "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",
+                    "price": price,
+                    "stock": stock,
+                    "status": status,
+                    "sort": FEATURED_SORT.get(sku, 100),
+                    "age": NEWEST_AGE.get(sku, 5 + idx * 6 + j + 2),
+                })
     return rows
 
 
@@ -185,9 +178,9 @@ def main() -> None:
     out.append("INSERT INTO category (id, code, parent_id, name, sort_order) VALUES")
     secondary = []
     for idx, ip in enumerate(IPS):
-        secondary.append(f"({100 + idx * 4}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")
-        for group, offset, cname, order in MERCH_GROUPS:
-            secondary.append(f"({100 + idx * 4 + offset}, '{ip['code']}-{group}', {CATEGORY_IDS[ip['code']]}, '{cname}', {order})")
+        secondary.append(f"({100 + idx * 11}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")
+        for group, cname, order in MERCH_GROUPS:
+            secondary.append(f"({100 + idx * 11 + order}, '{ip['code']}-{group}', {CATEGORY_IDS[ip['code']]}, '{cname}', {order})")
     out.append(",\n".join(secondary) + ";")
     out.append("")
 
@@ -217,7 +210,7 @@ def main() -> None:
 
     OUTPUT.write_text("\n".join(out), encoding="utf-8")
     print(f"written: {OUTPUT}")
-    print(f"products: {len(products)}, categories: {25}, users: {len(USERS)}")
+    print(f"products: {len(products)}, categories: {55}, users: {len(USERS)}")
 
 
 def render_images_sql() -> str:

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
 <rect width="600" height="800" fill="#B85C24"/>
-<circle cx="455" cy="175" r="140" fill="#F6D9A8" opacity="0.20"/>
+<circle cx="469" cy="189" r="140" fill="#F6D9A8" opacity="0.20"/>
 <path d="M0 560 L600 430 L600 520 L0 650 Z" fill="#D93A2B" opacity="0.9"/>
 <text x="46" y="96" font-family="Arial" font-size="20" fill="#F6D9A8" letter-spacing="6">ONIGIRI</text>
 <text x="44" y="345" font-family="Microsoft YaHei, sans-serif" font-size="82" font-weight="900" fill="#ffffff">饭团小馆</text>
