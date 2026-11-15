@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M03-01 · 账号与密码 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M03-01 · 账号与密码（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">LoginInterceptor.java</a><a href="#s2">WebConfig.java</a><a href="#s3">LoginInterceptorTest.java</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M02 商品浏览 / 任务 M02-08-01。内容：拦截 /cart、/orders、/profile，未登录跳登录并带 redirect。
+验证：mvn -pl cartoon-user-web -am test → Tests run: 50, 0 失败。</p>
+<p class="note" style="margin-top:8px">种子数据与 Mapper XML 的改动不在此页逐行对照：SQL 由生成器产出（db/tools/gen_demo_sql.py），XML 只加了一个 if 条件。</p>
+<section id="s1">
+<h2>LoginInterceptor.java<small>未登录跳登录并记原地址 · 38 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/interceptor/LoginInterceptor.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.interceptor;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.interceptor 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletRequest;</pre></td><td class="explain">Servlet 请求对象：取路径、查询串</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletResponse;</pre></td><td class="explain">Servlet 的响应对象：这里只用它设置 400/404 状态码</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">Servlet 会话对象，用来存放登录身份</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.HandlerInterceptor;</pre></td><td class="explain">Spring MVC 拦截器接口</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.net.URLEncoder;</pre></td><td class="explain">把原地址编码进 redirect 参数</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.nio.charset.StandardCharsets;</pre></td><td class="explain">字符集常量，明确按 UTF-8 读脚本</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 登录拦截器：受保护路径在未登录时跳登录页，并记住原地址。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * &lt;p&gt;只拦明确列出的路径，不做"全站拦截 + 白名单"：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * 后者每新增一个页面都要记得放行，漏一次就把公开页面锁住了。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> LoginInterceptor implements HandlerInterceptor {</pre></td><td class="explain">登录拦截器：只拦受保护路径。</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 会话里表示登录态的键，与 AuthController 写入的一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String USER_ID = "userId";</pre></td><td class="explain">会话里表示登录态的键，与 AuthController 写入的一致</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)</pre></td><td class="explain">处理前检查会话，返回 false 表示中断。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>            throws Exception {</pre></td><td class="explain">声明抛出异常，调用方或测试框架负责处理。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        if (session != null &amp;&amp; session.getAttribute(USER_ID) != null) {</pre></td><td class="explain">已登录：直接放行。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>            <span class="kw">return</span> true;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">        // 把原地址（含查询串）编码后带过去，登录成功再跳回来</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        String target = request.getRequestURI();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        if (request.getQueryString() != null) {</pre></td><td class="explain">有查询串就一起带上，回跳后条件不丢。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            target = target + "?" + request.getQueryString();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        String encoded = URLEncoder.encode(target, StandardCharsets.UTF_8);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        response.sendRedirect(request.getContextPath() + "/login?redirect=" + encoded);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        <span class="kw">return</span> false;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>WebConfig.java<small>注册拦截器与受保护路径 · 22 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/config/WebConfig.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.config;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.config 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.interceptor.LoginInterceptor;</pre></td><td class="explain">自定义登录拦截器</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">配置类，启动时加载</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.config.annotation.InterceptorRegistry;</pre></td><td class="explain">拦截器注册表</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.config.annotation.WebMvcConfigurer;</pre></td><td class="explain">MVC 扩展点：注册拦截器</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * Web 层配置：注册登录拦截器并声明受保护路径。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * &lt;p&gt;受保护路径集中写在这里，新增模块时只改这一处；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 公开页面（首页、作品、列表、详情、登录、注册）不受影响。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：启动时加载其中的 Bean。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WebConfig implements WebMvcConfigurer {</pre></td><td class="explain">Web 层配置：集中声明受保护路径。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> addInterceptors(InterceptorRegistry registry) {</pre></td><td class="explain">注册拦截器，由 Spring 调用。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> LoginInterceptor())</pre></td><td class="explain">挂上登录拦截器。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                .addPathPatterns("/cart", "/cart/**", "/orders", "/orders/**", "/profile", "/profile/**");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>LoginInterceptorTest.java<small>拦截测试 4 例 · 60 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/LoginInterceptorTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">自动配置 MockMvc，用于不起端口发请求</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">测试用假会话，可断言属性与失效</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">模拟 MVC 请求，直接调控制器并拿到渲染结果</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET 请求</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;</pre></td><td class="explain">断言重定向地址匹配模式</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline"> * 登录拦截测试：未登录被拦到登录页，已登录放行。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * &lt;p&gt;受保护页面本身在 M04/M05 才实现，这里不关心它们返回什么，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> * 只断言"有没有被重定向到登录页"。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">class</span> LoginInterceptorTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：每个用例前重建七张表。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">字段 mockMvc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @DisplayName("未登录访问购物车：跳登录并带上原地址")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">void</span> cartRedirectsToLogin() throws Exception {</pre></td><td class="explain">用例：未登录访问购物车被拦。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        mockMvc.perform(get("/cart"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Fcart*"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @DisplayName("未登录访问订单：同样被拦")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">void</span> ordersRedirectsToLogin() throws Exception {</pre></td><td class="explain">用例：未登录访问订单被拦。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        mockMvc.perform(get("/orders"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Forders*"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @DisplayName("已登录访问购物车：不再跳登录")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    <span class="kw">void</span> loggedInPassesThrough() throws Exception {</pre></td><td class="explain">用例：已登录放行（页面本身还没实现，所以是 404）。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        MockHttpSession session = <span class="kw">new</span> MockHttpSession();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        session.setAttribute("userId", 1L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">49</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(session))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    @DisplayName("公开页面不受拦截")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    <span class="kw">void</span> publicPagesAreOpen() throws Exception {</pre></td><td class="explain">用例：公开页面不受拦截。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        mockMvc.perform(get("/main")).andExpect(status().isOk());</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        mockMvc.perform(get("/login")).andExpect(status().isOk());</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M02-08-01 · 6 个文件、120 行。完整汇报见同目录 M03-04-拦截器.md。</footer>
+</body></html>

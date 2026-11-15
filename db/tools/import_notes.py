@@ -93,4 +93,11 @@ IMPORT_NOTES = {
     "import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl": "断言重定向目标",
     "import jakarta.servlet.http.HttpSession": "Servlet 会话对象，用来存放登录身份",
     "import org.springframework.mock.web.MockHttpSession": "测试用假会话，可断言属性与失效",
+    "import jakarta.servlet.http.HttpServletRequest": "Servlet 请求对象：取路径、查询串",
+    "import org.springframework.web.servlet.HandlerInterceptor": "Spring MVC 拦截器接口",
+    "import java.net.URLEncoder": "把原地址编码进 redirect 参数",
+    "import org.csu.mycartoonstore.web.interceptor.LoginInterceptor": "自定义登录拦截器",
+    "import org.springframework.web.servlet.config.annotation.InterceptorRegistry": "拦截器注册表",
+    "import org.springframework.web.servlet.config.annotation.WebMvcConfigurer": "MVC 扩展点：注册拦截器",
+    "import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern": "断言重定向地址匹配模式",
 }
