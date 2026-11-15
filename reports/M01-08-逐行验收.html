@@ -41,7 +41,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.testsupport;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.testsupport;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.testsupport 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.ClassPathResource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.support.EncodedResource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -73,13 +73,13 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 工具类，不允许实例化。 */</pre></td><td class="explain">注释：工具类，不允许实例化。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> TestSchema() {</pre></td><td class="explain">工具类，不允许实例化。</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    /** 删表 + 建表，供每个用例前调用，保证起点是空库。 */</pre></td><td class="explain">注释：删表 + 建表，供每个用例前调用，保证起点是空库。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> reset(DataSource dataSource) {</pre></td><td class="explain">删表 + 建表，供每个用例前调用，保证起点是空库。</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        dropTables(dataSource);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        runSchema(dataSource);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    /** 按外键依赖从子到父删除，避免 RESTRICT 阻塞。 */</pre></td><td class="explain">注释：按外键依赖从子到父删除，避免 RESTRICT 阻塞。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">void</span> dropTables(DataSource dataSource) {</pre></td><td class="explain">按外键依赖从子到父删除，避免 RESTRICT 阻塞。</td></tr>
@@ -87,11 +87,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>             Statement statement = connection.createStatement()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>            for (String table : DROP_ORDER) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                statement.execute("DROP TABLE IF EXISTS " + table);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        } catch (SQLException e) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            throw <span class="kw">new</span> IllegalStateException("清理测试库失败", e);</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
-<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">52</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    /** 执行 schema-test.sql 里的建表语句。 */</pre></td><td class="explain">注释：执行 schema-test.sql 里的建表语句。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">void</span> runSchema(DataSource dataSource) {</pre></td><td class="explain">执行 schema-test.sql 里的建表语句。</td></tr>
@@ -101,9 +101,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                    <span class="kw">new</span> EncodedResource(<span class="kw">new</span> ClassPathResource("sql/schema-test.sql"), StandardCharsets.UTF_8));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        } catch (SQLException e) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>            throw <span class="kw">new</span> IllegalStateException("初始化测试库失败", e);</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
-<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">
@@ -113,7 +113,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.support;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.support;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.support 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.testsupport.TestSchema;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -139,8 +139,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前执行，用来重置数据</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">void</span> resetSchema() {</pre></td><td class="explain">每个用例前重建测试库，避免测试之间互相污染。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        TestSchema.reset(dataSource);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s3">
@@ -150,7 +150,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
@@ -175,7 +175,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                Integer.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        assertThat(count).isEqualTo(7);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @DisplayName("建表后是空库，不含演示数据")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -184,7 +184,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        Integer users = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM store_user", Integer.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        assertThat(products).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        assertThat(users).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">36</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @DisplayName("生成列 parent_key 存在且是 STORED")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -194,8 +194,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                        + "WHERE table_schema = DATABASE() AND table_name = 'category' AND column_name = 'parent_key'",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                String.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        assertThat(extra).containsIgnoringCase("STORED GENERATED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s4">

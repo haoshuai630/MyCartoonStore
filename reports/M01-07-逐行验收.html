@@ -40,7 +40,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.catalog.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -81,7 +81,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Update("UPDATE product SET stock = stock - #{qty}, version = version + 1 "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{id} AND stock &gt;= #{qty}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">int</span> deductStock(@Param("id") Long id, @Param("qty") <span class="kw">int</span> qty);</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="productqueryjava">
@@ -91,7 +91,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.catalog.dto 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">Lombok：为字段生成 setter</td></tr>
@@ -124,7 +124,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">注释：偏移量（不参与执行）</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="productmapperxml">
@@ -217,7 +217,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -244,7 +244,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain">注释：购物车种类数，用于 20 种上限（不参与执行）</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">购物车种类数，用于 20 种上限</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="cartitemviewjava">
@@ -254,7 +254,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.dto;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.dto;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.dto 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">Lombok：为字段生成 setter</td></tr>
@@ -279,7 +279,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> Integer stock;</pre></td><td class="explain">字段 stock：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String productStatus;</pre></td><td class="explain">字段 productStatus：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> String categoryName;</pre></td><td class="explain">字段 categoryName：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="cartitemmapperxml">
@@ -321,7 +321,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.account.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.account.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.account.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -342,7 +342,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 锁用户行：同用户的购物车写操作与下单必须先拿这把锁 */</pre></td><td class="explain">注释：锁用户行：同用户的购物车写操作与下单必须先拿这把锁（不参与执行）</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE id = #{id} FOR UPDATE")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    StoreUser lockById(@Param("id") Long id);</pre></td><td class="explain">锁用户行：同用户的购物车写操作与下单必须先拿这把锁</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="salesordermapperjava">
@@ -352,7 +352,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.order.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -380,7 +380,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 支付凭证查重，生成 payment_no 时用 */</pre></td><td class="explain">注释：支付凭证查重，生成 payment_no 时用（不参与执行）</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE payment_no = #{paymentNo}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">int</span> countByPaymentNo(@Param("paymentNo") String paymentNo);</pre></td><td class="explain">支付凭证查重，生成 payment_no 时用</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="categorymapperjava">
@@ -390,7 +390,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.catalog.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -430,7 +430,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>             WHERE c2.parent_id = #{workId} AND pr.status = 'ON_SALE'</pre></td><td class="explain">限定到该作品，并且只算在售。</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            """)</pre></td><td class="explain">注解 SQL 结束。</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">int</span> countOnSaleByWork(<span class="kw">long</span> workId);</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="productimagemapperjava">
@@ -440,7 +440,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.catalog.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -451,7 +451,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductImageMapper <span class="kw">extends</span> BaseMapper&lt;ProductImage&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="salesorderitemmapperjava">
@@ -461,7 +461,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.mapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.order.mapper 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
@@ -472,7 +472,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderItemMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrderItem&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 </main>

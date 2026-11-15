@@ -51,6 +51,7 @@ def javadoc_above(lines, idx):
         break
     text = " ".join(block)
     text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip()
+    text = re.sub(r"<[^>]+>", "", text)
     return re.sub(r"\s+", " ", text)
 
 
@@ -74,7 +75,7 @@ def brace_notes(lines):
         before = depth
         depth += s.count("{") - s.count("}")
         if s == "}":
-            notes[i] = "结束类定义" if depth == 0 else ("结束方法" if depth == 1 else "结束内部代码块")
+            notes[i] = ("结构闭合：结束类定义；不产生新的业务行为。" if depth == 0 else ("结构闭合：结束方法；不产生新的业务行为。" if depth == 1 else "结构闭合：结束内部代码块；不产生新的业务行为。"))
     return notes
 
 
@@ -125,6 +126,8 @@ def make_java_explainer(lines):
             return "发起请求，后面几条断言检查渲染结果"
         if s == "}" and n in braces:
             return braces[n]
+        if s.startswith("package "):
+            return "包声明：本文件属于 " + s.rstrip(";").split()[-1] + " 包。"
         if s.startswith("import "):
             return IMPORT_NOTES.get(s.rstrip(";"), "")
         if s in ANNOTATION_NOTES or s.split("(")[0] in ANNOTATION_NOTES:

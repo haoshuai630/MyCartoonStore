@@ -112,7 +112,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.controller 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductDetail;</pre></td><td class="explain">详情页视图数据</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.CatalogService;</pre></td><td class="explain">商品查询服务：分类树、分页搜索、详情</td></tr>
@@ -134,7 +134,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> ProductController(CatalogService catalogService) {</pre></td><td class="explain">注入查询服务</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 按 id 查看商品详情 */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @GetMapping("/product/{id}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -142,8 +142,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        ProductDetail detail = catalogService.detail(id);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        model.addAttribute("detail", detail);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        <span class="kw">return</span> "product";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s3">
@@ -153,7 +153,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
@@ -193,7 +193,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                .andExpect(content().string(containsString("¥28.00")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                .andExpect(content().string(containsString("面包屑作品")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                .andExpect(content().string(containsString("单行本")));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">42</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    @DisplayName("有相册时渲染缩略图，无相册时只有封面")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -210,7 +210,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">55</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(withGallery).contains("thumbs");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(noGallery).doesNotContain("thumbs");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    @DisplayName("下架商品返回 404，不泄露存在性")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -220,7 +220,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">65</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", draftId))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    @DisplayName("不存在的 id 返回 404 而不是 500")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -228,16 +228,16 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", 999999))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .andExpect(status().isNotFound())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .andExpect(content().string(containsString("商品不存在或已下架")));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">77</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        <span class="kw">return</span> seedOnSaleProduct("DET-C01", "测试商品详情");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">81</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct(String sku, String name) {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory(sku.replace("-", ""));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        <span class="kw">return</span> insertProduct(sku, categoryId, name, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">86</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedCategory(String code) {</pre></td><td class="explain">造作品 + 单行本两级分类，返回二级 id</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, "面包屑作品" + code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
@@ -245,7 +245,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                code + "-COMIC", parentId, "单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code + "-COMIC");</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">94</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String name, String status) {</pre></td><td class="explain">插入商品并返回 id</td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, summary, description, cover_image, price, stock, status, sort_order) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
@@ -253,13 +253,13 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>                sku, categoryId, name, "一句话简介", "商品说明正文",</pre></td><td class="explain">对应 INSERT 的列值</td></tr>
 <tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                "images/products/" + sku + "/cover.svg", <span class="kw">new</span> BigDecimal("28.00"), 10, status, 1);</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.<span class="kw">class</span>, sku);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">102</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> addImage(<span class="kw">long</span> productId, <span class="kw">int</span> sortOrder, String path) {</pre></td><td class="explain">插入相册图</td></tr>
 <tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        jdbc.update("INSERT INTO product_image (product_id, image_path, sort_order) VALUES (?,?,?)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                productId, path, sortOrder);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 </main>

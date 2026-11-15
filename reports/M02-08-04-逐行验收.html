@@ -146,7 +146,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
@@ -191,7 +191,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(content().string(containsString("周边")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(content().string(containsString("C01")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                .andExpect(content().string(containsString("单行本1")));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">47</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @DisplayName("类型筛选：只要周边时不出现单行本")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -202,7 +202,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                .andExpect(content().string(containsString("M01")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .andExpect(content().string(not(containsString("C01"))));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">58</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    @DisplayName("分页：8 件商品，第 2 页只剩 2 件")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -220,7 +220,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThat(second).contains("第 2 / 2 页");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        assertThat(second).doesNotContain("C01");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">76</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @DisplayName("非法排序值返回 400，而不是静默降级")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -229,7 +229,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">81</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        mockMvc.perform(get("/category").param("sort", "PRICE"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(status().isBadRequest());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">85</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    @DisplayName("作品下拉能筛到只剩该作品商品")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -247,13 +247,13 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>                .andExpect(content().string(containsString("单行本1")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                .andExpect(content().string(not(containsString("别家商品"))));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">103</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> count(String body, String word) {</pre></td><td class="explain">统计子串出现次数，供断言使用。</td></tr>
 <tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        <span class="kw">int</span> n = 0, i = 0;</pre></td><td class="explain">计数器与游标</td></tr>
 <tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        while ((i = body.indexOf(word, i)) &gt;= 0) { n++; i += word.length(); }</pre></td><td class="explain">寻找下一次出现的位置</td></tr>
 <tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        <span class="kw">return</span> n;</pre></td><td class="explain">返回出现次数</td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">109</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seed() {</pre></td><td class="explain">造 1 个作品、2 个品类、8 件商品。</td></tr>
 <tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES ('T1', NULL, '作品一', 1)");</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
@@ -265,9 +265,9 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">117</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        for (<span class="kw">int</span> i = 1; i &lt;= 7; i++) {</pre></td><td class="explain">7 件单行本，配合每页 6 条刚好分成两页。</td></tr>
 <tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>            insertProduct(String.format("C%02d", i), comicId, "单行本" + i, "28.00", 10, "ON_SALE", i);</pre></td><td class="explain">循环插入 7 件单行本</td></tr>
-<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        insertProduct("M01", merchId, "周边M01", "58.00", 5, "ON_SALE", 8);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">123</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String name, String price, <span class="kw">int</span> stock,</pre></td><td class="explain">插入商品的辅助方法</td></tr>
 <tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>                               String status, <span class="kw">int</span> sortOrder) {</pre></td><td class="explain">商品插入参数的第二行：状态与排序。</td></tr>
@@ -275,8 +275,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
 <tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>                sku, categoryId, name, "测试简介", "images/products/" + sku + "/cover.svg",</pre></td><td class="explain">对应 INSERT 的列值</td></tr>
 <tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal(price), stock, status, sortOrder);</pre></td><td class="explain">价格用 BigDecimal 传入</td></tr>
-<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 </main>

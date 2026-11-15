@@ -89,7 +89,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.controller 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductSearchCommand;</pre></td><td class="explain">列表筛选参数对象，控制器直接接收查询参数</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.CatalogService;</pre></td><td class="explain">商品查询服务：分类树、分页搜索、详情</td></tr>
@@ -111,7 +111,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 构造器：注入查询服务，作品墙与作品页共用。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> WorksController(CatalogService catalogService) {</pre></td><td class="explain">构造器：注入查询服务，作品墙与作品页共用。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">     * 作品页：作品横幅 + 品类筛选 + 商品列表。</pre></td><td class="explain"></td></tr>
@@ -120,21 +120,21 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">     * 避免有人用 ?workId= 越权看别家作品。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @GetMapping("/works/{id}")</pre></td><td class="explain">作品页路由：路径里的 id 是作品（一级分类）。</td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, ProductSearchCommand command, Model model) {</pre></td><td class="explain">避免有人用 ?workId= 越权看别家作品。&lt;/p&gt; &lt;p&gt;路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖， 作品页：作品横幅 + 品类筛选 + 商品列表。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, ProductSearchCommand command, Model model) {</pre></td><td class="explain">避免有人用 ?workId= 越权看别家作品。 路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖， 作品页：作品横幅 + 品类筛选 + 商品列表。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        model.addAttribute("work", catalogService.work(id));  // 不存在或层级不对由 Service 抛 404，控制器不重复判断。</pre></td><td class="explain">不存在或层级不对由 Service 抛 404，控制器不重复判断。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        command.setWorkId(String.valueOf(id));  // 用路径 id 覆盖参数里的 workId，防止 ?workId=2 越权看别家作品。</pre></td><td class="explain">用路径 id 覆盖参数里的 workId，防止 ?workId=2 越权看别家作品。</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        model.addAttribute("page", catalogService.search(command));</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        model.addAttribute("query", command);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        <span class="kw">return</span> "work";  // 视图名对应 templates/work.html。</pre></td><td class="explain">视图名对应 templates/work.html。</td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">    /** 作品墙：每部作品一张卡，带品类数与在售数 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @GetMapping("/works")</pre></td><td class="explain">作品墙路由。</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">public</span> String list(Model model) {</pre></td><td class="explain">作品墙：每部作品一张卡，带品类数与在售数</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        model.addAttribute("works", catalogService.works());</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> "works";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s3">
@@ -144,7 +144,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
@@ -189,7 +189,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(content().string(containsString("2 个品类")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(content().string(containsString("2 件在售")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                .andExpect(content().string(containsString("共 1 部")));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">47</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @DisplayName("空库时作品墙显示空状态")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -198,19 +198,19 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        mockMvc.perform(get("/works"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andExpect(content().string(containsString("还没有任何作品")));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">56</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre class="cmtline">    /** 插入一部作品（一级分类），返回 id。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedWork(String code, String name) {</pre></td><td class="explain">插入一部作品（一级分类），返回 id。</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, name);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">62</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">    /** 在某部作品下插入一个品类，返回 id。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedCategory(String code, <span class="kw">long</span> parentId, String name) {</pre></td><td class="explain">在某部作品下插入一个品类，返回 id。</td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)", code, parentId, name);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">68</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre class="cmtline">    /** 插入一件商品，状态由用例指定。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String name, String status) {</pre></td><td class="explain">插入商品的辅助方法</td></tr>
@@ -218,8 +218,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                sku, categoryId, name, "简介", "images/products/" + sku + "/cover.svg",</pre></td><td class="explain">对应 INSERT 的列值</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal("28.00"), 10, status, 1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 </main>

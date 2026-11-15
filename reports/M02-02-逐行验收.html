@@ -212,7 +212,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.controller 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.CatalogService;</pre></td><td class="explain">商品查询服务：分类树、分页搜索、详情</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">Spring MVC 注解，标记控制器</td></tr>
@@ -235,7 +235,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> HomeController(CatalogService catalogService) {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 根路径与 /main 共用首页视图，装配作品入口与两个商品栏目 */</pre></td><td class="explain">注释：根路径与 /main 共用首页视图，装配作品入口与两个商品栏目（不参与执行）</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @GetMapping({"/", "/main"})</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -244,8 +244,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        model.addAttribute("newest", catalogService.newest(NEWEST_LIMIT));</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        model.addAttribute("featured", catalogService.featured(FEATURED_LIMIT));</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        <span class="kw">return</span> "main";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s4">
@@ -255,7 +255,7 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
@@ -291,7 +291,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                .andExpect(content().string(containsString("漫屿")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                .andExpect(content().string(containsString("/css/store.css")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                .andExpect(content().string(containsString("MANGA ISLE")));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @DisplayName("SVG 封面能作为静态资源返回")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -299,7 +299,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        mockMvc.perform(get("/images/products/STARLINE-C01/cover.svg"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(content().contentTypeCompatibleWith("image/svg+xml"));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">46</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("样式表能返回且非空")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
@@ -307,8 +307,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        mockMvc.perform(get("/css/store.css"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .andExpect(content().contentTypeCompatibleWith("text/css"));</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 </main>
