@@ -52,16 +52,16 @@ VOLUME_SUM = [
 
 # 周边：按行业通用品类分组（谷子/电商口径），名称里的 {w} 会替换成作品名
 MERCH_GROUPS = [
-    ("BADGE", "徽章", 2),
-    ("STAND", "亚克力立牌", 3),
-    ("CHARM", "挂件钥匙扣", 4),
-    ("PAPER", "色纸明信片", 5),
-    ("TICKET", "镭射票", 6),
-    ("PLUSH", "毛绒抱枕", 7),
-    ("FIGURE", "手办模型", 8),
-    ("ARTBOOK", "画集设定集", 9),
-    ("APPAREL", "服装包袋", 10),
-    ("STATIONERY", "文具杂货", 11),
+    ("BADGE", "徽章", 1),
+    ("STAND", "亚克力立牌", 2),
+    ("CHARM", "挂件钥匙扣", 3),
+    ("PAPER", "色纸明信片", 4),
+    ("TICKET", "镭射票", 5),
+    ("PLUSH", "毛绒抱枕", 6),
+    ("FIGURE", "手办模型", 7),
+    ("ARTBOOK", "画集设定集", 8),
+    ("APPAREL", "服装包袋", 9),
+    ("STATIONERY", "文具杂货", 10),
 ]
 
 # 每个品类 1-2 件：(名称模板, 价格, 库存, 状态)
@@ -141,6 +141,10 @@ def main() -> None:
 
     out = []
     out.append("-- MyCartoonStore 实验一：表结构与演示数据（独立完整脚本）")
+    out.append("-- 可重复导入：先删库再建库，避免表已存在 / 主键冲突")
+    out.append("DROP DATABASE IF EXISTS MyCartoonStore;")
+    out.append("CREATE DATABASE MyCartoonStore DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;")
+    out.append("USE MyCartoonStore;")
     out.append("-- 由 db/tools/gen_demo_sql.py 生成，请勿手工修改；改数据请改生成器后重跑。")
     out.append("-- 与 01-schema.sql 二选一，不按编号依次执行；此文件已包含完整表结构。")
     out.append("-- 在空的 MyCartoonStore 库中首次执行；不 DROP、不清空、不覆盖已有表。")
@@ -180,7 +184,7 @@ def main() -> None:
     for idx, ip in enumerate(IPS):
         secondary.append(f"({100 + idx * 11}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")
         for group, cname, order in MERCH_GROUPS:
-            secondary.append(f"({100 + idx * 11 + order}, '{ip['code']}-{group}', {CATEGORY_IDS[ip['code']]}, '{cname}', {order})")
+            secondary.append(f"({100 + idx * 11 + order}, '{ip['code']}-{group}', {CATEGORY_IDS[ip['code']]}, '{cname}', {order + 1})")
     out.append(",\n".join(secondary) + ";")
     out.append("")
 
