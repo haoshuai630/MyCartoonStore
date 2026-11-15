@@ -60,7 +60,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>            &lt;<span class="kw">b</span> th:text="${detail.product().name}"&gt;商品&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束分页。</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="product-detail"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="product-detail"&gt;</pre></td><td class="explain">详情两栏：左相册、右购买信息。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="gallery"&gt;</pre></td><td class="explain">左侧相册区</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">img</span> class="gallery-main" th:src="@{${detail.product().coverImage}}"</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
@@ -90,7 +90,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="hint"&gt;购物车功能在 M04 开放，当前按钮为占位。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">明说占位，避免用户以为坏了</td></tr>
 <tr class="gap"><td class="line">50</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="desc"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="desc"&gt;</pre></td><td class="explain">商品说明区，长描述放这里。</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;商品说明&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">长描述单独一块，列表页不展示</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                    &lt;<span class="kw">p</span> th:text="${detail.product().description}"&gt;描述&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>

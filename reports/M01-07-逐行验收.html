@@ -44,8 +44,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Update;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">给 Mapper 参数起名，XML 里用 #{名字} 引用</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Update;</pre></td><td class="explain">注解 SQL：把更新语句写在方法上</td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductQuery;</pre></td><td class="explain">Mapper 查询条件</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
@@ -227,10 +227,10 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">给 Mapper 参数起名，XML 里用 #{名字} 引用</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">注解 SQL：把查询直接写在方法上</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.entity.CartItem;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">购物车联表视图：商品当前价、库存、分类名</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.entity.CartItem;</pre></td><td class="explain">购物车条目实体</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">11</td><td></td><td></td></tr>
@@ -331,9 +331,9 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">给 Mapper 参数起名，XML 里用 #{名字} 引用</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">注解 SQL：把查询直接写在方法上</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">用户实体（登录、角色、状态）</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 账号 Mapper。</pre></td><td class="explain">注释：账号 Mapper。（不参与执行）</td></tr>
@@ -362,9 +362,9 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">给 Mapper 参数起名，XML 里用 #{名字} 引用</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">注解 SQL：把查询直接写在方法上</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单实体</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 订单 Mapper。</pre></td><td class="explain">注释：订单 Mapper。（不参与执行）</td></tr>
@@ -471,7 +471,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrderItem;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrderItem;</pre></td><td class="explain">订单明细实体</td></tr>
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。</pre></td><td class="explain">注释：订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。（不参与执行）</td></tr>

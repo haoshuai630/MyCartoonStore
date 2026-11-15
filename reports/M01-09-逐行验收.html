@@ -43,24 +43,24 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">购物车联表视图：商品当前价、库存、分类名</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">购物车数据访问</td></tr>
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品数据访问</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">订单数据访问</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DataAccessException;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DataAccessException;</pre></td><td class="explain">Spring 数据访问异常基类，用来断言约束拒绝</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">唯一键冲突异常</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">AssertJ 断言：期望抛出异常</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain"></td></tr>

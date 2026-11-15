@@ -55,7 +55,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">14</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">            &lt;!-- 筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">form</span> class="filter-bar" th:action="@{/category}" method="get"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">form</span> class="filter-bar" th:action="@{/category}" method="get"&gt;</pre></td><td class="explain">筛选表单：作品下拉 + 关键字一次提交。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                &lt;label class="field"&gt;</pre></td><td class="explain">筛选字段：字段名在上，控件在下。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;作品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">字段名：说明这个下拉用来选作品。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;select name="workId"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -72,7 +72,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;关键字&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">字段名：搜索输入框的标题。</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;<span class="kw">input</span> name="keyword" th:value="${query.keyword}" placeholder="商品名称"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;<span class="kw">button</span> class="btn btn-primary" type="submit"&gt;筛选&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;<span class="kw">button</span> class="btn btn-primary" type="submit"&gt;筛选&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">提交筛选，保留已选的类型与排序。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;重置&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr class="gap"><td class="line">36</td><td></td><td></td></tr>
@@ -234,7 +234,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">首页栏目：新品上架 / 精选推荐</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap error-box"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">h1</span>&gt;出了点问题&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">h1</span>&gt;出了点问题&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">错误页标题，弱化情绪、只陈述事实。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="error-message" th:text="${message}"&gt;错误信息&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">p</span>&gt;&lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/main}"&gt;回首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>               &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;去逛逛&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>

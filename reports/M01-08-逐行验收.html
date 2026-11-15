@@ -43,15 +43,15 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.testsupport;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.testsupport 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.ClassPathResource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.support.EncodedResource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.datasource.init.ScriptUtils;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.ClassPathResource;</pre></td><td class="explain">读取 classpath 下的资源文件</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.support.EncodedResource;</pre></td><td class="explain">指定编码读取资源，避免中文乱码</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.datasource.init.ScriptUtils;</pre></td><td class="explain">执行 SQL 脚本（建表语句）</td></tr>
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.nio.charset.StandardCharsets;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.sql.Connection;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.sql.SQLException;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.sql.Statement;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">数据源接口，测试里用来拿连接</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.nio.charset.StandardCharsets;</pre></td><td class="explain">字符集常量，明确按 UTF-8 读脚本</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.sql.Connection;</pre></td><td class="explain">JDBC 连接</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.sql.SQLException;</pre></td><td class="explain">JDBC 异常类型</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.sql.Statement;</pre></td><td class="explain">JDBC 语句对象，用来执行 DDL</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 测试库初始化：每次用例前把七张表删掉重建，保证测试之间互不影响。</pre></td><td class="explain"></td></tr>
@@ -115,13 +115,13 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.support;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.support 包。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.testsupport.TestSchema;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.testsupport.TestSchema;</pre></td><td class="explain">测试库工具：删表 + 建表</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">JUnit 5 注解，每个用例前执行</td></tr>
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.test.context.SpringBootTest;</pre></td><td class="explain">启动完整 Spring 上下文（含数据源）</td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.context.ActiveProfiles;</pre></td><td class="explain">指定 test 配置，连测试库</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">数据源接口，测试里用来拿连接</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 集成测试基类：启动完整用户端上下文 + 使用 test 配置 + 每个用例前重建七张表。</pre></td><td class="explain"></td></tr>
