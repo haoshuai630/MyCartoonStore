@@ -56,8 +56,7 @@ def make_html_explainer(lines: list[str]):
         if s in ("</body>", "</html>"):
             return "文档结束"
         if s.startswith("<!--"):
-            body = re.sub(r"^<!--\s*|\s*-->$", "", s).strip()
-            return ("注释：" + body + "（不参与渲染）") if body else "注释：分隔用，不参与渲染"
+            return ""
         if 'class="wrap"' in s or 'class="wrap ' in s:
             return "内容宽度容器：统一左右留白与最大宽度"
         if 'class="section-head"' in s:
@@ -129,6 +128,8 @@ def main() -> None:
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
             cls = ' class="cmtline"' if line.lstrip().startswith(("<!--", "//")) else ""
+            is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
+            text = "" if is_cmt else (fn(i, line) or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre{cls}>{hi(line)}</pre></td>'
@@ -165,8 +166,6 @@ def main() -> None:
 <footer>2026-11-15 · M02-02 · 4 个文件、{total} 行。完整汇报见同目录 M02-02-布局资源.md。</footer>
 </body></html>
 """
-    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
-    doc = doc.replace('<td class="explain">—</td>', '<td class="explain">本行参与结构或样式组织，不产生业务行为。</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 

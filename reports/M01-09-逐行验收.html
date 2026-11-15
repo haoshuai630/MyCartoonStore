@@ -43,34 +43,34 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品数据访问</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DataAccessException;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DataAccessException;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain">注释：M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * &lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，</pre></td><td class="explain">注释：&lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> * 不用 Mock 证明 SQL 能跑。&lt;/p&gt;</pre></td><td class="explain">注释：不用 Mock 证明 SQL 能跑。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre> * &lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，</pre></td><td class="explain">注释：&lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre> * 不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;</pre></td><td class="explain">注释：不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> DataAccessTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
@@ -87,7 +87,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">44</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @DisplayName("商品 SKU 唯一：重复插入被拒")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">void</span> skuMustBeUnique() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">void</span> skuMustBeUnique() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("DUPTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        insertProduct("DUP-001", categoryId, "28.00", 10, "ON_SALE", 100);</pre></td><td class="explain">准备商品 DUP-001：¥28.00，库存 10，ON_SALE，排序 100</td></tr>
 <tr class="gap"><td class="line">50</td><td></td><td></td></tr>
@@ -97,7 +97,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">54</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @DisplayName("价格必须大于 0：CHECK 拒绝 0 元")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">void</span> priceMustBePositive() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">void</span> priceMustBePositive() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("PRICETEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThatThrownBy(() -&gt; insertProduct("BAD-PRICE", categoryId, "0.00", 1, "ON_SALE", 100))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -107,7 +107,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">64</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @DisplayName("同一用户同一商品在购物车里只能有一条")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">void</span> cartUniquePerUserProduct() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">void</span> cartUniquePerUserProduct() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-cart");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("CARTTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("CART-001", categoryId, "28.00", 10, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
@@ -121,7 +121,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">78</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @DisplayName("有子分类的一级分类不能删除：外键 RESTRICT 拒绝")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> cannotDeleteCategoryWithChildren() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> cannotDeleteCategoryWithChildren() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        <span class="kw">long</span> primaryId = insertPrimaryCategory("CAT-DEL", "作品-CATDEL");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        insertSecondaryCategory("CAT-DEL-COMIC", primaryId, "单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">84</td><td></td><td></td></tr>
@@ -132,7 +132,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">89</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    @DisplayName("明细行金额必须等于单价×数量：CHECK 拒绝不一致")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">void</span> lineAmountMustMatchUnitPriceTimesQuantity() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">void</span> lineAmountMustMatchUnitPriceTimesQuantity() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-order");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("ORDTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("ORD-001", categoryId, "50.00", 10, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
@@ -149,7 +149,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">106</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    @DisplayName("已支付订单必须有支付时间：CHECK 拒绝半套支付信息")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    <span class="kw">void</span> paidOrderMustHavePaidAt() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    <span class="kw">void</span> paidOrderMustHavePaidAt() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-paid");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">111</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
@@ -163,7 +163,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">120</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    @DisplayName("下架商品不会被首页查询返回")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    <span class="kw">void</span> draftProductIsInvisible() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    <span class="kw">void</span> draftProductIsInvisible() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("DRAFTTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        insertProduct("HIDDEN-01", categoryId, "28.00", 10, "DRAFT", 1);</pre></td><td class="explain">准备商品 HIDDEN-01：¥28.00，库存 10，DRAFT，排序 1</td></tr>
 <tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        insertProduct("VISIBLE-01", categoryId, "28.00", 10, "ON_SALE", 1);</pre></td><td class="explain">准备商品 VISIBLE-01：¥28.00，库存 10，ON_SALE，排序 1</td></tr>
@@ -175,7 +175,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">132</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    @DisplayName("精选推荐按 sort_order 升序返回")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    <span class="kw">void</span> featuredOrderedBySortOrder() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    <span class="kw">void</span> featuredOrderedBySortOrder() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("FEATURED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>        insertProduct("S-3", categoryId, "28.00", 10, "ON_SALE", 3);</pre></td><td class="explain">准备商品 S-3：¥28.00，库存 10，ON_SALE，排序 3</td></tr>
 <tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        insertProduct("S-1", categoryId, "28.00", 10, "ON_SALE", 1);</pre></td><td class="explain">准备商品 S-1：¥28.00，库存 10，ON_SALE，排序 1</td></tr>
@@ -189,7 +189,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">146</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    @DisplayName("扣库存：足够时扣减并升版，不足时影响 0 行")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">void</span> deductStockRespectsInventory() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">void</span> deductStockRespectsInventory() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("STOCKTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("STOCK-01", categoryId, "28.00", 1, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">152</td><td></td><td></td></tr>
@@ -204,7 +204,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">161</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>    @DisplayName("购物车视图联表取到商品当前价格与库存")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    <span class="kw">void</span> cartViewJoinsCurrentPriceAndStock() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    <span class="kw">void</span> cartViewJoinsCurrentPriceAndStock() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-view");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("VIEWTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("VIEW-01", categoryId, "28.00", 7, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
@@ -222,7 +222,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">179</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>    @DisplayName("订单号查重：不存在返回 0，存在返回 1")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    <span class="kw">void</span> countByOrderNoWorks() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    <span class="kw">void</span> countByOrderNoWorks() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-count");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        assertThat(salesOrderMapper.countByOrderNo("NOPE-1")).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">185</td><td></td><td></td></tr>
@@ -271,7 +271,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertOrder(String orderNo, <span class="kw">long</span> userId, String status, String total) {</pre></td><td class="explain">插入一张订单（不含明细），返回 id。</td></tr>
 <tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>                        + "receiver_phone, receiver_address) VALUES (?,?,?,?,?,?,?)",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>                orderNo, userId, status, <span class="kw">new</span> BigDecimal(total), "收件人", "13800000000", "测试地址");</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>                orderNo, userId, status, <span class="kw">new</span> BigDecimal(total), "收件人", "13800000000", "测试地址");</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM sales_order WHERE order_no = ?", Long.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>

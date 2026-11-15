@@ -51,7 +51,8 @@ def main() -> None:
             if not line.strip():
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
-            text = MANUAL.get((title, line.strip())) or fn(i, line) or "本行参与结构或样式组织，不产生业务行为。"
+            is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
+            text = "" if is_cmt else (fn(i, line) or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre>{base.hi_java(line)}</pre></td>'
@@ -91,7 +92,6 @@ def main() -> None:
 完整汇报见同目录 M02-01-查询服务.md。</footer>
 </body></html>
 """
-    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 

@@ -85,7 +85,7 @@ footer{color:#536176;font-size:13px}
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
 <tr class="gap"><td class="line">313</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre class="cmtline">-- 4. 相册：100 条 = 20 件×3 张 + 20 件×2 张；另有 20 件无相册（用于回退封面）</pre></td><td class="explain">相册段标题：100 条 = 20 件×3 张 + 20 件×2 张，另 20 件无相册。</td></tr>
+<tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre class="cmtline">-- 4. 相册：100 条 = 20 件×3 张 + 20 件×2 张；另有 20 件无相册（用于回退封面）</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="315"><td class="line">315</td><td class="code"><pre><span class="kw">INSERT</span> <span class="kw">INTO</span> product_image (product_id, image_path, alt_text, sort_order) <span class="kw">VALUES</span></pre></td><td class="explain">相册段：product_id 用 SKU 子查询，不依赖自增顺序。</td></tr>
 <tr tabindex="0" data-line="316"><td class="line">316</td><td class="code"><pre>((<span class="kw">SELECT</span> id <span class="kw">FROM</span> product <span class="kw">WHERE</span> sku='STARLINE-C01'), 'images/products/STARLINE-C01/1.svg', '《星轨列车》第1卷 图1', 1),</pre></td><td class="explain">STARLINE-C01 第 1 张：images/products/STARLINE-C01/1.svg（alt「《星轨列车》第1卷 图1」）</td></tr>
 <tr tabindex="0" data-line="317"><td class="line">317</td><td class="code"><pre>((<span class="kw">SELECT</span> id <span class="kw">FROM</span> product <span class="kw">WHERE</span> sku='STARLINE-C01'), 'images/products/STARLINE-C01/2.svg', '《星轨列车》第1卷 图2', 2),</pre></td><td class="explain">STARLINE-C01 第 2 张：images/products/STARLINE-C01/2.svg（alt「《星轨列车》第1卷 图2」）</td></tr>

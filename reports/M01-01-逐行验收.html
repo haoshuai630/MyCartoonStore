@@ -40,13 +40,13 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre class="cmtline">-- MyCartoonStore 实验一：仅表结构（不含业务数据）</pre></td><td class="explain">标题：仅表结构，不含数据；库名已改为 MyCartoonStore。</td></tr>
-<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre class="cmtline">-- 七张表的结构、字段、约束、索引沿用课程 MyPetStore 基线，仅库名与注释本地化。</pre></td><td class="explain">新增行：声明 DDL 与课程基线一致，只改库名与注释。</td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre class="cmtline">-- 适用：MySQL 8.0.16+ / 8.4，InnoDB，utf8mb4。</pre></td><td class="explain">适用版本；本机 8.4.9 实测可执行。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre class="cmtline">-- 与 02-schema-with-demo.sql 二选一，不按编号依次执行。</pre></td><td class="explain">两个脚本二选一，不能依次执行。</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">-- 在空的 MyCartoonStore 库中首次执行；不 DROP、不清空、不覆盖已有表。</pre></td><td class="explain">空库首次执行；脚本不 DROP 任何数据。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">-- 已有同名表时会报错，请检查目标数据库，不要使用 mysql --force 跳过错误。</pre></td><td class="explain">已有同名表会报错，不要用 --force 跳过。</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">-- 本文件不创建数据库账号，不配置应用密码，也不会由应用启动时自动执行。</pre></td><td class="explain">脚本不建账号、不配密码、不被应用自动执行。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre class="cmtline">-- MyCartoonStore 实验一：仅表结构（不含业务数据）</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre class="cmtline">-- 七张表的结构、字段、约束、索引沿用课程 MyPetStore 基线，仅库名与注释本地化。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre class="cmtline">-- 适用：MySQL 8.0.16+ / 8.4，InnoDB，utf8mb4。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre class="cmtline">-- 与 02-schema-with-demo.sql 二选一，不按编号依次执行。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">-- 在空的 MyCartoonStore 库中首次执行；不 DROP、不清空、不覆盖已有表。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">-- 已有同名表时会报错，请检查目标数据库，不要使用 mysql --force 跳过错误。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">-- 本文件不创建数据库账号，不配置应用密码，也不会由应用启动时自动执行。</pre></td><td class="explain"></td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">SET</span> <span class="kw">NAMES</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_0900_ai_ci;</pre></td><td class="explain">客户端字符集与排序规则。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">SET</span> <span class="kw">SESSION</span> time_zone = '+08:00';</pre></td><td class="explain">会话时区，业务时间按东八区解释。</td></tr>
@@ -55,9 +55,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    CHARACTER <span class="kw">SET</span> utf8mb4 <span class="kw">COLLATE</span> utf8mb4_0900_ai_ci;</pre></td><td class="explain">库字符集与排序规则。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">USE</span> MyCartoonStore;</pre></td><td class="explain">后续 DDL 落在这个库。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">-- ===== 七张表的统一结构开始 =====</pre></td><td class="explain">分段标记：七张表结构开始。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">-- ===== 七张表的统一结构开始 =====</pre></td><td class="explain"></td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">-- 1. 教学账号：登录身份与普通用户/管理员角色。</pre></td><td class="explain">表 1：教学账号：登录身份与普通用户/管理员角色</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">-- 1. 教学账号：登录身份与普通用户/管理员角色。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> store_user (</pre></td><td class="explain">建表 store_user</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span> <span class="kw">COMMENT</span> '内部主键，Java Long',</pre></td><td class="explain">id：内部主键，Java Long</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    username VARCHAR(50) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">COMMENT</span> '登录名，创建后不修改，不区分大小写唯一',</pre></td><td class="explain">username：登录名，创建后不修改，不区分大小写唯一</td></tr>
@@ -78,8 +78,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">CONSTRAINT</span> ck_user_status <span class="kw">CHECK</span> (status IN ('ENABLED', 'DISABLED'))</pre></td><td class="explain">CHECK 约束 ck_user_status</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='用户及管理员账号';</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">-- 2. 两级分类：parent_id为空表示一级；二级必须指向一级，由Service校验。</pre></td><td class="explain">CHECK 条件续行</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">-- parent_key是生成列：插入/更新实体时不要写入它。</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">-- 2. 两级分类：parent_id为空表示一级；二级必须指向一级，由Service校验。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">-- parent_key是生成列：插入/更新实体时不要写入它。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> category (</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    code VARCHAR(32) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">COMMENT</span> '全局唯一编码，创建后不修改',</pre></td><td class="explain">CHECK 条件续行</td></tr>
@@ -100,7 +100,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">CONSTRAINT</span> ck_category_sort <span class="kw">CHECK</span> (sort_order &gt;= 0)</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='固定两级商品分类';</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr class="gap"><td class="line">60</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">-- 3. 一个商品对应一个可销售SKU，不做多规格；下架代替删除。</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">-- 3. 一个商品对应一个可销售SKU，不做多规格；下架代替删除。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> product (</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    sku VARCHAR(40) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">COMMENT</span> '唯一销售编码，创建后不修改',</pre></td><td class="explain">CHECK 条件续行</td></tr>
@@ -132,7 +132,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    <span class="kw">CONSTRAINT</span> ck_product_version <span class="kw">CHECK</span> (version &gt;= 0)</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='商品及可销售库存';</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr class="gap"><td class="line">92</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre class="cmtline">-- 4. 图片相册与封面分开；多个商品可复用相同的教学图片。</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre class="cmtline">-- 4. 图片相册与封面分开；多个商品可复用相同的教学图片。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> product_image (</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    product_id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
@@ -147,7 +147,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    <span class="kw">CONSTRAINT</span> ck_image_sort <span class="kw">CHECK</span> (sort_order &gt;= 0)</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='商品详情相册';</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr class="gap"><td class="line">107</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre class="cmtline">-- 5. 登录用户的持久购物车：价格不存这里；购物车不占库存。</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre class="cmtline">-- 5. 登录用户的持久购物车：价格不存这里；购物车不占库存。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> cart_item (</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    user_id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
@@ -167,7 +167,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    <span class="kw">CONSTRAINT</span> ck_cart_version <span class="kw">CHECK</span> (version &gt;= 0)</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='按用户持久化的购物车条目';</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr class="gap"><td class="line">127</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre class="cmtline">-- 6. 订单主表：模拟付款成功即PAID（待发货），没有真实支付渠道或退款。</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre class="cmtline">-- 6. 订单主表：模拟付款成功即PAID（待发货），没有真实支付渠道或退款。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales_order (</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span>,</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    order_no VARCHAR(40) <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">COMMENT</span> '服务端生成的唯一展示订单号',</pre></td><td class="explain">CHECK 条件续行</td></tr>
@@ -229,7 +229,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>    )</pre></td><td class="explain">约束结束</td></tr>
 <tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='订单及收货、模拟支付信息';</pre></td><td class="explain">表选项（InnoDB/utf8mb4）；表注释「订单及收货、模拟支付信息」</td></tr>
 <tr class="gap"><td class="line">189</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre class="cmtline">-- 7. 订单明细：保留成交时快照，不随商品后续变化而更新。</pre></td><td class="explain">表 7：订单明细：保留成交时快照，不随商品后续变化而更新</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre class="cmtline">-- 7. 订单明细：保留成交时快照，不随商品后续变化而更新。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre><span class="kw">CREATE</span> <span class="kw">TABLE</span> sales_order_item (</pre></td><td class="explain">建表 sales_order_item</td></tr>
 <tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>    id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span> <span class="kw">AUTO_INCREMENT</span>,</pre></td><td class="explain">列定义</td></tr>
 <tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>    order_id BIGINT <span class="kw">NOT</span> <span class="kw">NULL</span>,</pre></td><td class="explain">列定义</td></tr>
@@ -255,11 +255,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>    <span class="kw">CONSTRAINT</span> ck_order_item_amount <span class="kw">CHECK</span> (line_amount &gt; 0 <span class="kw">AND</span> line_amount = unit_price * quantity)</pre></td><td class="explain">CHECK 约束 ck_order_item_amount</td></tr>
 <tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>) <span class="kw">ENGINE</span>=InnoDB <span class="kw">DEFAULT</span> <span class="kw">CHARSET</span>=utf8mb4 <span class="kw">COLLATE</span>=utf8mb4_0900_ai_ci <span class="kw">COMMENT</span>='订单商品快照与金额明细';</pre></td><td class="explain">CHECK 条件续行</td></tr>
 <tr class="gap"><td class="line">215</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre class="cmtline">-- ===== 七张表的统一结构结束 =====</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre class="cmtline">-- ===== 七张表的统一结构结束 =====</pre></td><td class="explain"></td></tr>
 <tr class="gap"><td class="line">217</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre class="cmtline">-- Service仍需保证：只允许二级分类归属商品、禁止三级/循环分类、角色与所有权、</pre></td><td class="explain">CHECK 条件续行</td></tr>
-<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre class="cmtline">-- 购物车最多20种、用户行锁、库存和version更新、状态迁移、订单合计等于明细合计。</pre></td><td class="explain">CHECK 条件续行</td></tr>
-<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre class="cmtline">-- 下单的订单/明细/扣库存/删除结算条目须同一事务，不由触发器自动完成。</pre></td><td class="explain">CHECK 条件续行</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre class="cmtline">-- Service仍需保证：只允许二级分类归属商品、禁止三级/循环分类、角色与所有权、</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre class="cmtline">-- 购物车最多20种、用户行锁、库存和version更新、状态迁移、订单合计等于明细合计。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre class="cmtline">-- 下单的订单/明细/扣库存/删除结算条目须同一事务，不由触发器自动完成。</pre></td><td class="explain"></td></tr>
 </tbody></table>
 </section>
 </main>

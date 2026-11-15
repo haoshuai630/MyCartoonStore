@@ -115,11 +115,11 @@ def make_java_explainer(lines):
         if s.startswith('+ "VALUES'):
             return "SQL 续行：占位符与列数一一对应"
         if s == "/**":
-            return "注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。"
+            return ""
         if s == "*/":
-            return "注释块结束：说明到此为止，下一行才是真正的声明或语句。"
+            return ""
         if s == "*":
-            return "注释续行：继续上一行的说明，不参与执行。"
+            return ""
         if "mockMvc.perform(" in s:
             return "发起请求，后面几条断言检查渲染结果"
         if s == "}" and n in braces:

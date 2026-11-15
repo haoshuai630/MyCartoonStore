@@ -89,8 +89,6 @@ def javadoc_above(lines: list[str], idx: int) -> str:
             i -= 1
             continue
         break
-    text = " ".join(block) or "本行参与结构或样式组织，不产生业务行为。"
-    text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip() or "本行参与结构或样式组织，不产生业务行为。"
     return re.sub(r"\s+", " ", text)
 
 
@@ -301,6 +299,8 @@ def main() -> None:
             e = fn(i, line)
             cls = ' class="cmtline"' if line.lstrip().startswith(("//", "<!--")) else ""
             code = hi_java(line) if kind == "java" else hi_xml(line)
+            is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
+            text = "" if is_cmt else (fn(i, line) or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre{cls}>{code}</pre></td>'
@@ -338,8 +338,6 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 完整汇报见同目录 M01-07-Mapper.md。</footer>
 </body></html>
 """
-    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
-    doc = doc.replace('<td class="explain">—</td>', '<td class="explain">本行参与结构或样式组织，不产生业务行为。</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total_rows}")
 

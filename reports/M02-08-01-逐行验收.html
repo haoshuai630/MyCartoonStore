@@ -42,11 +42,11 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre class="cmtline"> * 作品墙的一张卡片：一级分类 + 它下面的品类数与在售商品数。</pre></td><td class="explain">注释：作品墙的一张卡片：一级分类 + 它下面的品类数与在售商品数。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline"> * &lt;p&gt;用 SQL 一次算出来，避免模板里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;用 SQL 一次算出来，避免模板里为每部作品再查两次库。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre class="cmtline"> * 作品墙的一张卡片：一级分类 + 它下面的品类数与在售商品数。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline"> * &lt;p&gt;用 SQL 一次算出来，避免模板里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">public</span> record WorkSummary(<span class="kw">long</span> id, String code, String name, <span class="kw">int</span> categoryCount, <span class="kw">int</span> productCount) {</pre></td><td class="explain">&lt;p&gt;用 SQL 一次算出来，避免模板里为每部作品再查两次库。&lt;/p&gt; 作品墙的一张卡片：一级分类 + 它下面的品类数与在售商品数。</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -64,9 +64,9 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">4</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> * 作品页头部：作品本身、它的品类列表、在售商品数。</pre></td><td class="explain">注释：作品页头部：作品本身、它的品类列表、在售商品数。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> * 作品页头部：作品本身、它的品类列表、在售商品数。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">public</span> record WorkDetail(Category work, List&lt;Category&gt; categories, <span class="kw">int</span> productCount) {</pre></td><td class="explain">作品页头部：作品本身、它的品类列表、在售商品数。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -88,17 +88,17 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">注释：分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">     * 作品墙数据：每个一级分类带上品类数与在售商品数。</pre></td><td class="explain">注释：作品墙数据：每个一级分类带上品类数与在售商品数。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">     * &lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">     * 作品墙数据：每个一级分类带上品类数与在售商品数。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">     * &lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            SELECT p.id AS id, p.code AS code, p.name AS name,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                   (SELECT COUNT(*) FROM category c WHERE c.parent_id = p.id) AS category_count,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -111,7 +111,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            """)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    List&lt;WorkSummary&gt; selectWorkSummaries();</pre></td><td class="explain">作品墙取数：品类数与在售商品数用子查询一次算完</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 某部作品的在售商品数（详情页横幅用） */</pre></td><td class="explain">注释：某部作品的在售商品数（详情页横幅用）（不参与执行）</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 某部作品的在售商品数（详情页横幅用） */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            SELECT COUNT(*) FROM product pr</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>              JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -133,33 +133,33 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">Lombok：为字段生成 setter</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain">注释：商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">13</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">注释：一级或二级分类 id；为空表示全部（不参与执行）</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级或二级分类 id；为空表示全部</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */</pre></td><td class="explain">注释：作品（一级分类）id；指定时只查该作品下的全部品类（不参与执行）</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> Long workId;</pre></td><td class="explain">作品（一级分类）id；指定时只查该作品下的全部品类</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** ALL / COMIC / MERCH */</pre></td><td class="explain">注释：ALL / COMIC / MERCH（不参与执行）</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** ALL / COMIC / MERCH */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH</td></tr>
 <tr class="gap"><td class="line">22</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">注释：商品名称关键字，已去首尾空白；为空表示不搜索（不参与执行）</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">商品名称关键字，已去首尾空白；为空表示不搜索</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain">注释：DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST（不参与执行）</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    /** 当前页数量 */</pre></td><td class="explain">注释：当前页数量（不参与执行）</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    /** 当前页数量 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">当前页数量</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** 偏移量 */</pre></td><td class="explain">注释：偏移量（不参与执行）</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** 偏移量 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -176,35 +176,35 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">Lombok：为字段生成 setter</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> * 列表页原始请求参数（都是字符串，由 Service 归一与校验）。</pre></td><td class="explain">注释：列表页原始请求参数（都是字符串，由 Service 归一与校验）。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * &lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，</pre></td><td class="explain">注释：&lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，（不参与执行）</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> * 也方便单测直接构造各种脏输入。&lt;/p&gt;</pre></td><td class="explain">注释：也方便单测直接构造各种脏输入。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> * 列表页原始请求参数（都是字符串，由 Service 归一与校验）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * &lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> * 也方便单测直接构造各种脏输入。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductSearchCommand {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 分类 id，可为空 */</pre></td><td class="explain">注释：分类 id，可为空（不参与执行）</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 分类 id，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> String categoryId;</pre></td><td class="explain">分类 id，可为空</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 作品（一级分类）id；作品页用它限定范围 */</pre></td><td class="explain">注释：作品（一级分类）id；作品页用它限定范围（不参与执行）</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 作品（一级分类）id；作品页用它限定范围 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> String workId;</pre></td><td class="explain">作品（一级分类）id；作品页用它限定范围</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** ALL / COMIC / MERCH，可为空 */</pre></td><td class="explain">注释：ALL / COMIC / MERCH，可为空（不参与执行）</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** ALL / COMIC / MERCH，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH，可为空</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空 */</pre></td><td class="explain">注释：DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空（不参与执行）</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 名称关键字，可为空 */</pre></td><td class="explain">注释：名称关键字，可为空（不参与执行）</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 名称关键字，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">名称关键字，可为空</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 页码，可为空 */</pre></td><td class="explain">注释：页码，可为空（不参与执行）</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 页码，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> String page;</pre></td><td class="explain">页码，可为空</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 每页数量，可为空 */</pre></td><td class="explain">注释：每页数量，可为空（不参与执行）</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 每页数量，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> String pageSize;</pre></td><td class="explain">每页数量，可为空</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -236,25 +236,25 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">集合类型：这里用来做白名单</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline"> * 商品浏览服务：列表查询、商品详情、分类树。</pre></td><td class="explain">注释：商品浏览服务：列表查询、商品详情、分类树。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> * &lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。</pre></td><td class="explain">注释：&lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline"> * Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;</pre></td><td class="explain">注释：Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline"> * 商品浏览服务：列表查询、商品详情、分类树。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> * &lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline"> * Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>@Service</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CatalogService {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">29</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">    /** 商品类型白名单：ALL 表示不过滤 */</pre></td><td class="explain">注释：商品类型白名单：ALL 表示不过滤（不参与执行）</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">    /** 商品类型白名单：ALL 表示不过滤 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; TYPES = Set.of("ALL", "COMIC", "MERCH");</pre></td><td class="explain">商品类型白名单：ALL 表示不过滤</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 排序白名单，与 ProductMapper.xml 的 choose 分支一一对应 */</pre></td><td class="explain">注释：排序白名单，与 ProductMapper.xml 的 choose 分支一一对应（不参与执行）</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 排序白名单，与 ProductMapper.xml 的 choose 分支一一对应 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; SORTS = Set.of("DEFAULT", "PRICE_ASC", "PRICE_DESC", "NEWEST");</pre></td><td class="explain">排序白名单，与 ProductMapper.xml 的 choose 分支一一对应</td></tr>
 <tr class="gap"><td class="line">35</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /** 商品列表默认每页 6 条 */</pre></td><td class="explain">注释：商品列表默认每页 6 条（不参与执行）</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /** 商品列表默认每页 6 条 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> DEFAULT_PAGE_SIZE = 6;</pre></td><td class="explain">商品列表默认每页 6 条</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 关键字最大长度 */</pre></td><td class="explain">注释：关键字最大长度（不参与执行）</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 关键字最大长度 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> KEYWORD_MAX_LENGTH = 120;</pre></td><td class="explain">关键字最大长度</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductMapper productMapper;</pre></td><td class="explain">字段 productMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
@@ -269,9 +269,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        this.productImageMapper = productImageMapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">53</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">     * 列表查询：校验参数 → 查数据 → 包装分页。</pre></td><td class="explain">注释：列表查询：校验参数 → 查数据 → 包装分页。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">     * 列表查询：校验参数 → 查数据 → 包装分页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">public</span> PageResult&lt;Product&gt; search(ProductSearchCommand command) {  // 列表唯一入口：参数归一 → 查数 → 包装分页。</pre></td><td class="explain">列表唯一入口：参数归一 → 查数 → 包装分页。</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        PageQuery pageQuery = PageQuery.of(command.getPage(), command.getPageSize(), DEFAULT_PAGE_SIZE);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        ProductQuery query = buildQuery(command, pageQuery);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
@@ -281,9 +281,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">return</span> PageResult.of(items, total, pageQuery);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">65</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre class="cmtline">     * 商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</pre></td><td class="explain">注释：商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre class="cmtline">     * 商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">public</span> ProductDetail detail(<span class="kw">long</span> productId) {</pre></td><td class="explain">商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        Product product = productMapper.selectById(productId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        if (product == null || !"ON_SALE".equals(product.getStatus())) {  // 下架与不存在统一 404，不泄露「存在但下架」。</pre></td><td class="explain">下架与不存在统一 404，不泄露「存在但下架」。</td></tr>
@@ -305,24 +305,24 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> ProductDetail(product, top, leaf, images);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">89</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">    /** 首页「新品上架」：上架商品按录入时间倒序，取 limit 条 */</pre></td><td class="explain">注释：首页「新品上架」：上架商品按录入时间倒序，取 limit 条（不参与执行）</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">    /** 首页「新品上架」：上架商品按录入时间倒序，取 limit 条 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Product&gt; newest(<span class="kw">int</span> limit) {</pre></td><td class="explain">首页「新品上架」：上架商品按录入时间倒序，取 limit 条</td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">return</span> productMapper.selectNewest(limit);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">94</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre class="cmtline">    /** 首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条 */</pre></td><td class="explain">注释：首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条（不参与执行）</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre class="cmtline">    /** 首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Product&gt; featured(<span class="kw">int</span> limit) {</pre></td><td class="explain">首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条</td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        <span class="kw">return</span> productMapper.selectFeatured(limit);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">99</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre class="cmtline">    /** 作品墙：每部作品一行，带品类数与在售商品数 */</pre></td><td class="explain">注释：作品墙：每部作品一行，带品类数与在售商品数（不参与执行）</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre class="cmtline">    /** 作品墙：每部作品一行，带品类数与在售商品数 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    <span class="kw">public</span> java.util.List&lt;org.csu.mycartoonstore.catalog.dto.WorkSummary&gt; works() {</pre></td><td class="explain">作品墙：每部作品一行，带品类数与在售商品数</td></tr>
 <tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectWorkSummaries();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">104</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre class="cmtline">     * 作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。</pre></td><td class="explain">注释：作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre class="cmtline">     * 作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    <span class="kw">public</span> org.csu.mycartoonstore.catalog.dto.WorkDetail work(<span class="kw">long</span> id) {</pre></td><td class="explain">作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。</td></tr>
 <tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        Category work = categoryMapper.selectById(id);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        if (work == null || work.getParentId() != null) {  // 只接受一级分类；二级分类当作品打开属于调用方错误。</pre></td><td class="explain">只接受一级分类；二级分类当作品打开属于调用方错误。</td></tr>
@@ -332,7 +332,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                work, childrenOf(id), categoryMapper.countOnSaleByWork(id));</pre></td><td class="explain">构造 WorkDetail：作品、品类列表与在售数一次返回。</td></tr>
 <tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">116</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre class="cmtline">    /** 一级分类（作品），按 sort_order、id 升序 */</pre></td><td class="explain">注释：一级分类（作品），按 sort_order、id 升序（不参与执行）</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre class="cmtline">    /** 一级分类（作品），按 sort_order、id 升序 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; topCategories() {</pre></td><td class="explain">一级分类（作品），按 sort_order、id 升序</td></tr>
 <tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -341,7 +341,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">125</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre class="cmtline">    /** 某个一级分类下的二级分类 */</pre></td><td class="explain">注释：某个一级分类下的二级分类（不参与执行）</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre class="cmtline">    /** 某个一级分类下的二级分类 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; childrenOf(<span class="kw">long</span> parentId) {</pre></td><td class="explain">某个一级分类下的二级分类</td></tr>
 <tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -350,7 +350,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">134</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre class="cmtline">    /** 全部分类，供列表页侧栏一次取完 */</pre></td><td class="explain">注释：全部分类，供列表页侧栏一次取完（不参与执行）</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre class="cmtline">    /** 全部分类，供列表页侧栏一次取完 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; allCategories() {</pre></td><td class="explain">全部分类，供列表页侧栏一次取完</td></tr>
 <tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -359,9 +359,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">143</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 参数归一</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 参数归一</pre></td><td class="explain"></td></tr>
 <tr class="gap"><td class="line">145</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre class="cmtline">    /** 把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。 */</pre></td><td class="explain">注释：把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre class="cmtline">    /** 把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    <span class="kw">private</span> ProductQuery buildQuery(ProductSearchCommand command, PageQuery pageQuery) {</pre></td><td class="explain">把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。</td></tr>
 <tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        ProductQuery query = <span class="kw">new</span> ProductQuery();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        query.setCategoryId(parseCategoryId(command.getCategoryId()));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
@@ -374,7 +374,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">return</span> query;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">158</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre class="cmtline">    /** 分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。 */</pre></td><td class="explain">注释：分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre class="cmtline">    /** 分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    <span class="kw">private</span> Long parseCategoryId(String raw) {</pre></td><td class="explain">分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。</td></tr>
 <tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白表示未传该参数，按缺省处理</td></tr>
 <tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
@@ -390,7 +390,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
 <tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">174</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre class="cmtline">    /** 白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。 */</pre></td><td class="explain">注释：白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre class="cmtline">    /** 白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>    <span class="kw">private</span> String parseEnum(String raw, String defaultValue, Set&lt;String&gt; allowed, String fieldName) {</pre></td><td class="explain">白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。</td></tr>
 <tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白表示未传该参数，按缺省处理</td></tr>
 <tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>            <span class="kw">return</span> defaultValue;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
@@ -402,7 +402,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">186</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre class="cmtline">    /** 关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。 */</pre></td><td class="explain">注释：关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre class="cmtline">    /** 关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    <span class="kw">private</span> String parseKeyword(String raw) {</pre></td><td class="explain">关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。</td></tr>
 <tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>        if (raw == null) {</pre></td><td class="explain">null 视为不搜索</td></tr>
 <tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
@@ -417,10 +417,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">201</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre class="cmtline">     * 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</pre></td><td class="explain">注释：把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，（不参与执行）</td></tr>
-<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre class="cmtline">     * 不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。</pre></td><td class="explain">注释：不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre class="cmtline">     * 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre class="cmtline">     * 不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>    <span class="kw">static</span> String escapeLike(String keyword) {</pre></td><td class="explain">不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</td></tr>
 <tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        if (keyword == null) {</pre></td><td class="explain">null 直接透传，由 SQL 侧决定不拼 LIKE 条件</td></tr>
 <tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>

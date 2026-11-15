@@ -49,27 +49,27 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">复用页头：品牌、导航、搜索、购物车徽标</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">注释：品牌横幅：装饰与入口，不直接下单（不参与渲染）</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="hero"&gt;</pre></td><td class="explain">品牌横幅：只做展示与入口，不直接下单</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap hero-inner"&gt;</pre></td><td class="explain">两栏栅格：左文案、右封面堆叠</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="hero-kicker"&gt;MANGA ISLE · 原创漫画官方商店&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">品牌副标，固定文案</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                &lt;<span class="kw">h1</span>&gt;先选一部&lt;br&gt;&lt;<span class="kw">em</span>&gt;作品&lt;/<span class="kw">em</span>&gt;，再挑它的周边。&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">首屏主张：先选作品，再挑周边</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                &lt;<span class="kw">p</span>&gt;五部连载作品，单行本与官方周边同页呈现。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">一句说明，不承诺未实现的能力</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="hero-actions"&gt;</pre></td><td class="explain">两个入口</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                    &lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/category}"&gt;开始选购 →&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">进全部商品列表</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category(sort='NEWEST')}"&gt;看新作&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">带 sort=NEWEST，列表按上架时间倒序</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="cover-stack"&gt;</pre></td><td class="explain">三张封面做视觉堆叠，纯装饰，不随数据变化</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                &lt;<span class="kw">img</span> th:src="@{/images/products/STARLINE-C01/cover.svg}" alt="星轨列车"&gt;</pre></td><td class="explain">封面取自静态资源，路径与种子数据一致</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                &lt;<span class="kw">img</span> th:src="@{/images/products/ONIGIRI-C01/cover.svg}" alt="饭团小馆"&gt;</pre></td><td class="explain">同上，换一部作品</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">img</span> th:src="@{/images/products/CICADA-C01/cover.svg}" alt="夏夜蝉鸣"&gt;</pre></td><td class="explain">同上</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">注释：作品入口：数据来自 category 的一级分类（不参与渲染）</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="strip"&gt;</pre></td><td class="explain">作品入口区</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="strip-grid" th:if="${!#lists.isEmpty(categories)}"&gt;</pre></td><td class="explain">没有分类时不渲染空网格</td></tr>
@@ -77,24 +77,24 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                   th:href="@{/works/{id}(id=${c.id})}"&gt;</pre></td><td class="explain">点作品进对应列表，带 categoryId</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                    &lt;<span class="kw">img</span> th:src="${'/images/products/' + c.code + '-C01/cover.svg'}" th:alt="${c.name}"&gt;</pre></td><td class="explain">封面按 code 拼：{code}-C01 是每部作品第一卷的封面</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;&lt;<span class="kw">b</span> th:text="${c.name}"&gt;作品&lt;/<span class="kw">b</span>&gt;&lt;<span class="kw">small</span> th:text="${c.code}"&gt;CODE&lt;/<span class="kw">small</span>&gt;&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">中文名 + 英文 code，便于与数据库核对</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            &lt;<span class="kw">p</span> th:if="${#lists.isEmpty(categories)}"&gt;暂无作品分类。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">无分类时的可读文案</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">42</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">注释：新品上架：上架商品按录入时间倒序，最多 3 项（不参与渲染）</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">新品栏目</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;NEW ARRIVAL&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;新品上架&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">栏目名固定；英文仅作装饰</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/category(sort='NEWEST')}"&gt;更多新品 →&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">带 sort=NEWEST 进列表</td></tr>
-<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="grid cols-3" th:if="${!#lists.isEmpty(newest)}"&gt;</pre></td><td class="explain">无上架商品时不渲染网格</td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;article class="card" th:each="p : ${newest}"&gt;</pre></td><td class="explain">每张卡是一个商品</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                    &lt;<span class="kw">a</span> class="media" th:href="@{/product/{id}(id=${p.id})}"&gt;</pre></td><td class="explain">进详情页，按 id 定位</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${p.coverImage}}" th:alt="${p.name}"&gt;</pre></td><td class="explain">封面路径来自 cover_image，不在模板里拼字符串</td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="body"&gt;</pre></td><td class="explain">卡片文字区：SKU、名称、价格、库存</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="cat" th:text="${p.sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">展示 SKU，便于与数据库核对</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                        &lt;h3&gt;&lt;<span class="kw">a</span> th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}"&gt;商品&lt;/<span class="kw">a</span>&gt;&lt;/h3&gt;</pre></td><td class="explain">商品名同时是详情入口</td></tr>
@@ -102,26 +102,26 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="foot"&gt;</pre></td><td class="explain">卡片底部：价格与库存</td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">¥ + 两位小数，与全站金额口径一致</td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="stock" th:classappend="${p.stock == 0} ? 'zero'" th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}"&gt;库存&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">0 件时加 zero 样式并显示缺货</td></tr>
-<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                &lt;/article&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                &lt;/article&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>            &lt;<span class="kw">p</span> th:if="${#lists.isEmpty(newest)}"&gt;暂无上架商品。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">无上架商品时给可读提示</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">注释：精选推荐：上架商品按 sort_order 升序，最多 4 项（不参与渲染）</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">精选栏目</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;EDITOR'S PICK&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;精选推荐&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">「精选推荐」由人工排序（sort_order）决定，不是销量</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/category}"&gt;全部商品 →&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">进列表，不带筛选</td></tr>
-<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="grid" th:if="${!#lists.isEmpty(featured)}"&gt;</pre></td><td class="explain">同新品：空集合不渲染</td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                &lt;article class="card" th:each="p : ${featured}"&gt;</pre></td><td class="explain">每张卡一个商品</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    &lt;<span class="kw">a</span> class="media" th:href="@{/product/{id}(id=${p.id})}"&gt;</pre></td><td class="explain">进详情页</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${p.coverImage}}" th:alt="${p.name}"&gt;</pre></td><td class="explain">封面来自 cover_image</td></tr>
-<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="body"&gt;</pre></td><td class="explain">卡片文字区：SKU、名称、价格、库存</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="cat" th:text="${p.sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">SKU</td></tr>
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                        &lt;h3&gt;&lt;<span class="kw">a</span> th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}"&gt;商品&lt;/<span class="kw">a</span>&gt;&lt;/h3&gt;</pre></td><td class="explain">商品名 + 详情入口</td></tr>
@@ -129,14 +129,14 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="foot"&gt;</pre></td><td class="explain">卡片底部：价格与库存</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">价格两位小数</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                            &lt;<span class="kw">span</span> class="stock" th:classappend="${p.stock == 0} ? 'zero'" th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}"&gt;库存&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">售罄样式与文案</td></tr>
-<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                &lt;/article&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                &lt;/article&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>            &lt;<span class="kw">p</span> th:if="${#lists.isEmpty(featured)}"&gt;暂无精选商品。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">无精选商品时的提示</td></tr>
-<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">97</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">复用页脚</td></tr>
 <tr class="gap"><td class="line">99</td><td></td><td></td></tr>
@@ -158,12 +158,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">MVC 模型，控制器往里放数据给模板</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 首页控制器。</pre></td><td class="explain">注释：首页控制器。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，</pre></td><td class="explain">注释：&lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;</pre></td><td class="explain">注释：与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Controller</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> HomeController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
@@ -213,9 +213,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre> * 首页渲染测试：验证作品入口、新品 3 条上限、精选 4 条与下架商品不可见。</pre></td><td class="explain">注释：首页渲染测试：验证作品入口、新品 3 条上限、精选 4 条与下架商品不可见。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc：不发真实 HTTP，直接调控制器并检查渲染结果</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">class</span> HomePageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
@@ -227,7 +227,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @DisplayName("首页显示作品入口与上架商品，隐藏下架商品")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">void</span> homeShowsOnSaleOnly() throws Exception {</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">void</span> homeShowsOnSaleOnly() throws Exception {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory("TESTIP", "测试作品");</pre></td><td class="explain">造作品分类；code 用 TESTIP，避免与其它用例同名冲突</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        insertProduct("TEST-C01", categoryId, "测试商品A", "28.00", 10, "ON_SALE", 1, 1);</pre></td><td class="explain">上架商品：¥28、库存 10、排序 1、1 天前上架</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        insertProduct("TEST-C02", categoryId, "测试商品B", "30.00", 10, "DRAFT", 2, 2);</pre></td><td class="explain">下架商品：后面断言它不能出现在页面任何位置</td></tr>
@@ -242,7 +242,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">46</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("新品最多 3 条：第 4 新的商品不出现在「新品上架」")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">void</span> newestIsLimitedToThree() throws Exception {</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">void</span> newestIsLimitedToThree() throws Exception {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory("LIMITIP", "限量作品");</pre></td><td class="explain">另一组分类，保证只有这 4 件参与排序</td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        insertProduct("L-01", categoryId, "新品一", "28.00", 10, "ON_SALE", 10, 1);</pre></td><td class="explain">最新：1 天前，排序 10</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        insertProduct("L-02", categoryId, "新品二", "28.00", 10, "ON_SALE", 10, 2);</pre></td><td class="explain">2 天前</td></tr>
@@ -262,7 +262,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">66</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    @DisplayName("空库时首页显示空状态，而不是报错")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">void</span> homeShowsEmptyState() throws Exception {</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">void</span> homeShowsEmptyState() throws Exception {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        mockMvc.perform(get("/main"))</pre></td><td class="explain">空库直接请求首页</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">空数据也必须 200</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andExpect(content().string(containsString("暂无上架商品")));</pre></td><td class="explain">空状态是模板给的文案，不是异常页</td></tr>
