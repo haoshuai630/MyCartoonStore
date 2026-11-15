@@ -48,7 +48,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain">面包屑：首页 / 作品 / 分类 / 商品</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/main}"&gt;首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
@@ -58,7 +58,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/category(categoryId=${detail.leafCategory().id})}" th:text="${detail.leafCategory().name}"&gt;分类&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>            &lt;<span class="kw">b</span> th:text="${detail.product().name}"&gt;商品&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束分页。</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="product-detail"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -68,8 +68,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="thumbs" th:if="${detail.hasGallery()}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                    &lt;<span class="kw">img</span> th:each="img : ${detail.images()}" th:src="@{${img.imagePath}}"</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                         th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;!-- 右侧：购买信息 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="info"&gt;</pre></td><td class="explain">右侧购买信息区</td></tr>
@@ -87,22 +87,22 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                    &lt;<span class="kw">button</span> type="submit" class="btn btn-primary"</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                            th:disabled="${detail.product().stock == 0}"</pre></td><td class="explain">缺货时数量框与按钮都禁用</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                            th:text="${detail.product().stock == 0} ? '暂时缺货' : '加入购物车'"&gt;加入购物车&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="hint"&gt;购物车功能在 M04 开放，当前按钮为占位。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">明说占位，避免用户以为坏了</td></tr>
 <tr class="gap"><td class="line">50</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="desc"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;商品说明&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">长描述单独一块，列表页不展示</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                    &lt;<span class="kw">p</span> th:text="${detail.product().description}"&gt;描述&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;main&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
 <tr class="gap"><td class="line">61</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;body&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;html&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">
@@ -127,7 +127,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * &lt;p&gt;商品不存在、已下架都在 Service 里转 404，由 GlobalExceptionHandler 输出错误页；</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * 控制器只负责把详情挂到模型上。&lt;/p&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Controller</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CatalogService catalogService;</pre></td><td class="explain">字段 catalogService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>

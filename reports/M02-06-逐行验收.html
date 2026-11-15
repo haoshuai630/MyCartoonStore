@@ -146,14 +146,14 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="error-message" th:text="${message}"&gt;错误信息&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">p</span>&gt;&lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/main}"&gt;回首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>               &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;去逛逛&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;section&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;main&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;body&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;html&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 </main>

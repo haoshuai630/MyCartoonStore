@@ -48,38 +48,38 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">首页栏目：新品上架 / 精选推荐</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;WORKS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部作品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;WORKS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部作品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">栏目头：英文做装饰，中文是标题。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="result-meta" th:if="${!#lists.isEmpty(works)}" th:text="'共 ' + ${#lists.size(works)} + ' 部'"&gt;共 0 部&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结果总数，并在有关键字时回显</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">            &lt;!-- 每部作品一张卡：点进去看该作品的品类与商品 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="works-grid" th:if="${!#lists.isEmpty(works)}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="work-card" th:each="w : ${works}" th:href="@{/works/{id}(id=${w.id})}"&gt;</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-cover"&gt;</pre></td><td class="explain">作品卡封面区：使用该作品第一卷封面</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="${'/images/products/' + w.code + '-C01/cover.svg'}" th:alt="${w.name}"&gt;</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-body"&gt;</pre></td><td class="explain">作品卡文字区：名称、code、品类数与在售数</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                        &lt;h3 th:text="${w.name}"&gt;作品&lt;/h3&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="work-code" th:text="${w.code}"&gt;CODE&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="work-meta"&gt;</pre></td><td class="explain">品类数与在售数并排展示</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.categoryCount()} + ' 个品类'"&gt;0 个品类&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.productCount()} + ' 件在售'"&gt;0 件在售&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束作品计数段落。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束整张作品卡的链接。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="empty" th:if="${#lists.isEmpty(works)}"&gt;还没有任何作品。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;section&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;main&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">37</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;body&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;html&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">
@@ -103,8 +103,8 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * &lt;p&gt;作品多了以后，导航只需要指向这一页，不必把每部作品都塞进侧栏。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Controller</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WorksController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WorksController {</pre></td><td class="explain">作品墙与作品页的入口控制器。</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CatalogService catalogService;</pre></td><td class="explain">字段 catalogService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
@@ -119,7 +119,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">     * &lt;p&gt;路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖，</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">     * 避免有人用 ?workId= 越权看别家作品。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @GetMapping("/works/{id}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @GetMapping("/works/{id}")</pre></td><td class="explain">作品页路由：路径里的 id 是作品（一级分类）。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, ProductSearchCommand command, Model model) {</pre></td><td class="explain">避免有人用 ?workId= 越权看别家作品。&lt;/p&gt; &lt;p&gt;路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖， 作品页：作品横幅 + 品类筛选 + 商品列表。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        model.addAttribute("work", catalogService.work(id));  // 不存在或层级不对由 Service 抛 404，控制器不重复判断。</pre></td><td class="explain">不存在或层级不对由 Service 抛 404，控制器不重复判断。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        command.setWorkId(String.valueOf(id));  // 用路径 id 覆盖参数里的 workId，防止 ?workId=2 越权看别家作品。</pre></td><td class="explain">用路径 id 覆盖参数里的 workId，防止 ?workId=2 越权看别家作品。</td></tr>
@@ -129,7 +129,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">    /** 作品墙：每部作品一张卡，带品类数与在售数 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @GetMapping("/works")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @GetMapping("/works")</pre></td><td class="explain">作品墙路由。</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">public</span> String list(Model model) {</pre></td><td class="explain">作品墙：每部作品一张卡，带品类数与在售数</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        model.addAttribute("works", catalogService.works());</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> "works";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
@@ -165,7 +165,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * 作品墙测试：作品名、品类数、在售数。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> WorksPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> WorksPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：继承基类，每个用例前重建七张表。</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">字段 mockMvc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>

@@ -8,6 +8,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+from manual_notes import MANUAL  # noqa: E402
 from java_explainer import make_java_explainer  # noqa: E402
 
 ROOT = base.ROOT
@@ -47,8 +48,11 @@ def make_html_explainer(lines: list[str]):
         s = line.strip()
         if not s:
             return ""
+        if s in MANUAL:
+            return MANUAL[s]
         if s.startswith("</"):
-            return "结构闭合：结束上面的容器；不产生新的内容。"
+            tag = re.match(r"</(\w+)", s)
+            return ("结构闭合：结束上面的 <" + tag.group(1) + "> 容器；不产生新的内容。") if tag else "结构闭合：结束上面的容器；不产生新的内容。"
         if s.upper().startswith("<!DOCTYPE"):
             return "HTML5 文档类型：浏览器按标准模式渲染"
         if s.startswith("<html"):

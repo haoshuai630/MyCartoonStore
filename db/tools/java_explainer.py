@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 
 from import_notes import IMPORT_NOTES
+from manual_notes import MANUAL
 
 EXTRA = {
     'this.catalogService = catalogService;': "构造器注入：保存 CatalogService 字段",
@@ -128,6 +129,8 @@ def make_java_explainer(lines):
             return IMPORT_NOTES.get(s.rstrip(";"), "")
         if s in ANNOTATION_NOTES or s.split("(")[0] in ANNOTATION_NOTES:
             return ANNOTATION_NOTES.get(s.split("(")[0], "")
+        if s in MANUAL:
+            return MANUAL[s]
         if s in EXTRA:
             return EXTRA[s]
 

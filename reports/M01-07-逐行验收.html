@@ -55,7 +55,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 商品 Mapper。</pre></td><td class="explain">注释：商品 Mapper。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductMapper <span class="kw">extends</span> BaseMapper&lt;Product&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 列表分页：分类 + 类型 + 关键字 + 白名单排序 */</pre></td><td class="explain">注释：列表分页：分类 + 类型 + 关键字 + 白名单排序（不参与执行）</td></tr>
@@ -100,9 +100,9 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain">注释：商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">Lombok：为所有字段生成 getter，省掉手写方法。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">Lombok：为所有字段生成 setter，供参数绑定使用。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">Mapper 查询条件的载体，字段由 Service 填好后传入。</td></tr>
 <tr class="gap"><td class="line">13</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">注释：一级或二级分类 id；为空表示全部（不参与执行）</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级或二级分类 id；为空表示全部</td></tr>
@@ -231,7 +231,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 购物车 Mapper。</pre></td><td class="explain">注释：购物车 Mapper。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CartItemMapper <span class="kw">extends</span> BaseMapper&lt;CartItem&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    /** 本人购物车全量（含失效条目），关联商品当前价格与库存 */</pre></td><td class="explain">注释：本人购物车全量（含失效条目），关联商品当前价格与库存（不参与执行）</td></tr>
@@ -265,8 +265,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 购物车行视图：条目本身 + 商品当前名称、封面、价格、库存、状态。</pre></td><td class="explain">注释：购物车行视图：条目本身 + 商品当前名称、封面、价格、库存、状态。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * &lt;p&gt;价格不存购物车，每次查询取商品当前值。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;价格不存购物车，每次查询取商品当前值。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">Lombok：为所有字段生成 getter，省掉手写方法。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">Lombok：为所有字段生成 setter，供参数绑定使用。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartItemView {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> Long id;</pre></td><td class="explain">字段 id：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
@@ -333,7 +333,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 账号 Mapper。</pre></td><td class="explain">注释：账号 Mapper。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> StoreUserMapper <span class="kw">extends</span> BaseMapper&lt;StoreUser&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE username = #{username}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -364,7 +364,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 订单 Mapper。</pre></td><td class="explain">注释：订单 Mapper。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrder&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM sales_order WHERE order_no = #{orderNo} FOR UPDATE")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -403,32 +403,32 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">注释：分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">继承 BaseMapper 获得单表 CRUD；自定义 SQL 写在下面的方法上。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>     * 作品墙数据：每个一级分类带上品类数与在售商品数。</pre></td><td class="explain">注释：作品墙数据：每个一级分类带上品类数与在售商品数。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>     *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>     * &lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>     */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            SELECT p.id AS id, p.code AS code, p.name AS name,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                   (SELECT COUNT(*) FROM category c WHERE c.parent_id = p.id) AS category_count,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                   (SELECT COUNT(*) FROM product pr</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                      JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                     WHERE c2.parent_id = p.id AND pr.status = 'ON_SALE') AS product_count</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>              FROM category p</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>             WHERE p.parent_id IS NULL</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>             ORDER BY p.sort_order, p.id</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            """)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">注解 SQL 开始：以下是完整 SQL，参数用 #{} 绑定。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            SELECT p.id AS id, p.code AS code, p.name AS name,</pre></td><td class="explain">作品主体：只取展示需要的 id、code、名称三列。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                   (SELECT COUNT(*) FROM category c WHERE c.parent_id = p.id) AS category_count,</pre></td><td class="explain">该作品的品类数：数它下面的二级分类。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                   (SELECT COUNT(*) FROM product pr</pre></td><td class="explain">在售商品数用关联子查询，避免页面里逐行再查。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                      JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">商品挂在二级分类上，再按父级归到作品。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                     WHERE c2.parent_id = p.id AND pr.status = 'ON_SALE') AS product_count</pre></td><td class="explain">只统计在售商品，下架的不计入卡片数字。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>              FROM category p</pre></td><td class="explain">作品表自身，下面用 parent_id 为空筛出一级分类。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>             WHERE p.parent_id IS NULL</pre></td><td class="explain">只要一级分类（作品）。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>             ORDER BY p.sort_order, p.id</pre></td><td class="explain">人工排序优先，相同排序按 id 稳定输出。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            """)</pre></td><td class="explain">注解 SQL 结束。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    List&lt;WorkSummary&gt; selectWorkSummaries();</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /** 某部作品的在售商品数（详情页横幅用） */</pre></td><td class="explain">注释：某部作品的在售商品数（详情页横幅用）（不参与执行）</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            SELECT COUNT(*) FROM product pr</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>              JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>             WHERE c2.parent_id = #{workId} AND pr.status = 'ON_SALE'</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            """)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">注解 SQL 开始：以下是完整 SQL，参数用 #{} 绑定。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            SELECT COUNT(*) FROM product pr</pre></td><td class="explain">作品页横幅要显示的在售数。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>              JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">商品挂在二级分类上，再按父级归到作品。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>             WHERE c2.parent_id = #{workId} AND pr.status = 'ON_SALE'</pre></td><td class="explain">限定到该作品，并且只算在售。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            """)</pre></td><td class="explain">注解 SQL 结束。</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">int</span> countOnSaleByWork(<span class="kw">long</span> workId);</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -449,7 +449,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。</pre></td><td class="explain">注释：商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductImageMapper <span class="kw">extends</span> BaseMapper&lt;ProductImage&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -470,7 +470,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。</pre></td><td class="explain">注释：订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderItemMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrderItem&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
