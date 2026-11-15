@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(${detail.product().name})}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <div class="wrap">
+        <!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 -->
+        <nav class="crumbs">
+            <a th:href="@{/main}">首页</a>
+            <span>/</span>
+            <a th:href="@{/category(categoryId=${detail.topCategory().id})}" th:text="${detail.topCategory().name}">作品</a>
+            <span>/</span>
+            <a th:href="@{/category(categoryId=${detail.leafCategory().id})}" th:text="${detail.leafCategory().name}">分类</a>
+            <span>/</span>
+            <b th:text="${detail.product().name}">商品</b>
+        </nav>
+
+        <div class="product-detail">
+            <!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 -->
+            <div class="gallery">
+                <img class="gallery-main" th:src="@{${detail.product().coverImage}}"
+                     th:alt="${detail.product().name}">
+                <div class="thumbs" th:if="${detail.hasGallery()}">
+                    <img th:each="img : ${detail.images()}" th:src="@{${img.imagePath}}"
+                         th:alt="${detail.product().name}">
+                </div>
+            </div>
+
+            <!-- 右侧：购买信息 -->
+            <div class="info">
+                <span class="cat" th:text="${detail.product().sku}">SKU</span>
+                <h1 th:text="${detail.product().name}">商品名</h1>
+                <p class="summary" th:text="${detail.product().summary}">简介</p>
+                <p class="price" th:text="'¥' + ${#numbers.formatDecimal(detail.product().price, 1, 2)}">¥0.00</p>
+                <p class="stock" th:classappend="${detail.product().stock == 0} ? 'zero'"
+                   th:text="${detail.product().stock == 0} ? '暂时缺货' : '库存 ' + ${detail.product().stock}">库存</p>
+
+                <!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 -->
+                <form class="buy" action="#" method="post">
+                    <input type="number" name="quantity" value="1" min="1"
+                           th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}">
+                    <button type="submit" class="btn btn-primary"
+                            th:disabled="${detail.product().stock == 0}"
+                            th:text="${detail.product().stock == 0} ? '暂时缺货' : '加入购物车'">加入购物车</button>
+                </form>
+                <p class="hint">购物车功能在 M04 开放，当前按钮为占位。</p>
+
+                <div class="desc">
+                    <h2>商品说明</h2>
+                    <p th:text="${detail.product().description}">描述</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
