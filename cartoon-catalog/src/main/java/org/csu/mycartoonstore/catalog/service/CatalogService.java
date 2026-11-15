@@ -54,7 +54,7 @@ public class CatalogService {
     /**
      * 列表查询：校验参数 → 查数据 → 包装分页。
      */
-    public PageResult<Product> search(ProductSearchCommand command) {
+    public PageResult<Product> search(ProductSearchCommand command) {  // 列表唯一入口：参数归一 → 查数 → 包装分页。
         PageQuery pageQuery = PageQuery.of(command.getPage(), command.getPageSize(), DEFAULT_PAGE_SIZE);
         ProductQuery query = buildQuery(command, pageQuery);
 
@@ -68,7 +68,7 @@ public class CatalogService {
      */
     public ProductDetail detail(long productId) {
         Product product = productMapper.selectById(productId);
-        if (product == null || !"ON_SALE".equals(product.getStatus())) {
+        if (product == null || !"ON_SALE".equals(product.getStatus())) {  // 下架与不存在统一 404，不泄露「存在但下架」。
             throw BizException.notFound("商品不存在或已下架");
         }
 
@@ -76,7 +76,7 @@ public class CatalogService {
         if (leaf == null) {
             throw BizException.notFound("商品分类不存在");
         }
-        Category top = leaf.getParentId() == null ? leaf : categoryMapper.selectById(leaf.getParentId());
+        Category top = leaf.getParentId() == null ? leaf : categoryMapper.selectById(leaf.getParentId());  // 二级取父得到一级；本身就是一级时复用，省一次查询。
 
         List<ProductImage> images = productImageMapper.selectList(
                 Wrappers.<ProductImage>lambdaQuery()
@@ -107,7 +107,7 @@ public class CatalogService {
      */
     public org.csu.mycartoonstore.catalog.dto.WorkDetail work(long id) {
         Category work = categoryMapper.selectById(id);
-        if (work == null || work.getParentId() != null) {
+        if (work == null || work.getParentId() != null) {  // 只接受一级分类；二级分类当作品打开属于调用方错误。
             throw BizException.notFound("作品不存在");
         }
         return new org.csu.mycartoonstore.catalog.dto.WorkDetail(
@@ -147,7 +147,7 @@ public class CatalogService {
     private ProductQuery buildQuery(ProductSearchCommand command, PageQuery pageQuery) {
         ProductQuery query = new ProductQuery();
         query.setCategoryId(parseCategoryId(command.getCategoryId()));
-        query.setWorkId(parseCategoryId(command.getWorkId()));
+        query.setWorkId(parseCategoryId(command.getWorkId()));  // 作品 id 与分类 id 共用正整数校验，不做特例。
         query.setProductType(parseEnum(command.getProductType(), "ALL", TYPES, "商品类型"));
         query.setSort(parseEnum(command.getSort(), "DEFAULT", SORTS, "排序方式"));
         query.setKeyword(escapeLike(parseKeyword(command.getKeyword())));
@@ -178,7 +178,7 @@ public class CatalogService {
             return defaultValue;
         }
         String value = raw.trim();
-        if (!allowed.contains(value)) {
+        if (!allowed.contains(value)) {  // 白名单外一律 400，不做大小写纠正或静默降级。
             throw BizException.badRequest(fieldName + "取值不合法");
         }
         return value;
@@ -193,7 +193,7 @@ public class CatalogService {
         if (value.isEmpty()) {
             return null;
         }
-        if (value.length() > KEYWORD_MAX_LENGTH) {
+        if (value.length() > KEYWORD_MAX_LENGTH) {  // 超长拒绝而不是截断，避免用户以为搜到了全部结果。
             throw BizException.badRequest("搜索关键字不能超过 " + KEYWORD_MAX_LENGTH + " 个字符");
         }
         return value;

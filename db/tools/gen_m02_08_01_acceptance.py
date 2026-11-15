@@ -42,7 +42,7 @@ def main():
             if not line.strip():
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
-            text = NOTES_TEXT.get(line.strip()) or fn(i, line)
+            text = fn(i, line) or NOTES_TEXT.get(line.strip()) or ""
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre>{base.hi_java(line)}</pre></td>'

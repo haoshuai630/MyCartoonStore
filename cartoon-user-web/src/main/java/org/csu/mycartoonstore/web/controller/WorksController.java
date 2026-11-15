@@ -29,11 +29,11 @@ public class WorksController {
      */
     @GetMapping("/works/{id}")
     public String detail(@PathVariable long id, ProductSearchCommand command, Model model) {
-        model.addAttribute("work", catalogService.work(id));
-        command.setWorkId(String.valueOf(id));
+        model.addAttribute("work", catalogService.work(id));  // 不存在或层级不对由 Service 抛 404，控制器不重复判断。
+        command.setWorkId(String.valueOf(id));  // 用路径 id 覆盖参数里的 workId，防止 ?workId=2 越权看别家作品。
         model.addAttribute("page", catalogService.search(command));
         model.addAttribute("query", command);
-        return "work";
+        return "work";  // 视图名对应 templates/work.html。
     }
 
     /** 作品墙：每部作品一张卡，带品类数与在售数 */
