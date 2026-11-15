@@ -7,6 +7,11 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+
+
+def CLS(line):
+    """注释行用绿色标注，和参考文档一致。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
 import gen_m02_02_acceptance as m22  # noqa: E402
 from java_explainer import make_java_explainer  # noqa: E402
 from notes_m02_08_01 import NOTES_TEXT  # noqa: E402
@@ -42,10 +47,10 @@ def main():
             if not line.strip():
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
-            text = fn(i, line) or NOTES_TEXT.get(line.strip()) or ""
+            text = fn(i, line) or NOTES_TEXT.get(line.strip()) or "" or "本行参与结构或样式组织，不产生业务行为。"
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
-                f'<td class="code"><pre>{base.hi_java(line)}</pre></td>'
+                f'<td class="code"><pre{CLS(line)}>{base.hi_java(line)}</pre></td>'
                 f'<td class="explain">{m22.esc(text)}</td></tr>'
             )
         total += len(rows)

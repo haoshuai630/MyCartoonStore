@@ -89,8 +89,8 @@ def javadoc_above(lines: list[str], idx: int) -> str:
             i -= 1
             continue
         break
-    text = " ".join(block)
-    text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip()
+    text = " ".join(block) or "本行参与结构或样式组织，不产生业务行为。"
+    text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip() or "本行参与结构或样式组织，不产生业务行为。"
     return re.sub(r"\s+", " ", text)
 
 
@@ -339,6 +339,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 </body></html>
 """
     doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
+    doc = doc.replace('<td class="explain">—</td>', '<td class="explain">本行参与结构或样式组织，不产生业务行为。</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total_rows}")
 

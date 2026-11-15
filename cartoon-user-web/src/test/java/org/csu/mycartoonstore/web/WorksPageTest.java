@@ -29,6 +29,7 @@ class WorksPageTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("作品墙显示作品名、品类数与在售数")
+    /** 用例：作品墙显示名称、品类数与在售数。 */
     void worksShowNameAndCounts() throws Exception {
         long workId = seedWork("W1", "测试作品甲");
         long comic = seedCategory("W1-COMIC", workId, "单行本");
@@ -46,22 +47,26 @@ class WorksPageTest extends AbstractIntegrationTest {
 
     @Test
     @DisplayName("空库时作品墙显示空状态")
+    /** 用例：空库显示空状态文案。 */
     void worksEmptyState() throws Exception {
         mockMvc.perform(get("/works"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("还没有任何作品")));
     }
 
+    /** 插入一部作品（一级分类），返回 id。 */
     private long seedWork(String code, String name) {
         jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, name);
         return jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.class, code);
     }
 
+    /** 在某部作品下插入一个品类，返回 id。 */
     private long seedCategory(String code, long parentId, String name) {
         jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)", code, parentId, name);
         return jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.class, code);
     }
 
+    /** 插入一件商品，状态由用例指定。 */
     private void insertProduct(String sku, long categoryId, String name, String status) {
         jdbc.update("INSERT INTO product (sku, category_id, name, summary, cover_image, price, stock, status, sort_order) "
                         + "VALUES (?,?,?,?,?,?,?,?,?)",

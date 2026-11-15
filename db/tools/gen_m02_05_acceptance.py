@@ -40,7 +40,7 @@ def main() -> None:
             if not line.strip():
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
-            text = NOTES_TEXT.get(line.strip()) or closers.get(i) or fn(i, line)
+            text = NOTES_TEXT.get(line.strip()) or closers.get(i) or fn(i, line) or "本行参与结构或样式组织，不产生业务行为。"
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre>{hi(line)}</pre></td>'

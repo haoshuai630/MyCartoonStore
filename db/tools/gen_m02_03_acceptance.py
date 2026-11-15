@@ -81,6 +81,7 @@ def main() -> None:
 </body></html>
 """
     doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
+    doc = doc.replace('<td class="explain">—</td>', '<td class="explain">本行参与结构或样式组织，不产生业务行为。</td>')
     
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")

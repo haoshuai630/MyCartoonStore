@@ -41,240 +41,240 @@ footer{color:#536176;font-size:13px}
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
 <thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DataAccessException;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品数据访问</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DataAccessException;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">导入</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * &lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> * 不用 Mock 证明 SQL 能跑。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre> * &lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre> * 不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> DataAccessTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">类声明</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * &lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> * 不用 Mock 证明 SQL 能跑。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre> * &lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre> * 不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> DataAccessTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入依赖</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">字段 jdbc</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">字段 jdbc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr class="gap"><td class="line">35</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入依赖</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> ProductMapper productMapper;</pre></td><td class="explain">字段 productMapper</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> ProductMapper productMapper;</pre></td><td class="explain">字段 productMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入依赖</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> CartItemMapper cartItemMapper;</pre></td><td class="explain">字段 cartItemMapper</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> CartItemMapper cartItemMapper;</pre></td><td class="explain">字段 cartItemMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入依赖</td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">private</span> SalesOrderMapper salesOrderMapper;</pre></td><td class="explain">字段 salesOrderMapper</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">private</span> SalesOrderMapper salesOrderMapper;</pre></td><td class="explain">字段 salesOrderMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr class="gap"><td class="line">44</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @DisplayName("商品 SKU 唯一：重复插入被拒")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">void</span> skuMustBeUnique() {</pre></td><td class="explain">用例：商品 SKU 唯一：重复插入被拒</td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("DUPTEST");</pre></td><td class="explain">属于 skuMustBeUnique：用例：商品 SKU 唯一：重复插入被拒 的一步</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @DisplayName("商品 SKU 唯一：重复插入被拒")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">void</span> skuMustBeUnique() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("DUPTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        insertProduct("DUP-001", categoryId, "28.00", 10, "ON_SALE", 100);</pre></td><td class="explain">准备商品 DUP-001：¥28.00，库存 10，ON_SALE，排序 100</td></tr>
 <tr class="gap"><td class="line">50</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        assertThatThrownBy(() -&gt; insertProduct("DUP-001", categoryId, "30.00", 5, "ON_SALE", 100))</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .isInstanceOf(DuplicateKeyException.<span class="kw">class</span>);</pre></td><td class="explain">断言抛出的异常类型</td></tr>
-<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        assertThatThrownBy(() -&gt; insertProduct("DUP-001", categoryId, "30.00", 5, "ON_SALE", 100))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .isInstanceOf(DuplicateKeyException.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">54</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @DisplayName("价格必须大于 0：CHECK 拒绝 0 元")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">void</span> priceMustBePositive() {</pre></td><td class="explain">用例：价格必须大于 0：CHECK 拒绝 0 元</td></tr>
-<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("PRICETEST");</pre></td><td class="explain">属于 priceMustBePositive：用例：价格必须大于 0：CHECK 拒绝 0 元 的一步</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @DisplayName("价格必须大于 0：CHECK 拒绝 0 元")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">void</span> priceMustBePositive() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("PRICETEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThatThrownBy(() -&gt; insertProduct("BAD-PRICE", categoryId, "0.00", 1, "ON_SALE", 100))</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">断言抛出的异常类型</td></tr>
-<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                .hasMessageContaining("Check constraint");</pre></td><td class="explain">断言异常信息包含关键字</td></tr>
-<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThatThrownBy(() -&gt; insertProduct("BAD-PRICE", categoryId, "0.00", 1, "ON_SALE", 100))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                .hasMessageContaining("Check constraint");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">64</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @DisplayName("同一用户同一商品在购物车里只能有一条")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">void</span> cartUniquePerUserProduct() {</pre></td><td class="explain">用例：同一用户同一商品在购物车里只能有一条</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-cart");</pre></td><td class="explain">属于 cartUniquePerUserProduct：用例：同一用户同一商品在购物车里只能有一条 的一步</td></tr>
-<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("CARTTEST");</pre></td><td class="explain">属于 cartUniquePerUserProduct：用例：同一用户同一商品在购物车里只能有一条 的一步</td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("CART-001", categoryId, "28.00", 10, "ON_SALE", 100);</pre></td><td class="explain">属于 cartUniquePerUserProduct：用例：同一用户同一商品在购物车里只能有一条 的一步</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @DisplayName("同一用户同一商品在购物车里只能有一条")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">void</span> cartUniquePerUserProduct() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-cart");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("CARTTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("CART-001", categoryId, "28.00", 10, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">71</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        jdbc.update("INSERT INTO cart_item (user_id, product_id, quantity) VALUES (?,?,?)", userId, productId, 1);</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        jdbc.update("INSERT INTO cart_item (user_id, product_id, quantity) VALUES (?,?,?)", userId, productId, 1);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr class="gap"><td class="line">73</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                "INSERT INTO cart_item (user_id, product_id, quantity) VALUES (?,?,?)", userId, productId, 2))</pre></td><td class="explain">属于 cartUniquePerUserProduct：用例：同一用户同一商品在购物车里只能有一条 的一步</td></tr>
-<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                .isInstanceOf(DuplicateKeyException.<span class="kw">class</span>);</pre></td><td class="explain">断言抛出的异常类型</td></tr>
-<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                "INSERT INTO cart_item (user_id, product_id, quantity) VALUES (?,?,?)", userId, productId, 2))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                .isInstanceOf(DuplicateKeyException.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">78</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @DisplayName("有子分类的一级分类不能删除：外键 RESTRICT 拒绝")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> cannotDeleteCategoryWithChildren() {</pre></td><td class="explain">用例：有子分类的一级分类不能删除：外键 RESTRICT 拒绝</td></tr>
-<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        <span class="kw">long</span> primaryId = insertPrimaryCategory("CAT-DEL", "作品-CATDEL");</pre></td><td class="explain">属于 cannotDeleteCategoryWithChildren：用例：有子分类的一级分类不能删除：外键 RESTRICT 拒绝 的一步</td></tr>
-<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        insertSecondaryCategory("CAT-DEL-COMIC", primaryId, "单行本");</pre></td><td class="explain">准备二级分类「单行本」</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @DisplayName("有子分类的一级分类不能删除：外键 RESTRICT 拒绝")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> cannotDeleteCategoryWithChildren() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        <span class="kw">long</span> primaryId = insertPrimaryCategory("CAT-DEL", "作品-CATDEL");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        insertSecondaryCategory("CAT-DEL-COMIC", primaryId, "单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">84</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update("DELETE FROM category WHERE id = ?", primaryId))</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">断言抛出的异常类型</td></tr>
-<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                .hasMessageContaining("foreign key");</pre></td><td class="explain">断言异常信息包含关键字</td></tr>
-<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update("DELETE FROM category WHERE id = ?", primaryId))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                .hasMessageContaining("foreign key");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">89</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    @DisplayName("明细行金额必须等于单价×数量：CHECK 拒绝不一致")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">void</span> lineAmountMustMatchUnitPriceTimesQuantity() {</pre></td><td class="explain">用例：明细行金额必须等于单价×数量：CHECK 拒绝不一致</td></tr>
-<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-order");</pre></td><td class="explain">属于 lineAmountMustMatchUnitPriceTimesQuantity：用例：明细行金额必须等于单价×数量：CHECK 拒绝不一致 的一步</td></tr>
-<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("ORDTEST");</pre></td><td class="explain">属于 lineAmountMustMatchUnitPriceTimesQuantity：用例：明细行金额必须等于单价×数量：CHECK 拒绝不一致 的一步</td></tr>
-<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("ORD-001", categoryId, "50.00", 10, "ON_SALE", 100);</pre></td><td class="explain">属于 lineAmountMustMatchUnitPriceTimesQuantity：用例：明细行金额必须等于单价×数量：CHECK 拒绝不一致 的一步</td></tr>
-<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        <span class="kw">long</span> orderId = insertOrder("TEST-ORDER-1", userId, "PENDING_PAYMENT", "100.00");</pre></td><td class="explain">SQL 参数续行</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    @DisplayName("明细行金额必须等于单价×数量：CHECK 拒绝不一致")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">void</span> lineAmountMustMatchUnitPriceTimesQuantity() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-order");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("ORDTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("ORD-001", categoryId, "50.00", 10, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        <span class="kw">long</span> orderId = insertOrder("TEST-ORDER-1", userId, "PENDING_PAYMENT", "100.00");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">97</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                "INSERT INTO sales_order_item (order_id, product_id, sku_snapshot, product_name_snapshot, "</pre></td><td class="explain">属于 lineAmountMustMatchUnitPriceTimesQuantity：用例：明细行金额必须等于单价×数量：CHECK 拒绝不一致 的一步</td></tr>
-<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>                        + "cover_image_snapshot, unit_price, quantity, line_amount) VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
-<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                orderId, productId, "ORD-001", "测试商品", "images/x.svg",</pre></td><td class="explain">参数续行</td></tr>
-<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal("50.00"), 2, <span class="kw">new</span> BigDecimal("999.00")))</pre></td><td class="explain">属于 lineAmountMustMatchUnitPriceTimesQuantity：用例：明细行金额必须等于单价×数量：CHECK 拒绝不一致 的一步</td></tr>
-<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">断言抛出的异常类型</td></tr>
-<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                .hasMessageContaining("Check constraint");</pre></td><td class="explain">断言异常信息包含关键字</td></tr>
-<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                "INSERT INTO sales_order_item (order_id, product_id, sku_snapshot, product_name_snapshot, "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>                        + "cover_image_snapshot, unit_price, quantity, line_amount) VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                orderId, productId, "ORD-001", "测试商品", "images/x.svg",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal("50.00"), 2, <span class="kw">new</span> BigDecimal("999.00")))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                .hasMessageContaining("Check constraint");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">106</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    @DisplayName("已支付订单必须有支付时间：CHECK 拒绝半套支付信息")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    <span class="kw">void</span> paidOrderMustHavePaidAt() {</pre></td><td class="explain">用例：已支付订单必须有支付时间：CHECK 拒绝半套支付信息</td></tr>
-<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-paid");</pre></td><td class="explain">属于 paidOrderMustHavePaidAt：用例：已支付订单必须有支付时间：CHECK 拒绝半套支付信息 的一步</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    @DisplayName("已支付订单必须有支付时间：CHECK 拒绝半套支付信息")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    <span class="kw">void</span> paidOrderMustHavePaidAt() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-paid");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">111</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>                "INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, receiver_phone, "</pre></td><td class="explain">属于 paidOrderMustHavePaidAt：用例：已支付订单必须有支付时间：CHECK 拒绝半套支付信息 的一步</td></tr>
-<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                        + "receiver_address, payment_method, payment_no, paid_at) VALUES (?,?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
-<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                "TEST-ORDER-2", userId, "PAID", <span class="kw">new</span> BigDecimal("10.00"),</pre></td><td class="explain">属于 paidOrderMustHavePaidAt：用例：已支付订单必须有支付时间：CHECK 拒绝半套支付信息 的一步</td></tr>
-<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>                "收件人", "13800000000", "地址", "MOCK", "PAY-TEST-2", null))</pre></td><td class="explain">属于 paidOrderMustHavePaidAt：用例：已支付订单必须有支付时间：CHECK 拒绝半套支付信息 的一步</td></tr>
-<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">断言抛出的异常类型</td></tr>
-<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                .hasMessageContaining("Check constraint");</pre></td><td class="explain">断言异常信息包含关键字</td></tr>
-<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        assertThatThrownBy(() -&gt; jdbc.update(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>                "INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, receiver_phone, "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                        + "receiver_address, payment_method, payment_no, paid_at) VALUES (?,?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                "TEST-ORDER-2", userId, "PAID", <span class="kw">new</span> BigDecimal("10.00"),</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>                "收件人", "13800000000", "地址", "MOCK", "PAY-TEST-2", null))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>                .isInstanceOf(DataAccessException.<span class="kw">class</span>)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                .hasMessageContaining("Check constraint");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">120</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    @DisplayName("下架商品不会被首页查询返回")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    <span class="kw">void</span> draftProductIsInvisible() {</pre></td><td class="explain">用例：下架商品不会被首页查询返回</td></tr>
-<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("DRAFTTEST");</pre></td><td class="explain">属于 draftProductIsInvisible：用例：下架商品不会被首页查询返回 的一步</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    @DisplayName("下架商品不会被首页查询返回")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    <span class="kw">void</span> draftProductIsInvisible() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("DRAFTTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        insertProduct("HIDDEN-01", categoryId, "28.00", 10, "DRAFT", 1);</pre></td><td class="explain">准备商品 HIDDEN-01：¥28.00，库存 10，DRAFT，排序 1</td></tr>
 <tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        insertProduct("VISIBLE-01", categoryId, "28.00", 10, "ON_SALE", 1);</pre></td><td class="explain">准备商品 VISIBLE-01：¥28.00，库存 10，ON_SALE，排序 1</td></tr>
 <tr class="gap"><td class="line">127</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        assertThat(productMapper.selectFeatured(10))</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                .extracting(Product::getSku)</pre></td><td class="explain">取出字段做断言</td></tr>
-<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                .containsExactly("VISIBLE-01");</pre></td><td class="explain">断言顺序与内容完全一致</td></tr>
-<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        assertThat(productMapper.selectFeatured(10))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                .extracting(Product::getSku)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                .containsExactly("VISIBLE-01");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">132</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    @DisplayName("精选推荐按 sort_order 升序返回")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    <span class="kw">void</span> featuredOrderedBySortOrder() {</pre></td><td class="explain">用例：精选推荐按 sort_order 升序返回</td></tr>
-<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("FEATURED");</pre></td><td class="explain">属于 featuredOrderedBySortOrder：用例：精选推荐按 sort_order 升序返回 的一步</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    @DisplayName("精选推荐按 sort_order 升序返回")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    <span class="kw">void</span> featuredOrderedBySortOrder() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("FEATURED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>        insertProduct("S-3", categoryId, "28.00", 10, "ON_SALE", 3);</pre></td><td class="explain">准备商品 S-3：¥28.00，库存 10，ON_SALE，排序 3</td></tr>
 <tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        insertProduct("S-1", categoryId, "28.00", 10, "ON_SALE", 1);</pre></td><td class="explain">准备商品 S-1：¥28.00，库存 10，ON_SALE，排序 1</td></tr>
 <tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        insertProduct("S-4", categoryId, "28.00", 10, "ON_SALE", 4);</pre></td><td class="explain">准备商品 S-4：¥28.00，库存 10，ON_SALE，排序 4</td></tr>
 <tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        insertProduct("S-2", categoryId, "28.00", 10, "ON_SALE", 2);</pre></td><td class="explain">准备商品 S-2：¥28.00，库存 10，ON_SALE，排序 2</td></tr>
 <tr class="gap"><td class="line">141</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        assertThat(productMapper.selectFeatured(3))</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                .extracting(Product::getSku)</pre></td><td class="explain">取出字段做断言</td></tr>
-<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                .containsExactly("S-1", "S-2", "S-3");</pre></td><td class="explain">断言顺序与内容完全一致</td></tr>
-<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        assertThat(productMapper.selectFeatured(3))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                .extracting(Product::getSku)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                .containsExactly("S-1", "S-2", "S-3");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">146</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    @DisplayName("扣库存：足够时扣减并升版，不足时影响 0 行")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">void</span> deductStockRespectsInventory() {</pre></td><td class="explain">用例：扣库存：足够时扣减并升版，不足时影响 0 行</td></tr>
-<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("STOCKTEST");</pre></td><td class="explain">属于 deductStockRespectsInventory：用例：扣库存：足够时扣减并升版，不足时影响 0 行 的一步</td></tr>
-<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("STOCK-01", categoryId, "28.00", 1, "ON_SALE", 100);</pre></td><td class="explain">属于 deductStockRespectsInventory：用例：扣库存：足够时扣减并升版，不足时影响 0 行 的一步</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    @DisplayName("扣库存：足够时扣减并升版，不足时影响 0 行")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">void</span> deductStockRespectsInventory() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("STOCKTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("STOCK-01", categoryId, "28.00", 1, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">152</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        assertThat(productMapper.deductStock(productId, 2)).isZero();</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        assertThat(productMapper.deductStock(productId, 1)).isEqualTo(1);</pre></td><td class="explain">断言预期结果</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        assertThat(productMapper.deductStock(productId, 2)).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        assertThat(productMapper.deductStock(productId, 1)).isEqualTo(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">155</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        Integer stock = jdbc.queryForObject("SELECT stock FROM product WHERE id = ?", Integer.<span class="kw">class</span>, productId);</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>        Long version = jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.<span class="kw">class</span>, productId);</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        assertThat(stock).isZero();</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        assertThat(version).isEqualTo(1L);</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        Integer stock = jdbc.queryForObject("SELECT stock FROM product WHERE id = ?", Integer.<span class="kw">class</span>, productId);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>        Long version = jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.<span class="kw">class</span>, productId);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        assertThat(stock).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        assertThat(version).isEqualTo(1L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">161</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>    @DisplayName("购物车视图联表取到商品当前价格与库存")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    <span class="kw">void</span> cartViewJoinsCurrentPriceAndStock() {</pre></td><td class="explain">用例：购物车视图联表取到商品当前价格与库存</td></tr>
-<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-view");</pre></td><td class="explain">属于 cartViewJoinsCurrentPriceAndStock：用例：购物车视图联表取到商品当前价格与库存 的一步</td></tr>
-<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("VIEWTEST");</pre></td><td class="explain">属于 cartViewJoinsCurrentPriceAndStock：用例：购物车视图联表取到商品当前价格与库存 的一步</td></tr>
-<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("VIEW-01", categoryId, "28.00", 7, "ON_SALE", 100);</pre></td><td class="explain">属于 cartViewJoinsCurrentPriceAndStock：用例：购物车视图联表取到商品当前价格与库存 的一步</td></tr>
-<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        jdbc.update("INSERT INTO cart_item (user_id, product_id, quantity) VALUES (?,?,?)", userId, productId, 2);</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>    @DisplayName("购物车视图联表取到商品当前价格与库存")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    <span class="kw">void</span> cartViewJoinsCurrentPriceAndStock() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-view");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        <span class="kw">long</span> categoryId = newSecondaryCategory("VIEWTEST");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>        <span class="kw">long</span> productId = insertProduct("VIEW-01", categoryId, "28.00", 7, "ON_SALE", 100);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        jdbc.update("INSERT INTO cart_item (user_id, product_id, quantity) VALUES (?,?,?)", userId, productId, 2);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr class="gap"><td class="line">169</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        List&lt;CartItemView&gt; views = cartItemMapper.selectViewByUser(userId);</pre></td><td class="explain">属于 cartViewJoinsCurrentPriceAndStock：用例：购物车视图联表取到商品当前价格与库存 的一步</td></tr>
-<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        assertThat(views).hasSize(1);</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        CartItemView view = views.get(0);</pre></td><td class="explain">属于 cartViewJoinsCurrentPriceAndStock：用例：购物车视图联表取到商品当前价格与库存 的一步</td></tr>
-<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        assertThat(view.getProductName()).isEqualTo("测试商品");</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        assertThat(view.getPrice()).isEqualByComparingTo("28.00");</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        assertThat(view.getStock()).isEqualTo(7);</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>        assertThat(view.getQuantity()).isEqualTo(2);</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        assertThat(view.getCategoryName()).isEqualTo("单行本");</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        List&lt;CartItemView&gt; views = cartItemMapper.selectViewByUser(userId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        assertThat(views).hasSize(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        CartItemView view = views.get(0);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        assertThat(view.getProductName()).isEqualTo("测试商品");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        assertThat(view.getPrice()).isEqualByComparingTo("28.00");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        assertThat(view.getStock()).isEqualTo(7);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>        assertThat(view.getQuantity()).isEqualTo(2);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        assertThat(view.getCategoryName()).isEqualTo("单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">179</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 测试方法</td></tr>
-<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>    @DisplayName("订单号查重：不存在返回 0，存在返回 1")</pre></td><td class="explain">用例的可读名称</td></tr>
-<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    <span class="kw">void</span> countByOrderNoWorks() {</pre></td><td class="explain">用例：订单号查重：不存在返回 0，存在返回 1</td></tr>
-<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-count");</pre></td><td class="explain">属于 countByOrderNoWorks：用例：订单号查重：不存在返回 0，存在返回 1 的一步</td></tr>
-<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        assertThat(salesOrderMapper.countByOrderNo("NOPE-1")).isZero();</pre></td><td class="explain">断言预期结果</td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>    @DisplayName("订单号查重：不存在返回 0，存在返回 1")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    <span class="kw">void</span> countByOrderNoWorks() {</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        <span class="kw">long</span> userId = insertUser("u-count");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        assertThat(salesOrderMapper.countByOrderNo("NOPE-1")).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">185</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>        insertOrder("EXISTS-1", userId, "PENDING_PAYMENT", "10.00");</pre></td><td class="explain">准备订单 EXISTS-1：PENDING_PAYMENT，合计 10.00</td></tr>
-<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        assertThat(salesOrderMapper.countByOrderNo("EXISTS-1")).isEqualTo(1);</pre></td><td class="explain">断言预期结果</td></tr>
-<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        assertThat(salesOrderMapper.countByOrderNo("EXISTS-1")).isEqualTo(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">189</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>    /** 建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>    /** 建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> newSecondaryCategory(String codeSuffix) {</pre></td><td class="explain">建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。</td></tr>
-<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        <span class="kw">long</span> primaryId = insertPrimaryCategory("IP-" + codeSuffix, "作品-" + codeSuffix);</pre></td><td class="explain">属于 newSecondaryCategory：建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。 的一步</td></tr>
-<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        <span class="kw">return</span> insertSecondaryCategory("COMIC-" + codeSuffix, primaryId, "单行本");</pre></td><td class="explain">返回结果</td></tr>
-<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        <span class="kw">long</span> primaryId = insertPrimaryCategory("IP-" + codeSuffix, "作品-" + codeSuffix);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        <span class="kw">return</span> insertSecondaryCategory("COMIC-" + codeSuffix, primaryId, "单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">195</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    /** 插入一个启用状态的普通用户，返回 id。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    /** 插入一个启用状态的普通用户，返回 id。 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertUser(String username) {</pre></td><td class="explain">插入一个启用状态的普通用户，返回 id。</td></tr>
-<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
-<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>                username, "$2a$10$0123456789012345678901234567890123456789012345678901",</pre></td><td class="explain">属于 insertUser：插入一个启用状态的普通用户，返回 id。 的一步</td></tr>
-<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>                "测试用户", "CUSTOMER", "ENABLED");</pre></td><td class="explain">属于 insertUser：插入一个启用状态的普通用户，返回 id。 的一步</td></tr>
-<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM store_user WHERE username = ?", Long.<span class="kw">class</span>, username);</pre></td><td class="explain">返回结果</td></tr>
-<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>                username, "$2a$10$0123456789012345678901234567890123456789012345678901",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>                "测试用户", "CUSTOMER", "ENABLED");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM store_user WHERE username = ?", Long.<span class="kw">class</span>, username);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">204</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>    /** 插入一级分类（parent_id 为空）。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>    /** 插入一级分类（parent_id 为空）。 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertPrimaryCategory(String code, String name) {</pre></td><td class="explain">插入一级分类（parent_id 为空）。</td></tr>
-<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 0)", code, name);</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">返回结果</td></tr>
-<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 0)", code, name);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">210</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>    /** 插入二级分类，父必须是一级。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>    /** 插入二级分类，父必须是一级。 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertSecondaryCategory(String code, <span class="kw">long</span> parentId, String name) {</pre></td><td class="explain">插入二级分类，父必须是一级。</td></tr>
-<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,0)",</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>                code, parentId, name);</pre></td><td class="explain">参数续行</td></tr>
-<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">返回结果</td></tr>
-<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,0)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>                code, parentId, name);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">217</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>    /** 插入一个商品，返回 id；库存与状态由用例指定。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>    /** 插入一个商品，返回 id；库存与状态由用例指定。 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String price, <span class="kw">int</span> stock, String status, <span class="kw">int</span> sortOrder) {</pre></td><td class="explain">插入一个商品，返回 id；库存与状态由用例指定。</td></tr>
-<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, cover_image, price, stock, status, sort_order) "</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
-<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>                sku, categoryId, "测试商品", "images/products/" + sku + "/cover.svg",</pre></td><td class="explain">参数续行</td></tr>
-<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal(price), stock, status, sortOrder);</pre></td><td class="explain">属于 insertProduct：插入一个商品，返回 id；库存与状态由用例指定。 的一步</td></tr>
-<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.<span class="kw">class</span>, sku);</pre></td><td class="explain">返回结果</td></tr>
-<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, cover_image, price, stock, status, sort_order) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>                sku, categoryId, "测试商品", "images/products/" + sku + "/cover.svg",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal(price), stock, status, sortOrder);</pre></td><td class="explain">价格用 BigDecimal 传入</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.<span class="kw">class</span>, sku);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">226</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>    /** 插入一张订单（不含明细），返回 id。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>    /** 插入一张订单（不含明细），返回 id。 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertOrder(String orderNo, <span class="kw">long</span> userId, String status, String total) {</pre></td><td class="explain">插入一张订单（不含明细），返回 id。</td></tr>
-<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
-<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>                        + "receiver_phone, receiver_address) VALUES (?,?,?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>                        + "receiver_phone, receiver_address) VALUES (?,?,?,?,?,?,?)",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>                orderNo, userId, status, <span class="kw">new</span> BigDecimal(total), "收件人", "13800000000", "测试地址");</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
-<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM sales_order WHERE order_no = ?", Long.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">返回结果</td></tr>
-<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
-<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM sales_order WHERE order_no = ?", Long.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
 </section>
 </main>

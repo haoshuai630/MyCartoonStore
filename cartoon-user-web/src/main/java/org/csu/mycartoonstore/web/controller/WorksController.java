@@ -17,6 +17,7 @@ public class WorksController {
 
     private final CatalogService catalogService;
 
+    /** 构造器：注入查询服务，作品墙与作品页共用。 */
     public WorksController(CatalogService catalogService) {
         this.catalogService = catalogService;
     }

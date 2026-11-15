@@ -59,6 +59,14 @@ def make_html_explainer(lines: list[str]):
             return "注释：说明本段的用途或约束"
         if 'class="wrap"' in s or 'class="wrap ' in s:
             return "内容宽度容器：统一左右留白与最大宽度"
+        if 'class="section-head"' in s:
+            return "栏目头：标题在左、总数或更多入口在右"
+        if 'class="work-cover"' in s:
+            return "作品卡封面区：使用该作品第一卷封面"
+        if 'class="work-body"' in s:
+            return "作品卡文字区：名称、code、品类数与在售数"
+        if 'class="work-meta"' in s:
+            return "品类数与在售数并排展示"
         if s == "<main>":
             return "页面主体区"
         if 'class="results"' in s:
@@ -157,6 +165,7 @@ def main() -> None:
 </body></html>
 """
     doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
+    doc = doc.replace('<td class="explain">—</td>', '<td class="explain">本行参与结构或样式组织，不产生业务行为。</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 

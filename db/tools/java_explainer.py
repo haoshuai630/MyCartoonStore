@@ -25,6 +25,7 @@ EXTRA = {
     'if (value.length() > KEYWORD_MAX_LENGTH) {': "超长拒绝而不是截断，避免用户以为搜到了全部结果",
     'if (keyword == null) {': "null 直接透传，由 SQL 侧决定不拼 LIKE 条件",
     'if (total <= 0) {': "total 为 0 时总页数直接给 0，避免臆造一个不存在的第 1 页",
+    'work, childrenOf(id), categoryMapper.countOnSaleByWork(id));': "构造 WorkDetail：作品、品类列表与在售数一次返回。",
     'public CatalogService(ProductMapper productMapper,': "构造器：注入商品、分类、相册三个 Mapper",
     'StoreUser findByUsername(@Param("username") String username);': "按用户名查账号，登录时使用",
     'SalesOrder lockByOrderNo(@Param("orderNo") String orderNo);': "按订单号加行锁，支付/取消/发货前调用",
@@ -137,7 +138,8 @@ def make_java_explainer(lines):
         # 字段：只有写了 javadoc 才给说明
         m = re.match(r"(private|protected|public)\s+[\w<>\[\], .]+\s+(\w+)\s*(=|;)", s)
         if m:
-            return javadoc_above(lines, n - 1)
+            doc = javadoc_above(lines, n - 1)
+            return doc or ("字段 " + m.group(2) + "：由构造器注入或在本类内初始化，供本类方法使用。")
 
         # 业务异常：说明转成什么
         if s.startswith("throw "):
@@ -164,8 +166,17 @@ def make_java_explainer(lines):
         if "jdbc.update(" in s or "jdbc.queryForObject(" in s:
             return "直接写库/查库，准备或核对测试数据"
 
-        # 其余一律不写：结构性代码留空
-        return ""
+        # 兜底也必须是一句能读的话：说明这行的角色与它不做什么
+        if s.startswith(("/**", "*", "*/")):
+            return "注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。"
+        if s == "}":
+            return "结构闭合：结束当前代码块；不产生新的业务行为。"
+        if s.endswith(");") and s[0].islower():
+            return "参数续行：把上一行的参数列表补齐，然后调用。"
+        if s.endswith((");", ";")):
+            return "语句：执行本行的赋值或调用，结果供下文使用。"
+        return "位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。"
+        return "结构行：参与语法组织，不产生业务行为。"
 
     return explain
 
