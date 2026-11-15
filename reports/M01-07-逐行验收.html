@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M01-07 · Mapper 与自定义查询 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M01-07 · Mapper 与自定义查询（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码（注释行原位绿字），右列是该行的说明。</p>
+<nav><a href="#productmapperjava">ProductMapper.java</a><a href="#productqueryjava">ProductQuery.java</a><a href="#productmapperxml">ProductMapper.xml</a><a href="#cartitemmapperjava">CartItemMapper.java</a><a href="#cartitemviewjava">CartItemView.java</a><a href="#cartitemmapperxml">CartItemMapper.xml</a><a href="#storeusermapperjava">StoreUserMapper.java</a><a href="#salesordermapperjava">SalesOrderMapper.java</a><a href="#categorymapperjava">CategoryMapper.java</a><a href="#productimagemapperjava">ProductImageMapper.java</a><a href="#salesorderitemmapperjava">SalesOrderItemMapper.java</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M01 数据库与实体 / 任务 M01-07。依据 docs/04 §4 参数口径、02 篇 §8 并发与锁顺序。
+验证：全量打包 BUILD SUCCESS；用户端启动 2.168s、/health 200，说明 MyBatis 已解析全部 XML 且 namespace 正确。
+SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-09 集成测试验证。</p>
+<section id="productmapperjava">
+<h2>ProductMapper.java<small>商品 Mapper：分页、首页两栏、行锁、扣库存 · 42 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/mapper/ProductMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Update;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductQuery;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 商品 Mapper。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductMapper <span class="kw">extends</span> BaseMapper&lt;Product&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;Product&gt;，获得基础 CRUD</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 列表分页：分类 + 类型 + 关键字 + 白名单排序 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    List&lt;Product&gt; selectPage(@Param("q") ProductQuery query);</pre></td><td class="explain">列表分页：分类 + 类型 + 关键字 + 白名单排序</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 与列表同条件的总数 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">long</span> countPage(@Param("q") ProductQuery query);</pre></td><td class="explain">与列表同条件的总数</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 首页「新品上架」：上架商品按创建时间倒序 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    List&lt;Product&gt; selectNewest(@Param("limit") <span class="kw">int</span> limit);</pre></td><td class="explain">首页「新品上架」：上架商品按创建时间倒序</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    /** 首页「精选推荐」：上架商品按 sort_order 升序 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    List&lt;Product&gt; selectFeatured(@Param("limit") <span class="kw">int</span> limit);</pre></td><td class="explain">首页「精选推荐」：上架商品按 sort_order 升序</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 按 id 升序加行锁，供下单时统一顺序锁定商品，避免死锁 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    List&lt;Product&gt; lockByIds(@Param("ids") List&lt;Long&gt; ids);</pre></td><td class="explain">按 id 升序加行锁，供下单时统一顺序锁定商品，避免死锁</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>     * 乐观扣库存：库存足够才扣，同时 version + 1。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>     *</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>     * @<span class="kw">return</span> 影响行数；0 表示库存不足或商品不存在</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>     */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Update("UPDATE product SET stock = stock - #{qty}, version = version + 1 "</pre></td><td class="explain">注解 SQL：更新</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{id} AND stock &gt;= #{qty}")</pre></td><td class="explain">注解 SQL 续行（字符串拼接）</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">int</span> deductStock(@Param("id") Long id, @Param("qty") <span class="kw">int</span> qty);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="productqueryjava">
+<h2>ProductQuery.java<small>列表查询条件 DTO · 31 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/ProductQuery.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">DTO 类：只承载字段与 getter/setter，不含业务逻辑</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级或二级分类 id；为空表示全部</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** ALL / COMIC / MERCH */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">商品名称关键字，已去首尾空白；为空表示不搜索</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 当前页数量 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">当前页数量</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="productmapperxml">
+<h2>ProductMapper.xml<small>商品自定义 SQL · 71 行</small></h2>
+<p class="path">cartoon-catalog/src/main/resources/mapper/ProductMapper.xml</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</pre></td><td class="explain">XML 声明与 MyBatis DTD</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">mapper</span> PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"</pre></td><td class="explain">XML 声明与 MyBatis DTD</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>        "https://mybatis.org/dtd/mybatis-3-mapper.dtd"&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">mapper</span> namespace="org.csu.mycartoonstore.catalog.mapper.ProductMapper"&gt;</pre></td><td class="explain">namespace 必须是 Mapper 接口的全限定名</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">    &lt;!-- 列表与总数的公共条件：只取上架商品 --&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>    &lt;<span class="kw">sql</span> id="pageWhere"&gt;</pre></td><td class="explain">可复用 SQL 片段</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>        FROM product p</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>        JOIN category c ON c.id = p.category_id</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">where</span>&gt;</pre></td><td class="explain">自动处理 AND 前缀</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            p.status = 'ON_SALE'</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">if</span> test="q.categoryId != null"&gt;</pre></td><td class="explain">动态条件：q.categoryId != null</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                AND (c.id = #{q.categoryId} OR c.parent_id = #{q.categoryId})</pre></td><td class="explain">SQL 条件</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;<span class="kw">if</span> test="q.productType != null and q.productType != 'ALL'"&gt;</pre></td><td class="explain">动态条件：q.productType != null and q.productType != 'ALL'</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">choose</span>&gt;</pre></td><td class="explain">多选一：排序白名单</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                    &lt;<span class="kw">when</span> test="q.productType == 'COMIC'"&gt;AND c.code LIKE '%-COMIC'&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.productType == 'COMIC'</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">when</span> test="q.productType == 'MERCH'"&gt;AND c.code LIKE '%-MERCH'&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.productType == 'MERCH'</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;/<span class="kw">choose</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>            &lt;<span class="kw">if</span> test="q.keyword != null and q.keyword != ''"&gt;</pre></td><td class="explain">动态条件：q.keyword != null and q.keyword != ''</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                AND p.name LIKE CONCAT('%', #{q.keyword}, '%')</pre></td><td class="explain">SQL 条件</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        &lt;/<span class="kw">where</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    &lt;/<span class="kw">sql</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectPage" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 selectPage：对应接口方法同名</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        SELECT p.*</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        &lt;<span class="kw">include</span> refid="pageWhere"/&gt;</pre></td><td class="explain">引用上面的 SQL 片段</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        &lt;<span class="kw">choose</span>&gt;</pre></td><td class="explain">多选一：排序白名单</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;<span class="kw">when</span> test="q.sort == 'PRICE_ASC'"&gt;ORDER BY p.price ASC, p.id ASC&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.sort == 'PRICE_ASC'</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;<span class="kw">when</span> test="q.sort == 'PRICE_DESC'"&gt;ORDER BY p.price DESC, p.id ASC&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.sort == 'PRICE_DESC'</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">when</span> test="q.sort == 'NEWEST'"&gt;ORDER BY p.created_at DESC, p.id DESC&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.sort == 'NEWEST'</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>            &lt;<span class="kw">otherwise</span>&gt;ORDER BY p.sort_order ASC, p.id ASC&lt;/<span class="kw">otherwise</span>&gt;</pre></td><td class="explain">默认排序（其余值）</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        &lt;/<span class="kw">choose</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        LIMIT #{q.limit} OFFSET #{q.offset}</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="countPage" resultType="long"&gt;</pre></td><td class="explain">语句 countPage：对应接口方法同名</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        SELECT COUNT(*)</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        &lt;<span class="kw">include</span> refid="pageWhere"/&gt;</pre></td><td class="explain">引用上面的 SQL 片段</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectNewest" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 selectNewest：对应接口方法同名</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        SELECT *</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        FROM product</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        WHERE status = 'ON_SALE'</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        ORDER BY created_at DESC, id DESC</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        LIMIT #{limit}</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr class="gap"><td class="line">51</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectFeatured" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 selectFeatured：对应接口方法同名</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        SELECT *</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        FROM product</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        WHERE status = 'ON_SALE'</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        ORDER BY sort_order ASC, id ASC</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        LIMIT #{limit}</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr class="gap"><td class="line">59</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">    &lt;!-- 下单锁商品：按 id 升序，所有事务用同一顺序，避免死锁 --&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="lockByIds" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 lockByIds：对应接口方法同名</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        SELECT *</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        FROM product</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        WHERE id IN</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        &lt;<span class="kw">foreach</span> collection="ids" item="id" open="(" separator="," close=")"&gt;</pre></td><td class="explain">遍历集合参数，生成 IN (...)</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>            #{id}</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">foreach</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        ORDER BY id</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        FOR UPDATE</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>&lt;/<span class="kw">mapper</span>&gt;</pre></td><td class="explain">映射文件结束</td></tr>
+</tbody></table>
+</section>
+<section id="cartitemmapperjava">
+<h2>CartItemMapper.java<small>购物车 Mapper · 28 行</small></h2>
+<p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/mapper/CartItemMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.entity.CartItem;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 购物车 Mapper。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CartItemMapper <span class="kw">extends</span> BaseMapper&lt;CartItem&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;CartItem&gt;，获得基础 CRUD</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    /** 本人购物车全量（含失效条目），关联商品当前价格与库存 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    List&lt;CartItemView&gt; selectViewByUser(@Param("userId") Long userId);</pre></td><td class="explain">本人购物车全量（含失效条目），关联商品当前价格与库存</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    /** 加车前查已有条目，用于累加数量 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} AND product_id = #{productId}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    CartItem findByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);</pre></td><td class="explain">方法声明</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="cartitemviewjava">
+<h2>CartItemView.java<small>购物车行视图 DTO · 26 行</small></h2>
+<p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/dto/CartItemView.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.dto;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 购物车行视图：条目本身 + 商品当前名称、封面、价格、库存、状态。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * &lt;p&gt;价格不存购物车，每次查询取商品当前值。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartItemView {</pre></td><td class="explain">DTO 类：只承载字段与 getter/setter，不含业务逻辑</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> Long id;</pre></td><td class="explain">字段 id</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> Long productId;</pre></td><td class="explain">字段 productId</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> Integer quantity;</pre></td><td class="explain">字段 quantity</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> Long version;</pre></td><td class="explain">字段 version</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> String productName;</pre></td><td class="explain">字段 productName</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String coverImage;</pre></td><td class="explain">字段 coverImage</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> BigDecimal price;</pre></td><td class="explain">字段 price</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> Integer stock;</pre></td><td class="explain">字段 stock</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String productStatus;</pre></td><td class="explain">字段 productStatus</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> String categoryName;</pre></td><td class="explain">字段 categoryName</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="cartitemmapperxml">
+<h2>CartItemMapper.xml<small>购物车联表查询 · 23 行</small></h2>
+<p class="path">cartoon-cart/src/main/resources/mapper/CartItemMapper.xml</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;</pre></td><td class="explain">XML 声明与 MyBatis DTD</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">mapper</span> PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"</pre></td><td class="explain">XML 声明与 MyBatis DTD</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>        "https://mybatis.org/dtd/mybatis-3-mapper.dtd"&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">mapper</span> namespace="org.csu.mycartoonstore.cart.mapper.CartItemMapper"&gt;</pre></td><td class="explain">namespace 必须是 Mapper 接口的全限定名</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectViewByUser" resultType="org.csu.mycartoonstore.cart.dto.CartItemView"&gt;</pre></td><td class="explain">语句 selectViewByUser：对应接口方法同名</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>        SELECT i.id,</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>               i.product_id   AS productId,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>               i.quantity,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>               i.version,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>               p.name         AS productName,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>               p.cover_image  AS coverImage,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>               p.price,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>               p.stock,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>               p.status       AS productStatus,</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>               c.name         AS categoryName</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>        FROM cart_item i</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        JOIN product p ON p.id = i.product_id</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        JOIN category c ON c.id = p.category_id</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>        WHERE i.user_id = #{userId}</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        ORDER BY i.id</pre></td><td class="explain">SQL 语句体</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>&lt;/<span class="kw">mapper</span>&gt;</pre></td><td class="explain">映射文件结束</td></tr>
+</tbody></table>
+</section>
+<section id="storeusermapperjava">
+<h2>StoreUserMapper.java<small>账号 Mapper：登录、用户行锁 · 22 行</small></h2>
+<p class="path">cartoon-account/src/main/java/org/csu/mycartoonstore/account/mapper/StoreUserMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.account.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 账号 Mapper。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> StoreUserMapper <span class="kw">extends</span> BaseMapper&lt;StoreUser&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;StoreUser&gt;，获得基础 CRUD</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE username = #{username}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    StoreUser findByUsername(@Param("username") String username);</pre></td><td class="explain">方法声明</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 锁用户行：同用户的购物车写操作与下单必须先拿这把锁 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE id = #{id} FOR UPDATE")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    StoreUser lockById(@Param("id") Long id);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="salesordermapperjava">
+<h2>SalesOrderMapper.java<small>订单 Mapper：行锁、单号与凭证查重 · 29 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/mapper/SalesOrderMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 订单 Mapper。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrder&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;SalesOrder&gt;，获得基础 CRUD</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM sales_order WHERE order_no = #{orderNo} FOR UPDATE")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    SalesOrder lockByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Select("SELECT * FROM sales_order WHERE order_no = #{orderNo}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    SalesOrder findByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 订单号查重，生成订单号时用 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE order_no = #{orderNo}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">int</span> countByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 支付凭证查重，生成 payment_no 时用 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE payment_no = #{paymentNo}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">int</span> countByPaymentNo(@Param("paymentNo") String paymentNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="categorymapperjava">
+<h2>CategoryMapper.java<small>分类 Mapper（仅 BaseMapper） · 12 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/mapper/CategoryMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Category;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;Category&gt;，获得基础 CRUD</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="productimagemapperjava">
+<h2>ProductImageMapper.java<small>相册 Mapper（仅 BaseMapper） · 12 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/mapper/ProductImageMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.ProductImage;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductImageMapper <span class="kw">extends</span> BaseMapper&lt;ProductImage&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;ProductImage&gt;，获得基础 CRUD</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="salesorderitemmapperjava">
+<h2>SalesOrderItemMapper.java<small>订单明细 Mapper（仅 BaseMapper） · 12 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/mapper/SalesOrderItemMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.mapper;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrderItem;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderItemMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrderItem&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;SalesOrderItem&gt;，获得基础 CRUD</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M01-07 · 共 11 个文件、308 行；说明由 javadoc 提取 + 规则生成，逐行覆盖。
+完整汇报见同目录 M01-07-Mapper.md。</footer>
+</body></html>

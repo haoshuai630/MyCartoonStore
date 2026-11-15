@@ -27,6 +27,12 @@ spring:
     cache: false
     encoding: UTF-8
 
+mybatis-plus:
+  # 自定义 SQL 分散在各业务模块的 resources/mapper 下，用 classpath* 才能从 JAR 里找到
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
 logging:
   level:
     org.csu.mycartoonstore: info

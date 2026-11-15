@@ -41,3 +41,8 @@ _dsh_tmp2/
 ### 临时回收（不提交）
 _trash/
 
+
+### Python 缓存
+__pycache__/
+*.pyc
+

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M01-08 · 测试基座 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M01-08 · 测试基座（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">TestSchema.java</a><a href="#s2">AbstractIntegrationTest.java</a><a href="#s3">SchemaSmokeTest.java</a><a href="#s4">application-test.yaml</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M01 数据库与实体 / 任务 M01-08。依据 06 篇 §3 测试方法与 docs/03 §5 数据规格。
+验证：mvn -pl cartoon-user-web -am test → Tests run: 3, Failures: 0, Errors: 0, BUILD SUCCESS。
+测试库 MyCartoonStore_test 与演示库完全分离；每个用例前重建七张表。</p>
+<p class="note" style="margin-top:8px">未覆盖：<code>sql/schema-test.sql</code> 是从 <code>db/01-schema.sql</code> 生成的 DDL 副本，结构已在 M01-01 逐行验收，此处不重复。</p>
+<section id="s1">
+<h2>TestSchema.java<small>测试库重建：删表 + 执行建表脚本 · 59 行</small></h2>
+<p class="path">cartoon-test-support/src/main/java/org/csu/mycartoonstore/testsupport/TestSchema.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.testsupport;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.ClassPathResource;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.io.support.EncodedResource;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.datasource.init.ScriptUtils;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.nio.charset.StandardCharsets;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.sql.Connection;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.sql.SQLException;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.sql.Statement;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * 测试库初始化：每次用例前把七张表删掉重建，保证测试之间互不影响。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre> * &lt;p&gt;只操作 {@code MyCartoonStore_test}，绝不碰演示库。删除顺序按外键依赖从子到父。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">final</span> <span class="kw">class</span> TestSchema {</pre></td><td class="explain">类声明</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** 先删子表，再删父表，避免外键 RESTRICT 阻塞 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String[] DROP_ORDER = {</pre></td><td class="explain">常量数组</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            "sales_order_item",</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            "sales_order",</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>            "cart_item",</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            "product_image",</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>            "product",</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>            "category",</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            "store_user"</pre></td><td class="explain">常量项：表名</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    };</pre></td><td class="explain">数组结束</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> TestSchema() {</pre></td><td class="explain">方法 TestSchema</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> reset(DataSource dataSource) {</pre></td><td class="explain">方法 reset</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        dropTables(dataSource);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        runSchema(dataSource);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">void</span> dropTables(DataSource dataSource) {</pre></td><td class="explain">方法 dropTables</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        try (Connection connection = dataSource.getConnection();</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>             Statement statement = connection.createStatement()) {</pre></td><td class="explain">方法 createStatement</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            for (String table : DROP_ORDER) {</pre></td><td class="explain">方法</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                statement.execute("DROP TABLE IF EXISTS " + table);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>            }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        } catch (SQLException e) {</pre></td><td class="explain">方法</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            throw <span class="kw">new</span> IllegalStateException("清理测试库失败", e);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr class="gap"><td class="line">49</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">void</span> runSchema(DataSource dataSource) {</pre></td><td class="explain">方法 runSchema</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        try (Connection connection = dataSource.getConnection()) {</pre></td><td class="explain">方法 getConnection</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>            ScriptUtils.executeSqlScript(</pre></td><td class="explain">代码</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                    connection,</pre></td><td class="explain">代码</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    <span class="kw">new</span> EncodedResource(<span class="kw">new</span> ClassPathResource("sql/schema-test.sql"), StandardCharsets.UTF_8));</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        } catch (SQLException e) {</pre></td><td class="explain">方法</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>            throw <span class="kw">new</span> IllegalStateException("初始化测试库失败", e);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>AbstractIntegrationTest.java<small>集成测试基类 · 27 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/support/AbstractIntegrationTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.support;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.testsupport.TestSchema;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.test.context.SpringBootTest;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.context.ActiveProfiles;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 集成测试基类：启动完整用户端上下文 + 使用 test 配置 + 每个用例前重建七张表。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;子类放在 {@code org.csu.mycartoonstore.web} 及其子包下，Spring Boot 才能向上找到启动类。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@SpringBootTest</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>@ActiveProfiles("test")</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> abstract <span class="kw">class</span> AbstractIntegrationTest {</pre></td><td class="explain">类声明（抽象基类）</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    protected DataSource dataSource;</pre></td><td class="explain">字段 dataSource</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">void</span> resetSchema() {</pre></td><td class="explain">方法 resetSchema</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        TestSchema.reset(dataSource);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>SchemaSmokeTest.java<small>基座自检：3 个用例 · 46 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/SchemaSmokeTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">导入</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">导入</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 测试基座自检：证明 {@link AbstractIntegrationTest} 能连上测试库、建出七张表。</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">class</span> SchemaSmokeTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">代码</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbcTemplate;</pre></td><td class="explain">字段 jdbcTemplate</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Test</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @DisplayName("测试库存在且恰好七张表")</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">void</span> sevenTables() {</pre></td><td class="explain">方法 sevenTables</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        Integer count = jdbcTemplate.queryForObject(</pre></td><td class="explain">代码</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()",</pre></td><td class="explain">SQL 字符串续行</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                Integer.<span class="kw">class</span>);</pre></td><td class="explain">语句续行</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        assertThat(count).isEqualTo(7);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Test</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @DisplayName("建表后是空库，不含演示数据")</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">void</span> tablesAreEmpty() {</pre></td><td class="explain">方法 tablesAreEmpty</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        Integer products = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.<span class="kw">class</span>);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        Integer users = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM store_user", Integer.<span class="kw">class</span>);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        assertThat(products).isZero();</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        assertThat(users).isZero();</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @Test</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @DisplayName("生成列 parent_key 存在且是 STORED")</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">void</span> generatedColumnExists() {</pre></td><td class="explain">方法 generatedColumnExists</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        String extra = jdbcTemplate.queryForObject(</pre></td><td class="explain">代码</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                "SELECT extra FROM information_schema.columns "</pre></td><td class="explain">代码</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                        + "WHERE table_schema = DATABASE() AND table_name = 'category' AND column_name = 'parent_key'",</pre></td><td class="explain">注解 SQL 续行（字符串拼接）</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                String.<span class="kw">class</span>);</pre></td><td class="explain">语句续行</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        assertThat(extra).containsIgnoringCase("STORED GENERATED");</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>application-test.yaml<small>test profile：连 MyCartoonStore_test · 16 行</small></h2>
+<p class="path">cartoon-user-web/src/test/resources/application-test.yaml</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>spring:</pre></td><td class="explain">配置段</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>  datasource:</pre></td><td class="explain">配置项</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>    driver-class-name: com.mysql.cj.jdbc.Driver</pre></td><td class="explain">MySQL 驱动</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="cmt">    # createDatabaseIfNotExist=true：测试库不存在时自动创建，省掉手工建库</span></pre></td><td class="explain">注释</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre>    url: jdbc:mysql://localhost:3306/MyCartoonStore_test?useUnicode=true&amp;characterEncoding=utf-8&amp;serverTimezone=Asia/Shanghai&amp;useSSL=false&amp;allowPublicKeyRetrieval=true&amp;createDatabaseIfNotExist=true</pre></td><td class="explain">连接测试库；createDatabaseIfNotExist 让库不存在时自动创建</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>    username: root</pre></td><td class="explain">凭据，可用 DB_PASSWORD 覆盖</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>    password: ${DB_PASSWORD:123456}</pre></td><td class="explain">凭据，可用 DB_PASSWORD 覆盖</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>mybatis-plus:</pre></td><td class="explain">配置段</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>  mapper-locations: classpath*:/mapper/**/*.xml</pre></td><td class="explain">从各业务模块 JAR 中加载 XML</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>  configuration:</pre></td><td class="explain">配置项</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>    map-underscore-to-camel-case: true</pre></td><td class="explain">下划线列名转驼峰属性</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>logging:</pre></td><td class="explain">配置段</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>  level:</pre></td><td class="explain">日志级别</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    org.csu.mycartoonstore: info</pre></td><td class="explain">日志级别</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M01-08 · 共 4 个文件、148 行。
+完整汇报见同目录 M01-08-测试基座.md。</footer>
+</body></html>

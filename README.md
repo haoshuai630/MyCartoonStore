@@ -39,6 +39,8 @@
 
 ## 构建与测试
 
+> 完整步骤（含数据库初始化、IDEA 启动、常见报错）见 [docs/11-本地运行指南](docs/11-本地运行指南.md)。
+
 ```bash
 # 全量打包（跳过测试）
 ./mvnw -DskipTests package          # Windows: mvnw.cmd -DskipTests package
