@@ -168,7 +168,8 @@ def make_java_explainer(lines):
 
         # 兜底也必须是一句能读的话：说明这行的角色与它不做什么
         if s.startswith(("/**", "*", "*/")):
-            return "注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。"
+            body = re.sub(r"^[/\*\s]+|\*/$", "", s).strip()
+            return ("注释：" + body + "（不参与执行）") if body else "注释分隔行：只做排版，不参与执行。"
         if s == "}":
             return "结构闭合：结束当前代码块；不产生新的业务行为。"
         if s.endswith(");") and s[0].islower():

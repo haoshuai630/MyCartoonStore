@@ -50,12 +50,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">页面可见内容的起点</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">&lt;!-- 顶部条 + 页头：品牌、导航、搜索、购物车徽标 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">&lt;!-- 顶部条 + 页头：品牌、导航、搜索、购物车徽标 --&gt;</pre></td><td class="explain">注释：!-- 顶部条 + 页头：品牌、导航、搜索、购物车徽标（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>&lt;<span class="kw">div</span> th:fragment="header" style="display:contents"&gt;</pre></td><td class="explain">定义可复用片段 header，其他页面用 th:replace 引用</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="topbar"&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;官方正版 &lt;<span class="kw">span</span> class="dot"&gt;/&lt;/<span class="kw">span</span>&gt; 满 99 包邮 &lt;<span class="kw">span</span> class="dot"&gt;/&lt;/<span class="kw">span</span>&gt; 教学演示站点，商品与订单均为虚构&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">            &lt;!-- 登录身份在 M03 接入，这里先固定显示游客 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">            &lt;!-- 登录身份在 M03 接入，这里先固定显示游客 --&gt;</pre></td><td class="explain">注释：!-- 登录身份在 M03 接入，这里先固定显示游客（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;游客&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
@@ -83,7 +83,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    &lt;/<span class="kw">header</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">43</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">&lt;!-- 页脚 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">&lt;!-- 页脚 --&gt;</pre></td><td class="explain">注释：!-- 页脚（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>&lt;<span class="kw">footer</span> class="site-footer" th:fragment="footer"&gt;</pre></td><td class="explain">定义可复用片段 footer，其他页面用 th:replace 引用</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        &lt;<span class="kw">b</span>&gt;漫屿 MANGA ISLE&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
@@ -110,7 +110,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">注释：!-- 品牌横幅：装饰与入口，不直接下单（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="hero"&gt;</pre></td><td class="explain">品牌横幅：只做展示与入口，不直接下单</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap hero-inner"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
@@ -130,7 +130,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">注释：!-- 作品入口：数据来自 category 的一级分类（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="strip"&gt;</pre></td><td class="explain">作品入口：一级分类，点进对应作品列表</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="strip-grid" th:if="${!#lists.isEmpty(categories)}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
@@ -144,7 +144,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">42</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">注释：!-- 新品上架：上架商品按录入时间倒序，最多 3 项（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">首页栏目：新品上架 / 精选推荐</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
@@ -171,7 +171,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre class="cmtline">    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre class="cmtline">    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">注释：!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">首页栏目：新品上架 / 精选推荐</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
@@ -220,10 +220,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 首页控制器。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 首页控制器。</pre></td><td class="explain">注释：首页控制器。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，</pre></td><td class="explain">注释：&lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，（不参与执行）</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;</pre></td><td class="explain">注释：与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Controller</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> HomeController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -237,7 +237,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 根路径与 /main 共用首页视图，装配作品入口与两个商品栏目 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 根路径与 /main 共用首页视图，装配作品入口与两个商品栏目 */</pre></td><td class="explain">注释：根路径与 /main 共用首页视图，装配作品入口与两个商品栏目（不参与执行）</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @GetMapping({"/", "/main"})</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">public</span> String main(Model model) {</pre></td><td class="explain">根路径与 /main 共用首页视图，装配作品入口与两个商品栏目</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        model.addAttribute("categories", catalogService.topCategories());</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
@@ -271,9 +271,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre> * 布局渲染测试：确认公共片段能被 Thymeleaf 解析、静态资源能正确返回。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre> * 布局渲染测试：确认公共片段能被 Thymeleaf 解析、静态资源能正确返回。</pre></td><td class="explain">注释：布局渲染测试：确认公共片段能被 Thymeleaf 解析、静态资源能正确返回。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre> * &lt;p&gt;不连业务数据，所以不继承集成测试基类，避免每个用例重建七张表。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre> * &lt;p&gt;不连业务数据，所以不继承集成测试基类，避免每个用例重建七张表。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;不连业务数据，所以不继承集成测试基类，避免每个用例重建七张表。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@SpringBootTest</pre></td><td class="explain">启动完整上下文</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>

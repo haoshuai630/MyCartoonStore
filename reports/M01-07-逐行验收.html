@@ -52,31 +52,31 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">11</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 商品 Mapper。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 商品 Mapper。</pre></td><td class="explain">注释：商品 Mapper。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductMapper <span class="kw">extends</span> BaseMapper&lt;Product&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 列表分页：分类 + 类型 + 关键字 + 白名单排序 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 列表分页：分类 + 类型 + 关键字 + 白名单排序 */</pre></td><td class="explain">注释：列表分页：分类 + 类型 + 关键字 + 白名单排序（不参与执行）</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    List&lt;Product&gt; selectPage(@Param("q") ProductQuery query);</pre></td><td class="explain">列表分页：分类 + 类型 + 关键字 + 白名单排序</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 与列表同条件的总数 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 与列表同条件的总数 */</pre></td><td class="explain">注释：与列表同条件的总数（不参与执行）</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">long</span> countPage(@Param("q") ProductQuery query);</pre></td><td class="explain">与列表同条件的总数</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 首页「新品上架」：上架商品按创建时间倒序 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 首页「新品上架」：上架商品按创建时间倒序 */</pre></td><td class="explain">注释：首页「新品上架」：上架商品按创建时间倒序（不参与执行）</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    List&lt;Product&gt; selectNewest(@Param("limit") <span class="kw">int</span> limit);</pre></td><td class="explain">首页「新品上架」：上架商品按创建时间倒序</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    /** 首页「精选推荐」：上架商品按 sort_order 升序 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    /** 首页「精选推荐」：上架商品按 sort_order 升序 */</pre></td><td class="explain">注释：首页「精选推荐」：上架商品按 sort_order 升序（不参与执行）</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    List&lt;Product&gt; selectFeatured(@Param("limit") <span class="kw">int</span> limit);</pre></td><td class="explain">首页「精选推荐」：上架商品按 sort_order 升序</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 按 id 升序加行锁，供下单时统一顺序锁定商品，避免死锁 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 按 id 升序加行锁，供下单时统一顺序锁定商品，避免死锁 */</pre></td><td class="explain">注释：按 id 升序加行锁，供下单时统一顺序锁定商品，避免死锁（不参与执行）</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    List&lt;Product&gt; lockByIds(@Param("ids") List&lt;Long&gt; ids);</pre></td><td class="explain">按 id 升序加行锁，供下单时统一顺序锁定商品，避免死锁</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>     * 乐观扣库存：库存足够才扣，同时 version + 1。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>     * 乐观扣库存：库存足够才扣，同时 version + 1。</pre></td><td class="explain">注释：乐观扣库存：库存足够才扣，同时 version + 1。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>     *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>     * @<span class="kw">return</span> 影响行数；0 表示库存不足或商品不存在</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>     * @<span class="kw">return</span> 影响行数；0 表示库存不足或商品不存在</pre></td><td class="explain">注释：@return 影响行数；0 表示库存不足或商品不存在（不参与执行）</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Update("UPDATE product SET stock = stock - #{qty}, version = version + 1 "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{id} AND stock &gt;= #{qty}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -97,32 +97,32 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">Lombok：为字段生成 setter</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain">注释：商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">13</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">注释：一级或二级分类 id；为空表示全部（不参与执行）</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级或二级分类 id；为空表示全部</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */</pre></td><td class="explain">注释：作品（一级分类）id；指定时只查该作品下的全部品类（不参与执行）</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> Long workId;</pre></td><td class="explain">作品（一级分类）id；指定时只查该作品下的全部品类</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** ALL / COMIC / MERCH */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** ALL / COMIC / MERCH */</pre></td><td class="explain">注释：ALL / COMIC / MERCH（不参与执行）</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH</td></tr>
 <tr class="gap"><td class="line">22</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">注释：商品名称关键字，已去首尾空白；为空表示不搜索（不参与执行）</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">商品名称关键字，已去首尾空白；为空表示不搜索</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain">注释：DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST（不参与执行）</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    /** 当前页数量 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    /** 当前页数量 */</pre></td><td class="explain">注释：当前页数量（不参与执行）</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">当前页数量</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">注释：偏移量（不参与执行）</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
 </tbody></table>
@@ -229,19 +229,19 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">11</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 购物车 Mapper。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 购物车 Mapper。</pre></td><td class="explain">注释：购物车 Mapper。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CartItemMapper <span class="kw">extends</span> BaseMapper&lt;CartItem&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    /** 本人购物车全量（含失效条目），关联商品当前价格与库存 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    /** 本人购物车全量（含失效条目），关联商品当前价格与库存 */</pre></td><td class="explain">注释：本人购物车全量（含失效条目），关联商品当前价格与库存（不参与执行）</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    List&lt;CartItemView&gt; selectViewByUser(@Param("userId") Long userId);</pre></td><td class="explain">本人购物车全量（含失效条目），关联商品当前价格与库存</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    /** 加车前查已有条目，用于累加数量 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    /** 加车前查已有条目，用于累加数量 */</pre></td><td class="explain">注释：加车前查已有条目，用于累加数量（不参与执行）</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} AND product_id = #{productId}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    CartItem findByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);</pre></td><td class="explain">加车前查已有条目，用于累加数量</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain">注释：购物车种类数，用于 20 种上限（不参与执行）</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">购物车种类数，用于 20 种上限</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
@@ -262,8 +262,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 购物车行视图：条目本身 + 商品当前名称、封面、价格、库存、状态。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * &lt;p&gt;价格不存购物车，每次查询取商品当前值。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 购物车行视图：条目本身 + 商品当前名称、封面、价格、库存、状态。</pre></td><td class="explain">注释：购物车行视图：条目本身 + 商品当前名称、封面、价格、库存、状态。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * &lt;p&gt;价格不存购物车，每次查询取商品当前值。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;价格不存购物车，每次查询取商品当前值。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -330,8 +330,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 账号 Mapper。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 账号 Mapper。</pre></td><td class="explain">注释：账号 Mapper。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> StoreUserMapper <span class="kw">extends</span> BaseMapper&lt;StoreUser&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -339,7 +339,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE username = #{username}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    StoreUser findByUsername(@Param("username") String username);</pre></td><td class="explain">按用户名查账号，登录时使用</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 锁用户行：同用户的购物车写操作与下单必须先拿这把锁 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 锁用户行：同用户的购物车写操作与下单必须先拿这把锁 */</pre></td><td class="explain">注释：锁用户行：同用户的购物车写操作与下单必须先拿这把锁（不参与执行）</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE id = #{id} FOR UPDATE")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    StoreUser lockById(@Param("id") Long id);</pre></td><td class="explain">锁用户行：同用户的购物车写操作与下单必须先拿这把锁</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
@@ -361,8 +361,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 订单 Mapper。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 订单 Mapper。</pre></td><td class="explain">注释：订单 Mapper。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrder&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -373,11 +373,11 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Select("SELECT * FROM sales_order WHERE order_no = #{orderNo}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    SalesOrder findByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">按订单号查订单（不加锁）</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 订单号查重，生成订单号时用 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 订单号查重，生成订单号时用 */</pre></td><td class="explain">注释：订单号查重，生成订单号时用（不参与执行）</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE order_no = #{orderNo}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">int</span> countByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">订单号查重，生成订单号时用</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 支付凭证查重，生成 payment_no 时用 */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 支付凭证查重，生成 payment_no 时用 */</pre></td><td class="explain">注释：支付凭证查重，生成 payment_no 时用（不参与执行）</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE payment_no = #{paymentNo}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">int</span> countByPaymentNo(@Param("paymentNo") String paymentNo);</pre></td><td class="explain">支付凭证查重，生成 payment_no 时用</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
@@ -401,15 +401,15 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">注释：分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>     * 作品墙数据：每个一级分类带上品类数与在售商品数。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>     * 作品墙数据：每个一级分类带上品类数与在售商品数。</pre></td><td class="explain">注释：作品墙数据：每个一级分类带上品类数与在售商品数。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>     *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>     * &lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>     * &lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;（不参与执行）</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            SELECT p.id AS id, p.code AS code, p.name AS name,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -423,7 +423,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            """)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    List&lt;WorkSummary&gt; selectWorkSummaries();</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /** 某部作品的在售商品数（详情页横幅用） */</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /** 某部作品的在售商品数（详情页横幅用） */</pre></td><td class="explain">注释：某部作品的在售商品数（详情页横幅用）（不参与执行）</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            SELECT COUNT(*) FROM product pr</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>              JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -447,7 +447,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.ProductImage;</pre></td><td class="explain">商品相册实体</td></tr>
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。</pre></td><td class="explain">注释：商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductImageMapper <span class="kw">extends</span> BaseMapper&lt;ProductImage&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -468,7 +468,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrderItem;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。</pre></td><td class="explain">注释正文：说明紧邻声明的职责、输入输出与边界，编译后不产生指令。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。</pre></td><td class="explain">注释：订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderItemMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrderItem&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
