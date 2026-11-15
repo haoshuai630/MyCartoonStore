@@ -54,7 +54,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="result-meta" th:if="${!#lists.isEmpty(works)}" th:text="'共 ' + ${#lists.size(works)} + ' 部'"&gt;共 0 部&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span.result-meta 容器</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.section-head 容器</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;!-- 每部作品一张卡：点进去看该作品的品类与商品 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">            &lt;!-- 每部作品一张卡：点进去看该作品的品类与商品 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="works-grid" th:if="${!#lists.isEmpty(works)}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="work-card" th:each="w : ${works}" th:href="@{/works/{id}(id=${w.id})}"&gt;</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-cover"&gt;</pre></td><td class="explain">—</td></tr>
@@ -98,11 +98,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PathVariable;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * 作品墙：所有作品（一级分类）的入口页。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * &lt;p&gt;作品多了以后，导航只需要指向这一页，不必把每部作品都塞进侧栏。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * 作品墙：所有作品（一级分类）的入口页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * &lt;p&gt;作品多了以后，导航只需要指向这一页，不必把每部作品都塞进侧栏。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Controller</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WorksController {</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
@@ -112,12 +112,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>     * 作品页：作品横幅 + 品类筛选 + 商品列表。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>     *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>     * &lt;p&gt;路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖，</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>     * 避免有人用 ?workId= 越权看别家作品。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">     * 作品页：作品横幅 + 品类筛选 + 商品列表。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">     * &lt;p&gt;路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">     * 避免有人用 ?workId= 越权看别家作品。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @GetMapping("/works/{id}")</pre></td><td class="explain">作品页路径：id 是作品（一级分类）</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, ProductSearchCommand command, Model model) {</pre></td><td class="explain">路径 id + 查询参数（品类/排序/页码）</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        model.addAttribute("work", catalogService.work(id));</pre></td><td class="explain">作品横幅数据；不存在或层级不对直接 404</td></tr>
@@ -127,7 +127,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        <span class="kw">return</span> "work";</pre></td><td class="explain">视图名对应 templates/work.html</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    /** 作品墙：每部作品一张卡，带品类数与在售数 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 作品墙：每部作品一张卡，带品类数与在售数 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @GetMapping("/works")</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">public</span> String list(Model model) {</pre></td><td class="explain">作品墙：每部作品一张卡，带品类数与在售数</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        model.addAttribute("works", catalogService.works());</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
@@ -160,9 +160,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre> * 作品墙测试：作品名、品类数、在售数。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * 作品墙测试：作品名、品类数、在售数。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> WorksPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>

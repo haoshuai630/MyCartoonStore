@@ -49,7 +49,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain">面包屑：首页 / 作品 / 分类 / 商品</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/main}"&gt;首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结束 a 容器</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
@@ -61,7 +61,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结束 nav.crumbs 容器</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="product-detail"&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="gallery"&gt;</pre></td><td class="explain">左侧相册区</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">img</span> class="gallery-main" th:src="@{${detail.product().coverImage}}"</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                     th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">—</td></tr>
@@ -71,7 +71,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.thumbs 容器</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.gallery 容器</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;!-- 右侧：购买信息 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">            &lt;!-- 右侧：购买信息 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="info"&gt;</pre></td><td class="explain">右侧购买信息区</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="cat" th:text="${detail.product().sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span.cat 容器</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                &lt;<span class="kw">h1</span> th:text="${detail.product().name}"&gt;商品名&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">结束 h1 容器</td></tr>
@@ -80,7 +80,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="stock" th:classappend="${detail.product().stock == 0} ? 'zero'"</pre></td><td class="explain">库存为 0 时加 zero 样式，显示售罄</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                   th:text="${detail.product().stock == 0} ? '暂时缺货' : '库存 ' + ${detail.product().stock}"&gt;库存&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结束 p 容器</td></tr>
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                &lt;!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">                &lt;!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                &lt;<span class="kw">form</span> class="buy" action="#" method="post"&gt;</pre></td><td class="explain">购物车 M04 才实现，这里先占位不提交</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="number" name="quantity" value="1" min="1"</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                           th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}"&gt;</pre></td><td class="explain">—</td></tr>
@@ -121,12 +121,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PathVariable;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * 商品详情页。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * &lt;p&gt;商品不存在、已下架都在 Service 里转 404，由 GlobalExceptionHandler 输出错误页；</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * 控制器只负责把详情挂到模型上。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * 商品详情页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * &lt;p&gt;商品不存在、已下架都在 Service 里转 404，由 GlobalExceptionHandler 输出错误页；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 控制器只负责把详情挂到模型上。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Controller</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductController {</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
@@ -136,7 +136,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 按 id 查看商品详情 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 按 id 查看商品详情 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @GetMapping("/product/{id}")</pre></td><td class="explain">详情页路径：id 走路径变量，便于分享链接</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, Model model) {</pre></td><td class="explain">按 id 取详情；不存在/下架在 Service 抛 404</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        ProductDetail detail = catalogService.detail(id);</pre></td><td class="explain">一次取回商品、两级分类、相册</td></tr>
@@ -170,9 +170,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre> * 详情页测试：正常商品、下架商品、不存在的 id、相册与无相册两种情况。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * 详情页测试：正常商品、下架商品、不存在的 id、相册与无相册两种情况。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> ProductPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：每个用例前重建七张表</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>

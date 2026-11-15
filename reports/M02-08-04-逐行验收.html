@@ -53,7 +53,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;ALL PRODUCTS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部商品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div 容器</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.section-head 容器</td></tr>
 <tr class="gap"><td class="line">14</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;!-- 筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">            &lt;!-- 筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">form</span> class="filter-bar" th:action="@{/category}" method="get"&gt;</pre></td><td class="explain">筛选条用一个 GET 表单提交，作品多了也不会撑爆页面</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                &lt;label class="field"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;作品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
@@ -165,11 +165,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre> * 列表页测试：类型筛选、分页、非法排序参数。</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * &lt;p&gt;固定造 8 件商品（7 件单行本 + 1 件周边），默认每页 6 条，因此第 2 页应有 2 条。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"> * 列表页测试：类型筛选、分页、非法排序参数。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> * &lt;p&gt;固定造 8 件商品（7 件单行本 + 1 件周边），默认每页 6 条，因此第 2 页应有 2 条。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">class</span> CategoryPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
