@@ -20,6 +20,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected DataSource dataSource;
 
+    /** 每个用例前重建测试库，避免测试之间互相污染。 */
     @BeforeEach
     void resetSchema() {
         TestSchema.reset(dataSource);

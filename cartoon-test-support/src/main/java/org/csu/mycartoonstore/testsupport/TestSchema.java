@@ -28,14 +28,17 @@ public final class TestSchema {
             "store_user"
     };
 
+    /** 工具类，不允许实例化。 */
     private TestSchema() {
     }
 
+    /** 删表 + 建表，供每个用例前调用，保证起点是空库。 */
     public static void reset(DataSource dataSource) {
         dropTables(dataSource);
         runSchema(dataSource);
     }
 
+    /** 按外键依赖从子到父删除，避免 RESTRICT 阻塞。 */
     private static void dropTables(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection();
              Statement statement = connection.createStatement()) {
@@ -47,6 +50,7 @@ public final class TestSchema {
         }
     }
 
+    /** 执行 schema-test.sql 里的建表语句。 */
     private static void runSchema(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             ScriptUtils.executeSqlScript(

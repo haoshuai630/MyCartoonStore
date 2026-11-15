@@ -55,7 +55,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 商品 Mapper。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;分页查询、首页两栏、行锁在 XML；扣库存用注解，保证只有一条 UPDATE。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductMapper <span class="kw">extends</span> BaseMapper&lt;Product&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;Product&gt;，获得基础 CRUD</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 列表分页：分类 + 类型 + 关键字 + 白名单排序 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
@@ -79,8 +79,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>     * @<span class="kw">return</span> 影响行数；0 表示库存不足或商品不存在</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>     */</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Update("UPDATE product SET stock = stock - #{qty}, version = version + 1 "</pre></td><td class="explain">注解 SQL：更新</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{id} AND stock &gt;= #{qty}")</pre></td><td class="explain">注解 SQL 续行（字符串拼接）</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">int</span> deductStock(@Param("id") Long id, @Param("qty") <span class="kw">int</span> qty);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{id} AND stock &gt;= #{qty}")</pre></td><td class="explain">注解</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">int</span> deductStock(@Param("id") Long id, @Param("qty") <span class="kw">int</span> qty);</pre></td><td class="explain">@return 影响行数；0 表示库存不足或商品不存在 乐观扣库存：库存足够才扣，同时 version + 1。</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
 </section>
@@ -102,7 +102,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">注解</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">注解</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">DTO 类：只承载字段与 getter/setter，不含业务逻辑</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">类声明</td></tr>
 <tr class="gap"><td class="line">13</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级或二级分类 id；为空表示全部</td></tr>
@@ -225,7 +225,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 购物车 Mapper。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CartItemMapper <span class="kw">extends</span> BaseMapper&lt;CartItem&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;CartItem&gt;，获得基础 CRUD</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    /** 本人购物车全量（含失效条目），关联商品当前价格与库存 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
@@ -233,11 +233,11 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    /** 加车前查已有条目，用于累加数量 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} AND product_id = #{productId}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    CartItem findByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    CartItem findByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);</pre></td><td class="explain">加车前查已有条目，用于累加数量</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">购物车种类数，用于 20 种上限</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
 </section>
@@ -261,7 +261,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">注解</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">注解</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartItemView {</pre></td><td class="explain">DTO 类：只承载字段与 getter/setter，不含业务逻辑</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartItemView {</pre></td><td class="explain">类声明</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> Long id;</pre></td><td class="explain">字段 id</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> Long productId;</pre></td><td class="explain">字段 productId</td></tr>
@@ -327,15 +327,15 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 账号 Mapper。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;按用户名查询用于登录；行锁用于购物车与下单前的"先锁用户"串行化。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> StoreUserMapper <span class="kw">extends</span> BaseMapper&lt;StoreUser&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;StoreUser&gt;，获得基础 CRUD</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE username = #{username}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    StoreUser findByUsername(@Param("username") String username);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    StoreUser findByUsername(@Param("username") String username);</pre></td><td class="explain">按用户名查账号，登录时使用</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 锁用户行：同用户的购物车写操作与下单必须先拿这把锁 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @Select("SELECT * FROM store_user WHERE id = #{id} FOR UPDATE")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    StoreUser lockById(@Param("id") Long id);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    StoreUser lockById(@Param("id") Long id);</pre></td><td class="explain">锁用户行：同用户的购物车写操作与下单必须先拿这把锁</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
 </section>
@@ -358,22 +358,22 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 订单 Mapper。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;行锁用于支付/取消/发货：同一订单只允许一种状态迁移成功。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrder&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;SalesOrder&gt;，获得基础 CRUD</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Select("SELECT * FROM sales_order WHERE order_no = #{orderNo} FOR UPDATE")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    SalesOrder lockByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    SalesOrder lockByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">按订单号加行锁，支付/取消/发货前调用</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Select("SELECT * FROM sales_order WHERE order_no = #{orderNo}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    SalesOrder findByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    SalesOrder findByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">按订单号查订单（不加锁）</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 订单号查重，生成订单号时用 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE order_no = #{orderNo}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">int</span> countByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">int</span> countByOrderNo(@Param("orderNo") String orderNo);</pre></td><td class="explain">订单号查重，生成订单号时用</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 支付凭证查重，生成 payment_no 时用 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM sales_order WHERE payment_no = #{paymentNo}")</pre></td><td class="explain">注解 SQL：查询</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">int</span> countByPaymentNo(@Param("paymentNo") String paymentNo);</pre></td><td class="explain">方法声明</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">int</span> countByPaymentNo(@Param("paymentNo") String paymentNo);</pre></td><td class="explain">支付凭证查重，生成 payment_no 时用</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
 </section>
@@ -393,7 +393,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;Category&gt;，获得基础 CRUD</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
@@ -414,7 +414,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 商品相册 Mapper。详情页按 sort_order、id 升序查询，用 QueryWrapper 即可。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> ProductImageMapper <span class="kw">extends</span> BaseMapper&lt;ProductImage&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;ProductImage&gt;，获得基础 CRUD</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
@@ -435,7 +435,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 订单明细 Mapper。按 order_id 查询用 QueryWrapper 即可。</pre></td><td class="explain">注释续行</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 扫描注册</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis Mapper，由 @MapperScan 注册</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> SalesOrderItemMapper <span class="kw">extends</span> BaseMapper&lt;SalesOrderItem&gt; {</pre></td><td class="explain">接口：继承 BaseMapper&lt;SalesOrderItem&gt;，获得基础 CRUD</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
