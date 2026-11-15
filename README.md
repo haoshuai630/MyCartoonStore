@@ -11,8 +11,8 @@
 | 模块 | 内容 | 状态 |
 |---|---|---|
 | M00 | 工程基座（parent、common、测试基座、依赖边界检查） | ✅ 完成 |
-| M01 | 数据库与实体（SQL 改写、七表实体/Mapper、种子数据） | ⬜ 待开始 |
-| M02 | 商品浏览 | ⬜ |
+| M01 | 数据库与实体（SQL 改写、七表实体/Mapper、种子数据） | ✅ 完成（v0.3-m01） |
+| M02 | 商品浏览（首页 / 列表 / 详情） | 🟡 进行中 4/7 |
 | M03 | 账号与权限 | ⬜ |
 | M04 | 购物车 | ⬜ |
 | M05 | 订单 | ⬜ |
@@ -21,7 +21,7 @@
 | M08 | P1 扩展 | ⬜ |
 | M09 | 验收交付 | ⬜ |
 
-> `db/` 里的两份 SQL 目前仍是课程原始的 `MyPetStore` 版本，M01 会改写为 `MyCartoonStore` 与漫画种子数据。
+> 数据库已是 `MyCartoonStore` + 漫画种子数据（4 用户 / 15 分类 / 60 商品 / 10 订单）。最近一次更新：2026-11-15。
 
 ---
 
@@ -54,10 +54,14 @@
 ./mvnw -pl cartoon-admin-web spring-boot:run
 ```
 
-探活：
+已实现的页面与探活：
 
-- 用户端 <http://localhost:8080/health>
-- 管理端 <http://localhost:8081/admin/health>
+| 地址 | 说明 |
+|---|---|
+| <http://localhost:8080/main> | 首页：作品入口 + 新品 3 + 精选 4 |
+| <http://localhost:8080/category> | 列表页：分类 / 类型 / 排序 / 关键字 / 分页 |
+| <http://localhost:8080/health> | 用户端探活 |
+| <http://localhost:8081/admin/health> | 管理端探活（管理页面在 M07 做） |
 
 ---
 
