@@ -83,6 +83,10 @@ def make_java_explainer(lines):
         s = line.strip()
         if not s:
             return ""
+        # 源码里写了行尾注释就直接用：注释本身已经是"为什么"，不再另编
+        m = re.search(r"//\s*(.+?)\s*$", line)
+        if m and not s.startswith("//") and "http" not in line:
+            return m.group(1)
         if s.startswith(".andExpect(status("):
             return "断言 HTTP 状态码"
         if s.startswith(".andExpect("):
@@ -123,10 +127,6 @@ def make_java_explainer(lines):
             return IMPORT_NOTES.get(s.rstrip(";"), "")
         if s in ANNOTATION_NOTES or s.split("(")[0] in ANNOTATION_NOTES:
             return ANNOTATION_NOTES.get(s.split("(")[0], "")
-        # 源码里写了行尾注释就直接用：注释本身已经是"为什么"，不再另编
-        m = re.search(r"//\s*(.+?)\s*$", line)
-        if m and not s.startswith("//") and "http" not in line:
-            return m.group(1)
         if s in EXTRA:
             return EXTRA[s]
 
