@@ -56,7 +56,7 @@ def make_html_explainer(lines: list[str]):
         if s in ("</body>", "</html>"):
             return "文档结束"
         if s.startswith("<!--"):
-            body = s.strip("<").strip(">").strip("-").strip()
+            body = re.sub(r"^<!--\s*|\s*-->$", "", s).strip()
             return ("注释：" + body + "（不参与渲染）") if body else "注释：分隔用，不参与渲染"
         if 'class="wrap"' in s or 'class="wrap ' in s:
             return "内容宽度容器：统一左右留白与最大宽度"

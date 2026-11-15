@@ -54,7 +54,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;ALL PRODUCTS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部商品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div 容器</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.section-head 容器</td></tr>
 <tr class="gap"><td class="line">14</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;!-- 筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面 --&gt;</pre></td><td class="explain">注释：!-- 筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面（不参与渲染）</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;!-- 筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面 --&gt;</pre></td><td class="explain">注释：筛选条：作品下拉 + 类型 + 排序，一个表单提交，作品再多也不会撑爆页面（不参与渲染）</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">form</span> class="filter-bar" th:action="@{/category}" method="get"&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                &lt;label class="field"&gt;</pre></td><td class="explain">本行参与结构或样式组织，不产生业务行为。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;作品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
@@ -155,12 +155,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">MVC 模型，控制器往里放数据给模板</td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 商品列表页。</pre></td><td class="explain">注释：商品列表页。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * &lt;p&gt;筛选条件全部通过查询参数绑定到 ProductSearchCommand，由 CatalogService 归一与校验；</pre></td><td class="explain">注释：&lt;p&gt;筛选条件全部通过查询参数绑定到 ProductSearchCommand，由 CatalogService 归一与校验；（不参与执行）</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * 控制器不解析参数，也不做分页计算。&lt;/p&gt;</pre></td><td class="explain">注释：控制器不解析参数，也不做分页计算。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CategoryController {</pre></td><td class="explain">控制器：只接收参数、装配模型，查询交给 Service</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
@@ -197,12 +197,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ControllerAdvice;</pre></td><td class="explain">全局增强，集中处理异常</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ExceptionHandler;</pre></td><td class="explain">指定处理哪类异常的方法</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * 把业务异常翻译成页面 + HTTP 状态码。</pre></td><td class="explain">注释：把业务异常翻译成页面 + HTTP 状态码。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * &lt;p&gt;没有这层，BizException 会冒到容器变成 500 堆栈页；参数错误应该是 400，</pre></td><td class="explain">注释：&lt;p&gt;没有这层，BizException 会冒到容器变成 500 堆栈页；参数错误应该是 400，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * 对象不存在应该是 404。M02-06 再统一美化错误页的样式。&lt;/p&gt;</pre></td><td class="explain">注释：对象不存在应该是 404。M02-06 再统一美化错误页的样式。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@ControllerAdvice</pre></td><td class="explain">全局异常处理类，所有控制器共享</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> GlobalExceptionHandler {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
@@ -274,11 +274,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre> * 列表页测试：类型筛选、分页、非法排序参数。</pre></td><td class="explain">注释：列表页测试：类型筛选、分页、非法排序参数。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * &lt;p&gt;固定造 8 件商品（7 件单行本 + 1 件周边），默认每页 6 条，因此第 2 页应有 2 条。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;固定造 8 件商品（7 件单行本 + 1 件周边），默认每页 6 条，因此第 2 页应有 2 条。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc：不占真实端口就能请求页面</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">class</span> CategoryPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：继承基类，每个用例前重建七张表</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>

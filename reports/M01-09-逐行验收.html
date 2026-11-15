@@ -62,15 +62,15 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain">注释：M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * &lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，</pre></td><td class="explain">注释：&lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> * 不用 Mock 证明 SQL 能跑。&lt;/p&gt;</pre></td><td class="explain">注释：不用 Mock 证明 SQL 能跑。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre> * &lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，</pre></td><td class="explain">注释：&lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre> * 不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;</pre></td><td class="explain">注释：不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> DataAccessTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>

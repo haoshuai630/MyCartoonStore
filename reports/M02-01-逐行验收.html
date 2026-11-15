@@ -46,16 +46,16 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">4</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre> * 分页结果：页内数据 + 总数 + 当前页信息。</pre></td><td class="explain">注释：分页结果：页内数据 + 总数 + 当前页信息。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;与 {@link PageQuery} 配套使用：查询条件由 PageQuery 归一，返回由 PageResult 承载。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;与 {@link PageQuery} 配套使用：查询条件由 PageQuery 归一，返回由 PageResult 承载。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * @param items    当前页数据</pre></td><td class="explain">注释：@param items    当前页数据（不参与执行）</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * @param total    符合条件的总数</pre></td><td class="explain">注释：@param total    符合条件的总数（不参与执行）</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * @param page     当前页码（从 1 开始）</pre></td><td class="explain">注释：@param page     当前页码（从 1 开始）（不参与执行）</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * @param pageSize 每页数量</pre></td><td class="explain">注释：@param pageSize 每页数量（不参与执行）</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> record PageResult&lt;T&gt;(List&lt;T&gt; items, <span class="kw">long</span> total, <span class="kw">int</span> page, <span class="kw">int</span> pageSize) {</pre></td><td class="explain">@param pageSize 每页数量 @param page 当前页码（从 1 开始） @param total 符合条件的总数 @param items 当前页数据 &lt;p&gt;与 {@link PageQuery} 配套使用：查询条件由 PageQuery 归一，返回由 PageResult 承载。&lt;/p&gt; 分页结果：页内数据 + 总数 + 当前页信息。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** 由查询条件与总数构造，保证页码/页大小与查询一致。 */</pre></td><td class="explain">注释：由查询条件与总数构造，保证页码/页大小与查询一致。（不参与执行）</td></tr>
@@ -100,12 +100,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">Lombok：为字段生成 setter</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 列表页原始请求参数（都是字符串，由 Service 归一与校验）。</pre></td><td class="explain">注释：列表页原始请求参数（都是字符串，由 Service 归一与校验）。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * &lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，</pre></td><td class="explain">注释：&lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 也方便单测直接构造各种脏输入。&lt;/p&gt;</pre></td><td class="explain">注释：也方便单测直接构造各种脏输入。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductSearchCommand {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -148,14 +148,14 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 商品详情视图：商品本身 + 两级分类 + 相册。</pre></td><td class="explain">注释：商品详情视图：商品本身 + 两级分类 + 相册。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * @param product      商品</pre></td><td class="explain">注释：@param product      商品（不参与执行）</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * @param topCategory  一级分类（作品）</pre></td><td class="explain">注释：@param topCategory  一级分类（作品）（不参与执行）</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * @param leafCategory 二级分类（单行本 / 官方周边）</pre></td><td class="explain">注释：@param leafCategory 二级分类（单行本 / 官方周边）（不参与执行）</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> * @param images       相册，按 sort_order、id 升序；可能为空</pre></td><td class="explain">注释：@param images       相册，按 sort_order、id 升序；可能为空（不参与执行）</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> record ProductDetail(Product product,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                            Category topCategory,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                            Category leafCategory,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -195,12 +195,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">集合类型：这里用来做白名单</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>/**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> * 商品浏览服务：列表查询、商品详情、分类树。</pre></td><td class="explain">注释：商品浏览服务：列表查询、商品详情、分类树。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> *</pre></td><td class="explain">注释续行：继续上一行的说明，不参与执行。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> * &lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。</pre></td><td class="explain">注释：&lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。（不参与执行）</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;</pre></td><td class="explain">注释：Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>@Service</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CatalogService {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">29</td><td></td><td></td></tr>
@@ -228,9 +228,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        this.productImageMapper = productImageMapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">53</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>     * 列表查询：校验参数 → 查数据 → 包装分页。</pre></td><td class="explain">注释：列表查询：校验参数 → 查数据 → 包装分页。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">public</span> PageResult&lt;Product&gt; search(ProductSearchCommand command) {  // 列表唯一入口：参数归一 → 查数 → 包装分页。</pre></td><td class="explain">列表唯一入口：参数归一 → 查数 → 包装分页。</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        PageQuery pageQuery = PageQuery.of(command.getPage(), command.getPageSize(), DEFAULT_PAGE_SIZE);</pre></td><td class="explain">先归一分页参数，非法页码/页大小在这里转 400</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        ProductQuery query = buildQuery(command, pageQuery);</pre></td><td class="explain">再把业务参数归一成 Mapper 可用对象</td></tr>
@@ -240,9 +240,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">return</span> PageResult.of(items, total, pageQuery);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">65</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>     * 商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</pre></td><td class="explain">注释：商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">public</span> ProductDetail detail(<span class="kw">long</span> productId) {</pre></td><td class="explain">商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        Product product = productMapper.selectById(productId);</pre></td><td class="explain">按主键查商品</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        if (product == null || !"ON_SALE".equals(product.getStatus())) {  // 下架与不存在统一 404，不泄露「存在但下架」。</pre></td><td class="explain">下架与不存在统一 404，不泄露「存在但下架」。</td></tr>
@@ -279,9 +279,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectWorkSummaries();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">104</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>     * 作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。</pre></td><td class="explain">注释：作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    <span class="kw">public</span> org.csu.mycartoonstore.catalog.dto.WorkDetail work(<span class="kw">long</span> id) {</pre></td><td class="explain">作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。</td></tr>
 <tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        Category work = categoryMapper.selectById(id);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        if (work == null || work.getParentId() != null) {  // 只接受一级分类；二级分类当作品打开属于调用方错误。</pre></td><td class="explain">只接受一级分类；二级分类当作品打开属于调用方错误。</td></tr>
@@ -376,10 +376,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
 <tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
 <tr class="gap"><td class="line">201</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>    /**</pre></td><td class="explain">注释块开始：紧邻下方几行说明该类型或方法的职责、输入输出与边界，编译后不产生指令。</td></tr>
 <tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>     * 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</pre></td><td class="explain">注释：把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，（不参与执行）</td></tr>
 <tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>     * 不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。</pre></td><td class="explain">注释：不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>     */</pre></td><td class="explain">注释块结束：说明到此为止，下一行才是真正的声明或语句。</td></tr>
 <tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>    <span class="kw">static</span> String escapeLike(String keyword) {</pre></td><td class="explain">不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</td></tr>
 <tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        if (keyword == null) {</pre></td><td class="explain">null 直接透传，由 SQL 侧决定不拼 LIKE 条件</td></tr>
 <tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
