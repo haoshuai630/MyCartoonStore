@@ -225,3 +225,74 @@ button{font-family:inherit}
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+/* ===== M02-06：列表页 / 详情页 / 错误页 / 响应式 ===== */
+
+/* 面包屑：从首页到当前商品，最后一级不可点 */
+.crumbs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted);padding:18px 0 0}
+.crumbs a:hover{color:var(--red)}
+.crumbs b{color:var(--ink)}
+
+/* 列表页两栏：左侧筛选固定宽度，右侧结果自适应 */
+.list-layout{display:grid;grid-template-columns:250px 1fr;gap:36px;align-items:start;padding:28px 0 60px}
+.filters{position:sticky;top:96px;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}
+.filters h3{margin:0 0 12px;font-size:13px;letter-spacing:.18em}
+.filters a{display:block;padding:6px 0;font-size:14px;font-weight:700}
+.filters a:hover{color:var(--red)}
+.filters a.sub{padding-left:14px;font-weight:500;font-size:13px;color:#4a4237}
+.filter-all{margin-bottom:10px;color:var(--muted)}
+.filter-group{border-top:1px dashed #d8cdb8;padding-top:10px;margin-top:10px}
+
+/* 工具栏：类型与排序各一组胶囊按钮 */
+.toolbar{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:14px}
+.types,.sorts{display:flex;flex-wrap:wrap;gap:8px}
+.types a,.sorts a{border:2px solid var(--ink);padding:5px 12px;font-size:13px;font-weight:700;background:#fff}
+.types a.on,.sorts a.on{background:var(--ink);color:var(--yellow)}
+.result-meta{margin:16px 0 0;font-size:13px;color:#4a4237}
+.result-meta b{color:var(--red)}
+
+/* 分页：不可点的方向用浅色，避免看着能点却没反应 */
+.pager{display:flex;justify-content:center;align-items:center;gap:16px;margin:40px 0 0;font-size:13px;font-weight:700}
+.pager a{border:2px solid var(--ink);padding:6px 14px;background:#fff}
+.pager a:hover{background:var(--ink);color:var(--yellow)}
+.pager .disabled{color:#b8ad99;border:2px dashed #d8cdb8;padding:6px 14px}
+.empty{border:3px dashed #d8cdb8;padding:40px;text-align:center;color:var(--muted)}
+
+/* 详情页：左图右信息，窄屏自动堆叠 */
+.product-detail{display:grid;grid-template-columns:1fr 1fr;gap:44px;padding:26px 0 70px;align-items:start}
+.gallery-main{width:100%;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);background:#fff}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.thumbs img{width:100%;border:2px solid var(--ink);background:#fff}
+.info h1{margin:6px 0 10px;font-size:34px;line-height:1.2;font-weight:900}
+.info .summary{color:#4a4237;margin:0 0 18px}
+.info .price{font-size:34px;font-weight:900;color:var(--red);margin:0 0 6px}
+.info .stock{margin:0 0 20px;font-size:13px;color:#4a4237}
+.info .stock.zero{color:var(--red);font-weight:800}
+.buy{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.buy input{width:88px;border:2px solid var(--ink);padding:10px;font-size:14px;background:#fff}
+.buy .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;transform:none}
+.hint{font-size:12px;color:var(--muted);margin:0 0 26px}
+.desc{border-top:3px solid var(--ink);padding-top:18px}
+.desc h2{margin:0 0 10px;font-size:16px;letter-spacing:.12em}
+.desc p{color:#4a4237;line-height:1.9;margin:0}
+
+/* 错误页：给出可去的两个入口 */
+.error-box{max-width:640px;margin:70px auto;border:3px solid var(--ink);background:#fff;padding:44px;text-align:center;box-shadow:8px 8px 0 var(--ink)}
+.error-box h1{margin:0 0 12px;font-size:30px}
+.error-message{font-size:15px;color:var(--red);font-weight:700;margin:0 0 26px}
+
+/* 窄屏：两栏改单栏，标题降字号，搜索框让位 */
+@media (max-width:1000px){
+  .list-layout{grid-template-columns:1fr}
+  .filters{position:static}
+  .product-detail{grid-template-columns:1fr;gap:28px}
+  .hero-inner{grid-template-columns:1fr}
+  .cover-stack{display:none}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  .header-main{height:auto;flex-wrap:wrap;gap:12px;padding:12px 0}
+  .search input{width:120px}
+  .hero h1{font-size:38px}
+  .info h1{font-size:26px}
+  .thumbs{grid-template-columns:repeat(3,1fr)}
+}
