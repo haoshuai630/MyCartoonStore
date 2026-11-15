@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M02-08-01 · 作品数据层 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M02-08-01 · 作品数据层（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">WorkSummary.java</a><a href="#s2">WorkDetail.java</a><a href="#s3">CategoryMapper.java</a><a href="#s4">ProductQuery.java</a><a href="#s5">ProductSearchCommand.java</a><a href="#s6">CatalogService.java</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M02 商品浏览 / 任务 M02-08-01。内容：每部作品 4 个品类（单行本/模型/抱枕/其他周边）、作品墙统计 SQL、按作品过滤。
+验证：mvn -pl cartoon-catalog -am test → Tests run: 14, 0 失败。</p>
+<p class="note" style="margin-top:8px">种子数据与 Mapper XML 的改动不在此页逐行对照：SQL 由生成器产出（db/tools/gen_demo_sql.py），XML 只加了一个 if 条件。</p>
+<section id="s1">
+<h2>WorkSummary.java<small>作品墙卡片 DTO · 9 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/WorkSummary.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre> * 作品墙的一张卡片：一级分类 + 它下面的品类数与在售商品数。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre> * &lt;p&gt;用 SQL 一次算出来，避免模板里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">public</span> record WorkSummary(<span class="kw">long</span> id, String code, String name, <span class="kw">int</span> categoryCount, <span class="kw">int</span> productCount) {</pre></td><td class="explain">作品墙卡片：作品 + 品类数 + 在售商品数，全部由一条 SQL 算出</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>WorkDetail.java<small>作品页头部 DTO · 11 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/WorkDetail.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Category;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">4</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * 作品页头部：作品本身、它的品类列表、在售商品数。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">public</span> record WorkDetail(Category work, List&lt;Category&gt; categories, <span class="kw">int</span> productCount) {</pre></td><td class="explain">作品页头部：作品本身、它的品类、在售商品数</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>CategoryMapper.java<small>作品统计 SQL · 41 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/mapper/CategoryMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.mapper;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.WorkSummary;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Category;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 分类 Mapper。两级树的层级校验在 Service，这里只做数据访问。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Mapper</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CategoryMapper <span class="kw">extends</span> BaseMapper&lt;Category&gt; {</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>     * 作品墙数据：每个一级分类带上品类数与在售商品数。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>     *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>     * &lt;p&gt;一次查询算完，避免页面里为每部作品再查两次库。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            SELECT p.id AS id, p.code AS code, p.name AS name,</pre></td><td class="explain">一级分类作为作品主体</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                   (SELECT COUNT(*) FROM category c WHERE c.parent_id = p.id) AS category_count,</pre></td><td class="explain">该作品下有几个品类</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                   (SELECT COUNT(*) FROM product pr</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                      JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                     WHERE c2.parent_id = p.id AND pr.status = 'ON_SALE') AS product_count</pre></td><td class="explain">只统计在售，下架商品不计入卡片数字</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>              FROM category p</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>             WHERE p.parent_id IS NULL</pre></td><td class="explain">只要一级分类（作品）</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>             ORDER BY p.sort_order, p.id</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            """)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    List&lt;WorkSummary&gt; selectWorkSummaries();</pre></td><td class="explain">作品墙取数：品类数与在售商品数用子查询一次算完</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /** 某部作品的在售商品数（详情页横幅用） */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Select("""</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            SELECT COUNT(*) FROM product pr</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>              JOIN category c2 ON pr.category_id = c2.id</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>             WHERE c2.parent_id = #{workId} AND pr.status = 'ON_SALE'</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            """)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">int</span> countOnSaleByWork(<span class="kw">long</span> workId);</pre></td><td class="explain">作品页横幅上的在售数量</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>ProductQuery.java<small>新增 workId 条件 · 34 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/ProductQuery.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 商品列表查询条件。由 Controller 组装，Service 校验后传给 Mapper。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;排序值与商品类型只允许白名单值，Service 侧校验，SQL 侧用 choose 映射到固定列。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductQuery {</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级或二级分类 id；为空表示全部</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */</pre></td><td class="explain">作品页用它圈定范围，品类筛选再叠加 categoryId</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> Long workId;</pre></td><td class="explain">为空表示不限作品</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** ALL / COMIC / MERCH */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">商品名称关键字，已去首尾空白；为空表示不搜索</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    /** 当前页数量 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">当前页数量</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>ProductSearchCommand.java<small>新增 workId 参数 · 36 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/ProductSearchCommand.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 列表页原始请求参数（都是字符串，由 Service 归一与校验）。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * &lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 也方便单测直接构造各种脏输入。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductSearchCommand {</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    /** 分类 id，可为空 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> String categoryId;</pre></td><td class="explain">分类 id，可为空</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** 作品（一级分类）id；作品页用它限定范围 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> String workId;</pre></td><td class="explain">作品（一级分类）id；作品页用它限定范围</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** ALL / COMIC / MERCH，可为空 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH，可为空</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    /** 名称关键字，可为空 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">名称关键字，可为空</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 页码，可为空 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> String page;</pre></td><td class="explain">页码，可为空</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    /** 每页数量，可为空 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> String pageSize;</pre></td><td class="explain">每页数量，可为空</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+<section id="s6">
+<h2>CatalogService.java<small>作品墙/作品页取数 · 214 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/CatalogService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.service;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.toolkit.Wrappers;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductDetail;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductQuery;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductSearchCommand;</pre></td><td class="explain">列表筛选参数对象，控制器直接接收查询参数</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Category;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.ProductImage;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.CategoryMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductImageMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.page.PageQuery;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.page.PageResult;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> * 商品浏览服务：列表查询、商品详情、分类树。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> * &lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>@Service</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CatalogService {</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    /** 商品类型白名单：ALL 表示不过滤 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; TYPES = Set.of("ALL", "COMIC", "MERCH");</pre></td><td class="explain">商品类型白名单：ALL 表示不过滤</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    /** 排序白名单，与 ProductMapper.xml 的 choose 分支一一对应 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; SORTS = Set.of("DEFAULT", "PRICE_ASC", "PRICE_DESC", "NEWEST");</pre></td><td class="explain">排序白名单，与 ProductMapper.xml 的 choose 分支一一对应</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    /** 商品列表默认每页 6 条 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> DEFAULT_PAGE_SIZE = 6;</pre></td><td class="explain">商品列表默认每页 6 条</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    /** 关键字最大长度 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> KEYWORD_MAX_LENGTH = 120;</pre></td><td class="explain">关键字最大长度</td></tr>
+<tr class="gap"><td class="line">41</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductMapper productMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CategoryMapper categoryMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductImageMapper productImageMapper;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    <span class="kw">public</span> CatalogService(ProductMapper productMapper,</pre></td><td class="explain">构造器：注入商品、分类、相册三个 Mapper</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                          CategoryMapper categoryMapper,</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                          ProductImageMapper productImageMapper) {</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        this.productMapper = productMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        this.categoryMapper = categoryMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        this.productImageMapper = productImageMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>     * 列表查询：校验参数 → 查数据 → 包装分页。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">public</span> PageResult&lt;Product&gt; search(ProductSearchCommand command) {</pre></td><td class="explain">列表查询：校验参数 → 查数据 → 包装分页。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        PageQuery pageQuery = PageQuery.of(command.getPage(), command.getPageSize(), DEFAULT_PAGE_SIZE);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        ProductQuery query = buildQuery(command, pageQuery);</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        List&lt;Product&gt; items = productMapper.selectPage(query);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        <span class="kw">long</span> total = productMapper.countPage(query);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">return</span> PageResult.of(items, total, pageQuery);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>     * 商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">public</span> ProductDetail detail(<span class="kw">long</span> productId) {</pre></td><td class="explain">商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        Product product = productMapper.selectById(productId);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        if (product == null || !"ON_SALE".equals(product.getStatus())) {</pre></td><td class="explain">不存在与已下架合并成同一个 404，不区分原因，避免泄露商品是否存在</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>            throw BizException.notFound("商品不存在或已下架");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr class="gap"><td class="line">74</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        Category leaf = categoryMapper.selectById(product.getCategoryId());</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        if (leaf == null) {</pre></td><td class="explain">分类缺失说明数据不一致，宁可 404 也不渲染半截分类路径</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>            throw BizException.notFound("商品分类不存在");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        Category top = leaf.getParentId() == null ? leaf : categoryMapper.selectById(leaf.getParentId());</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        List&lt;ProductImage&gt; images = productImageMapper.selectList(</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                Wrappers.&lt;ProductImage&gt;lambdaQuery()</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        .eq(ProductImage::getProductId, productId)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                        .orderByAsc(ProductImage::getSortOrder)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                        .orderByAsc(ProductImage::getId));</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">86</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> ProductDetail(product, top, leaf, images);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    /** 首页「新品上架」：上架商品按录入时间倒序，取 limit 条 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Product&gt; newest(<span class="kw">int</span> limit) {</pre></td><td class="explain">首页「新品上架」：上架商品按录入时间倒序，取 limit 条</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">return</span> productMapper.selectNewest(limit);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    /** 首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Product&gt; featured(<span class="kw">int</span> limit) {</pre></td><td class="explain">首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        <span class="kw">return</span> productMapper.selectFeatured(limit);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>    /** 作品墙：每部作品一行，带品类数与在售商品数 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    <span class="kw">public</span> java.util.List&lt;org.csu.mycartoonstore.catalog.dto.WorkSummary&gt; works() {</pre></td><td class="explain">作品墙：直接返回 Mapper 的统计结果</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectWorkSummaries();</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>     * 作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    <span class="kw">public</span> org.csu.mycartoonstore.catalog.dto.WorkDetail work(<span class="kw">long</span> id) {</pre></td><td class="explain">作品页：只接受一级分类</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        Category work = categoryMapper.selectById(id);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        if (work == null || work.getParentId() != null) {</pre></td><td class="explain">二级分类或不存在的 id 都当作品不存在</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>            throw BizException.notFound("作品不存在");</pre></td><td class="explain">统一 404，不区分「没有」和「层级不对」</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> org.csu.mycartoonstore.catalog.dto.WorkDetail(</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                work, childrenOf(id), categoryMapper.countOnSaleByWork(id));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">116</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>    /** 一级分类（作品），按 sort_order、id 升序 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; topCategories() {</pre></td><td class="explain">一级分类（作品），按 sort_order、id 升序</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>                        .isNull(Category::getParentId)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>                        .orderByAsc(Category::getSortOrder)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">125</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>    /** 某个一级分类下的二级分类 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; childrenOf(<span class="kw">long</span> parentId) {</pre></td><td class="explain">某个一级分类下的二级分类</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                        .eq(Category::getParentId, parentId)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                        .orderByAsc(Category::getSortOrder)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">134</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    /** 全部分类，供列表页侧栏一次取完 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; allCategories() {</pre></td><td class="explain">全部分类，供列表页侧栏一次取完</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>                        .orderByAsc(Category::getParentId)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>                        .orderByAsc(Category::getSortOrder)</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">143</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>    // ---------------------------------------------------------------- 参数归一</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">145</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>    /** 把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    <span class="kw">private</span> ProductQuery buildQuery(ProductSearchCommand command, PageQuery pageQuery) {</pre></td><td class="explain">把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        ProductQuery query = <span class="kw">new</span> ProductQuery();</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        query.setCategoryId(parseCategoryId(command.getCategoryId()));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        query.setWorkId(parseCategoryId(command.getWorkId()));</pre></td><td class="explain">作品 id 与分类 id 用同一套正整数校验</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        query.setProductType(parseEnum(command.getProductType(), "ALL", TYPES, "商品类型"));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        query.setSort(parseEnum(command.getSort(), "DEFAULT", SORTS, "排序方式"));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        query.setKeyword(escapeLike(parseKeyword(command.getKeyword())));</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        query.setLimit(pageQuery.pageSize());</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        query.setOffset(pageQuery.offset());</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">return</span> query;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">158</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>    /** 分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    <span class="kw">private</span> Long parseCategoryId(String raw) {</pre></td><td class="explain">分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白表示未传该参数，按缺省处理</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>        try {</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">0 与负数不是合法分类 id</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>                throw BizException.badRequest("分类参数格式不正确");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>            }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>            throw BizException.badRequest("分类参数格式不正确");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">174</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>    /** 白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>    <span class="kw">private</span> String parseEnum(String raw, String defaultValue, Set&lt;String&gt; allowed, String fieldName) {</pre></td><td class="explain">白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白表示未传该参数，按缺省处理</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>            <span class="kw">return</span> defaultValue;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>        String value = raw.trim();</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>        if (!allowed.contains(value)) {</pre></td><td class="explain">白名单之外一律 400，不做大小写纠正或静默降级</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "取值不合法");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">186</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>    /** 关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    <span class="kw">private</span> String parseKeyword(String raw) {</pre></td><td class="explain">关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>        if (raw == null) {</pre></td><td class="explain">null 视为不搜索</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        String value = raw.trim();</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        if (value.isEmpty()) {</pre></td><td class="explain">全是空白的关键字等价于没有关键字</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>        if (value.length() &gt; KEYWORD_MAX_LENGTH) {</pre></td><td class="explain">超长拒绝而不是截断，避免用户以为搜到了全部结果</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>            throw BizException.badRequest("搜索关键字不能超过 " + KEYWORD_MAX_LENGTH + " 个字符");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">201</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>    /**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>     * 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>     * 不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>     */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>    <span class="kw">static</span> String escapeLike(String keyword) {</pre></td><td class="explain">不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        if (keyword == null) {</pre></td><td class="explain">null 直接透传，由 SQL 侧决定不拼 LIKE 条件</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>        }</pre></td><td class="explain">结束内部代码块</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>        <span class="kw">return</span> keyword.replace("\\", "\\\\")</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>                .replace("%", "\\%")</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>                .replace("_", "\\_");</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M02-08-01 · 6 个文件、345 行。完整汇报见同目录 M02-08-01-作品数据层.md。</footer>
+</body></html>
