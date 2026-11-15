@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.csu.mycartoonstore.catalog.mapper.ProductMapper">
+
+    <!-- 列表与总数的公共条件：只取上架商品 -->
+    <sql id="pageWhere">
+        FROM product p
+        JOIN category c ON c.id = p.category_id
+        <where>
+            p.status = 'ON_SALE'
+            <if test="q.categoryId != null">
+                AND (c.id = #{q.categoryId} OR c.parent_id = #{q.categoryId})
+            </if>
+            <if test="q.productType != null and q.productType != 'ALL'">
+                <choose>
+                    <when test="q.productType == 'COMIC'">AND c.code LIKE '%-COMIC'</when>
+                    <when test="q.productType == 'MERCH'">AND c.code LIKE '%-MERCH'</when>
+                </choose>
+            </if>
+            <if test="q.keyword != null and q.keyword != ''">
+                AND p.name LIKE CONCAT('%', #{q.keyword}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultType="org.csu.mycartoonstore.catalog.entity.Product">
+        SELECT p.*
+        <include refid="pageWhere"/>
+        <choose>
+            <when test="q.sort == 'PRICE_ASC'">ORDER BY p.price ASC, p.id ASC</when>
+            <when test="q.sort == 'PRICE_DESC'">ORDER BY p.price DESC, p.id ASC</when>
+            <when test="q.sort == 'NEWEST'">ORDER BY p.created_at DESC, p.id DESC</when>
+            <otherwise>ORDER BY p.sort_order ASC, p.id ASC</otherwise>
+        </choose>
+        LIMIT #{q.limit} OFFSET #{q.offset}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectNewest" resultType="org.csu.mycartoonstore.catalog.entity.Product">
+        SELECT *
+        FROM product
+        WHERE status = 'ON_SALE'
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectFeatured" resultType="org.csu.mycartoonstore.catalog.entity.Product">
+        SELECT *
+        FROM product
+        WHERE status = 'ON_SALE'
+        ORDER BY sort_order ASC, id ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 下单锁商品：按 id 升序，所有事务用同一顺序，避免死锁 -->
+    <select id="lockByIds" resultType="org.csu.mycartoonstore.catalog.entity.Product">
+        SELECT *
+        FROM product
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY id
+        FOR UPDATE
+    </select>
+</mapper>
