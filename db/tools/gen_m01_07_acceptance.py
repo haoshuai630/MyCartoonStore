@@ -120,15 +120,31 @@ def make_java_explainer(lines: list[str]):
         if "(" in s and s.endswith(";") and not s.startswith("return"):
             doc = javadoc_above(lines, n - 1)
             return doc or "方法声明"
-        if s.endswith(";") and re.search(r"\bprivate\b", s):
-            name = re.search(r"private\s+[\w<>, ]+\s+(\w+);", s)
+        if s.endswith(";") and re.search(r"\b(private|protected|public)\b", s):
+            name = re.search(r"(\w+)\s*;", s)
             doc = javadoc_above(lines, n - 1)
             return doc or (f"字段 {name.group(1)}" if name else "字段")
+        if re.match(r"(public|private|protected).*\bclass\b", s):
+            return "类声明" + ("（抽象基类）" if "abstract" in s else "")
+        if "[] " in s and s.endswith("= {"):
+            return "常量数组"
+        if re.match(r'"[a-z_]+",?$', s):
+            return "常量项：表名"
+        if s == "};":
+            return "数组结束"
+        if s.endswith(") {"):
+            doc = javadoc_above(lines, n - 1)
+            name = re.search(r"(\w+)\(", s)
+            return doc or (f"方法 {name.group(1)}" if name else "方法")
+        if s.endswith(",") and s.startswith("\""):
+            return "SQL 字符串续行"
+        if s.endswith(");"):
+            return "语句续行"
         if s == "}":
             return "结束"
         if s == "":
             return ""
-        return ""
+        return "代码"
 
     return explain
 
