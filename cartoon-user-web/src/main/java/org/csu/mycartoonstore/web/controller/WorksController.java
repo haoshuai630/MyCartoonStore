@@ -1,9 +1,11 @@
 package org.csu.mycartoonstore.web.controller;
 
+import org.csu.mycartoonstore.catalog.dto.ProductSearchCommand;
 import org.csu.mycartoonstore.catalog.service.CatalogService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * 作品墙：所有作品（一级分类）的入口页。
@@ -17,6 +19,21 @@ public class WorksController {
 
     public WorksController(CatalogService catalogService) {
         this.catalogService = catalogService;
+    }
+
+    /**
+     * 作品页：作品横幅 + 品类筛选 + 商品列表。
+     *
+     * <p>路径里的 id 是唯一可信的作品来源，查询参数里的 workId 一律覆盖，
+     * 避免有人用 ?workId= 越权看别家作品。</p>
+     */
+    @GetMapping("/works/{id}")
+    public String detail(@PathVariable long id, ProductSearchCommand command, Model model) {
+        model.addAttribute("work", catalogService.work(id));
+        command.setWorkId(String.valueOf(id));
+        model.addAttribute("page", catalogService.search(command));
+        model.addAttribute("query", command);
+        return "work";
     }
 
     /** 作品墙：每部作品一张卡，带品类数与在售数 */

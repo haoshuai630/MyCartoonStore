@@ -307,3 +307,9 @@ button{font-family:inherit}
 .work-meta{display:flex;gap:16px;margin:10px 0 0;font-size:13px;color:#4a4237}
 @media(max-width:1000px){.works-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.works-grid{grid-template-columns:1fr}}
+/* ===== M02-08-03：作品页横幅 ===== */
+.work-hero{border-bottom:3px solid var(--ink);background:var(--paper-2)}
+.work-hero-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:46px 0 30px}
+.work-hero-inner h1{margin:8px 0 10px;font-size:46px;line-height:1.05;font-weight:900}
+.work-hero-inner p{margin:0;font-size:13px;color:#4a4237;display:flex;gap:18px}
+@media(max-width:640px){.work-hero-inner{flex-direction:column;align-items:flex-start}.work-hero-inner h1{font-size:32px}}

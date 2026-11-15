@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head(${work.work().name})}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <!-- 作品横幅：名称、code、品类数与在售数 -->
+    <section class="work-hero">
+        <div class="wrap work-hero-inner">
+            <div>
+                <span class="work-code" th:text="${work.work().code}">CODE</span>
+                <h1 th:text="${work.work().name}">作品</h1>
+                <p>
+                    <span th:text="${#lists.size(work.categories())} + ' 个品类'">0 个品类</span>
+                    <span th:text="${work.productCount()} + ' 件在售'">0 件在售</span>
+                </p>
+            </div>
+            <a class="btn btn-ghost" th:href="@{/works}">← 全部作品</a>
+        </div>
+    </section>
+
+    <div class="wrap">
+        <!-- 品类胶囊：全部 + 该作品的每个二级分类 -->
+        <div class="toolbar">
+            <div class="types">
+                <a th:href="@{/works/{id}(id=${work.work().id})}"
+                   th:classappend="${query.categoryId == null or query.categoryId.isEmpty()} ? 'on'">全部品类</a>
+                <a th:each="c : ${work.categories()}"
+                   th:href="@{/works/{id}(id=${work.work().id}, categoryId=${c.id})}"
+                   th:classappend="${query.categoryId == c.id.toString()} ? 'on'"
+                   th:text="${c.name}">品类</a>
+            </div>
+            <div class="sorts">
+                <a th:href="@{/works/{id}(id=${work.work().id}, categoryId=${query.categoryId}, sort='DEFAULT')}"
+                   th:classappend="${query.sort == 'DEFAULT'} ? 'on'">默认</a>
+                <a th:href="@{/works/{id}(id=${work.work().id}, categoryId=${query.categoryId}, sort='PRICE_ASC')}"
+                   th:classappend="${query.sort == 'PRICE_ASC'} ? 'on'">价格低到高</a>
+                <a th:href="@{/works/{id}(id=${work.work().id}, categoryId=${query.categoryId}, sort='PRICE_DESC')}"
+                   th:classappend="${query.sort == 'PRICE_DESC'} ? 'on'">价格高到低</a>
+                <a th:href="@{/works/{id}(id=${work.work().id}, categoryId=${query.categoryId}, sort='NEWEST')}"
+                   th:classappend="${query.sort == 'NEWEST'} ? 'on'">最新</a>
+            </div>
+        </div>
+
+        <p class="result-meta">共 <b th:text="${page.total}">0</b> 件</p>
+
+        <div class="grid" th:if="${!page.isEmpty()}">
+            <article class="card" th:each="p : ${page.items}">
+                <a class="media" th:href="@{/product/{id}(id=${p.id})}">
+                    <img th:src="@{${p.coverImage}}" th:alt="${p.name}">
+                </a>
+                <div class="body">
+                    <span class="cat" th:text="${p.sku}">SKU</span>
+                    <h3><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">商品</a></h3>
+                    <div class="foot">
+                        <span class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}">¥0.00</span>
+                        <span class="stock" th:classappend="${p.stock == 0} ? 'zero'"
+                              th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}">库存</span>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <p class="empty" th:if="${page.isEmpty()}">这个品类下暂时没有商品。</p>
+
+        <!-- 分页：保留当前品类与排序 -->
+        <nav class="pager" th:if="${page.totalPages() > 1}">
+            <a th:if="${page.hasPrevious()}"
+               th:href="@{/works/{id}(id=${work.work().id}, categoryId=${query.categoryId}, sort=${query.sort}, page=${page.page - 1})}">上一页</a>
+            <span th:unless="${page.hasPrevious()}" class="disabled">上一页</span>
+            <span th:text="'第 ' + ${page.page} + ' / ' + ${page.totalPages()} + ' 页'">第 1 / 1 页</span>
+            <a th:if="${page.hasNext()}"
+               th:href="@{/works/{id}(id=${work.work().id}, categoryId=${query.categoryId}, sort=${query.sort}, page=${page.page + 1})}">下一页</a>
+            <span th:unless="${page.hasNext()}" class="disabled">下一页</span>
+        </nav>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
