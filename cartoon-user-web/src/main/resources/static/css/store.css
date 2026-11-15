@@ -296,3 +296,14 @@ button{font-family:inherit}
   .info h1{font-size:26px}
   .thumbs{grid-template-columns:repeat(3,1fr)}
 }
+/* ===== M02-08-02：作品墙 ===== */
+.works-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+.work-card{display:block;border:3px solid var(--ink);background:#fff;box-shadow:6px 6px 0 var(--ink);transition:.15s}
+.work-card:hover{transform:translate(-2px,-2px);box-shadow:9px 9px 0 var(--ink)}
+.work-cover img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border-bottom:3px solid var(--ink)}
+.work-body{padding:16px 18px}
+.work-body h3{margin:0 0 4px;font-size:20px}
+.work-code{font-size:11px;letter-spacing:.2em;color:var(--muted)}
+.work-meta{display:flex;gap:16px;margin:10px 0 0;font-size:13px;color:#4a4237}
+@media(max-width:1000px){.works-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.works-grid{grid-template-columns:1fr}}

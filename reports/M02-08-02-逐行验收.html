@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M02-08-02 · 作品墙 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M02-08-02 · 作品墙（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">works.html</a><a href="#s2">WorksController.java</a><a href="#s3">WorksPageTest.java</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M02 商品浏览 / 任务 M02-08-02。内容：/works 作品墙，卡片含封面、品类数、在售数；导航新增「作品」。
+验证：mvn -pl cartoon-user-web -am test → Tests run: 30；实际启动后 GET /works 返回 200，渲染出 5 部作品。</p>
+<section id="s1">
+<h2>works.html<small>作品墙页面 · 41 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/works.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档类型：浏览器按标准模式渲染</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">根元素；xmlns:th 声明命名空间，模板里的 th:* 才生效</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('全部作品')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">结束 head 容器</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">页面可见内容的起点</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div 容器</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">首页栏目：新品上架 / 精选推荐</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;WORKS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部作品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div 容器</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="result-meta" th:if="${!#lists.isEmpty(works)}" th:text="'共 ' + ${#lists.size(works)} + ' 部'"&gt;共 0 部&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span.result-meta 容器</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.section-head 容器</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;!-- 每部作品一张卡：点进去看该作品的品类与商品 --&gt;</pre></td><td class="explain">注释：说明本段的用途或约束</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="works-grid" th:if="${!#lists.isEmpty(works)}"&gt;</pre></td><td class="explain">空库时不渲染网格，交给下面的空状态</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="work-card" th:each="w : ${works}" th:href="@{/works/{id}(id=${w.id})}"&gt;</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-cover"&gt;</pre></td><td class="explain">封面区：用该作品第一卷的封面</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="${'/images/products/' + w.code + '-C01/cover.svg'}" th:alt="${w.name}"&gt;</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.work-cover 容器</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-body"&gt;</pre></td><td class="explain">卡片文字区：名称、code、品类数、在售数</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                        &lt;h3 th:text="${w.name}"&gt;作品&lt;/h3&gt;</pre></td><td class="explain">结束 h3 容器</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="work-code" th:text="${w.code}"&gt;CODE&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文 code 便于与数据库核对</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="work-meta"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.categoryCount()} + ' 个品类'"&gt;0 个品类&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.productCount()} + ' 件在售'"&gt;0 件在售&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结束 p.work-meta 容器</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.work-body 容器</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结束 a.work-card 容器</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.works-grid 容器</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="empty" th:if="${#lists.isEmpty(works)}"&gt;还没有任何作品。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">空库时的可读提示</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.wrap 容器</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结束 section.section 容器</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结束 main 容器</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">结束 footer 容器</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结束 body 容器</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结束 html 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>WorksController.java<small>作品墙路由 · 28 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/controller/WorksController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.CatalogService;</pre></td><td class="explain">商品查询服务：分类树、分页搜索、详情</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">Spring MVC 注解，标记控制器</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">MVC 模型，控制器往里放数据给模板</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 作品墙：所有作品（一级分类）的入口页。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">说明续行</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;作品多了以后，导航只需要指向这一页，不必把每部作品都塞进侧栏。&lt;/p&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Controller</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WorksController {</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CatalogService catalogService;</pre></td><td class="explain">作品墙数据来自查询服务</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">public</span> WorksController(CatalogService catalogService) {</pre></td><td class="explain">注入查询服务</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 作品墙：每部作品一张卡，带品类数与在售数 */</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    @GetMapping("/works")</pre></td><td class="explain">作品墙入口：导航里的「作品」指向这里</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">public</span> String list(Model model) {</pre></td><td class="explain">不加筛选参数，作品墙一次展示全部作品</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        model.addAttribute("works", catalogService.works());</pre></td><td class="explain">一条 SQL 取回作品 + 品类数 + 在售数</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        <span class="kw">return</span> "works";</pre></td><td class="explain">视图名对应 templates/works.html</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>WorksPageTest.java<small>作品墙测试 2 例 · 71 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/WorksPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">自动配置 MockMvc，用于不起端口发请求</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">模拟 MVC 请求，直接调控制器并拿到渲染结果</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">Hamcrest 匹配器：断言字符串包含某段文本</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET 请求</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>/**</pre></td><td class="explain">说明块开始：下面几行讲职责与约束</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre> * 作品墙测试：作品名、品类数、在售数。</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre> */</pre></td><td class="explain">说明块结束</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> WorksPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：每个用例前重建七张表</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @DisplayName("作品墙显示作品名、品类数与在售数")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">void</span> worksShowNameAndCounts() throws Exception {</pre></td><td class="explain">用例：作品墙显示名称与两个计数</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        <span class="kw">long</span> workId = seedWork("W1", "测试作品甲");</pre></td><td class="explain">造一部作品</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        <span class="kw">long</span> comic = seedCategory("W1-COMIC", workId, "单行本");</pre></td><td class="explain">给它挂两个品类</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        seedCategory("W1-BADGE", workId, "徽章");</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        insertProduct("W1-C01", comic, "在售卷", "ON_SALE");</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        insertProduct("W1-C02", comic, "另一卷", "ON_SALE");</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        mockMvc.perform(get("/works"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                .andExpect(content().string(containsString("测试作品甲")))</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                .andExpect(content().string(containsString("2 个品类")))</pre></td><td class="explain">品类数按实际子分类算</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(content().string(containsString("2 件在售")))</pre></td><td class="explain">在售数只算 ON_SALE</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(content().string(containsString("共 1 部")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("空库时作品墙显示空状态")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">void</span> worksEmptyState() throws Exception {</pre></td><td class="explain">用例：空库显示空状态</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        mockMvc.perform(get("/works"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .andExpect(content().string(containsString("还没有任何作品")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedWork(String code, String name) {</pre></td><td class="explain">插入一级分类并返回 id</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, name);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">59</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedCategory(String code, <span class="kw">long</span> parentId, String name) {</pre></td><td class="explain">插入二级分类并返回 id</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)", code, parentId, name);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr class="gap"><td class="line">64</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String name, String status) {</pre></td><td class="explain">插入商品的辅助方法</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, summary, cover_image, price, stock, status, sort_order) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                sku, categoryId, name, "简介", "images/products/" + sku + "/cover.svg",</pre></td><td class="explain">对应 INSERT 的列值</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal("28.00"), 10, status, 1);</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    }</pre></td><td class="explain">结束方法</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>}</pre></td><td class="explain">结束类定义</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M02-08-02 · 3 个文件、140 行。完整汇报见同目录 M02-08-02-作品墙.md。</footer>
+</body></html>
