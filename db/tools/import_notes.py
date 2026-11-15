@@ -85,4 +85,10 @@ IMPORT_NOTES = {
     "import static org.mockito.Mockito.when": "Mockito：设定假实现的返回值",
     "import static org.mockito.ArgumentMatchers.any": "Mockito：匹配任意参数",
     "import static org.junit.jupiter.api.Assertions.assertThrows": "JUnit：断言抛出异常",
+    "import org.springframework.web.bind.annotation.PostMapping": "映射 POST 请求路径",
+    "import org.springframework.web.bind.annotation.RequestParam": "把表单字段绑定到方法参数",
+    "import org.springframework.web.servlet.mvc.support.RedirectAttributes": "重定向时携带一次性提示（flash）",
+    "import org.csu.mycartoonstore.account.service.AccountService": "账号服务：注册与登录校验",
+    "import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post": "构造 POST 请求",
+    "import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl": "断言重定向目标",
 }

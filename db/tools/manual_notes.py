@@ -326,4 +326,11 @@ MANUAL = {
     'assertThatThrownBy(() -> service.register("a", "Password123", "短名"))': '一个字符的用户名应被拒。',
     'void registerShortPassword() {': '用例：密码过短返回 400。',
     'assertThatThrownBy(() -> service.register("newbie", "123", "新用户"))': '3 位密码应被拒。',
+    'public AuthController(AccountService accountService) {': '注入账号服务，注册逻辑不在控制器里重写。',
+    'this.accountService = accountService;': '保存服务引用。',
+    'void registerPageRenders() throws Exception {': '用例：注册页能打开并含表单字段。',
+    'void registerSucceeds() throws Exception {': '用例：注册成功后跳登录页。',
+    'void registerDuplicate() throws Exception {': '用例：用户名已存在时留在注册页。',
+    'void registerPasswordMismatch() throws Exception {': '用例：两次密码不一致不写库。',
+    '"SELECT COUNT(*) FROM store_user WHERE username = \'mismatch\'", Integer.class);': '确认失败时没有写入任何账号。',
 }

@@ -309,3 +309,12 @@ button{font-family:inherit}
 .filter-bar select,.filter-bar input{border:2px solid var(--ink);padding:8px 10px;font-size:14px;background:#fff;min-width:190px}
 .filter-bar .btn{padding:10px 18px}
 @media(max-width:640px){.filter-bar select,.filter-bar input{min-width:0;width:100%}.filter-bar .field{width:100%}}
+/* ===== M03-02：注册 / 登录表单 ===== */
+.auth-box{max-width:520px;margin:56px auto 80px}
+.auth-box h1{margin:0 0 8px;font-size:34px}
+.auth-form{display:flex;flex-direction:column;gap:16px;border:3px solid var(--ink);background:#fff;padding:26px;box-shadow:8px 8px 0 var(--ink)}
+.auth-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:800;letter-spacing:.1em}
+.auth-form input{border:2px solid var(--ink);padding:10px 12px;font-size:15px;background:#fff}
+.auth-form .btn{align-self:flex-start;margin-top:6px}
+.auth-error{border:2px solid var(--red);color:var(--red);background:#fff5f3;padding:10px 14px;font-weight:700;margin:0 0 16px}
+.auth-switch{margin:18px 0 0;font-size:14px;color:#4a4237}
