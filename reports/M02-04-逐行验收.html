@@ -58,19 +58,19 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">form</span> class="filter-bar" th:action="@{/category}" method="get"&gt;</pre></td><td class="explain">筛选表单：作品下拉 + 关键字一次提交。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                &lt;label class="field"&gt;</pre></td><td class="explain">筛选字段：字段名在上，控件在下。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;作品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">字段名：说明这个下拉用来选作品。</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;select name="workId"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                        &lt;option value=""&gt;全部作品&lt;/option&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;select name="workId"&gt;</pre></td><td class="explain">作品下拉：选项由 works() 提供。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                        &lt;option value=""&gt;全部作品&lt;/option&gt;</pre></td><td class="explain">空值表示不按作品过滤。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                        &lt;option th:each="w : ${works}" th:value="${w.id}"</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                                th:text="${w.name}"</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                                th:selected="${query.workId == w.id.toString()}"&gt;作品&lt;/option&gt;</pre></td><td class="explain">当前作品保持选中，翻页后不丢。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                    &lt;/select&gt;</pre></td><td class="explain">结构闭合：结束作品下拉。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
 <tr class="gap"><td class="line">26</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="hidden" name="productType" th:value="${query.productType}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="hidden" name="sort" th:value="${query.sort}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="hidden" name="productType" th:value="${query.productType}"&gt;</pre></td><td class="explain">带上类型，点筛选不会把它清空。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="hidden" name="sort" th:value="${query.sort}"&gt;</pre></td><td class="explain">带上排序，同理。</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;label class="field"&gt;</pre></td><td class="explain">筛选字段：字段名在上，控件在下。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;关键字&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">字段名：搜索输入框的标题。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;<span class="kw">input</span> name="keyword" th:value="${query.keyword}" placeholder="商品名称"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;<span class="kw">input</span> name="keyword" th:value="${query.keyword}" placeholder="商品名称"&gt;</pre></td><td class="explain">关键字输入框，回填当前值。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;<span class="kw">button</span> class="btn btn-primary" type="submit"&gt;筛选&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">提交筛选，保留已选的类型与排序。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;重置&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
@@ -204,7 +204,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 对象不存在应该是 404。M02-06 再统一美化错误页的样式。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@ControllerAdvice</pre></td><td class="explain">全局异常处理类，所有控制器共享</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> GlobalExceptionHandler {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> GlobalExceptionHandler {</pre></td><td class="explain">全局异常处理：业务异常转状态码 + 错误页。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @ExceptionHandler(BizException.<span class="kw">class</span>)</pre></td><td class="explain">指定这个方法处理哪类异常</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">public</span> String handleBiz(BizException e, Model model, HttpServletResponse response) {</pre></td><td class="explain">异常处理方法：设置状态码并返回错误页</td></tr>
@@ -342,7 +342,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">85</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    @DisplayName("作品下拉能筛到只剩该作品商品")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    <span class="kw">void</span> filterByWork() throws Exception {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    <span class="kw">void</span> filterByWork() throws Exception {</pre></td><td class="explain">用例：作品下拉能筛到只剩该作品。</td></tr>
 <tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        seed();</pre></td><td class="explain">每个用例都从同一套 8 件商品开始</td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES ('T2', NULL, '作品二', 2)");</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        <span class="kw">long</span> otherWork = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T2'", Long.<span class="kw">class</span>);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>

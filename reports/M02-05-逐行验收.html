@@ -52,11 +52,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain">面包屑：首页 / 作品 / 分类 / 商品</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/main}"&gt;首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">面包屑分隔符。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/category(categoryId=${detail.topCategory().id})}" th:text="${detail.topCategory().name}"&gt;作品&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">面包屑分隔符。</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/category(categoryId=${detail.leafCategory().id})}" th:text="${detail.leafCategory().name}"&gt;分类&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">面包屑分隔符。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>            &lt;<span class="kw">b</span> th:text="${detail.product().name}"&gt;商品&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束分页。</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
@@ -64,10 +64,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="gallery"&gt;</pre></td><td class="explain">左侧相册区</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">img</span> class="gallery-main" th:src="@{${detail.product().coverImage}}"</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                     th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                     th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">alt 用商品名，图挂了也能读。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="thumbs" th:if="${detail.hasGallery()}"&gt;</pre></td><td class="explain">没有相册图时不渲染缩略图区</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                    &lt;<span class="kw">img</span> th:each="img : ${detail.images()}" th:src="@{${img.imagePath}}"</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                         th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                         th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">alt 用商品名，图挂了也能读。</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
@@ -82,9 +82,9 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">                &lt;!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                &lt;<span class="kw">form</span> class="buy" action="#" method="post"&gt;</pre></td><td class="explain">购物车 M04 才实现，这里先占位不提交</td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="number" name="quantity" value="1" min="1"</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                           th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                    &lt;<span class="kw">button</span> type="submit" class="btn btn-primary"</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="number" name="quantity" value="1" min="1"</pre></td><td class="explain">数量输入：最小 1。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                           th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}"&gt;</pre></td><td class="explain">上限为库存，缺货时禁用。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                    &lt;<span class="kw">button</span> type="submit" class="btn btn-primary"</pre></td><td class="explain">加入购物车按钮（M04 前是占位）。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                            th:disabled="${detail.product().stock == 0}"</pre></td><td class="explain">缺货时数量框与按钮都禁用</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                            th:text="${detail.product().stock == 0} ? '暂时缺货' : '加入购物车'"&gt;加入购物车&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
@@ -128,7 +128,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 控制器只负责把详情挂到模型上。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductController {</pre></td><td class="explain">详情页控制器：取详情并挂模型。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CatalogService catalogService;</pre></td><td class="explain">详情数据全部来自查询服务</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
@@ -230,11 +230,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .andExpect(content().string(containsString("商品不存在或已下架")));</pre></td><td class="explain">错误页给出可读文案</td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">77</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct() {</pre></td><td class="explain">造一件上架商品，用默认 SKU 与名称。</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        <span class="kw">return</span> seedOnSaleProduct("DET-C01", "测试商品详情");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">81</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct(String sku, String name) {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct(String sku, String name) {</pre></td><td class="explain">按指定 SKU 与名称造商品。</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory(sku.replace("-", ""));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        <span class="kw">return</span> insertProduct(sku, categoryId, name, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
@@ -251,7 +251,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, summary, description, cover_image, price, stock, status, sort_order) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>                sku, categoryId, name, "一句话简介", "商品说明正文",</pre></td><td class="explain">对应 INSERT 的列值</td></tr>
-<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                "images/products/" + sku + "/cover.svg", <span class="kw">new</span> BigDecimal("28.00"), 10, status, 1);</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                "images/products/" + sku + "/cover.svg", <span class="kw">new</span> BigDecimal("28.00"), 10, status, 1);</pre></td><td class="explain">商品参数：封面、价格、库存、状态、排序。</td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.<span class="kw">class</span>, sku);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">102</td><td></td><td></td></tr>

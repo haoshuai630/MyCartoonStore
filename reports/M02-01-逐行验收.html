@@ -162,10 +162,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * @param leafCategory 二级分类（单行本 / 官方周边）</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * @param images       相册，按 sort_order、id 升序；可能为空</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> record ProductDetail(Product product,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                            Category topCategory,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                            Category leafCategory,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                            List&lt;ProductImage&gt; images) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> record ProductDetail(Product product,</pre></td><td class="explain">详情视图：商品 + 两级分类 + 相册。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                            Category topCategory,</pre></td><td class="explain">一级分类（作品），面包屑第一层。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                            Category leafCategory,</pre></td><td class="explain">二级分类（单行本/周边），面包屑第二层。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                            List&lt;ProductImage&gt; images) {</pre></td><td class="explain">相册图列表，没有图时为空列表。</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 没有相册时，详情页回退封面 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> boolean hasGallery() {</pre></td><td class="explain">没有相册时，详情页回退封面</td></tr>

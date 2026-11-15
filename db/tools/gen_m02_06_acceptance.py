@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+from manual_notes import MANUAL  # noqa: E402
 
 
 def CLS(line):
@@ -61,7 +62,7 @@ def main():
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
             is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
-            text = "" if is_cmt else ((fn(i, line) if callable(fn) else "") or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
+            text = "" if is_cmt else ((MANUAL.get(line.strip()) if "MANUAL" in globals() else "") or (fn(i, line) if callable(fn) else "") or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre{CLS(line)}>{hi(line)}</pre></td>'
