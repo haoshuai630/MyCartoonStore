@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
 <rect width="600" height="600" fill="#1B3B6F"/>
 <rect x="30" y="30" width="540" height="540" fill="none" stroke="#4FC3F7" stroke-width="4" opacity="0.6"/>
-<text x="300" y="250" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="54" font-weight="900" fill="#ffffff">《星轨列车》第3卷</text>
+<text x="300" y="250" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="54" font-weight="900" fill="#ffffff">第3卷</text>
 <text x="300" y="330" text-anchor="middle" font-family="Arial" font-size="22" fill="#4FC3F7" letter-spacing="4">VIEW 2</text>
 <rect width="600" height="600" fill="none" stroke="#16130F" stroke-width="10"/>
 </svg>

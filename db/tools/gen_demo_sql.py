@@ -133,7 +133,7 @@ def build_products():
             rows.append({
                 "sku": sku,
                 "cat": merch_id,
-                "name": f"{ip['cn']} {name}",
+                "name": f"《{ip['cn']}》{name}",
                 "summary": "官方授权周边，随书附赠收藏卡。",
                 "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",
                 "price": price,

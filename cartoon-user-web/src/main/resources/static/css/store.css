@@ -215,3 +215,13 @@ button{font-family:inherit}
   .grid,.grid.cols-3{grid-template-columns:repeat(2,1fr)}
   .header-main{height:auto;flex-wrap:wrap;padding:14px 0;gap:14px}
 }
+/* 商品卡标题固定两行高度：名称长短不一，但卡片不参差 */
+.card h3 {
+    min-height: 2.6em;
+}
+.card h3 a {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import pathlib
+import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -35,8 +36,8 @@ def cover_svg(ip_code: str, title: str, subtitle: str, seed: int) -> str:
 <circle cx="{430 + seed % 40}" cy="{150 + seed % 60}" r="140" fill="{fg}" opacity="0.20"/>
 <path d="M0 560 L600 430 L600 520 L0 650 Z" fill="#D93A2B" opacity="0.9"/>
 <text x="46" y="96" font-family="Arial" font-size="20" fill="{fg}" letter-spacing="6">{ip_code}</text>
-<text x="44" y="330" font-family="Microsoft YaHei, sans-serif" font-size="82" font-weight="900" fill="#ffffff">{title[:3]}</text>
-<text x="44" y="420" font-family="Microsoft YaHei, sans-serif" font-size="82" font-weight="900" fill="#ffffff">{title[3:]}</text>
+<text x="44" y="345" font-family="Microsoft YaHei, sans-serif" font-size="82" font-weight="900" fill="#ffffff">{title}</text>
+<text x="44" y="420" font-family="Microsoft YaHei, sans-serif" font-size="44" font-weight="700" fill="{fg}">{subtitle}</text>
 <text x="48" y="612" font-family="Microsoft YaHei, sans-serif" font-size="26" font-weight="700" fill="#ffffff">{subtitle}</text>
 <rect width="600" height="800" fill="none" stroke="#16130F" stroke-width="14"/>
 <circle cx="512" cy="700" r="46" fill="#F2C14E" stroke="#16130F" stroke-width="6"/>
@@ -73,10 +74,12 @@ def main() -> None:
         ip_code = p["sku"].split("-")[0]
         folder = IMAGES / "products" / p["sku"]
         folder.mkdir(parents=True, exist_ok=True)
-        title = p["name"]
-        subtitle = p["name"].split(" ")[-1] if " " in p["name"] else p["name"]
+        m = re.match(r"《(.+?)》(.*)", p["name"])
+        title = m.group(1) if m else p["name"]
+        subtitle = m.group(2) if m else ""
+
         (folder / "cover.svg").write_text(
-            cover_svg(ip_code, p["name"][:3], p["name"][3:], idx), encoding="utf-8")
+            cover_svg(ip_code, title, subtitle, idx), encoding="utf-8")
         counts["cover"] += 1
         pos = idx % 12
         gallery = 3 if pos < 4 else (2 if pos < 8 else 0)
