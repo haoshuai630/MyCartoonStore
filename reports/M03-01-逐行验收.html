@@ -42,16 +42,16 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.account.service;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.toolkit.Wrappers;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.mapper.StoreUserMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.toolkit.Wrappers;</pre></td><td class="explain">MyBatis-Plus 条件构造器入口</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">用户实体</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.mapper.StoreUserMapper;</pre></td><td class="explain">用户数据访问</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码枚举，用来区分 400 与 404</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.transaction.annotation.Transactional;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">密码编码器接口：encode 生成散列、matches 校验</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">标记为业务服务，由 Spring 托管</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.transaction.annotation.Transactional;</pre></td><td class="explain">事务注解：方法内多条写操作要么全成要么全滚</td></tr>
 <tr class="gap"><td class="line">11</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.util.regex.Pattern;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.util.regex.Pattern;</pre></td><td class="explain">正则：校验用户名格式</td></tr>
 <tr class="gap"><td class="line">13</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * 账号服务：登录校验与注册。</pre></td><td class="explain"></td></tr>
@@ -150,10 +150,10 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.account.config;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Bean;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Bean;</pre></td><td class="explain">声明一个由容器管理的 Bean</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">配置类，启动时加载</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;</pre></td><td class="explain">BCrypt 实现</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">密码编码器接口：encode 生成散列、matches 校验</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * 密码策略配置。</pre></td><td class="explain"></td></tr>
@@ -181,21 +181,21 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.account.service;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.mapper.StoreUserMapper;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">用户实体</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.mapper.StoreUserMapper;</pre></td><td class="explain">用户数据访问</td></tr>
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码枚举，用来区分 400 与 404</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">JUnit：每个用例前执行</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;</pre></td><td class="explain">BCrypt 实现</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">密码编码器接口：encode 生成散列、matches 校验</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock;</pre></td><td class="explain">—</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">AssertJ：断言抛出异常</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">Mockito：匹配任意参数</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock;</pre></td><td class="explain">Mockito：创建接口的假实现</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">Mockito：设定假实现的返回值</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> * 账号服务测试：密码校验、状态判断、注册校验。</pre></td><td class="explain"></td></tr>
