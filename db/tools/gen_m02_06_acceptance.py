@@ -9,6 +9,12 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+
+
+def CLS(line):
+    """注释行绿色标注。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
+
 import gen_m02_02_acceptance as m22  # noqa: E402
 from notes_m02_06 import NOTES_TEXT  # noqa: E402
 
@@ -58,7 +64,7 @@ def main():
             text = "" if is_cmt else ((fn(i, line) if callable(fn) else "") or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
-                f'<td class="code"><pre>{hi(line)}</pre></td>'
+                f'<td class="code"><pre{CLS(line)}>{hi(line)}</pre></td>'
                 f'<td class="explain">{esc(text)}</td></tr>'
             )
         total += len(rows)

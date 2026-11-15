@@ -8,6 +8,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
 
+
+def CLS(line):
+    """注释行绿色标注。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
+
+
 ROOT = base.ROOT
 OUT = ROOT / "reports" / "M02-01-逐行验收.html"
 
@@ -52,10 +58,10 @@ def main() -> None:
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
             is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
-            text = "" if is_cmt else (fn(i, line) or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
+            text = "" if is_cmt else ((NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or fn(i, line) or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
-                f'<td class="code"><pre>{base.hi_java(line)}</pre></td>'
+                f'<td class="code"><pre{CLS(line)}>{base.hi_java(line)}</pre></td>'
                 f'<td class="explain">{base.esc(text)}</td></tr>'
             )
         total += len(rows)

@@ -300,7 +300,7 @@ def main() -> None:
             cls = ' class="cmtline"' if line.lstrip().startswith(("//", "<!--")) else ""
             code = hi_java(line) if kind == "java" else hi_xml(line)
             is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
-            text = "" if is_cmt else (fn(i, line) or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
+            text = "" if is_cmt else ((NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or fn(i, line) or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre{cls}>{code}</pre></td>'

@@ -53,14 +53,14 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.sql.SQLException;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.sql.Statement;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * 测试库初始化：每次用例前把七张表删掉重建，保证测试之间互不影响。</pre></td><td class="explain">注释：测试库初始化：每次用例前把七张表删掉重建，保证测试之间互不影响。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre> * &lt;p&gt;只操作 {@code MyCartoonStore_test}，绝不碰演示库。删除顺序按外键依赖从子到父。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;只操作 {@code MyCartoonStore_test}，绝不碰演示库。删除顺序按外键依赖从子到父。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 测试库初始化：每次用例前把七张表删掉重建，保证测试之间互不影响。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> * &lt;p&gt;只操作 {@code MyCartoonStore_test}，绝不碰演示库。删除顺序按外键依赖从子到父。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">final</span> <span class="kw">class</span> TestSchema {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** 先删子表，再删父表，避免外键 RESTRICT 阻塞 */</pre></td><td class="explain">注释：先删子表，再删父表，避免外键 RESTRICT 阻塞（不参与执行）</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 先删子表，再删父表，避免外键 RESTRICT 阻塞 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String[] DROP_ORDER = {</pre></td><td class="explain">先删子表，再删父表，避免外键 RESTRICT 阻塞</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            "sales_order_item",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            "sales_order",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -69,19 +69,19 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>            "product",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>            "category",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            "store_user"</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    };</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    };</pre></td><td class="explain">数组字面量结束：DROP_ORDER 到此定义完毕。</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 工具类，不允许实例化。 */</pre></td><td class="explain">注释：工具类，不允许实例化。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 工具类，不允许实例化。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> TestSchema() {</pre></td><td class="explain">工具类，不允许实例化。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    /** 删表 + 建表，供每个用例前调用，保证起点是空库。 */</pre></td><td class="explain">注释：删表 + 建表，供每个用例前调用，保证起点是空库。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /** 删表 + 建表，供每个用例前调用，保证起点是空库。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> reset(DataSource dataSource) {</pre></td><td class="explain">删表 + 建表，供每个用例前调用，保证起点是空库。</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        dropTables(dataSource);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        runSchema(dataSource);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    /** 按外键依赖从子到父删除，避免 RESTRICT 阻塞。 */</pre></td><td class="explain">注释：按外键依赖从子到父删除，避免 RESTRICT 阻塞。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">    /** 按外键依赖从子到父删除，避免 RESTRICT 阻塞。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">void</span> dropTables(DataSource dataSource) {</pre></td><td class="explain">按外键依赖从子到父删除，避免 RESTRICT 阻塞。</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        try (Connection connection = dataSource.getConnection();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>             Statement statement = connection.createStatement()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -93,7 +93,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">52</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    /** 执行 schema-test.sql 里的建表语句。 */</pre></td><td class="explain">注释：执行 schema-test.sql 里的建表语句。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">    /** 执行 schema-test.sql 里的建表语句。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">void</span> runSchema(DataSource dataSource) {</pre></td><td class="explain">执行 schema-test.sql 里的建表语句。</td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        try (Connection connection = dataSource.getConnection()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>            ScriptUtils.executeSqlScript(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -123,11 +123,11 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 集成测试基类：启动完整用户端上下文 + 使用 test 配置 + 每个用例前重建七张表。</pre></td><td class="explain">注释：集成测试基类：启动完整用户端上下文 + 使用 test 配置 + 每个用例前重建七张表。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * &lt;p&gt;子类放在 {@code org.csu.mycartoonstore.web} 及其子包下，Spring Boot 才能向上找到启动类。&lt;/p&gt;</pre></td><td class="explain">注释：&lt;p&gt;子类放在 {@code org.csu.mycartoonstore.web} 及其子包下，Spring Boot 才能向上找到启动类。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 集成测试基类：启动完整用户端上下文 + 使用 test 配置 + 每个用例前重建七张表。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * &lt;p&gt;子类放在 {@code org.csu.mycartoonstore.web} 及其子包下，Spring Boot 才能向上找到启动类。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@SpringBootTest</pre></td><td class="explain">启动完整上下文</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>@ActiveProfiles("test")</pre></td><td class="explain">启用 test 配置</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> abstract <span class="kw">class</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
@@ -135,10 +135,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    protected DataSource dataSource;</pre></td><td class="explain">字段 dataSource：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
 <tr class="gap"><td class="line">22</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    /** 每个用例前重建测试库，避免测试之间互相污染。 */</pre></td><td class="explain">注释：每个用例前重建测试库，避免测试之间互相污染。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 每个用例前重建测试库，避免测试之间互相污染。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前执行，用来重置数据</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">void</span> resetSchema() {</pre></td><td class="explain">每个用例前重建测试库，避免测试之间互相污染。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        TestSchema.reset(dataSource);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        TestSchema.reset(dataSource);</pre></td><td class="explain">每个用例前重置七张表，保证起点是空库。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -160,9 +160,9 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
 <tr class="gap"><td class="line">10</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 测试基座自检：证明 {@link AbstractIntegrationTest} 能连上测试库、建出七张表。</pre></td><td class="explain">注释：测试基座自检：证明 {@link AbstractIntegrationTest} 能连上测试库、建出七张表。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 测试基座自检：证明 {@link AbstractIntegrationTest} 能连上测试库、建出七张表。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">class</span> SchemaSmokeTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
@@ -173,15 +173,15 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">void</span> sevenTables() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        Integer count = jdbcTemplate.queryForObject(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                Integer.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                Integer.<span class="kw">class</span>);</pre></td><td class="explain">查询结果按 Integer 接收（COUNT 返回整数）。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        assertThat(count).isEqualTo(7);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @DisplayName("建表后是空库，不含演示数据")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">void</span> tablesAreEmpty() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        Integer products = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        Integer users = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM store_user", Integer.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        Integer products = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM product", Integer.<span class="kw">class</span>);</pre></td><td class="explain">统计商品表行数，用于断言空库。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        Integer users = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM store_user", Integer.<span class="kw">class</span>);</pre></td><td class="explain">统计用户表行数，用于断言空库。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        assertThat(products).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        assertThat(users).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
@@ -192,7 +192,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        String extra = jdbcTemplate.queryForObject(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                "SELECT extra FROM information_schema.columns "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                        + "WHERE table_schema = DATABASE() AND table_name = 'category' AND column_name = 'parent_key'",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                String.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                String.<span class="kw">class</span>);</pre></td><td class="explain">查询结果按 String 接收（information_schema 返回字符串）。</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        assertThat(extra).containsIgnoringCase("STORED GENERATED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>

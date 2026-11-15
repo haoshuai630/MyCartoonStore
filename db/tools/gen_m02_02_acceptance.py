@@ -8,6 +8,12 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+
+
+def CLS(line):
+    """注释行绿色标注。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
+
 from manual_notes import MANUAL  # noqa: E402
 from java_explainer import make_java_explainer  # noqa: E402
 
@@ -135,7 +141,7 @@ def main() -> None:
                 continue
             cls = ' class="cmtline"' if line.lstrip().startswith(("<!--", "//")) else ""
             is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
-            text = "" if is_cmt else (fn(i, line) or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
+            text = "" if is_cmt else ((NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or fn(i, line) or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre{cls}>{hi(line)}</pre></td>'

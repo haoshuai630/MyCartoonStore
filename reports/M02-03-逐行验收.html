@@ -49,7 +49,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">复用页头：品牌、导航、搜索、购物车徽标</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">    &lt;!-- 品牌横幅：装饰与入口，不直接下单 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="hero"&gt;</pre></td><td class="explain">品牌横幅：只做展示与入口，不直接下单</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap hero-inner"&gt;</pre></td><td class="explain">两栏栅格：左文案、右封面堆叠</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -69,7 +69,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;section&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    &lt;!-- 作品入口：数据来自 category 的一级分类 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="strip"&gt;</pre></td><td class="explain">作品入口区</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="strip-grid" th:if="${!#lists.isEmpty(categories)}"&gt;</pre></td><td class="explain">没有分类时不渲染空网格</td></tr>
@@ -83,7 +83,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">42</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">    &lt;!-- 新品上架：上架商品按录入时间倒序，最多 3 项 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">新品栏目</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
@@ -110,7 +110,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;section&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre class="cmtline">    &lt;!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">精选栏目</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
@@ -158,12 +158,12 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">MVC 模型，控制器往里放数据给模板</td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * 首页控制器。</pre></td><td class="explain">注释：首页控制器。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * &lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，</pre></td><td class="explain">注释：&lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，（不参与执行）</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * 与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;</pre></td><td class="explain">注释：与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;（不参与执行）</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * 首页控制器。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * &lt;p&gt;只负责取数与挂模型，页面逻辑留在模板；数量上限（3 / 4）在这里写死，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 与 01 篇 FR-G-01 的口径一致，避免模板里散落魔法数字。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> HomeController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
@@ -176,7 +176,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">保存引用</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 根路径与 /main 共用首页视图，装配作品入口与两个商品栏目 */</pre></td><td class="explain">注释：根路径与 /main 共用首页视图，装配作品入口与两个商品栏目（不参与执行）</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">    /** 根路径与 /main 共用首页视图，装配作品入口与两个商品栏目 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @GetMapping({"/", "/main"})</pre></td><td class="explain">根路径与 /main 都进首页，logo 与直接输入都能到</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">public</span> String main(Model model) {</pre></td><td class="explain">根路径与 /main 共用首页视图，装配作品入口与两个商品栏目</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        model.addAttribute("categories", catalogService.topCategories());</pre></td><td class="explain">作品入口取一级分类，模板按 code 拼封面</td></tr>
@@ -213,9 +213,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre> * 首页渲染测试：验证作品入口、新品 3 条上限、精选 4 条与下架商品不可见。</pre></td><td class="explain">注释：首页渲染测试：验证作品入口、新品 3 条上限、精选 4 条与下架商品不可见。（不参与执行）</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"> * 首页渲染测试：验证作品入口、新品 3 条上限、精选 4 条与下架商品不可见。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc：不发真实 HTTP，直接调控制器并检查渲染结果</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">class</span> HomePageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
@@ -253,7 +253,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">以字符串读取，避免编码与流关闭问题</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        // 前三条在「新品上架」和「精选推荐」各出现一次；第四条只在精选里出现</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">        // 前三条在「新品上架」和「精选推荐」各出现一次；第四条只在精选里出现</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        assertThat(count(body, "新品一")).isEqualTo(4);</pre></td><td class="explain">新品一：新品栏 + 精选栏各两次（alt 与标题），共 4</td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        assertThat(count(body, "新品二")).isEqualTo(4);</pre></td><td class="explain">同上</td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(count(body, "新品三")).isEqualTo(4);</pre></td><td class="explain">同上</td></tr>

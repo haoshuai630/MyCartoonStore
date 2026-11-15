@@ -49,7 +49,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain">面包屑：首页 / 作品 / 分类 / 商品</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/main}"&gt;首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -61,26 +61,26 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束分页。</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="product-detail"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="gallery"&gt;</pre></td><td class="explain">左侧相册区</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">img</span> class="gallery-main" th:src="@{${detail.product().coverImage}}"</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                     th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="thumbs" th:if="${detail.hasGallery()}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="thumbs" th:if="${detail.hasGallery()}"&gt;</pre></td><td class="explain">没有相册图时不渲染缩略图区</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                    &lt;<span class="kw">img</span> th:each="img : ${detail.images()}" th:src="@{${img.imagePath}}"</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                         th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;!-- 右侧：购买信息 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">            &lt;!-- 右侧：购买信息 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="info"&gt;</pre></td><td class="explain">右侧购买信息区</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="cat" th:text="${detail.product().sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                &lt;<span class="kw">h1</span> th:text="${detail.product().name}"&gt;商品名&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="summary" th:text="${detail.product().summary}"&gt;简介&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="summary" th:text="${detail.product().summary}"&gt;简介&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">一句话简介，列表页也用它</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="price" th:text="'¥' + ${#numbers.formatDecimal(detail.product().price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">价格统一渲染为两位小数</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="stock" th:classappend="${detail.product().stock == 0} ? 'zero'"</pre></td><td class="explain">库存为 0 时加 zero 样式，显示售罄</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                   th:text="${detail.product().stock == 0} ? '暂时缺货' : '库存 ' + ${detail.product().stock}"&gt;库存&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                &lt;!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 --&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">                &lt;!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                &lt;<span class="kw">form</span> class="buy" action="#" method="post"&gt;</pre></td><td class="explain">购物车 M04 才实现，这里先占位不提交</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="number" name="quantity" value="1" min="1"</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                           th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}"&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -121,27 +121,27 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PathVariable;</pre></td><td class="explain">把路径片段绑定到方法参数</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * 商品详情页。</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> *</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * &lt;p&gt;商品不存在、已下架都在 Service 里转 404，由 GlobalExceptionHandler 输出错误页；</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * 控制器只负责把详情挂到模型上。&lt;/p&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * 商品详情页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * &lt;p&gt;商品不存在、已下架都在 Service 里转 404，由 GlobalExceptionHandler 输出错误页；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 控制器只负责把详情挂到模型上。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CatalogService catalogService;</pre></td><td class="explain">字段 catalogService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CatalogService catalogService;</pre></td><td class="explain">详情数据全部来自查询服务</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> ProductController(CatalogService catalogService) {</pre></td><td class="explain">注入查询服务</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        this.catalogService = catalogService;</pre></td><td class="explain">构造器注入：保存 CatalogService 字段</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 按 id 查看商品详情 */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @GetMapping("/product/{id}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, Model model) {</pre></td><td class="explain">按 id 查看商品详情</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        ProductDetail detail = catalogService.detail(id);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        model.addAttribute("detail", detail);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        <span class="kw">return</span> "product";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 按 id 查看商品详情 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @GetMapping("/product/{id}")</pre></td><td class="explain">详情页路径：id 走路径变量，便于分享链接</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable <span class="kw">long</span> id, Model model) {</pre></td><td class="explain">按 id 取详情；不存在/下架在 Service 抛 404</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        ProductDetail detail = catalogService.detail(id);</pre></td><td class="explain">一次取回商品、两级分类、相册</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        model.addAttribute("detail", detail);</pre></td><td class="explain">模板用 detail.product() 这类访问器直接取</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        <span class="kw">return</span> "product";</pre></td><td class="explain">视图名对应 templates/product.html</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -170,11 +170,11 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>/**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre> * 详情页测试：正常商品、下架商品、不存在的 id、相册与无相册两种情况。</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre> */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * 详情页测试：正常商品、下架商品、不存在的 id、相册与无相册两种情况。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> ProductPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> ProductPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：每个用例前重建七张表</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">字段 mockMvc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
@@ -185,13 +185,13 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @DisplayName("详情页显示名称、价格与两级分类面包屑")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">void</span> detailShowsProductAndBreadcrumb() throws Exception {</pre></td><td class="explain">用例：详情页展示名称、价格、面包屑</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        <span class="kw">long</span> productId = seedOnSaleProduct();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        <span class="kw">long</span> productId = seedOnSaleProduct();</pre></td><td class="explain">造一件上架商品</td></tr>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", productId))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", productId))</pre></td><td class="explain">请求详情页</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                .andExpect(content().string(containsString("测试商品详情")))</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                .andExpect(content().string(containsString("¥28.00")))</pre></td><td class="explain">断言响应内容</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                .andExpect(content().string(containsString("面包屑作品")))</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                .andExpect(content().string(containsString("测试商品详情")))</pre></td><td class="explain">商品名必须出现</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                .andExpect(content().string(containsString("¥28.00")))</pre></td><td class="explain">价格按两位小数渲染</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                .andExpect(content().string(containsString("面包屑作品")))</pre></td><td class="explain">面包屑里有一级分类</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                .andExpect(content().string(containsString("单行本")));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">42</td><td></td><td></td></tr>
@@ -199,35 +199,35 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    @DisplayName("有相册时渲染缩略图，无相册时只有封面")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">void</span> galleryOnlyWhenImagesExist() throws Exception {</pre></td><td class="explain">用例：有相册显示缩略图，无相册不显示</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        <span class="kw">long</span> withImages = seedOnSaleProduct();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        addImage(withImages, 1, "images/products/DET-C01/1.svg");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        addImage(withImages, 1, "images/products/DET-C01/1.svg");</pre></td><td class="explain">给第一件商品加相册图</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        addImage(withImages, 2, "images/products/DET-C01/2.svg");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">long</span> withoutImages = seedOnSaleProduct("DET-C02", "无相册商品");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">long</span> withoutImages = seedOnSaleProduct("DET-C02", "无相册商品");</pre></td><td class="explain">第二件商品不加图</td></tr>
 <tr class="gap"><td class="line">50</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        String withGallery = mockMvc.perform(get("/product/{id}", withImages))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取出渲染后的整页 HTML，供后面的字符串断言。</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        String noGallery = mockMvc.perform(get("/product/{id}", withoutImages))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取出渲染后的整页 HTML，供后面的字符串断言。</td></tr>
 <tr class="gap"><td class="line">55</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(withGallery).contains("thumbs");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(noGallery).doesNotContain("thumbs");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(withGallery).contains("thumbs");</pre></td><td class="explain">有图时渲染 thumbs 区</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(noGallery).doesNotContain("thumbs");</pre></td><td class="explain">无图时整块不出现</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    @DisplayName("下架商品返回 404，不泄露存在性")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    <span class="kw">void</span> draftProductReturns404() throws Exception {</pre></td><td class="explain">用例：下架商品 404</td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">long</span> categoryId = seedCategory("DRAFTIP");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        <span class="kw">long</span> draftId = insertProduct("DRAFT-01", categoryId, "已下架商品", "DRAFT");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        <span class="kw">long</span> draftId = insertProduct("DRAFT-01", categoryId, "已下架商品", "DRAFT");</pre></td><td class="explain">造一件 DRAFT 商品</td></tr>
 <tr class="gap"><td class="line">65</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", draftId))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">必须 404，不能 200 或 500</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    @DisplayName("不存在的 id 返回 404 而不是 500")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>    <span class="kw">void</span> missingProductReturns404() throws Exception {</pre></td><td class="explain">用例：不存在的 id 也是 404</td></tr>
-<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", 999999))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(get("/product/{id}", 999999))</pre></td><td class="explain">请求一个不存在的 id</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .andExpect(status().isNotFound())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .andExpect(content().string(containsString("商品不存在或已下架")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .andExpect(content().string(containsString("商品不存在或已下架")));</pre></td><td class="explain">错误页给出可读文案</td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">77</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedOnSaleProduct() {</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
@@ -240,7 +240,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">86</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seedCategory(String code) {</pre></td><td class="explain">造作品 + 单行本两级分类，返回二级 id</td></tr>
-<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, "面包屑作品" + code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)", code, "面包屑作品" + code);</pre></td><td class="explain">名称带 code 后缀，避免同级重名</td></tr>
 <tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">long</span> parentId = jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                code + "-COMIC", parentId, "单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>

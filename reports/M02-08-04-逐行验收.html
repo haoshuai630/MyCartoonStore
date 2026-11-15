@@ -72,7 +72,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;<span class="kw">input</span> name="keyword" th:value="${query.keyword}" placeholder="商品名称"&gt;</pre></td><td class="explain">关键字回填，用户能看到自己搜了什么</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;<span class="kw">button</span> class="btn btn-primary" type="submit"&gt;筛选&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">只有点按钮才提交，不依赖 JS</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;重置&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;重置&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">一键回到无筛选状态</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr class="gap"><td class="line">36</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="toolbar"&gt;</pre></td><td class="explain">工具条：左边类型，右边排序。</td></tr>
@@ -211,13 +211,13 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">63</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        String first = mockMvc.perform(get("/category"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取出渲染后的整页 HTML，供后面的字符串断言。</td></tr>
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        assertThat(count(first, "C0")).isGreaterThan(0);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        assertThat(first).contains("第 1 / 2 页");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr class="gap"><td class="line">69</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        String second = mockMvc.perform(get("/category").param("page", "2"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取出渲染后的整页 HTML，供后面的字符串断言。</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThat(second).contains("第 2 / 2 页");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        assertThat(second).doesNotContain("C01");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
@@ -239,13 +239,13 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        <span class="kw">long</span> otherWork = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T2'", Long.<span class="kw">class</span>);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES ('T2-COMIC', ?, '单行本', 1)", otherWork);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        <span class="kw">long</span> otherComic = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T2-COMIC'", Long.<span class="kw">class</span>);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        insertProduct("X01", otherComic, "别家商品", "28.00", 10, "ON_SALE", 1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        insertProduct("X01", otherComic, "别家商品", "28.00", 10, "ON_SALE", 1);</pre></td><td class="explain">另造一部作品的一件商品，验证不会串进来</td></tr>
 <tr class="gap"><td class="line">95</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        <span class="kw">long</span> workId = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T1'", Long.<span class="kw">class</span>);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        <span class="kw">long</span> workId = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T1'", Long.<span class="kw">class</span>);</pre></td><td class="explain">取作品 id 作为下拉值</td></tr>
 <tr class="gap"><td class="line">97</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        mockMvc.perform(get("/category").param("workId", String.valueOf(workId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>                .andExpect(content().string(containsString("单行本1")))</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>                .andExpect(content().string(containsString("单行本1")))</pre></td><td class="explain">本作品商品出现</td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                .andExpect(content().string(not(containsString("别家商品"))));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">103</td><td></td><td></td></tr>

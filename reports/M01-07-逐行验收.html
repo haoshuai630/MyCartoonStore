@@ -85,7 +85,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 </tbody></table>
 </section>
 <section id="productqueryjava">
-<h2>ProductQuery.java<small>列表查询条件 DTO · 34 行</small></h2>
+<h2>ProductQuery.java<small>列表查询条件 DTO · 40 行</small></h2>
 <p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/ProductQuery.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
@@ -110,21 +110,27 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */</pre></td><td class="explain">注释：作品（一级分类）id；指定时只查该作品下的全部品类（不参与执行）</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> Long workId;</pre></td><td class="explain">作品（一级分类）id；指定时只查该作品下的全部品类</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /** ALL / COMIC / MERCH */</pre></td><td class="explain">注释：ALL / COMIC / MERCH（不参与执行）</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH</td></tr>
-<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">注释：商品名称关键字，已去首尾空白；为空表示不搜索（不参与执行）</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">商品名称关键字，已去首尾空白；为空表示不搜索</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    /**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>     * 商品类型过滤：ALL 不过滤；COMIC 只查单行本（分类 code 以 -COMIC 结尾）；</pre></td><td class="explain">注释：商品类型过滤：ALL 不过滤；COMIC 只查单行本（分类 code 以 -COMIC 结尾）；（不参与执行）</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>     * MERCH 查其余全部周边品类。取值由 CatalogService 的白名单校验，非法值返回 400。</pre></td><td class="explain">注释：MERCH 查其余全部周边品类。取值由 CatalogService 的白名单校验，非法值返回 400。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>     */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">商品类型过滤：ALL 不过滤；COMIC 只查单行本（分类 code 以 -COMIC 结尾）； MERCH 查其余全部周边品类。取值由 CatalogService 的白名单校验，非法值返回 400。</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST */</pre></td><td class="explain">注释：DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST（不参与执行）</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    /** 商品名称关键字，已去首尾空白；为空表示不搜索 */</pre></td><td class="explain">注释：商品名称关键字，已去首尾空白；为空表示不搜索（不参与执行）</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">商品名称关键字，已去首尾空白；为空表示不搜索</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    /** 当前页数量 */</pre></td><td class="explain">注释：当前页数量（不参与执行）</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">当前页数量</td></tr>
-<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">注释：偏移量（不参与执行）</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    /**</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>     * 排序方式：DEFAULT 按人工排序 sort_order；PRICE_ASC / PRICE_DESC 按价格；</pre></td><td class="explain">注释：排序方式：DEFAULT 按人工排序 sort_order；PRICE_ASC / PRICE_DESC 按价格；（不参与执行）</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>     * NEWEST 按上架时间倒序。SQL 侧用 choose 映射到固定列，非法值返回 400。</pre></td><td class="explain">注释：NEWEST 按上架时间倒序。SQL 侧用 choose 映射到固定列，非法值返回 400。（不参与执行）</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>     */</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">排序方式：DEFAULT 按人工排序 sort_order；PRICE_ASC / PRICE_DESC 按价格； NEWEST 按上架时间倒序。SQL 侧用 choose 映射到固定列，非法值返回 400。</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    /** 当前页数量 */</pre></td><td class="explain">注释：当前页数量（不参与执行）</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">当前页数量</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    /** 偏移量 */</pre></td><td class="explain">注释：偏移量（不参与执行）</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">偏移量</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="productmapperxml">
@@ -476,6 +482,6 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 </tbody></table>
 </section>
 </main>
-<footer>2026-11-15 · M01-07 · 共 11 个文件、343 行；说明由 javadoc 提取 + 规则生成，逐行覆盖。
+<footer>2026-11-15 · M01-07 · 共 11 个文件、349 行；说明由 javadoc 提取 + 规则生成，逐行覆盖。
 完整汇报见同目录 M01-07-Mapper.md。</footer>
 </body></html>
