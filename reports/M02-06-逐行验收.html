@@ -48,7 +48,7 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">234</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre><span class="cm">/* 列表页两栏：左侧筛选固定宽度，右侧结果自适应 */</span></pre></td><td class="explain">两栏布局：筛选固定 250px，结果占满剩余</td></tr>
 <tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>.list-layout{display:grid;grid-template-columns:250px 1fr;gap:36px;align-items:start;padding:28px 0 60px}</pre></td><td class="explain">grid 两列；align-items:start 让侧栏不被拉伸</td></tr>
-<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>.filters{position:sticky;top:96px;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}</pre></td><td class="explain">sticky 让筛选栏滚动时跟随；top 96px 避开吸顶页头</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>.filters{position:sticky;top:121px;align-self:start;max-height:calc(100vh - 140px);overflow:auto;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>.filters h3{margin:0 0 12px;font-size:13px;letter-spacing:.18em}</pre></td><td class="explain">小标题加字距，弱化层级</td></tr>
 <tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>.filters a{display:block;padding:6px 0;font-size:14px;font-weight:700}</pre></td><td class="explain">block 让每项占一行，点击区域更大</td></tr>
 <tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>.filters a:hover{color:var(--red)}</pre></td><td class="explain">悬停用品牌红</td></tr>
