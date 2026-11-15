@@ -16,6 +16,9 @@ public class ProductSearchCommand {
     /** 分类 id，可为空 */
     private String categoryId;
 
+    /** 作品（一级分类）id；作品页用它限定范围 */
+    private String workId;
+
     /** ALL / COMIC / MERCH，可为空 */
     private String productType;
 

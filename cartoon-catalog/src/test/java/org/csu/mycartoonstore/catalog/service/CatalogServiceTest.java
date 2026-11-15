@@ -4,6 +4,7 @@ import org.csu.mycartoonstore.catalog.dto.ProductDetail;
 import org.csu.mycartoonstore.catalog.dto.ProductQuery;
 import org.csu.mycartoonstore.catalog.dto.ProductSearchCommand;
 import org.csu.mycartoonstore.catalog.entity.Category;
+import org.csu.mycartoonstore.catalog.dto.WorkSummary;
 import org.csu.mycartoonstore.catalog.entity.Product;
 import org.csu.mycartoonstore.catalog.entity.ProductImage;
 import org.csu.mycartoonstore.catalog.mapper.CategoryMapper;
@@ -195,6 +196,65 @@ class CatalogServiceTest {
 
         assertThat(detail.hasGallery()).isFalse();
         assertThat(detail.topCategory().getId()).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("作品墙返回 Mapper 的结果，不在 Service 里二次加工")
+    void worksDelegatesToMapper() {
+        WorkSummary star = new WorkSummary(1L, "STARLINE", "星轨列车", 4, 11);
+        when(categoryMapper.selectWorkSummaries()).thenReturn(java.util.List.of(star));
+
+        var works = catalogService.works();
+
+        assertThat(works).hasSize(1);
+        assertThat(works.get(0).name()).isEqualTo("星轨列车");
+        assertThat(works.get(0).categoryCount()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("作品页返回作品、品类列表与在售商品数")
+    void workReturnsDetail() {
+        Category work = new Category();
+        work.setId(1L);
+        work.setName("星轨列车");
+        Category model = new Category();
+        model.setId(101L);
+        model.setParentId(1L);
+        model.setName("模型");
+        when(categoryMapper.selectById(1L)).thenReturn(work);
+        when(categoryMapper.selectList(any())).thenReturn(java.util.List.of(model));
+        when(categoryMapper.countOnSaleByWork(1L)).thenReturn(11);
+
+        var detail = catalogService.work(1L);
+
+        assertThat(detail.work().getName()).isEqualTo("星轨列车");
+        assertThat(detail.categories()).hasSize(1);
+        assertThat(detail.productCount()).isEqualTo(11);
+    }
+
+    @Test
+    @DisplayName("二级分类不能当作品页打开：返回 404")
+    void workRejectsSecondaryCategory() {
+        Category leaf = new Category();
+        leaf.setId(101L);
+        leaf.setParentId(1L);
+        when(categoryMapper.selectById(101L)).thenReturn(leaf);
+
+        assertThatThrownBy(() -> catalogService.work(101L))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("不存在的作品 id 返回 404")
+    void workNotFound() {
+        when(categoryMapper.selectById(999L)).thenReturn(null);
+
+        assertThatThrownBy(() -> catalogService.work(999L))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND);
     }
 
     private Product product(long id, long categoryId, String status) {

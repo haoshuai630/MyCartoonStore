@@ -97,6 +97,23 @@ public class CatalogService {
         return productMapper.selectFeatured(limit);
     }
 
+    /** 作品墙：每部作品一行，带品类数与在售商品数 */
+    public java.util.List<org.csu.mycartoonstore.catalog.dto.WorkSummary> works() {
+        return categoryMapper.selectWorkSummaries();
+    }
+
+    /**
+     * 作品页头部：只接受一级分类；二级分类或不存在都按 404 处理。
+     */
+    public org.csu.mycartoonstore.catalog.dto.WorkDetail work(long id) {
+        Category work = categoryMapper.selectById(id);
+        if (work == null || work.getParentId() != null) {
+            throw BizException.notFound("作品不存在");
+        }
+        return new org.csu.mycartoonstore.catalog.dto.WorkDetail(
+                work, childrenOf(id), categoryMapper.countOnSaleByWork(id));
+    }
+
     /** 一级分类（作品），按 sort_order、id 升序 */
     public List<Category> topCategories() {
         return categoryMapper.selectList(
@@ -130,6 +147,7 @@ public class CatalogService {
     private ProductQuery buildQuery(ProductSearchCommand command, PageQuery pageQuery) {
         ProductQuery query = new ProductQuery();
         query.setCategoryId(parseCategoryId(command.getCategoryId()));
+        query.setWorkId(parseCategoryId(command.getWorkId()));
         query.setProductType(parseEnum(command.getProductType(), "ALL", TYPES, "商品类型"));
         query.setSort(parseEnum(command.getSort(), "DEFAULT", SORTS, "排序方式"));
         query.setKeyword(escapeLike(parseKeyword(command.getKeyword())));
