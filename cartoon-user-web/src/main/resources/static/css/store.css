@@ -233,14 +233,6 @@ button{font-family:inherit}
 .crumbs b{color:var(--ink)}
 
 /* 列表页两栏：左侧筛选固定宽度，右侧结果自适应 */
-.list-layout{display:grid;grid-template-columns:250px 1fr;gap:36px;align-items:start;padding:28px 0 60px}
-.filters{position:sticky;top:121px;align-self:start;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}
-.filters h3{margin:0 0 12px;font-size:13px;letter-spacing:.18em}
-.filters a{display:block;padding:6px 0;font-size:14px;font-weight:700}
-.filters a:hover{color:var(--red)}
-.filters a.sub{padding-left:14px;font-weight:500;font-size:13px;color:#4a4237}
-.filter-all{margin-bottom:10px;color:var(--muted)}
-.filter-group{border-top:1px dashed #d8cdb8;padding-top:10px;margin-top:10px}
 
 /* 工具栏：类型与排序各一组胶囊按钮 */
 .toolbar{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:14px}
@@ -282,8 +274,6 @@ button{font-family:inherit}
 
 /* 窄屏：两栏改单栏，标题降字号，搜索框让位 */
 @media (max-width:1000px){
-  .list-layout{grid-template-columns:1fr}
-  .filters{position:static}
   .product-detail{grid-template-columns:1fr;gap:28px}
   .hero-inner{grid-template-columns:1fr}
   .cover-stack{display:none}
@@ -313,3 +303,9 @@ button{font-family:inherit}
 .work-hero-inner h1{margin:8px 0 10px;font-size:46px;line-height:1.05;font-weight:900}
 .work-hero-inner p{margin:0;font-size:13px;color:#4a4237;display:flex;gap:18px}
 @media(max-width:640px){.work-hero-inner{flex-direction:column;align-items:flex-start}.work-hero-inner h1{font-size:32px}}
+/* ===== M02-08-04：列表页筛选条（替代侧栏） ===== */
+.filter-bar{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;border:3px solid var(--ink);background:#fff;padding:16px 18px;box-shadow:6px 6px 0 var(--ink);margin:0 0 22px}
+.filter-bar .field{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;letter-spacing:.12em}
+.filter-bar select,.filter-bar input{border:2px solid var(--ink);padding:8px 10px;font-size:14px;background:#fff;min-width:190px}
+.filter-bar .btn{padding:10px 18px}
+@media(max-width:640px){.filter-bar select,.filter-bar input{min-width:0;width:100%}.filter-bar .field{width:100%}}

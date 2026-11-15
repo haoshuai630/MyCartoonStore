@@ -31,7 +31,7 @@
         <div class="wrap">
             <div class="strip-grid" th:if="${!#lists.isEmpty(categories)}">
                 <a class="strip-item" th:each="c : ${categories}"
-                   th:href="@{/category(categoryId=${c.id})}">
+                   th:href="@{/works/{id}(id=${c.id})}">
                     <img th:src="${'/images/products/' + c.code + '-C01/cover.svg'}" th:alt="${c.name}">
                     <span><b th:text="${c.name}">作品</b><small th:text="${c.code}">CODE</small></span>
                 </a>

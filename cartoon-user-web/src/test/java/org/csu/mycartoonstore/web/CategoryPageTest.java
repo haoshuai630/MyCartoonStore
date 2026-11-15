@@ -83,6 +83,24 @@ class CategoryPageTest extends AbstractIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("作品下拉能筛到只剩该作品商品")
+    void filterByWork() throws Exception {
+        seed();
+        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES ('T2', NULL, '作品二', 2)");
+        long otherWork = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T2'", Long.class);
+        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES ('T2-COMIC', ?, '单行本', 1)", otherWork);
+        long otherComic = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T2-COMIC'", Long.class);
+        insertProduct("X01", otherComic, "别家商品", "28.00", 10, "ON_SALE", 1);
+
+        long workId = jdbc.queryForObject("SELECT id FROM category WHERE code = 'T1'", Long.class);
+
+        mockMvc.perform(get("/category").param("workId", String.valueOf(workId)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("单行本1")))
+                .andExpect(content().string(not(containsString("别家商品"))));
+    }
+
     private int count(String body, String word) {
         int n = 0, i = 0;
         while ((i = body.indexOf(word, i)) >= 0) { n++; i += word.length(); }

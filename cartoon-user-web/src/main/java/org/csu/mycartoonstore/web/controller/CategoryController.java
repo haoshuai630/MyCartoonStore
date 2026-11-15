@@ -25,7 +25,7 @@ public class CategoryController {
     @GetMapping("/category")
     public String list(ProductSearchCommand command, Model model) {
         model.addAttribute("page", catalogService.search(command));
-        model.addAttribute("categories", catalogService.allCategories());
+        model.addAttribute("works", catalogService.works());
         model.addAttribute("query", command);
         return "category";
     }
