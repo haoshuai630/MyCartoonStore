@@ -381,4 +381,5 @@ MANUAL = {
     '<head th:replace="~{fragments/common :: head(\'注册\')}"></head>': '复用公共 head，标题传「注册」。',
     '<div th:replace="~{fragments/common :: header}"></div>': '复用页头：品牌、导航、搜索、购物车徽标。',
     '<footer th:replace="~{fragments/common :: footer}"></footer>': '复用页脚。',
+    "</div>": "结构闭合：结束当前容器；不产生新的内容。",
 }
