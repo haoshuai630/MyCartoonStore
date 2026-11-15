@@ -87,6 +87,16 @@ public class CatalogService {
         return new ProductDetail(product, top, leaf, images);
     }
 
+    /** 首页「新品上架」：上架商品按录入时间倒序，取 limit 条 */
+    public List<Product> newest(int limit) {
+        return productMapper.selectNewest(limit);
+    }
+
+    /** 首页「精选推荐」：上架商品按 sort_order 升序，取 limit 条 */
+    public List<Product> featured(int limit) {
+        return productMapper.selectFeatured(limit);
+    }
+
     /** 一级分类（作品），按 sort_order、id 升序 */
     public List<Category> topCategories() {
         return categoryMapper.selectList(

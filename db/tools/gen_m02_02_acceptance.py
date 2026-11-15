@@ -41,42 +41,42 @@ def hi_html(line: str) -> str:
 
 
 def make_html_explainer(lines: list[str]):
+    """只解释"这一行为什么这么写"，结构性标签留空。"""
+
     def explain(n: int, line: str) -> str:
         s = line.strip()
         if not s:
             return ""
-        if s.startswith("<!DOCTYPE"):
-            return "HTML5 文档类型"
-        if s.startswith("<!--"):
-            return "注释：说明本段的用途或后续任务"
-        if s.startswith("<html"):
-            return "根元素；声明 Thymeleaf 命名空间，模板里才能用 th:* 属性"
         if "th:fragment" in s:
             name = re.search(r'th:fragment="(\w+)', s)
             return f"定义可复用片段 {name.group(1)}，其他页面用 th:replace 引用"
         if "th:replace" in s:
             return "引用公共片段，避免每个页面重复写页头页脚"
+        if "th:each" in s:
+            return "遍历后端传入的集合渲染"
+        if "th:if" in s:
+            return "空集合时不渲染该区块（空状态由另一段负责）"
         if "th:href" in s:
             return "站内链接，由 Thymeleaf 补上下文路径"
         if "th:src" in s:
             return "站内静态资源，路径与数据库里的 cover_image 一致"
+        if "th:text" in s and "formatDecimal" in s:
+            return "价格统一渲染为两位小数"
         if "th:text" in s:
             return "文本由后端数据渲染，不写死"
-        if s.startswith("<title"):
-            return "页面标题：由片段参数拼接品牌名"
-        if s.startswith("<link"):
-            return "引入站点样式表"
-        if s.startswith("</head"):
-            return "head 结束"
-        if re.match(r"<(div|header|footer|section|main|nav|form|h1|h2|p|span)\b", s):
-            tag = re.match(r"<(\w+)", s).group(1)
-            return f"{tag} 容器开始"
-        if s.startswith("</"):
-            return "结束标签"
-        return "结构/内容行"
+        if 'class="hero"' in s:
+            return "品牌横幅：只做展示与入口，不直接下单"
+        if 'class="strip"' in s:
+            return "作品入口：一级分类，点进对应作品列表"
+        if 'class="section"' in s:
+            return "首页栏目：新品上架 / 精选推荐"
+        if 'class="card"' in s:
+            return "商品卡：封面、名称、价格与库存状态"
+        if "th:classappend" in s:
+            return "库存为 0 时加 zero 样式，显示售罄"
+        return ""
 
     return explain
-
 
 def main() -> None:
     sections, nav, total = [], [], 0
