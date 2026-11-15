@@ -8,7 +8,7 @@ NOTES_TEXT = {
     ".crumbs b{color:var(--ink)}": "当前商品用主色加粗，与链接区分",
     "/* 列表页两栏：左侧筛选固定宽度，右侧结果自适应 */": "两栏布局：筛选固定 250px，结果占满剩余",
     ".list-layout{display:grid;grid-template-columns:250px 1fr;gap:36px;align-items:start;padding:28px 0 60px}": "grid 两列；align-items:start 让侧栏不被拉伸",
-    ".filters{position:sticky;top:96px;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}": "sticky 让筛选栏滚动时跟随；top 121px = 顶栏 32 + 页头 78 + 边框 3 + 8 间距，正好让开吸顶页头",
+    ".filters{position:sticky;top:96px;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}": "sticky 让筛选栏滚动时跟随；top 121px = 顶栏 32 + 页头 78 + 边框 3 + 8 间距，正好让开吸顶页头；不设 max-height，避免侧栏内部再出现滚动条",
     ".filters h3{margin:0 0 12px;font-size:13px;letter-spacing:.18em}": "小标题加字距，弱化层级",
     ".filters a{display:block;padding:6px 0;font-size:14px;font-weight:700}": "block 让每项占一行，点击区域更大",
     ".filters a:hover{color:var(--red)}": "悬停用品牌红",
