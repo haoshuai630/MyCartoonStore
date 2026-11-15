@@ -41,7 +41,7 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档类型：浏览器按标准模式渲染</td></tr>
 <tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">根元素；xmlns:th 声明命名空间，模板里的 th:* 才生效</td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('全部商品')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">结束 head 容器</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('全部商品')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">复用公共 head 片段，标题由参数传入。</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">页面可见内容的起点</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div 容器</td></tr>

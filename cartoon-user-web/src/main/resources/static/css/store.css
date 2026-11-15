@@ -318,3 +318,5 @@ button{font-family:inherit}
 .auth-form .btn{align-self:flex-start;margin-top:6px}
 .auth-error{border:2px solid var(--red);color:var(--red);background:#fff5f3;padding:10px 14px;font-weight:700;margin:0 0 16px}
 .auth-switch{margin:18px 0 0;font-size:14px;color:#4a4237}
+
+.auth-ok{border:2px solid #2E5E4E;color:#2E5E4E;background:#f2f8f4;padding:10px 14px;font-weight:700;margin:0 0 16px}

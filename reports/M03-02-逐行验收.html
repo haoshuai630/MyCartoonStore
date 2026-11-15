@@ -42,7 +42,7 @@ footer{color:#536176;font-size:13px}
 <tbody>
 <tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE html&gt;</pre></td><td class="explain">HTML5 文档类型，浏览器按标准模式渲染。</td></tr>
 <tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">根元素，声明 Thymeleaf 命名空间。</td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;head th:replace="~{fragments/common :: head('注册')}"&gt;&lt;/head&gt;</pre></td><td class="explain">复用公共 head，标题传「注册」。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;head th:replace="~{fragments/common :: head('注册')}"&gt;&lt;/head&gt;</pre></td><td class="explain">复用公共 head 片段，标题由参数传入。</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;body&gt;</pre></td><td class="explain">页面可见内容的起点。</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;div th:replace="~{fragments/common :: header}"&gt;&lt;/div&gt;</pre></td><td class="explain">复用页头：品牌、导航、搜索、购物车徽标。</td></tr>

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -53,6 +54,51 @@ public class AuthController {
         } catch (BizException e) {
             return backToForm(model, username, displayName, e.getMessage());
         }
+    }
+
+    /** 打开登录页：带上注册成功等一次性提示 */
+    @GetMapping("/login")
+    public String loginPage() {
+        return "auth/login";
+    }
+
+    /**
+     * 提交登录：校验通过后把 userId 与显示名写进 Session。
+     *
+     * <p>登录后回到 redirect 指定的站内路径；只接受以 / 开头的地址，
+     * 避免被构造成跳转到站外的开放重定向。</p>
+     */
+    @PostMapping("/login")
+    public String login(@RequestParam String username,
+                        @RequestParam String password,
+                        @RequestParam(required = false) String redirect,
+                        HttpSession session,
+                        Model model) {
+        try {
+            StoreUser user = accountService.authenticate(username, password);
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("displayName", user.getDisplayName());
+            return "redirect:" + safeRedirect(redirect);
+        } catch (BizException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("username", username);
+            return "auth/login";
+        }
+    }
+
+    /** 登出：只清会话，不删其他状态 */
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/main";
+    }
+
+    /** 只允许站内相对路径，其他一律回首页 */
+    private String safeRedirect(String redirect) {
+        if (redirect == null || redirect.isBlank() || !redirect.startsWith("/") || redirect.startsWith("//")) {
+            return "/main";
+        }
+        return redirect;
     }
 
     /** 回到表单并回填已填内容，避免用户重填 */

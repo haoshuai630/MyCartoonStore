@@ -91,4 +91,6 @@ IMPORT_NOTES = {
     "import org.csu.mycartoonstore.account.service.AccountService": "账号服务：注册与登录校验",
     "import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post": "构造 POST 请求",
     "import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl": "断言重定向目标",
+    "import jakarta.servlet.http.HttpSession": "Servlet 会话对象，用来存放登录身份",
+    "import org.springframework.mock.web.MockHttpSession": "测试用假会话，可断言属性与失效",
 }
