@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' | 漫屿 MANGA ISLE'">漫屿 MANGA ISLE</title>
+    <link rel="stylesheet" th:href="@{/css/store.css}">
+</head>
+<body>
+
+<!-- 顶部条 + 页头：品牌、导航、搜索、购物车徽标 -->
+<div th:fragment="header">
+    <div class="topbar">
+        <div class="wrap">
+            <span>官方正版 <span class="dot">/</span> 满 99 包邮 <span class="dot">/</span> 教学演示站点，商品与订单均为虚构</span>
+            <!-- 登录身份在 M03 接入，这里先固定显示游客 -->
+            <span>游客</span>
+        </div>
+    </div>
+    <header class="site-header">
+        <div class="wrap header-main">
+            <a class="brand" th:href="@{/main}">
+                <span class="mark">漫</span>
+                <span><b>漫屿</b><small>MANGA ISLE</small></span>
+            </a>
+            <nav class="nav">
+                <a th:href="@{/main}">首页</a>
+                <a th:href="@{/category}">全部商品</a>
+                <a th:href="@{/category(sort='NEWEST')}">新作上架</a>
+                <a th:href="@{/orders}">我的订单</a>
+            </nav>
+            <div class="header-tools">
+                <form class="search" th:action="@{/category}" method="get">
+                    <input name="keyword" placeholder="搜索商品名称">
+                    <button type="submit">搜索</button>
+                </form>
+                <a class="cart-link" th:href="@{/cart}">购物车 <b>0</b></a>
+            </div>
+        </div>
+    </header>
+</div>
+
+<!-- 页脚 -->
+<footer class="site-footer" th:fragment="footer">
+    <div class="wrap">
+        <b>漫屿 MANGA ISLE</b>
+        <span>原创漫画 · 官方周边 · 教学演示</span>
+    </div>
+</footer>
+
+</body>
+</html>

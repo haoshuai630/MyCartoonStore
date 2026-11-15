@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('首页')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <!-- 品牌横幅：M02-03 接入真实数据后，下方会出现作品入口与两个商品栏目 -->
+    <section class="hero">
+        <div class="wrap hero-inner">
+            <div>
+                <span class="hero-kicker">MANGA ISLE · 原创漫画官方商店</span>
+                <h1>先选一部<br><em>作品</em>，再挑它的周边。</h1>
+                <p>单行本与官方周边同页呈现，全部来自站内数据库。</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" th:href="@{/category}">开始选购 →</a>
+                    <a class="btn btn-ghost" th:href="@{/category(sort='NEWEST')}">看新作</a>
+                </div>
+            </div>
+            <div class="cover-stack">
+                <img th:src="@{/images/products/STARLINE-C01/cover.svg}" alt="星轨列车">
+                <img th:src="@{/images/products/ONIGIRI-C01/cover.svg}" alt="饭团小馆">
+                <img th:src="@{/images/products/CICADA-C01/cover.svg}" alt="夏夜蝉鸣">
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div><span class="en">LAYOUT READY</span><h2>布局已就绪</h2></div>
+            </div>
+            <p>页头、页脚、导航、搜索与购物车徽标已抽出为公共片段；作品入口、新品与精选将在 M02-03 接入数据库。</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
