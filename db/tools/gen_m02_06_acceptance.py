@@ -9,6 +9,13 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+from manual_notes import MANUAL  # noqa: E402
+
+
+def CLS(line):
+    """注释行绿色标注。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
+
 import gen_m02_02_acceptance as m22  # noqa: E402
 from notes_m02_06 import NOTES_TEXT  # noqa: E402
 
@@ -54,10 +61,11 @@ def main():
             if not line.strip():
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
-            text = NOTES_TEXT.get(line.strip()) or (fn(i, line) if fn else "")
+            is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
+            text = "" if is_cmt else ((MANUAL.get(line.strip()) if "MANUAL" in globals() else "") or (fn(i, line) if callable(fn) else "") or (NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
-                f'<td class="code"><pre>{hi(line)}</pre></td>'
+                f'<td class="code"><pre{CLS(line)}>{hi(line)}</pre></td>'
                 f'<td class="explain">{esc(text)}</td></tr>'
             )
         total += len(rows)
@@ -90,7 +98,6 @@ def main():
 <footer>2026-11-15 · M02-06 · 2 个文件、{total} 行。完整汇报见同目录 M02-06-页面收尾.md。</footer>
 </body></html>
 """
-    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 

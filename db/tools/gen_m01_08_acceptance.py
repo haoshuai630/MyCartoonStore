@@ -8,6 +8,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
 
+
+def CLS(line):
+    """注释行绿色标注。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
+
+
 ROOT = base.ROOT
 OUT = ROOT / "reports" / "M01-08-逐行验收.html"
 
@@ -77,9 +83,11 @@ def main() -> None:
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
             e = fn(i, line)
+            is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
+            text = "" if is_cmt else ((NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or fn(i, line) or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
-                f'<td class="code"><pre>{hi(line)}</pre></td>'
+                f'<td class="code"><pre{CLS(line)}>{hi(line)}</pre></td>'
                 f'<td class="explain">{base.esc(e)}</td></tr>'
             )
         total += len(rows)
@@ -115,7 +123,6 @@ def main() -> None:
 完整汇报见同目录 M01-08-测试基座.md。</footer>
 </body></html>
 """
-    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 

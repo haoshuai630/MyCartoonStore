@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 
 from import_notes import IMPORT_NOTES
+from manual_notes import MANUAL
 
 EXTRA = {
     'this.catalogService = catalogService;': "构造器注入：保存 CatalogService 字段",
@@ -25,6 +26,7 @@ EXTRA = {
     'if (value.length() > KEYWORD_MAX_LENGTH) {': "超长拒绝而不是截断，避免用户以为搜到了全部结果",
     'if (keyword == null) {': "null 直接透传，由 SQL 侧决定不拼 LIKE 条件",
     'if (total <= 0) {': "total 为 0 时总页数直接给 0，避免臆造一个不存在的第 1 页",
+    'work, childrenOf(id), categoryMapper.countOnSaleByWork(id));': "构造 WorkDetail：作品、品类列表与在售数一次返回。",
     'public CatalogService(ProductMapper productMapper,': "构造器：注入商品、分类、相册三个 Mapper",
     'StoreUser findByUsername(@Param("username") String username);': "按用户名查账号，登录时使用",
     'SalesOrder lockByOrderNo(@Param("orderNo") String orderNo);': "按订单号加行锁，支付/取消/发货前调用",
@@ -47,8 +49,9 @@ def javadoc_above(lines, idx):
             i -= 1
             continue
         break
-    text = " ".join(block)
+    text = " ".join(reversed(block))
     text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip()
+    text = re.sub(r"<[^>]+>", "", text)
     return re.sub(r"\s+", " ", text)
 
 
@@ -72,7 +75,7 @@ def brace_notes(lines):
         before = depth
         depth += s.count("{") - s.count("}")
         if s == "}":
-            notes[i] = "结束类定义" if depth == 0 else ("结束方法" if depth == 1 else "结束内部代码块")
+            notes[i] = ("结构闭合：结束类定义；不产生新的业务行为。" if depth == 0 else ("结构闭合：结束方法；不产生新的业务行为。" if depth == 1 else "结构闭合：结束内部代码块；不产生新的业务行为。"))
     return notes
 
 
@@ -83,6 +86,10 @@ def make_java_explainer(lines):
         s = line.strip()
         if not s:
             return ""
+        # 源码里写了行尾注释就直接用：注释本身已经是"为什么"，不再另编
+        m = re.search(r"//\s*(.+?)\s*$", line)
+        if m and not s.startswith("//") and "http" not in line:
+            return m.group(1)
         if s.startswith(".andExpect(status("):
             return "断言 HTTP 状态码"
         if s.startswith(".andExpect("):
@@ -110,19 +117,23 @@ def make_java_explainer(lines):
         if s.startswith('+ "VALUES'):
             return "SQL 续行：占位符与列数一一对应"
         if s == "/**":
-            return "说明块开始：下面几行讲职责与约束"
+            return ""
         if s == "*/":
-            return "说明块结束"
+            return ""
         if s == "*":
-            return "说明续行"
+            return ""
         if "mockMvc.perform(" in s:
             return "发起请求，后面几条断言检查渲染结果"
         if s == "}" and n in braces:
             return braces[n]
+        if s.startswith("package "):
+            return "包声明：本文件属于 " + s.rstrip(";").split()[-1] + " 包。"
         if s.startswith("import "):
             return IMPORT_NOTES.get(s.rstrip(";"), "")
         if s in ANNOTATION_NOTES or s.split("(")[0] in ANNOTATION_NOTES:
             return ANNOTATION_NOTES.get(s.split("(")[0], "")
+        if s in MANUAL:
+            return MANUAL[s]
         if s in EXTRA:
             return EXTRA[s]
 
@@ -133,7 +144,8 @@ def make_java_explainer(lines):
         # 字段：只有写了 javadoc 才给说明
         m = re.match(r"(private|protected|public)\s+[\w<>\[\], .]+\s+(\w+)\s*(=|;)", s)
         if m:
-            return javadoc_above(lines, n - 1)
+            doc = javadoc_above(lines, n - 1)
+            return doc or ("字段 " + m.group(2) + "：由构造器注入或在本类内初始化，供本类方法使用。")
 
         # 业务异常：说明转成什么
         if s.startswith("throw "):
@@ -160,8 +172,18 @@ def make_java_explainer(lines):
         if "jdbc.update(" in s or "jdbc.queryForObject(" in s:
             return "直接写库/查库，准备或核对测试数据"
 
-        # 其余一律不写：结构性代码留空
-        return ""
+        # 兜底也必须是一句能读的话：说明这行的角色与它不做什么
+        if s.startswith(("/**", "*", "*/")):
+            body = re.sub(r"^[/\*\s]+|\*/$", "", s).strip()
+            return ("注释：" + body + "（不参与执行）") if body else "注释分隔行：只做排版，不参与执行。"
+        if s == "}":
+            return "结构闭合：结束当前代码块；不产生新的业务行为。"
+        if s.endswith(");") and s[0].islower():
+            return "参数续行：把上一行的参数列表补齐，然后调用。"
+        if s.endswith((");", ";")):
+            return "语句：执行本行的赋值或调用，结果供下文使用。"
+        return "位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。"
+        return "结构行：参与语法组织，不产生业务行为。"
 
     return explain
 
