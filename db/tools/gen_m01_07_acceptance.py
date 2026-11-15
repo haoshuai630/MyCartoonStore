@@ -74,14 +74,21 @@ def hi_xml(line: str) -> str:
 
 
 def javadoc_above(lines: list[str], idx: int) -> str:
-    """向上找最近的 /** ... */ 块，取第一行正文。"""
+    """向上找最近的 /** ... */ 块，取第一行正文；中间允许隔着 @注解 行。"""
     i = idx - 1
     block = []
-    while i >= 0 and (lines[i].strip().startswith(("*", "/**", "*/"))):
-        block.append(lines[i].strip())
-        if lines[i].strip().startswith("/**"):
-            break
-        i -= 1
+    while i >= 0:
+        s = lines[i].strip()
+        if s.startswith("@"):
+            i -= 1
+            continue
+        if s.startswith(("*", "/**", "*/")):
+            block.append(s)
+            if s.startswith("/**"):
+                break
+            i -= 1
+            continue
+        break
     text = " ".join(block)
     text = text.replace("/**", "").replace("*/", "").replace("*", " ").strip()
     return re.sub(r"\s+", " ", text)
@@ -117,9 +124,6 @@ def make_java_explainer(lines: list[str]):
         if re.match(r"public\s+interface\s+\w+", s):
             base = re.search(r"BaseMapper<(\w+)>", s)
             return f"接口：继承 BaseMapper<{base.group(1)}>，获得基础 CRUD" if base else "接口声明"
-        if "(" in s and s.endswith(";") and not s.startswith("return"):
-            doc = javadoc_above(lines, n - 1)
-            return doc or "方法声明"
         if s.endswith(";") and re.search(r"\b(private|protected|public)\b", s):
             name = re.search(r"(\w+)\s*;", s)
             doc = javadoc_above(lines, n - 1)
@@ -133,18 +137,100 @@ def make_java_explainer(lines: list[str]):
         if s == "};":
             return "数组结束"
         if s.endswith(") {"):
+            # 先处理结构性的 try/catch/for，再找 javadoc 或 @DisplayName
+            if s.startswith("} catch ("):
+                return "异常包装成运行时异常，保留原始 cause"
+            if s.startswith("try ("):
+                return "try-with-resources：连接与语句自动关闭"
+            if "createStatement()) {" in s:
+                return "资源声明续行（与上一行同属 try-with-resources）"
+            if s.startswith("for (String table"):
+                return "按 DROP_ORDER 顺序逐表删除"
             doc = javadoc_above(lines, n - 1)
-            name = re.search(r"(\w+)\(", s)
-            return doc or (f"方法 {name.group(1)}" if name else "方法")
+            if doc:
+                return doc
+            for k in range(n - 2, max(n - 7, -1), -1):
+                m = re.search(r'@DisplayName\("([^"]+)"\)', lines[k])
+                if m:
+                    return "用例：" + m.group(1)
+            return ""
+        if s.startswith("try ("):
+            return "try-with-resources：连接与语句自动关闭"
+        if "createStatement()) {" in s:
+            return "资源声明续行（与上一行同属 try-with-resources）"
+        if s.startswith("} catch ("):
+            return "异常包装成运行时异常，保留原始 cause"
+        if s.startswith("for (String table"):
+            return "按 DROP_ORDER 顺序逐表删除"
         if s.endswith(",") and s.startswith("\""):
             return "SQL 字符串续行"
-        if s.endswith(");"):
-            return "语句续行"
+        # 构造器、链式条件、测试夹具：按"这句话在准备什么"来说明
+        if s.startswith("this.") and s.endswith(";"):
+            return "构造器注入：把 Mapper 保存为字段"
+        if s.startswith("Wrappers."):
+            return "构造 Lambda 查询"
+        if s.startswith(".eq("):
+            return "等值条件"
+        if s.startswith(".isNull("):
+            return "限定字段为空"
+        if s.startswith(".orderByAsc("):
+            return "按该列升序"
+        if s.startswith("try {"):
+            return "进入可能抛异常的解析块"
+        if s.startswith("query.set"):
+            return "写入查询条件"
+        if s.startswith("long value = Long.parseLong"):
+            return "解析数字；失败由 catch 转 400"
+        if s.startswith(".replace("):
+            return "转义 LIKE 通配符"
+        m = re.match(r'insertProduct\("([^"]+)", [^,]+, "([\d.]+)", (\d+), "(\w+)", (\d+)\)', s)
+        if m:
+            return f"准备商品 {m.group(1)}：¥{m.group(2)}，库存 {m.group(3)}，{m.group(4)}，排序 {m.group(5)}"
+        m = re.match(r'insertUser\("([^"]+)"\)', s)
+        if m:
+            return f"准备用户 {m.group(1)}"
+        m = re.match(r'newSecondaryCategory\("([^"]+)"\)', s)
+        if m:
+            return f"准备分类：一级「作品-{m.group(1)}」+ 二级「单行本」"
+        m = re.match(r'insertPrimaryCategory\("([^"]+)", "([^"]+)"\)', s)
+        if m:
+            return f"准备一级分类「{m.group(2)}」"
+        m = re.match(r'insertSecondaryCategory\("([^"]+)", (\w+), "([^"]+)"\)', s)
+        if m:
+            return f"准备二级分类「{m.group(3)}」，挂在指定父下"
+        m = re.match(r'insertOrder\("([^"]+)", (\w+), "(\w+)", "([\d.]+)"\)', s)
+        if m:
+            return f"准备订单 {m.group(1)}：{m.group(3)}，合计 {m.group(4)}"
+        if s.startswith("assertThat(") and ".isZero()" in s:
+            return "断言结果为 0"
+        if s.startswith("assertThat(") and ".isEqualTo(" in s:
+            return "断言等于期望值"
+        if s.startswith(".isInstanceOf("):
+            return "断言抛出的异常类型"
+        if s.startswith(".hasMessageContaining("):
+            return "断言异常信息包含关键字"
+        if s.startswith(".containsExactly("):
+            return "断言顺序与内容完全一致"
+        # 语句级：只标注"这句在做什么角色"，不复述代码
+        if s.startswith(("assertThat", "assertThatThrownBy")):
+            return "断言预期结果"
+        if s.startswith(("isInstanceOf(", ".hasMessageContaining", ".isEqualTo", ".isZero", ".isTrue", ".isFalse", ".hasSize", ".extracting")):
+            return "断言链：校验类型/值/集合"
+        if s.startswith("jdbc."):
+            return "准备或核对测试数据"
+        if any(call in s for call in (".selectPage(", ".countPage(", ".selectById(", ".selectList(", ".selectFeatured(", ".selectNewest(", ".lockByIds(", ".deductStock(", ".selectViewByUser(", ".countByOrderNo(")):
+            return "调用 Mapper / 被测方法取数"
+        if s.startswith("throw "):
+            return "转成业务异常（400/404）"
+        if s.startswith("return "):
+            return "返回结果"
+        if s.startswith("query.set") or s.startswith("command.set"):
+            return "写入查询条件"
         if s == "}":
             return "结束"
         if s == "":
             return ""
-        return "代码"
+        return ""
 
     return explain
 
@@ -193,6 +279,9 @@ def make_xml_explainer():
 
     return explain
 
+
+# 用独立模块的实现覆盖上面的旧版本
+from java_explainer import make_java_explainer  # noqa: E402,F811
 
 def main() -> None:
     sections = []
@@ -249,9 +338,11 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 完整汇报见同目录 M01-07-Mapper.md。</footer>
 </body></html>
 """
+    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total_rows}")
 
 
 if __name__ == "__main__":
     main()
+

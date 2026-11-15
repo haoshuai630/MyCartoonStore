@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M02-06 · 页面收尾 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M02-06 · 页面收尾（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">store.css</a><a href="#s2">error.html</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M02 商品浏览 / 任务 M02-06。内容：列表页两栏、工具栏胶囊按钮、分页禁用态、详情页两栏、错误页与两档响应式断点。
+验证：mvn -pl cartoon-user-web -am test → Tests run: 28, 0 失败；三个页面均 200。</p>
+<section id="s1">
+<h2>store.css<small>store.css（新增段） · 71 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/static/css/store.css（从第 228 行起）</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre><span class="cm">/* ===== M02-06：列表页 / 详情页 / 错误页 / 响应式 ===== */</span></pre></td><td class="explain">以下为本次新增的页面样式，覆盖列表、详情、错误页与窄屏</td></tr>
+<tr class="gap"><td class="line">229</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre><span class="cm">/* 面包屑：从首页到当前商品，最后一级不可点 */</span></pre></td><td class="explain">面包屑：最后一级是当前商品，所以用 b 而不是 a</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>.crumbs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted);padding:18px 0 0}</pre></td><td class="explain">一行排开、允许换行；字号小、颜色弱，不与正文抢</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>.crumbs a:hover{color:var(--red)}</pre></td><td class="explain">可点的层级用品牌红提示</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>.crumbs b{color:var(--ink)}</pre></td><td class="explain">当前商品用主色加粗，与链接区分</td></tr>
+<tr class="gap"><td class="line">234</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre><span class="cm">/* 列表页两栏：左侧筛选固定宽度，右侧结果自适应 */</span></pre></td><td class="explain">两栏布局：筛选固定 250px，结果占满剩余</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>.list-layout{display:grid;grid-template-columns:250px 1fr;gap:36px;align-items:start;padding:28px 0 60px}</pre></td><td class="explain">grid 两列；align-items:start 让侧栏不被拉伸</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>.filters{position:sticky;top:121px;align-self:start;border:3px solid var(--ink);background:#fff;padding:18px;box-shadow:6px 6px 0 var(--ink)}</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>.filters h3{margin:0 0 12px;font-size:13px;letter-spacing:.18em}</pre></td><td class="explain">小标题加字距，弱化层级</td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>.filters a{display:block;padding:6px 0;font-size:14px;font-weight:700}</pre></td><td class="explain">block 让每项占一行，点击区域更大</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>.filters a:hover{color:var(--red)}</pre></td><td class="explain">悬停用品牌红</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>.filters a.sub{padding-left:14px;font-weight:500;font-size:13px;color:#4a4237}</pre></td><td class="explain">二级分类缩进、字重变轻，体现从属</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>.filter-all{margin-bottom:10px;color:var(--muted)}</pre></td><td class="explain">「全部作品」弱化，避免与作品名抢</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>.filter-group{border-top:1px dashed #d8cdb8;padding-top:10px;margin-top:10px}</pre></td><td class="explain">虚线分隔每部作品，比实线轻</td></tr>
+<tr class="gap"><td class="line">244</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre><span class="cm">/* 工具栏：类型与排序各一组胶囊按钮 */</span></pre></td><td class="explain">工具栏左右两组：类型在左、排序在右</td></tr>
+<tr tabindex="0" data-line="246"><td class="line">246</td><td class="code"><pre>.toolbar{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;border-bottom:3px solid var(--ink);padding-bottom:14px}</pre></td><td class="explain">两端对齐 + 底部分隔线，与结果区分开</td></tr>
+<tr tabindex="0" data-line="247"><td class="line">247</td><td class="code"><pre>.types,.sorts{display:flex;flex-wrap:wrap;gap:8px}</pre></td><td class="explain">两组按钮都允许换行，窄屏不挤</td></tr>
+<tr tabindex="0" data-line="248"><td class="line">248</td><td class="code"><pre>.types a,.sorts a{border:2px solid var(--ink);padding:5px 12px;font-size:13px;font-weight:700;background:#fff}</pre></td><td class="explain">胶囊按钮：黑边白底，与全站按钮同一套语言</td></tr>
+<tr tabindex="0" data-line="249"><td class="line">249</td><td class="code"><pre>.types a.on,.sorts a.on{background:var(--ink);color:var(--yellow)}</pre></td><td class="explain">选中态反色，一眼看出当前筛选</td></tr>
+<tr tabindex="0" data-line="250"><td class="line">250</td><td class="code"><pre>.result-meta{margin:16px 0 0;font-size:13px;color:#4a4237}</pre></td><td class="explain">结果数在工具栏下方，弱化但可读</td></tr>
+<tr tabindex="0" data-line="251"><td class="line">251</td><td class="code"><pre>.result-meta b{color:var(--red)}</pre></td><td class="explain">数字用红色强调</td></tr>
+<tr class="gap"><td class="line">252</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="253"><td class="line">253</td><td class="code"><pre><span class="cm">/* 分页：不可点的方向用浅色，避免看着能点却没反应 */</span></pre></td><td class="explain">分页：能点的实线、不能点的虚线灰字</td></tr>
+<tr tabindex="0" data-line="254"><td class="line">254</td><td class="code"><pre>.pager{display:flex;justify-content:center;align-items:center;gap:16px;margin:40px 0 0;font-size:13px;font-weight:700}</pre></td><td class="explain">居中、留足上边距</td></tr>
+<tr tabindex="0" data-line="255"><td class="line">255</td><td class="code"><pre>.pager a{border:2px solid var(--ink);padding:6px 14px;background:#fff}</pre></td><td class="explain">可点方向：实线按钮</td></tr>
+<tr tabindex="0" data-line="256"><td class="line">256</td><td class="code"><pre>.pager a:hover{background:var(--ink);color:var(--yellow)}</pre></td><td class="explain">悬停反色，与选中态一致</td></tr>
+<tr tabindex="0" data-line="257"><td class="line">257</td><td class="code"><pre>.pager .disabled{color:#b8ad99;border:2px dashed #d8cdb8;padding:6px 14px}</pre></td><td class="explain">不可点方向：虚线 + 灰字，视觉上就不能点</td></tr>
+<tr tabindex="0" data-line="258"><td class="line">258</td><td class="code"><pre>.empty{border:3px dashed #d8cdb8;padding:40px;text-align:center;color:var(--muted)}</pre></td><td class="explain">空结果用虚线框，和「有内容」区分</td></tr>
+<tr class="gap"><td class="line">259</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="260"><td class="line">260</td><td class="code"><pre><span class="cm">/* 详情页：左图右信息，窄屏自动堆叠 */</span></pre></td><td class="explain">详情页两栏：左图右信息</td></tr>
+<tr tabindex="0" data-line="261"><td class="line">261</td><td class="code"><pre>.product-detail{display:grid;grid-template-columns:1fr 1fr;gap:44px;padding:26px 0 70px;align-items:start}</pre></td><td class="explain">等宽两栏；align-items:start 防止右栏被拉伸</td></tr>
+<tr tabindex="0" data-line="262"><td class="line">262</td><td class="code"><pre>.gallery-main{width:100%;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);background:#fff}</pre></td><td class="explain">主图黑边 + 硬阴影，贴合全站风格</td></tr>
+<tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}</pre></td><td class="explain">缩略图一行四张，自动等分</td></tr>
+<tr tabindex="0" data-line="264"><td class="line">264</td><td class="code"><pre>.thumbs img{width:100%;border:2px solid var(--ink);background:#fff}</pre></td><td class="explain">缩略图细边，弱于主图</td></tr>
+<tr tabindex="0" data-line="265"><td class="line">265</td><td class="code"><pre>.info h1{margin:6px 0 10px;font-size:34px;line-height:1.2;font-weight:900}</pre></td><td class="explain">商品名是全页最大字，行高收紧</td></tr>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre>.info .summary{color:#4a4237;margin:0 0 18px}</pre></td><td class="explain">简介用正文色，不与标题抢</td></tr>
+<tr tabindex="0" data-line="267"><td class="line">267</td><td class="code"><pre>.info .price{font-size:34px;font-weight:900;color:var(--red);margin:0 0 6px}</pre></td><td class="explain">价格与标题同字号、品牌红，购买决策第一眼</td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>.info .stock{margin:0 0 20px;font-size:13px;color:#4a4237}</pre></td><td class="explain">库存弱化，但紧邻价格</td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>.info .stock.zero{color:var(--red);font-weight:800}</pre></td><td class="explain">缺货时库存变红加粗</td></tr>
+<tr tabindex="0" data-line="270"><td class="line">270</td><td class="code"><pre>.buy{display:flex;gap:12px;align-items:center;margin-bottom:10px}</pre></td><td class="explain">数量框与按钮一行排列</td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre>.buy input{width:88px;border:2px solid var(--ink);padding:10px;font-size:14px;background:#fff}</pre></td><td class="explain">数量框窄、与按钮同高</td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>.buy .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;transform:none}</pre></td><td class="explain">禁用态去掉阴影与位移，明确不能点</td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre>.hint{font-size:12px;color:var(--muted);margin:0 0 26px}</pre></td><td class="explain">占位提示弱化，避免误以为可用</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>.desc{border-top:3px solid var(--ink);padding-top:18px}</pre></td><td class="explain">说明区与购买区用实线隔开</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>.desc h2{margin:0 0 10px;font-size:16px;letter-spacing:.12em}</pre></td><td class="explain">说明标题小一号，加字距</td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>.desc p{color:#4a4237;line-height:1.9;margin:0}</pre></td><td class="explain">长文行高放宽，便于阅读</td></tr>
+<tr class="gap"><td class="line">277</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="278"><td class="line">278</td><td class="code"><pre><span class="cm">/* 错误页：给出可去的两个入口 */</span></pre></td><td class="explain">错误页：一条说明 + 两个可去的地方</td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>.error-box{max-width:640px;margin:70px auto;border:3px solid var(--ink);background:#fff;padding:44px;text-align:center;box-shadow:8px 8px 0 var(--ink)}</pre></td><td class="explain">限宽居中，硬阴影与其他卡片一致</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>.error-box h1{margin:0 0 12px;font-size:30px}</pre></td><td class="explain">标题不夸张，重点是下方的错误信息</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>.error-message{font-size:15px;color:var(--red);font-weight:700;margin:0 0 26px}</pre></td><td class="explain">错误信息用红色加粗，用户先看这里</td></tr>
+<tr class="gap"><td class="line">282</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre><span class="cm">/* 窄屏：两栏改单栏，标题降字号，搜索框让位 */</span></pre></td><td class="explain">1000px 以下两栏改单栏</td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>@media (max-width:1000px){</pre></td><td class="explain">阈值取 1000：列表侧栏 + 结果在窄屏放不下两栏</td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>  .list-layout{grid-template-columns:1fr}</pre></td><td class="explain">列表改单栏，筛选移到上方</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>  .filters{position:static}</pre></td><td class="explain">单栏后取消吸顶，避免遮挡内容</td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>  .product-detail{grid-template-columns:1fr;gap:28px}</pre></td><td class="explain">详情改上下排布</td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>  .hero-inner{grid-template-columns:1fr}</pre></td><td class="explain">横幅改单栏</td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre>  .cover-stack{display:none}</pre></td><td class="explain">窄屏隐藏装饰封面，把首屏留给文案与入口</td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>}</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>@media (max-width:640px){</pre></td><td class="explain">640px 以下按手机处理</td></tr>
+<tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre>  .wrap{padding:0 16px}</pre></td><td class="explain">左右留白收窄，给内容更多宽度</td></tr>
+<tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>  .header-main{height:auto;flex-wrap:wrap;gap:12px;padding:12px 0}</pre></td><td class="explain">页头允许换行，不再固定高度</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>  .search input{width:120px}</pre></td><td class="explain">搜索框收窄，保证一行放得下</td></tr>
+<tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>  .hero h1{font-size:38px}</pre></td><td class="explain">首屏标题降字号，避免溢出</td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>  .info h1{font-size:26px}</pre></td><td class="explain">商品名降字号</td></tr>
+<tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre>  .thumbs{grid-template-columns:repeat(3,1fr)}</pre></td><td class="explain">缩略图一行三张</td></tr>
+<tr tabindex="0" data-line="298"><td class="line">298</td><td class="code"><pre>}</pre></td><td class="explain">—</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>error.html<small>error.html · 22 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/error/error.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档类型：浏览器按标准模式渲染</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">根元素；xmlns:th 声明命名空间，模板里的 th:* 才生效</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('出错了')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">页面可见内容的起点</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">首页栏目：新品上架 / 精选推荐</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap error-box"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白与最大宽度</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">h1</span>&gt;出了点问题&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="error-message" th:text="${message}"&gt;错误信息&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">p</span>&gt;&lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/main}"&gt;回首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>               &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/category}"&gt;去逛逛&lt;/<span class="kw">a</span>&gt;&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">文档结束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">文档结束</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M02-06 · 2 个文件、93 行。完整汇报见同目录 M02-06-页面收尾.md。</footer>
+</body></html>

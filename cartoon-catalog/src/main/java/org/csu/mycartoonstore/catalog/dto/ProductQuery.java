@@ -14,6 +14,9 @@ public class ProductQuery {
     /** 一级或二级分类 id；为空表示全部 */
     private Long categoryId;
 
+    /** 作品（一级分类）id；指定时只查该作品下的全部品类 */
+    private Long workId;
+
     /** ALL / COMIC / MERCH */
     private String productType;
 

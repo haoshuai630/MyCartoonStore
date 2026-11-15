@@ -9,13 +9,16 @@
         JOIN category c ON c.id = p.category_id
         <where>
             p.status = 'ON_SALE'
+            <if test="q.workId != null">
+                AND c.parent_id = #{q.workId}
+            </if>
             <if test="q.categoryId != null">
                 AND (c.id = #{q.categoryId} OR c.parent_id = #{q.categoryId})
             </if>
             <if test="q.productType != null and q.productType != 'ALL'">
                 <choose>
                     <when test="q.productType == 'COMIC'">AND c.code LIKE '%-COMIC'</when>
-                    <when test="q.productType == 'MERCH'">AND c.code LIKE '%-MERCH'</when>
+                    <when test="q.productType == 'MERCH'">AND c.code NOT LIKE '%-COMIC'</when>
                 </choose>
             </if>
             <if test="q.keyword != null and q.keyword != ''">

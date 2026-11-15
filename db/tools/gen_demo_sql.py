@@ -50,49 +50,35 @@ VOLUME_SUM = [
     "最后一卷，列车驶入黎明。",
 ]
 
-# 周边：(名称, 价格, 库存, 状态)
+# 周边：按行业通用品类分组（谷子/电商口径），名称里的 {w} 会替换成作品名
+MERCH_GROUPS = [
+    ("BADGE", "徽章", 1),
+    ("STAND", "亚克力立牌", 2),
+    ("CHARM", "挂件钥匙扣", 3),
+    ("PAPER", "色纸明信片", 4),
+    ("TICKET", "镭射票", 5),
+    ("PLUSH", "毛绒抱枕", 6),
+    ("FIGURE", "手办模型", 7),
+    ("ARTBOOK", "画集设定集", 8),
+    ("APPAREL", "服装包袋", 9),
+    ("STATIONERY", "文具杂货", 10),
+]
+
+# 每个品类 1-2 件：(名称模板, 价格, 库存, 状态)
 MERCH = {
-    "STARLINE": [
-        ("列车长亚克力立牌", 89, 0, "ON_SALE"),
-        ("车票金属徽章", 39, 8, "ON_SALE"),
-        ("星空帆布袋", 69, 9, "ON_SALE"),
-        ("线路图线圈本", 29, 10, "ON_SALE"),
-        ("列车钥匙扣", 45, 11, "ON_SALE"),
-        ("全彩设定画集", 128, 6, "DRAFT"),
-    ],
-    "MISTPORT": [
-        ("侦探风衣立牌", 89, 3, "ON_SALE"),
-        ("雾港地图海报", 49, 9, "ON_SALE"),
-        ("怀表造型挂件", 59, 10, "ON_SALE"),
-        ("案件档案文件夹", 25, 11, "ON_SALE"),
-        ("主角徽章套装", 45, 12, "ON_SALE"),
-        ("雾港设定集", 118, 7, "ON_SALE"),
-    ],
-    "ONIGIRI": [
-        ("饭团造型抱枕", 99, 1, "ON_SALE"),
-        ("小馆围裙", 79, 8, "ON_SALE"),
-        ("菜单贴纸包", 19, 9, "ON_SALE"),
-        ("陶瓷马克杯", 59, 10, "ON_SALE"),
-        ("店长亚克力立牌", 69, 11, "ON_SALE"),
-        ("料理手账本", 35, 6, "ON_SALE"),
-    ],
-    "IRONWOOD": [
-        ("机械鹿拼装模型", 199, 5, "ON_SALE"),
-        ("齿轮金属徽章", 45, 8, "ON_SALE"),
-        ("森林夜光海报", 55, 9, "ON_SALE"),
-        ("工装短T", 89, 10, "ON_SALE"),
-        ("机械书签套装", 29, 11, "ON_SALE"),
-        ("机械设定画集", 138, 6, "ON_SALE"),
-    ],
-    "CICADA": [
-        ("蝉鸣主题T恤", 89, 4, "ON_SALE"),
-        ("星空风铃", 69, 0, "ON_SALE"),
-        ("蝉翼亚克力挂件", 39, 9, "ON_SALE"),
-        ("夏日明信片组", 25, 10, "ON_SALE"),
-        ("主角亚克力立牌", 79, 11, "ON_SALE"),
-        ("夏日画集", 108, 6, "ON_SALE"),
-    ],
+    "BADGE": [("{w}主角吧唧", 25, 30, "ON_SALE"), ("{w}金属徽章套装", 45, 18, "ON_SALE")],
+    "STAND": [("{w}主角亚克力立牌", 79, 15, "ON_SALE"), ("{w}场景立牌", 89, 9, "ON_SALE")],
+    "CHARM": [("{w}亚克力挂件", 39, 25, "ON_SALE"), ("{w}金属钥匙扣", 45, 12, "ON_SALE")],
+    "PAPER": [("{w}明信片组", 25, 20, "ON_SALE")],
+    "TICKET": [("{w}镭射票", 35, 0, "ON_SALE")],
+    "PLUSH": [("{w}角色抱枕", 99, 6, "ON_SALE")],
+    "FIGURE": [("{w}拼装模型", 169, 4, "ON_SALE")],
+    "ARTBOOK": [("{w}官方画集", 118, 5, "ON_SALE")],
+    "APPAREL": [("{w}主题T恤", 89, 0, "ON_SALE")],
+    "STATIONERY": [("{w}线圈笔记本", 29, 22, "ON_SALE")],
 }
+
+# 二级分类：品类代码 → (id 偏移, 名称, 排序)
 
 # 让「新品上架」与「精选推荐」各有确定的样例
 NEWEST_AGE = {"CICADA-M04": 0, "ONIGIRI-C04": 1, "MISTPORT-M05": 2}
@@ -111,8 +97,7 @@ def esc(text: str) -> str:
 def build_products():
     rows = []
     for idx, ip in enumerate(IPS):
-        comic_id = 100 + idx * 2
-        merch_id = 101 + idx * 2
+        comic_id = 100 + idx * 11
         for n in range(1, 7):
             sku = f"{ip['code']}-C{n:02d}"
             status = "DRAFT" if n == 6 else "ON_SALE"
@@ -128,20 +113,24 @@ def build_products():
                 "sort": FEATURED_SORT.get(sku, 100),
                 "age": NEWEST_AGE.get(sku, 5 + idx * 6 + n),
             })
-        for j, (name, price, stock, status) in enumerate(MERCH[ip["code"]], start=1):
-            sku = f"{ip['code']}-M{j:02d}"
-            rows.append({
-                "sku": sku,
-                "cat": merch_id,
-                "name": f"{ip['cn']} {name}",
-                "summary": "官方授权周边，随书附赠收藏卡。",
-                "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",
-                "price": price,
-                "stock": stock,
-                "status": status,
-                "sort": FEATURED_SORT.get(sku, 100),
-                "age": NEWEST_AGE.get(sku, 5 + idx * 6 + j + 2),
-            })
+        j = 0
+        for group, _cname, order in MERCH_GROUPS:
+            for tmpl, price, stock, status in MERCH[group]:
+                j += 1
+                sku = f"{ip['code']}-M{j:02d}"
+                name = tmpl.format(w=ip["cn"])
+                rows.append({
+                    "sku": sku,
+                    "cat": 100 + idx * 11 + order,
+                    "name": f"《{ip['cn']}》{name}",
+                    "summary": "官方授权周边，随书附赠收藏卡。",
+                    "desc": f"{ip['cn']}「{name}」，官方授权周边。材质与规格以实物为准，教学演示数据。",
+                    "price": price,
+                    "stock": stock,
+                    "status": status,
+                    "sort": FEATURED_SORT.get(sku, 100),
+                    "age": NEWEST_AGE.get(sku, 5 + idx * 6 + j + 2),
+                })
     return rows
 
 
@@ -152,6 +141,10 @@ def main() -> None:
 
     out = []
     out.append("-- MyCartoonStore 实验一：表结构与演示数据（独立完整脚本）")
+    out.append("-- 可重复导入：先删库再建库，避免表已存在 / 主键冲突")
+    out.append("DROP DATABASE IF EXISTS MyCartoonStore;")
+    out.append("CREATE DATABASE MyCartoonStore DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;")
+    out.append("USE MyCartoonStore;")
     out.append("-- 由 db/tools/gen_demo_sql.py 生成，请勿手工修改；改数据请改生成器后重跑。")
     out.append("-- 与 01-schema.sql 二选一，不按编号依次执行；此文件已包含完整表结构。")
     out.append("-- 在空的 MyCartoonStore 库中首次执行；不 DROP、不清空、不覆盖已有表。")
@@ -189,8 +182,9 @@ def main() -> None:
     out.append("INSERT INTO category (id, code, parent_id, name, sort_order) VALUES")
     secondary = []
     for idx, ip in enumerate(IPS):
-        secondary.append(f"({100 + idx * 2}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")
-        secondary.append(f"({101 + idx * 2}, '{ip['code']}-MERCH', {CATEGORY_IDS[ip['code']]}, '官方周边', 2)")
+        secondary.append(f"({100 + idx * 11}, '{ip['code']}-COMIC', {CATEGORY_IDS[ip['code']]}, '单行本', 1)")
+        for group, cname, order in MERCH_GROUPS:
+            secondary.append(f"({100 + idx * 11 + order}, '{ip['code']}-{group}', {CATEGORY_IDS[ip['code']]}, '{cname}', {order + 1})")
     out.append(",\n".join(secondary) + ";")
     out.append("")
 
@@ -220,7 +214,7 @@ def main() -> None:
 
     OUTPUT.write_text("\n".join(out), encoding="utf-8")
     print(f"written: {OUTPUT}")
-    print(f"products: {len(products)}, categories: 15, users: {len(USERS)}")
+    print(f"products: {len(products)}, categories: {55}, users: {len(USERS)}")
 
 
 def render_images_sql() -> str:

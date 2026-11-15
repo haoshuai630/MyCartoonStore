@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('首页')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <!-- 品牌横幅：装饰与入口，不直接下单 -->
+    <section class="hero">
+        <div class="wrap hero-inner">
+            <div>
+                <span class="hero-kicker">MANGA ISLE · 原创漫画官方商店</span>
+                <h1>先选一部<br><em>作品</em>，再挑它的周边。</h1>
+                <p>五部连载作品，单行本与官方周边同页呈现。</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" th:href="@{/category}">开始选购 →</a>
+                    <a class="btn btn-ghost" th:href="@{/category(sort='NEWEST')}">看新作</a>
+                </div>
+            </div>
+            <div class="cover-stack">
+                <img th:src="@{/images/products/STARLINE-C01/cover.svg}" alt="星轨列车">
+                <img th:src="@{/images/products/ONIGIRI-C01/cover.svg}" alt="饭团小馆">
+                <img th:src="@{/images/products/CICADA-C01/cover.svg}" alt="夏夜蝉鸣">
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品入口：数据来自 category 的一级分类 -->
+    <div class="strip">
+        <div class="wrap">
+            <div class="strip-grid" th:if="${!#lists.isEmpty(categories)}">
+                <a class="strip-item" th:each="c : ${categories}"
+                   th:href="@{/works/{id}(id=${c.id})}">
+                    <img th:src="${'/images/products/' + c.code + '-C01/cover.svg'}" th:alt="${c.name}">
+                    <span><b th:text="${c.name}">作品</b><small th:text="${c.code}">CODE</small></span>
+                </a>
+            </div>
+            <p th:if="${#lists.isEmpty(categories)}">暂无作品分类。</p>
+        </div>
+    </div>
+
+    <!-- 新品上架：上架商品按录入时间倒序，最多 3 项 -->
+    <section class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div><span class="en">NEW ARRIVAL</span><h2>新品上架</h2></div>
+                <a th:href="@{/category(sort='NEWEST')}">更多新品 →</a>
+            </div>
+            <div class="grid cols-3" th:if="${!#lists.isEmpty(newest)}">
+                <article class="card" th:each="p : ${newest}">
+                    <a class="media" th:href="@{/product/{id}(id=${p.id})}">
+                        <img th:src="@{${p.coverImage}}" th:alt="${p.name}">
+                    </a>
+                    <div class="body">
+                        <span class="cat" th:text="${p.sku}">SKU</span>
+                        <h3><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">商品</a></h3>
+                        <p class="sum" th:text="${p.summary}">简介</p>
+                        <div class="foot">
+                            <span class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}">¥0.00</span>
+                            <span class="stock" th:classappend="${p.stock == 0} ? 'zero'" th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}">库存</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <p th:if="${#lists.isEmpty(newest)}">暂无上架商品。</p>
+        </div>
+    </section>
+
+    <!-- 精选推荐：上架商品按 sort_order 升序，最多 4 项 -->
+    <section class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div><span class="en">EDITOR'S PICK</span><h2>精选推荐</h2></div>
+                <a th:href="@{/category}">全部商品 →</a>
+            </div>
+            <div class="grid" th:if="${!#lists.isEmpty(featured)}">
+                <article class="card" th:each="p : ${featured}">
+                    <a class="media" th:href="@{/product/{id}(id=${p.id})}">
+                        <img th:src="@{${p.coverImage}}" th:alt="${p.name}">
+                    </a>
+                    <div class="body">
+                        <span class="cat" th:text="${p.sku}">SKU</span>
+                        <h3><a th:href="@{/product/{id}(id=${p.id})}" th:text="${p.name}">商品</a></h3>
+                        <p class="sum" th:text="${p.summary}">简介</p>
+                        <div class="foot">
+                            <span class="price" th:text="'¥' + ${#numbers.formatDecimal(p.price, 1, 2)}">¥0.00</span>
+                            <span class="stock" th:classappend="${p.stock == 0} ? 'zero'" th:text="${p.stock == 0} ? '暂时缺货' : '库存 ' + ${p.stock}">库存</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <p th:if="${#lists.isEmpty(featured)}">暂无精选商品。</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

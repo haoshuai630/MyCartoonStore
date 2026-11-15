@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('全部作品')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div><span class="en">WORKS</span><h2>全部作品</h2></div>
+                <span class="result-meta" th:if="${!#lists.isEmpty(works)}" th:text="'共 ' + ${#lists.size(works)} + ' 部'">共 0 部</span>
+            </div>
+
+            <!-- 每部作品一张卡：点进去看该作品的品类与商品 -->
+            <div class="works-grid" th:if="${!#lists.isEmpty(works)}">
+                <a class="work-card" th:each="w : ${works}" th:href="@{/works/{id}(id=${w.id})}">
+                    <div class="work-cover">
+                        <img th:src="${'/images/products/' + w.code + '-C01/cover.svg'}" th:alt="${w.name}">
+                    </div>
+                    <div class="work-body">
+                        <h3 th:text="${w.name}">作品</h3>
+                        <span class="work-code" th:text="${w.code}">CODE</span>
+                        <p class="work-meta">
+                            <span th:text="${w.categoryCount()} + ' 个品类'">0 个品类</span>
+                            <span th:text="${w.productCount()} + ' 件在售'">0 件在售</span>
+                        </p>
+                    </div>
+                </a>
+            </div>
+
+            <p class="empty" th:if="${#lists.isEmpty(works)}">还没有任何作品。</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

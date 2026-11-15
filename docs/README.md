@@ -112,3 +112,5 @@ mycartoonstore/                      # 仓库根，parent pom
 2. 补依赖：`spring-security-crypto`（BCrypt）、`spring-boot-starter-validation`。
 3. 改写两份 SQL：库名换 `MyCartoonStore`，分类/商品/订单种子换漫画数据，**表结构不动**。
 4. 按 07 篇阶段 1 跑通"请求 → 数据库 → 模板 → 测试"闭环。
+
+- [12 · 真实漫画 IP 与图片接入（待办）](12-真实IP与图片接入-待办.md)

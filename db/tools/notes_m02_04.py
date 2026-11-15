@@ -1,0 +1,87 @@
+"""M02-04 逐行说明（手写，按代码原文匹配）。"""
+
+NOTES_TEXT = {
+    # CategoryController
+    'private final CatalogService catalogService;': "只依赖查询服务，不直接碰 Mapper",
+    '@GetMapping("/category")': "列表页唯一入口：分类/类型/排序/关键字/页码都走这里",
+    'model.addAttribute("page", catalogService.search(command));': "查一页数据；参数校验与归一都在 Service 里做",
+    'model.addAttribute("categories", catalogService.allCategories());': "侧栏一次取全部分类，模板里不再查库",
+    'model.addAttribute("query", command);': "回填筛选状态，用于高亮当前类型与排序",
+
+    # category.html
+    '<aside class="filters">': "侧栏：作品（一级）与其下的单行本/周边",
+    '<a class="filter-all" th:href="@{/category}">全部作品</a>': "清空筛选",
+    'th:if="${t.parentId == null}"': "只渲染一级分类（作品）",
+    'th:if="${c.parentId == t.id}"': "把二级分类挂在所属作品下面",
+    '<div class="toolbar">': "类型与排序：用链接而不是表单，翻页时参数自然保留",
+    "productType='ALL'": "不按类型过滤",
+    "productType='COMIC'": "只看单行本",
+    "productType='MERCH'": "只看官方周边",
+    "sort='DEFAULT'": "默认排序：按 sort_order 升序",
+    "sort='PRICE_ASC'": "按价格从低到高",
+    "sort='PRICE_DESC'": "按价格从高到低",
+    "sort='NEWEST'": "按上架时间倒序",
+    'th:if="${query.keyword != null and !query.keyword.isEmpty()}"': "有关键字时回显，让用户知道当前搜的是什么",
+    '<nav class="pager" th:if="${page.totalPages() > 1}">': "只有一页时不渲染分页",
+    'th:if="${page.hasPrevious()}"': "第一页不显示可点的上一页",
+    'th:if="${page.hasNext()}"': "最后一页不显示可点的下一页",
+    "<p class=\"empty\" th:if=\"${page.isEmpty()}\">": "查不到结果时给可操作的提示，而不是空白页",
+
+    'package org.csu.mycartoonstore.web.controller;': "包声明：控制器层",
+    '@Controller': "标记为控制器，返回的字符串按视图名解析",
+    'public class CategoryController {': "控制器：只接收参数、装配模型，查询交给 Service",
+    'public CategoryController(CatalogService catalogService) {': "注入查询服务",
+    'return "category";': "视图名对应 templates/category.html",
+
+    # CategoryPageTest
+    'for (int i = 1; i <= 7; i++) {': "7 件单行本，配合默认每页 6 条刚好分两页",
+    'insertProduct("M01", merchId, "周边M01", "58.00", 5, "ON_SALE", 8);': "1 件周边，排序最后，落在第 2 页",
+    'assertThat(first).contains("第 1 / 2 页");': "8 件商品必须分成两页",
+    'assertThat(second).doesNotContain("C01");': "第 2 页不应再出现第一页的第一条商品",
+    '.param("productType", "MERCH")': "只要周边",
+    '.param("page", "2")': "直接翻到第 2 页",
+    '.param("sort", "PRICE")': "非法排序值：应被 Service 拒绝",
+
+    'package org.csu.mycartoonstore.web.controller;': "包声明：控制器层",
+    '@Controller': "标记为控制器，返回的字符串按视图名解析",
+    'public class CategoryController {': "控制器：只接收参数、装配模型，查询交给 Service",
+    'public CategoryController(CatalogService catalogService) {': "注入查询服务",
+    'return "category";': "视图名对应 templates/category.html",
+
+    # CategoryPageTest：用例与断言逐行说明
+    '@AutoConfigureMockMvc': "开启 MockMvc：不占真实端口就能请求页面",
+    'private MockMvc mockMvc;': "用来发请求并检查渲染出来的 HTML",
+    'private JdbcTemplate jdbc;': "直接写库造数据，不依赖尚未实现的后台录入",
+    'void listShowsAllTypes() throws Exception {': "用例：列表页能同时展示单行本与周边",
+    'seed();': "每个用例都从同一套 8 件商品开始",
+    'mockMvc.perform(get("/category"))': "请求列表页（不带任何筛选）",
+    '.andExpect(status().isOk())': "页面必须 200",
+    '.andExpect(content().string(containsString("作品一")))': "侧栏出现作品名",
+    '.andExpect(content().string(containsString("单行本")))': "侧栏出现二级分类",
+    '.andExpect(content().string(containsString("周边")))': "侧栏出现另一个二级分类",
+    '.andExpect(content().string(containsString("C01")))': "结果里出现单行本商品",
+    '.andExpect(content().string(containsString("单行本1")))': "商品名按数据渲染",
+    'void filterByMerch() throws Exception {': "用例：只看周边时不出现单行本",
+    '.andExpect(content().string(containsString("M01")))': "周边商品出现",
+    '.andExpect(content().string(not(containsString("C01"))));': "单行本不能混进来",
+    'void paginationSplitsPages() throws Exception {': "用例：8 件商品分成两页",
+    'String first = mockMvc.perform(get("/category"))': "第 1 页",
+    '.andReturn().getResponse().getContentAsString();': "拿到整页 HTML 以便统计",
+    'assertThat(count(first, "C0")).isGreaterThan(0);': "第 1 页至少有若干单行本",
+    'String second = mockMvc.perform(get("/category").param("page", "2"))': "第 2 页",
+    'void invalidSortIsRejected() throws Exception {': "用例：非法排序值被拒",
+    'private void seed() {': "造 1 个作品、2 个二级分类、7 件单行本、1 件周边",
+    'long topId = jdbc.queryForObject("SELECT id FROM category WHERE code = \'T1\'", Long.class);': "取回一级分类 id，二级要挂上去",
+    'long comicId = jdbc.queryForObject("SELECT id FROM category WHERE code = \'T1-COMIC\'", Long.class);': "单行本分类 id",
+    'long merchId = jdbc.queryForObject("SELECT id FROM category WHERE code = \'T1-MERCH\'", Long.class);': "周边分类 id",
+
+    'class CategoryPageTest extends AbstractIntegrationTest {': "测试类：继承基类，每个用例前重建七张表",
+    'private int count(String body, String word) {': "统计子串出现次数，用来判断商品出现在几个栏目",
+    '.andExpect(status().isBadRequest());': "非法参数必须是 400",
+    'assertThat(second).contains("第 2 / 2 页");': "第 2 页的页码正确",
+    'assertThat(first).contains("第 1 / 2 页");': "第 1 页的页码正确",
+
+    # GlobalExceptionHandler
+    'response.setStatus(e.code() == ErrorCode.NOT_FOUND': "404 给 NOT_FOUND，其余按参数错误处理",
+    'return "error/error";': "统一错误页，M02-06 再美化",
+}

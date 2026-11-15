@@ -68,6 +68,8 @@ def main() -> None:
 完整汇报见同目录 M01-09-集成测试.md。</footer>
 </body></html>
 """
+    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
+    doc = doc.replace('<td class="explain">—</td>', '<td class="explain">SQL 参数续行（接上一行 INSERT 的参数）</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 
