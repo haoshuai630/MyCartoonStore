@@ -52,34 +52,34 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;WORKS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部作品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="result-meta" th:if="${!#lists.isEmpty(works)}" th:text="'共 ' + ${#lists.size(works)} + ' 部'"&gt;共 0 部&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结果总数，并在有关键字时回显</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">            &lt;!-- 每部作品一张卡：点进去看该作品的品类与商品 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="works-grid" th:if="${!#lists.isEmpty(works)}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="work-card" th:each="w : ${works}" th:href="@{/works/{id}(id=${w.id})}"&gt;</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-cover"&gt;</pre></td><td class="explain">作品卡封面区：使用该作品第一卷封面</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="${'/images/products/' + w.code + '-C01/cover.svg'}" th:alt="${w.name}"&gt;</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-body"&gt;</pre></td><td class="explain">作品卡文字区：名称、code、品类数与在售数</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                        &lt;h3 th:text="${w.name}"&gt;作品&lt;/h3&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="work-code" th:text="${w.code}"&gt;CODE&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="work-meta"&gt;</pre></td><td class="explain">品类数与在售数并排展示</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.categoryCount()} + ' 个品类'"&gt;0 个品类&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.productCount()} + ' 件在售'"&gt;0 件在售&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="empty" th:if="${#lists.isEmpty(works)}"&gt;还没有任何作品。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">本行是代码语句：执行调用或赋值，不改变其他状态。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">37</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">引用公共片段，避免每个页面重复写页头页脚</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">文档结束</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">文档结束</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束上面的容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">

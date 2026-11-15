@@ -47,6 +47,8 @@ def make_html_explainer(lines: list[str]):
         s = line.strip()
         if not s:
             return ""
+        if s.startswith("</"):
+            return "结构闭合：结束上面的容器；不产生新的内容。"
         if s.upper().startswith("<!DOCTYPE"):
             return "HTML5 文档类型：浏览器按标准模式渲染"
         if s.startswith("<html"):
