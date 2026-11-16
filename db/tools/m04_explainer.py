@@ -98,7 +98,11 @@ def explain(s: str, javadoc: str = "") -> str | None:
             return "插入时抛唯一键冲突，模拟并发加车"
         if "deleteByIdAndUser" in call or "updateQuantity" in call:
             return f"写库影响 {value.strip()} 行"
-        return ("准备返回值：" + target) if target else None
+        if target:
+            return "准备返回值：" + target
+        # 认不出的返回值交给下面的具体规则，不要在这里直接返回 None
+        if "summary" in call:
+            return "准备当前购物车：数量、价格、状态按用例设定"
 
     # ---- 断言验证：verify(...)
     m = re.match(r"verify\((\w+)(?:,\s*never\(\))?\)\.(\w+)\((.*)\);$", s)
@@ -360,9 +364,13 @@ def explain(s: str, javadoc: str = "") -> str | None:
     if s in production:
         return production[s]
 
-    m = re.match(r'throw BizException\.badRequest\(fieldName \+ "(.*)"\);$', s)
+    m = re.match(r'throw BizException\.badRequest\((\w+) \+ "不能超过 " \+ (\w+) \+ "(.*)"\);$', s)
     if m:
-        return f"抛 400：文案带上字段名（{m.group(1)}）"
+        return "抛 400：超长提示带字段名与上限"
+
+    m = re.match(r'throw BizException\.badRequest\((\w+) \+ "(.*)"\);$', s)
+    if m:
+        return f"抛 400：文案带上字段名（{m.group(2)}）"
 
     m = re.match(r"service\.(\w+)\((.*)\);$", s)
     if m:
@@ -375,7 +383,7 @@ def explain(s: str, javadoc: str = "") -> str | None:
         }.get(m.group(1), "调用 " + m.group(1))
         return f"{call_once}：{m.group(2)}"
 
-    m = re.match(r"v\.(set\w+)\(", s)
+    m = re.match(r"(?:v|view)\.(set\w+)\(", s)
     if m:
         setting = {
             "setId": "夹具：行 id",
@@ -522,8 +530,87 @@ def explain(s: str, javadoc: str = "") -> str | None:
     if s == "public boolean isEmpty() {":
         return "没有行即空车"
 
-    # ---- 类声明
-    m = re.match(r"public class (\w+) \{", s)
+    # ---- M05：结算快照与收货校验
+    m05 = {
+        "if (!current.isAllAvailable()) {": "当前车出现失效条目，同样视为已变化",
+        "List<CheckoutSnapshot.Line> before = snapshot.getLines();": "快照里的行（构造时已按条目 id 排序）",
+        "List<CheckoutSnapshot.Line> after = now.getLines();": "当前车生成的行（同样排序）",
+        "for (int i = 0; i < before.size(); i++) {": "按位置逐行比对",
+        "List<CheckoutSnapshot.Line> lines = new ArrayList<>(summary.getLines().size());": "按车行数预分配",
+        "for (CartLine line : summary.getLines()) {": "逐行转成快照行",
+        "line.getItemId(),": "行数据：购物车条目 id",
+        "line.getProductId(),": "商品 id",
+        "line.getQuantity(),": "数量",
+        "line.getVersion(),": "购物车版本（改数量会 +1）",
+        "line.getPrice()));": "当前单价；金额一律由服务端计算",
+        "return new CheckoutSnapshot(userId, lines, summary.getTotalAmount());":
+            "返回快照：用户、行、页面总额",
+        "@Serial": "JDK 序列化注解：标记与序列化有关的成员",
+        "private static final long serialVersionUID = 1L;":
+            "固定序列化版本号：会话里的旧对象不会因类改动而反序列化失败",
+        "List<Line> sorted = new ArrayList<>(lines);": "复制后排序，不改调用方的列表",
+        "&& cartItemId == other.cartItemId": "逐项比较：条目 id",
+        "&& productId == other.productId": "逐项比较：商品 id",
+        "&& quantity == other.quantity": "逐项比较：数量",
+        "&& cartVersion == other.cartVersion": "逐项比较：购物车版本",
+        "&& price.compareTo(other.price) == 0;": "逐项比较：价格（按数值，不按刻度）",
+        "if (this == o) {": "同一个引用直接相等",
+        "if (!(o instanceof Line other)) {": "类型不对就不相等",
+        "return sameAs(other);": "复用同一套逐项比较",
+        "public final class ReceiverForm {": "工具类：只做静态校验，不实例化",
+        "return new Receiver(name, phone, address);": "三项都通过才构造",
+        "class CheckoutServiceTest {": "测试类：Mock CartService，验证快照与比对",
+        "cartService = mock(CartService.class);": "Mock 购物车服务",
+        "service = new CheckoutService(cartService);": "被测服务：注入 Mock 的车服务",
+        "CartItemView view = new CartItemView();": "夹具：造一行购物车视图",
+        "return view;": "返回构造好的视图行",
+        "});": "断言代码块结束",
+        'when(cartService.summary(USER)).thenReturn(CartSummary.of(List.of()));': "空车：一行都没有",
+        "when(cartService.summary(USER)).thenReturn(summary)": "之后每次都返回这辆车",
+        "CartSummary summary = summaryOf(view(10L, 8L, 2, \"28.00\", 10, \"ON_SALE\", 0L));":
+            "先准备一辆车，后面反复复用",
+        'when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 2, "28.00", 10, "ON_SALE", 0L)));':
+            "当前车：数量 2、¥28.00、上架",
+        'when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L)));':
+            "当前车：数量 1、¥28.00、上架",
+        'when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "29.00", 10, "ON_SALE", 0L)));':
+            "当前车：价格改成 ¥29.00",
+        'when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "DRAFT", 0L)));':
+            "当前车：商品已下架",
+        "try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {":
+            "序列化到字节数组，模拟写进 Session",
+        "out.writeObject(snapshot);": "写出快照对象",
+        "CheckoutSnapshot restored;": "先声明，反序列化后再赋值",
+        "try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {":
+            "从字节数组读回，模拟从 Session 取出",
+        'Receiver receiver = ReceiverForm.parse("  张三  ", " 13800000000 ", " 某市某区某路 1 号 ");':
+            "输入带首尾空白：应被去掉后再保存",
+        'Receiver receiver = ReceiverForm.parse("名".repeat(50), "1".repeat(30), "址".repeat(255));':
+            "长度正好等于上限：必须通过",
+        "assertThat(receiver.getName()).hasSize(50);": "断言收货人长度为上限值",
+        "assertThat(receiver.getPhone()).hasSize(30);": "断言电话长度为上限值",
+        "assertThat(receiver.getAddress()).hasSize(255);": "断言地址长度为上限值",
+    }
+    if s in m05:
+        return m05[s]
+
+    m = re.match(r'String (\w+) = require\((raw\w+), "([^"]+)", (\w+)\);$', s)
+    if m:
+        return f"校验{('收货人' if m.group(1) == 'name' else '电话' if m.group(1) == 'phone' else '地址')}：去空白并限长"
+
+    m = re.match(r'assertThat\(e\.getMessage\(\)\)\.contains\("([^"]+)"\);$', s)
+    if m:
+        return f"断言错误文案包含「{m.group(1)}」"
+
+    m = re.match(r"\.containsExactly\((.+)\);$", s)
+    if m:
+        return f"断言顺序与取值：{m.group(1)}"
+
+    if re.match(r"assertThat\(\w+\.getLines\(\)\)\.extracting\(", s):
+        return "取出条目 id 列，按顺序比对"
+
+    # ---- 类声明（含 final / static / implements）
+    m = re.match(r"public (?:static )?(?:final )?class (\w+)(?: implements [\w, .]+)? \{", s)
     if m:
         return javadoc or f"{m.group(1)}：见类注释"
 
