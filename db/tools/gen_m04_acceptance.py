@@ -59,11 +59,12 @@ TASKS = {
     "03": {
         "title": "M04-03 · 改数量、移除与失效条目",
         "out": "M04-03-逐行验收.html",
-        "note": "内容：改数量与移除的归属/版本校验、403 与 409 状态码、失效条目提示与结算禁用。"
-                "验证：mvn -pl cartoon-user-web -am test → Tests run: 72, Failures: 0（含新增 10 例）。"
+        "note": "内容：改数量与移除的归属/版本校验、404 与 409 状态码、失效条目提示与结算禁用。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 74, Failures: 0。"
                 "失效条目的模板行在 M04-02 的 cart.html 一节已逐行对照，本页不重复。",
         "files": [
-            (TEST + "CartMutationTest.java", "CartMutationTest.java", "10 个用例：改量/移除/并发版本/上限/失效", "java"),
+            (TEST + "CartMutationTest.java", "CartMutationTest.java", "10 个用例：改量/移除/版本/上限/失效", "java"),
+            (TEST + "CartPersistenceTest.java", "CartPersistenceTest.java", "AC-09：退出重登与跨账号（2 例）", "java"),
             (WEB + "controller/GlobalExceptionHandler.java", "GlobalExceptionHandler.java", "按错误码输出 4xx", "java"),
         ],
     },
@@ -93,10 +94,8 @@ NOTES: dict[tuple[str, str], str] = {
         "归属与版本都写进 WHERE：影响 0 行说明条目不属于本人或页面已过期",
     (CART + "service/CartService.java", "int rows = cartItemMapper.deleteByIdAndUser(userId, itemId, version);"):
         "删除同样带 user_id 与 version，旧页面删不掉新状态的条目",
-    (CART + "service/CartService.java", "if (item == null) {"):
-        "条目已不存在：404，不泄露它曾经属于谁",
-    (CART + "service/CartService.java", "if (!item.getUserId().equals(userId)) {"):
-        "不是本人 → 403；仅靠 SQL 影响行数无法区分 403 与 409，所以先查归属",
+    (CART + "service/CartService.java", "if (item == null || !item.getUserId().equals(userId)) {"):
+        "不存在与他人条目走同一个 404：连这个 id 是否存在都不暴露",
     (CART + "service/CartService.java", "if (item.getVersion() == null || item.getVersion() != version) {"):
         "版本对不上说明页面是旧的：409，绝不覆盖其他会话改过的新数量",
     (CART + "service/CartService.java", "int newQuantity = existing.getQuantity() + added;"):
@@ -141,7 +140,7 @@ NOTES: dict[tuple[str, str], str] = {
     (WEB + "interceptor/LoginInterceptor.java", "if (port != request.getServerPort()) {"):
         "端口不同也算外站来源，防止被构造成登录后跳站外",
     (WEB + "controller/GlobalExceptionHandler.java", "response.setStatus(e.code().status());"):
-        "状态码与错误码一一对应：403 越权、409 冲突不再被压成 400",
+        "状态码与错误码一一对应：404 不存在/越权、409 冲突不再被压成 400",
     ("cartoon-user-web/src/main/resources/templates/cart.html",
      'th:classappend="${line.invalid} ? \'invalid\'"'):
         "失效行整行浅红底，和可结算行一眼分开",

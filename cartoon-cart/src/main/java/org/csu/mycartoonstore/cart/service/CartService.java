@@ -142,14 +142,16 @@ public class CartService {
         return product;
     }
 
-    /** 条目必须存在且属于本人：不是本人给 403，不存在给 404 */
+    /**
+     * 条目必须存在且属于本人：不存在与他人条目统一 404。
+     *
+     * <p>不返回 403，是因为 403 等于承认"这个条目 id 存在、只是不归你"；
+     * 统一 404 连存在性也不暴露（AC-18 允许 403/404，这里选更严的 404）。</p>
+     */
     private CartItem requireOwnItem(long userId, long itemId) {
         CartItem item = cartItemMapper.selectById(itemId);
-        if (item == null) {
+        if (item == null || !item.getUserId().equals(userId)) {
             throw BizException.notFound("购物车条目不存在，可能已被移除");
-        }
-        if (!item.getUserId().equals(userId)) {
-            throw BizException.forbidden("无权操作他人的购物车");
         }
         return item;
     }

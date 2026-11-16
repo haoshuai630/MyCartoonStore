@@ -34,7 +34,8 @@ public interface CartItemMapper extends BaseMapper<CartItem> {
 
     /**
      * 改数量：把归属与版本一起写进 WHERE。
-     * <p>影响 0 行说明"不是本人的条目"或"页面已过期"，由 Service 区分成 403 / 409。</p>
+     * <p>影响 0 行说明"不是本人的条目"或"页面已过期"。Service 先查归属：
+     * 不是本人与不存在统一 404（不暴露存在性），版本不符给 409。</p>
      */
     @Update("UPDATE cart_item SET quantity = #{quantity}, version = version + 1 "
             + "WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")

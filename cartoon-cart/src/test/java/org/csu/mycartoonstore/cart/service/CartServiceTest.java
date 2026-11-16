@@ -164,13 +164,13 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("改他人条目：403，不写库")
+    @DisplayName("改他人条目：统一 404，不暴露条目是否存在")
     void changeQuantityRejectsOtherUser() {
         when(cartItemMapper.selectById(77L)).thenReturn(item(77L, 2L, 9L, 2, 0L));
 
         assertThatThrownBy(() -> service.changeQuantity(USER, "77", "3", "0"))
                 .isInstanceOfSatisfying(BizException.class,
-                        e -> assertThat(e.code()).isEqualTo(ErrorCode.FORBIDDEN));
+                        e -> assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));
         verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());
     }
 

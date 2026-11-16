@@ -34,7 +34,7 @@ footer{color:#536176;font-size:13px}
 <p class="note" style="margin-top:8px">说明口径：行尾注释与 javadoc 优先；没有注释的规则行由 <code>gen_m04_acceptance.py</code> 的 NOTES 补充；
 import、注解、括号等结构性代码渲染为「—」。</p>
 <section id="s1">
-<h2>CartService.java<small>购物车规则：加车/改量/移除/汇总 · 243 行</small></h2>
+<h2>CartService.java<small>购物车规则：加车/改量/移除/汇总 · 245 行</small></h2>
 <p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/service/CartService.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
@@ -142,7 +142,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        <span class="kw">int</span> quantity = parseQuantity(quantityRaw);</pre></td><td class="explain">数量先解析：不是 1–99 的整数直接 400</td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersion(versionRaw);</pre></td><td class="explain">版本号先解析：缺失或非法按旧页面处理（409）</td></tr>
 <tr class="gap"><td class="line">102</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        CartItem item = requireOwnItem(userId, itemId);</pre></td><td class="explain">查条目并校验归属：不存在 404、非本人 403</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        CartItem item = requireOwnItem(userId, itemId);</pre></td><td class="explain">查条目并校验归属：不是本人与不存在统一 404，不暴露存在性</td></tr>
 <tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        requireVersion(item, version);</pre></td><td class="explain">旧页面检测：版本不一致 409</td></tr>
 <tr class="gap"><td class="line">105</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        Product product = productMapper.selectById(item.getProductId());</pre></td><td class="explain">重查商品：加车后状态与库存可能已经变了</td></tr>
@@ -164,7 +164,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>        <span class="kw">long</span> itemId = parseId(itemIdRaw, "条目编号");</pre></td><td class="explain">条目编号先解析：非正整数 400</td></tr>
 <tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersion(versionRaw);</pre></td><td class="explain">版本号先解析：缺失或非法按旧页面处理（409）</td></tr>
 <tr class="gap"><td class="line">124</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        CartItem item = requireOwnItem(userId, itemId);</pre></td><td class="explain">查条目并校验归属：不存在 404、非本人 403</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        CartItem item = requireOwnItem(userId, itemId);</pre></td><td class="explain">查条目并校验归属：不是本人与不存在统一 404，不暴露存在性</td></tr>
 <tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        requireVersion(item, version);</pre></td><td class="explain">旧页面检测：版本不一致 409</td></tr>
 <tr class="gap"><td class="line">127</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        <span class="kw">int</span> rows = cartItemMapper.deleteByIdAndUser(userId, itemId, version);</pre></td><td class="explain">删除同样带 user_id 与 version，旧页面删不掉新状态的条目</td></tr>
@@ -184,105 +184,107 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">返回查到的商品</td></tr>
 <tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">144</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre class="cmtline">    /** 条目必须存在且属于本人：不是本人给 403，不存在给 404 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>    <span class="kw">private</span> CartItem requireOwnItem(<span class="kw">long</span> userId, <span class="kw">long</span> itemId) {</pre></td><td class="explain">条目必须存在且属于本人：不是本人给 403，不存在给 404</td></tr>
-<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>        CartItem item = cartItemMapper.selectById(itemId);</pre></td><td class="explain">按 id 查条目，先读归属才能区分 404 与 403</td></tr>
-<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        if (item == null) {</pre></td><td class="explain">条目已不存在：404，不泄露它曾经属于谁</td></tr>
-<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>            throw BizException.notFound("购物车条目不存在，可能已被移除");</pre></td><td class="explain">抛 404：购物车条目不存在，可能已被移除</td></tr>
-<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        if (!item.getUserId().equals(userId)) {</pre></td><td class="explain">不是本人 → 403；仅靠 SQL 影响行数无法区分 403 与 409，所以先查归属</td></tr>
-<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>            throw BizException.forbidden("无权操作他人的购物车");</pre></td><td class="explain">抛 403：无权操作他人的购物车</td></tr>
-<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        <span class="kw">return</span> item;</pre></td><td class="explain">返回查到的条目</td></tr>
-<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr class="gap"><td class="line">156</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre class="cmtline">    /** 旧页面带回过期版本号时拒绝，不覆盖其他会话改过的新数量 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> requireVersion(CartItem item, <span class="kw">long</span> version) {</pre></td><td class="explain">旧页面带回过期版本号时拒绝，不覆盖其他会话改过的新数量</td></tr>
-<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        if (item.getVersion() == null || item.getVersion() != version) {</pre></td><td class="explain">版本对不上说明页面是旧的：409，绝不覆盖其他会话改过的新数量</td></tr>
-<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
-<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr class="gap"><td class="line">163</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre class="cmtline">    /** 累加进已有条目：先算总数，再一次性校验上限与库存 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> mergeInto(CartItem existing, <span class="kw">int</span> added, Product product) {</pre></td><td class="explain">累加进已有条目：先算总数，再一次性校验上限与库存</td></tr>
-<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        if (existing == null) {</pre></td><td class="explain">并发窗口里条目被删：按冲突让用户刷新</td></tr>
-<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
-<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>        <span class="kw">int</span> newQuantity = existing.getQuantity() + added;</pre></td><td class="explain">校验累加后的总数，不只校验本次输入（FR-C-01 §2）</td></tr>
-<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        if (newQuantity &gt; MAX_QUANTITY) {</pre></td><td class="explain">累加后超过 99：拒绝，原数量不动</td></tr>
-<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>            throw BizException.badRequest("同一商品最多 " + MAX_QUANTITY + " 件");</pre></td><td class="explain">抛 400：同一商品最多 {MAX_QUANTITY} 件</td></tr>
-<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        ensureStock(newQuantity, product);</pre></td><td class="explain">累加后仍不能超过库存，否则页面会立刻变失效</td></tr>
-<tr class="gap"><td class="line">174</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        <span class="kw">int</span> rows = cartItemMapper.updateQuantity(</pre></td><td class="explain">带旧版本更新，返回影响行数</td></tr>
-<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                existing.getUserId(), existing.getId(), newQuantity, existing.getVersion());</pre></td><td class="explain">把条目自身的归属、id、新数量、旧版本传给 SQL</td></tr>
-<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">影响 0 行：并发下条目已被改动或删除</td></tr>
-<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
-<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr class="gap"><td class="line">181</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre class="cmtline">    /** 库存校验：购物车不占库存，但也不能放进买不到的数量 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> ensureStock(<span class="kw">int</span> quantity, Product product) {</pre></td><td class="explain">库存校验：购物车不占库存，但也不能放进买不到的数量</td></tr>
-<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        <span class="kw">int</span> stock = product.getStock() == null ? 0 : product.getStock();</pre></td><td class="explain">库存为空按 0 处理：宁可拒绝，也不放一个买不到的数量进车</td></tr>
-<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        if (stock &lt;= 0) {</pre></td><td class="explain">库存 0：按缺货处理，不给出可买上限</td></tr>
-<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>            throw BizException.badRequest("商品暂时缺货");</pre></td><td class="explain">库存 0 单独给缺货文案，避免出现「最多可买 0 件」这种怪提示</td></tr>
-<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>        if (quantity &gt; stock) {</pre></td><td class="explain">库存不足时把可买上限告诉用户，而不是只说失败</td></tr>
-<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>            throw BizException.badRequest("库存不足，最多可购买 " + stock + " 件");</pre></td><td class="explain">抛 400：库存不足，最多可购买 {stock} 件</td></tr>
-<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr class="gap"><td class="line">192</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 参数解析</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre class="cmtline">     * 条目必须存在且属于本人：不存在与他人条目统一 404。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre class="cmtline">     * &lt;p&gt;不返回 403，是因为 403 等于承认"这个条目 id 存在、只是不归你"；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre class="cmtline">     * 统一 404 连存在性也不暴露（AC-18 允许 403/404，这里选更严的 404）。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>    <span class="kw">private</span> CartItem requireOwnItem(<span class="kw">long</span> userId, <span class="kw">long</span> itemId) {</pre></td><td class="explain">条目必须存在且属于本人：不存在与他人条目统一 404。 不返回 403，是因为 403 等于承认"这个条目 id 存在、只是不归你"； 统一 404 连存在性也不暴露（AC-18 允许 403/404，这里选更严的 404）。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        CartItem item = cartItemMapper.selectById(itemId);</pre></td><td class="explain">按 id 查条目，读到 user_id 才能判断是不是本人的</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        if (item == null || !item.getUserId().equals(userId)) {</pre></td><td class="explain">不存在与他人条目走同一个 404：连这个 id 是否存在都不暴露</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>            throw BizException.notFound("购物车条目不存在，可能已被移除");</pre></td><td class="explain">抛 404：购物车条目不存在，可能已被移除</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">return</span> item;</pre></td><td class="explain">返回查到的条目</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">158</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre class="cmtline">    /** 旧页面带回过期版本号时拒绝，不覆盖其他会话改过的新数量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> requireVersion(CartItem item, <span class="kw">long</span> version) {</pre></td><td class="explain">旧页面带回过期版本号时拒绝，不覆盖其他会话改过的新数量</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        if (item.getVersion() == null || item.getVersion() != version) {</pre></td><td class="explain">版本对不上说明页面是旧的：409，绝不覆盖其他会话改过的新数量</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">165</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre class="cmtline">    /** 累加进已有条目：先算总数，再一次性校验上限与库存 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> mergeInto(CartItem existing, <span class="kw">int</span> added, Product product) {</pre></td><td class="explain">累加进已有条目：先算总数，再一次性校验上限与库存</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        if (existing == null) {</pre></td><td class="explain">并发窗口里条目被删：按冲突让用户刷新</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        <span class="kw">int</span> newQuantity = existing.getQuantity() + added;</pre></td><td class="explain">校验累加后的总数，不只校验本次输入（FR-C-01 §2）</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        if (newQuantity &gt; MAX_QUANTITY) {</pre></td><td class="explain">累加后超过 99：拒绝，原数量不动</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>            throw BizException.badRequest("同一商品最多 " + MAX_QUANTITY + " 件");</pre></td><td class="explain">抛 400：同一商品最多 {MAX_QUANTITY} 件</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        ensureStock(newQuantity, product);</pre></td><td class="explain">累加后仍不能超过库存，否则页面会立刻变失效</td></tr>
+<tr class="gap"><td class="line">176</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        <span class="kw">int</span> rows = cartItemMapper.updateQuantity(</pre></td><td class="explain">带旧版本更新，返回影响行数</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>                existing.getUserId(), existing.getId(), newQuantity, existing.getVersion());</pre></td><td class="explain">把条目自身的归属、id、新数量、旧版本传给 SQL</td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">影响 0 行：并发下条目已被改动或删除</td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">183</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre class="cmtline">    /** 库存校验：购物车不占库存，但也不能放进买不到的数量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> ensureStock(<span class="kw">int</span> quantity, Product product) {</pre></td><td class="explain">库存校验：购物车不占库存，但也不能放进买不到的数量</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>        <span class="kw">int</span> stock = product.getStock() == null ? 0 : product.getStock();</pre></td><td class="explain">库存为空按 0 处理：宁可拒绝，也不放一个买不到的数量进车</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        if (stock &lt;= 0) {</pre></td><td class="explain">库存 0：按缺货处理，不给出可买上限</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>            throw BizException.badRequest("商品暂时缺货");</pre></td><td class="explain">库存 0 单独给缺货文案，避免出现「最多可买 0 件」这种怪提示</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        if (quantity &gt; stock) {</pre></td><td class="explain">库存不足时把可买上限告诉用户，而不是只说失败</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>            throw BizException.badRequest("库存不足，最多可购买 " + stock + " 件");</pre></td><td class="explain">抛 400：库存不足，最多可购买 {stock} 件</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">194</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre class="cmtline">    /** 表单里的 id：空、非数字、非正数一律 400，不静默当成 0 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseId(String raw, String fieldName) {</pre></td><td class="explain">表单里的 id：空、非数字、非正数一律 400，不静默当成 0</td></tr>
-<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
-<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不能为空");</pre></td><td class="explain">抛 400：文案带上字段名（不能为空）</td></tr>
-<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
-<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">解析成 long；格式错误在 catch 里转 400</td></tr>
-<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">id 只接受正整数：0 与负数一律 400</td></tr>
-<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>                throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">抛 400：文案带上字段名（不正确）</td></tr>
-<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
-<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
-<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">抛 400：文案带上字段名（不正确）</td></tr>
-<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr class="gap"><td class="line">210</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre class="cmtline">    /** 数量必须是 1–99 的整数：小数、0、负数、超上限都不写库 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> parseQuantity(String raw) {</pre></td><td class="explain">数量必须是 1–99 的整数：小数、0、负数、超上限都不写库</td></tr>
-<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
-<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>            throw BizException.badRequest("数量不能为空");</pre></td><td class="explain">抛 400：数量不能为空</td></tr>
-<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>        <span class="kw">int</span> value;</pre></td><td class="explain">先声明，try 里再赋值</td></tr>
-<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
-<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>            value = Integer.parseInt(raw.trim());</pre></td><td class="explain">解析失败在 catch 里转 400，不吞异常</td></tr>
-<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
-<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
-<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>        if (value &lt; 1 || value &gt; MAX_QUANTITY) {</pre></td><td class="explain">越界数量（0、负数、100）统一 400</td></tr>
-<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
-<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
-<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr class="gap"><td class="line">227</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre class="cmtline">    /** 版本号：缺失说明页面是旧的，直接要求刷新 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseVersion(String raw) {</pre></td><td class="explain">版本号：缺失说明页面是旧的，直接要求刷新</td></tr>
-<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
-<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
-<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
-<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">解析成 long；格式错误在 catch 里转 400</td></tr>
-<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>            if (value &lt; 0) {</pre></td><td class="explain">负版本号只可能来自伪造或旧页面：409</td></tr>
-<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>                throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
-<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
-<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
-<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
-<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 参数解析</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">196</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre class="cmtline">    /** 表单里的 id：空、非数字、非正数一律 400，不静默当成 0 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseId(String raw, String fieldName) {</pre></td><td class="explain">表单里的 id：空、非数字、非正数一律 400，不静默当成 0</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不能为空");</pre></td><td class="explain">抛 400：文案带上字段名（不能为空）</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">解析成 long；格式错误在 catch 里转 400</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">id 只接受正整数：0 与负数一律 400</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>                throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">抛 400：文案带上字段名（不正确）</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">抛 400：文案带上字段名（不正确）</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">212</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre class="cmtline">    /** 数量必须是 1–99 的整数：小数、0、负数、超上限都不写库 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> parseQuantity(String raw) {</pre></td><td class="explain">数量必须是 1–99 的整数：小数、0、负数、超上限都不写库</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>            throw BizException.badRequest("数量不能为空");</pre></td><td class="explain">抛 400：数量不能为空</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        <span class="kw">int</span> value;</pre></td><td class="explain">先声明，try 里再赋值</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>            value = Integer.parseInt(raw.trim());</pre></td><td class="explain">解析失败在 catch 里转 400，不吞异常</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        if (value &lt; 1 || value &gt; MAX_QUANTITY) {</pre></td><td class="explain">越界数量（0、负数、100）统一 400</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">229</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre class="cmtline">    /** 版本号：缺失说明页面是旧的，直接要求刷新 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseVersion(String raw) {</pre></td><td class="explain">版本号：缺失说明页面是旧的，直接要求刷新</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">解析成 long；格式错误在 catch 里转 400</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>            if (value &lt; 0) {</pre></td><td class="explain">负版本号只可能来自伪造或旧页面：409</td></tr>
+<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>                throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="244"><td class="line">244</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">
@@ -470,7 +472,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 </tbody></table>
 </section>
 <section id="s4">
-<h2>CartItemMapper.java<small>按用户改量、删除、徽标求和 · 48 行</small></h2>
+<h2>CartItemMapper.java<small>按用户改量、删除、徽标求和 · 49 行</small></h2>
 <p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/mapper/CartItemMapper.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
@@ -512,18 +514,19 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">     * 改数量：把归属与版本一起写进 WHERE。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     * &lt;p&gt;影响 0 行说明"不是本人的条目"或"页面已过期"，由 Service 区分成 403 / 409。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Update("UPDATE cart_item SET quantity = #{quantity}, version = version + 1 "</pre></td><td class="explain">SQL：改数量并把版本 +1，条件含归属与旧版本</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")</pre></td><td class="explain">SQL 续行：归属与版本条件，影响 0 行即冲突</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">int</span> updateQuantity(@Param("userId") Long userId, @Param("itemId") Long itemId,</pre></td><td class="explain">改数量方法签名：四个参数都参与 WHERE 或 SET</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                       @Param("quantity") <span class="kw">int</span> quantity, @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">方法参数续行：新数量与旧版本</td></tr>
-<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">    /** 移除：同样带 user_id 与 version，避免越权与旧页面覆盖 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @Delete("DELETE FROM cart_item WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")</pre></td><td class="explain">SQL：删除条目，条件含归属与版本</td></tr>
-<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    <span class="kw">int</span> deleteByIdAndUser(@Param("userId") Long userId, @Param("itemId") Long itemId,</pre></td><td class="explain">删除方法签名：归属与版本参与 WHERE</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                          @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">方法参数续行：旧版本</td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     * &lt;p&gt;影响 0 行说明"不是本人的条目"或"页面已过期"。Service 先查归属：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     * 不是本人与不存在统一 404（不暴露存在性），版本不符给 409。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @Update("UPDATE cart_item SET quantity = #{quantity}, version = version + 1 "</pre></td><td class="explain">SQL：改数量并把版本 +1，条件含归属与旧版本</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>            + "WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")</pre></td><td class="explain">SQL 续行：归属与版本条件，影响 0 行即冲突</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">int</span> updateQuantity(@Param("userId") Long userId, @Param("itemId") Long itemId,</pre></td><td class="explain">改数量方法签名：四个参数都参与 WHERE 或 SET</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                       @Param("quantity") <span class="kw">int</span> quantity, @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">方法参数续行：新数量与旧版本</td></tr>
+<tr class="gap"><td class="line">44</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre class="cmtline">    /** 移除：同样带 user_id 与 version，避免越权与旧页面覆盖 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @Delete("DELETE FROM cart_item WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")</pre></td><td class="explain">SQL：删除条目，条件含归属与版本</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">int</span> deleteByIdAndUser(@Param("userId") Long userId, @Param("itemId") Long itemId,</pre></td><td class="explain">删除方法签名：归属与版本参与 WHERE</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                          @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">方法参数续行：旧版本</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
 </section>
 <section id="s5">
@@ -699,13 +702,13 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">165</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
-<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>    @DisplayName("改他人条目：403，不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityRejectsOtherUser() {</pre></td><td class="explain">改他人条目：403，不写库</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>    @DisplayName("改他人条目：统一 404，不暴露条目是否存在")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityRejectsOtherUser() {</pre></td><td class="explain">改他人条目：统一 404，不暴露条目是否存在</td></tr>
 <tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, 2L, 9L, 2, 0L));</pre></td><td class="explain">准备商品：条目 77L：用户 2L、商品 9L、数量 2、版本 0L</td></tr>
 <tr class="gap"><td class="line">170</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeQuantity(USER, "77", "3", "0"))</pre></td><td class="explain">调用 service.changeQuantity(USER, "77", "3", "0"，期望抛出业务异常</td></tr>
 <tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
-<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.FORBIDDEN));</pre></td><td class="explain">错误码必须是 FORBIDDEN（）</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));</pre></td><td class="explain">错误码必须是 NOT_FOUND（）</td></tr>
 <tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());</pre></td><td class="explain">确认没有调用 updateQuantity：用户 anyLong()、条目 anyLong()、数量 anyInt()、旧版本 anyLong()</td></tr>
 <tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">176</td><td></td><td></td></tr>
@@ -847,5 +850,5 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 </tbody></table>
 </section>
 </main>
-<footer>2026-11-16 · M04-01 · 购物车服务与数据访问 · 5 个文件、768 行。完整汇报见同目录的 Markdown 汇报。</footer>
+<footer>2026-11-16 · M04-01 · 购物车服务与数据访问 · 5 个文件、771 行。完整汇报见同目录的 Markdown 汇报。</footer>
 </body></html>

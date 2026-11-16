@@ -283,7 +283,7 @@ def explain(s: str, javadoc: str = "") -> str | None:
         "long version = parseVersion(versionRaw);": "版本号先解析：缺失或非法按旧页面处理（409）",
         "ensureStock(quantity, product);": "库存校验：0 件缺货、超过库存给出可买上限",
         "ensureStock(newQuantity, product);": "累加后的数量同样不能超过库存",
-        "CartItem item = requireOwnItem(userId, itemId);": "查条目并校验归属：不存在 404、非本人 403",
+        "CartItem item = requireOwnItem(userId, itemId);": "查条目并校验归属：不是本人与不存在统一 404，不暴露存在性",
         "requireVersion(item, version);": "旧页面检测：版本不一致 409",
         "long value = Long.parseLong(raw.trim());": "解析成 long；格式错误在 catch 里转 400",
         "if (newQuantity > MAX_QUANTITY) {": "累加后超过 99：拒绝，原数量不动",
@@ -304,7 +304,7 @@ def explain(s: str, javadoc: str = "") -> str | None:
         "Product product = productMapper.selectById(item.getProductId());":
             "重查商品：加车后状态与库存可能已经变了",
         "CartItem item = cartItemMapper.selectById(itemId);":
-            "按 id 查条目，先读归属才能区分 404 与 403",
+            "按 id 查条目，读到 user_id 才能判断是不是本人的",
         "int rows = cartItemMapper.updateQuantity(": "带旧版本更新，返回影响行数",
         "existing.getUserId(), existing.getId(), newQuantity, existing.getVersion());":
             "把条目自身的归属、id、新数量、旧版本传给 SQL",
@@ -474,6 +474,10 @@ def explain(s: str, javadoc: str = "") -> str | None:
             "带查询串一起回跳",
         "class CartPageTest extends AbstractIntegrationTest {": "集成测试：真实 MySQL + MockMvc",
         "class CartMutationTest extends AbstractIntegrationTest {": "集成测试：写操作走真实 SQL",
+        "class CartPersistenceTest extends AbstractIntegrationTest {": "集成测试：AC-09 验证车在库里、不在会话里",
+        "MockHttpSession first = CartFixture.session(userId);": "浏览器 A 的会话（只带 userId）",
+        "MockHttpSession second = CartFixture.session(userId);": "新会话 = 重新登录或换浏览器，userId 不变",
+        "MockHttpSession intruderSession = CartFixture.session(intruder);": "另一个账号的会话",
         "when(cartItemMapper.findByUserAndProduct(USER, 9L))": "第一次查不到已有条目",
         "when(cartItemMapper.insert(any(CartItem.class)))": "让插入抛唯一键冲突",
         '.thenThrow(new DuplicateKeyException("uk_cart_user_product"));': "模拟并发加车撞唯一键",

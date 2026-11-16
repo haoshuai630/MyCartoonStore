@@ -70,7 +70,7 @@ class CartMutationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("改他人条目：403，条目不动")
+    @DisplayName("改他人条目：统一 404，条目不动")
     void changeQuantityRejectsOtherUser() throws Exception {
         long owner = CartFixture.createUser(jdbc, "mut_owner");
         long other = CartFixture.createUser(jdbc, "mut_other");
@@ -81,7 +81,8 @@ class CartMutationTest extends AbstractIntegrationTest {
                         .param("quantity", "9")
                         .param("version", "0")
                         .session(CartFixture.session(other)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString("购物车条目不存在")));
 
         assertThat(CartFixture.quantityOf(jdbc, itemId)).isEqualTo(2);
     }
@@ -152,7 +153,7 @@ class CartMutationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("移除他人条目：403，条目仍在")
+    @DisplayName("移除他人条目：统一 404，条目仍在")
     void removeRejectsOtherUser() throws Exception {
         long owner = CartFixture.createUser(jdbc, "mut_rm_owner");
         long other = CartFixture.createUser(jdbc, "mut_rm_other");
@@ -162,7 +163,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         mockMvc.perform(post("/cart/items/{id}/remove", itemId)
                         .param("version", "0")
                         .session(CartFixture.session(other)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
 
         assertThat(CartFixture.countItems(jdbc, owner)).isEqualTo(1);
     }

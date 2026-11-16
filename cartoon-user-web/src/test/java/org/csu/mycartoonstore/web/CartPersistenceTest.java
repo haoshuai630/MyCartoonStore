@@ -87,16 +87,16 @@ class CartPersistenceTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("购物车还是空的")))
                 .andExpect(content().string(not(containsString("商品AC09-C02"))));
 
-        // 写：改数量与移除都被归属校验拒绝
+        // 写：改数量与移除都被拒绝；统一 404，连"条目存在"都不告诉对方
         mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
                         .param("quantity", "5")
                         .param("version", "0")
                         .session(intruderSession))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
         mockMvc.perform(post("/cart/items/{id}/remove", itemId)
                         .param("version", "0")
                         .session(intruderSession))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isNotFound());
 
         // 原条目一行未动
         assertThat(CartFixture.countItems(jdbc, owner)).isEqualTo(1);
