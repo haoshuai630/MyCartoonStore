@@ -320,3 +320,9 @@ button{font-family:inherit}
 .auth-switch{margin:18px 0 0;font-size:14px;color:#4a4237}
 
 .auth-ok{border:2px solid #2E5E4E;color:#2E5E4E;background:#f2f8f4;padding:10px 14px;font-weight:700;margin:0 0 16px}
+
+/* ===== M03-05：页头身份 ===== */
+.topbar a{color:var(--yellow);text-decoration:underline}
+.topbar a:hover{color:#fff}
+.logout-form{display:inline;margin-left:10px}
+.link-btn{background:none;border:0;color:var(--yellow);font:inherit;cursor:pointer;text-decoration:underline;padding:0}

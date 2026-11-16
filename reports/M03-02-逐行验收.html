@@ -60,31 +60,31 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;span&gt;用户名&lt;/span&gt;</pre></td><td class="explain">字段名：用户名。</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                    &lt;input name="username" th:value="${username}" required maxlength="32" autocomplete="username"&gt;</pre></td><td class="explain">用户名输入：必填、最多 32 位，失败时回填。</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                    &lt;span&gt;显示名（可不填）&lt;/span&gt;</pre></td><td class="explain">字段名：显示名，可空。</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                    &lt;input name="displayName" th:value="${displayName}" maxlength="50"&gt;</pre></td><td class="explain">显示名输入：最多 50 位。</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                    &lt;span&gt;密码&lt;/span&gt;</pre></td><td class="explain">字段名：密码。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                    &lt;input type="password" name="password" required minlength="8" autocomplete="new-password"&gt;</pre></td><td class="explain">密码输入：至少 8 位，浏览器不记忆旧值。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;span&gt;确认密码&lt;/span&gt;</pre></td><td class="explain">字段名：确认密码。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                    &lt;input type="password" name="confirmPassword" required minlength="8" autocomplete="new-password"&gt;</pre></td><td class="explain">确认密码输入，只用于与上面比对。</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束一个筛选字段。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;button class="btn btn-primary" type="submit"&gt;注册&lt;/button&gt;</pre></td><td class="explain">提交注册。</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            &lt;/form&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            &lt;/form&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">36</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>            &lt;p class="auth-switch"&gt;已有账号？&lt;a th:href="@{/login}"&gt;去登录&lt;/a&gt;&lt;/p&gt;</pre></td><td class="explain">去登录的入口。</td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        &lt;/div&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    &lt;/section&gt;</pre></td><td class="explain">结构闭合：结束当前区段。</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/main&gt;</pre></td><td class="explain">结构闭合：结束主体区。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        &lt;/div&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    &lt;/section&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/main&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>&lt;footer th:replace="~{fragments/common :: footer}"&gt;&lt;/footer&gt;</pre></td><td class="explain">复用页脚。</td></tr>
 <tr class="gap"><td class="line">43</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>&lt;/body&gt;</pre></td><td class="explain">结构闭合：结束页面主体。</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>&lt;/html&gt;</pre></td><td class="explain">结构闭合：文档结束。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>&lt;/body&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>&lt;/html&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">

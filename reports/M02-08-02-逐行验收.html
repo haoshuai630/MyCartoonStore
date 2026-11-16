@@ -52,34 +52,34 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;&lt;<span class="kw">span</span> class="en"&gt;WORKS&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">h2</span>&gt;全部作品&lt;/<span class="kw">h2</span>&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div 容器</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="result-meta" th:if="${!#lists.isEmpty(works)}" th:text="'共 ' + ${#lists.size(works)} + ' 部'"&gt;共 0 部&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span.result-meta 容器</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.section-head 容器</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">            &lt;!-- 每部作品一张卡：点进去看该作品的品类与商品 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="works-grid" th:if="${!#lists.isEmpty(works)}"&gt;</pre></td><td class="explain">空库时不渲染网格，交给下面的空状态</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="work-card" th:each="w : ${works}" th:href="@{/works/{id}(id=${w.id})}"&gt;</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-cover"&gt;</pre></td><td class="explain">封面区：用该作品第一卷的封面</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="${'/images/products/' + w.code + '-C01/cover.svg'}" th:alt="${w.name}"&gt;</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.work-cover 容器</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="work-body"&gt;</pre></td><td class="explain">卡片文字区：名称、code、品类数、在售数</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                        &lt;h3 th:text="${w.name}"&gt;作品&lt;/h3&gt;</pre></td><td class="explain">结束 h3 容器</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="work-code" th:text="${w.code}"&gt;CODE&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文 code 便于与数据库核对</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="work-meta"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.categoryCount()} + ' 个品类'"&gt;0 个品类&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                            &lt;<span class="kw">span</span> th:text="${w.productCount()} + ' 件在售'"&gt;0 件在售&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结束 span 容器</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结束 p.work-meta 容器</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.work-body 容器</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结束 a.work-card 容器</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.works-grid 容器</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;p&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;a&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="empty" th:if="${#lists.isEmpty(works)}"&gt;还没有任何作品。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">空库时的可读提示</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结束 div.wrap 容器</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结束 section.section 容器</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结束 main 容器</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">37</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">结束 footer 容器</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结束 body 容器</td></tr>
-<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结束 html 容器</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="s2">

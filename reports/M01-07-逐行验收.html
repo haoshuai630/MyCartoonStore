@@ -144,18 +144,18 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            p.status = 'ON_SALE'</pre></td><td class="explain">SQL</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">if</span> test="q.categoryId != null"&gt;</pre></td><td class="explain">动态条件：q.categoryId != null</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                AND (c.id = #{q.categoryId} OR c.parent_id = #{q.categoryId})</pre></td><td class="explain">SQL 条件</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;if&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;<span class="kw">if</span> test="q.productType != null and q.productType != 'ALL'"&gt;</pre></td><td class="explain">动态条件：q.productType != null and q.productType != 'ALL'</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">choose</span>&gt;</pre></td><td class="explain">多选一：排序白名单</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                    &lt;<span class="kw">when</span> test="q.productType == 'COMIC'"&gt;AND c.code LIKE '%-COMIC'&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.productType == 'COMIC'</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                    &lt;<span class="kw">when</span> test="q.productType == 'MERCH'"&gt;AND c.code LIKE '%-MERCH'&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.productType == 'MERCH'</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;/<span class="kw">choose</span>&gt;</pre></td><td class="explain">SQL</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;/<span class="kw">choose</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;choose&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;if&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>            &lt;<span class="kw">if</span> test="q.keyword != null and q.keyword != ''"&gt;</pre></td><td class="explain">动态条件：q.keyword != null and q.keyword != ''</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                AND p.name LIKE CONCAT('%', #{q.keyword}, '%')</pre></td><td class="explain">SQL 条件</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">SQL</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        &lt;/<span class="kw">where</span>&gt;</pre></td><td class="explain">SQL</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    &lt;/<span class="kw">sql</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;/<span class="kw">if</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;if&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        &lt;/<span class="kw">where</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;where&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    &lt;/<span class="kw">sql</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;sql&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">26</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectPage" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 selectPage：对应接口方法同名</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        SELECT p.*</pre></td><td class="explain">SQL 语句体</td></tr>
@@ -165,14 +165,14 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            &lt;<span class="kw">when</span> test="q.sort == 'PRICE_DESC'"&gt;ORDER BY p.price DESC, p.id ASC&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.sort == 'PRICE_DESC'</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">when</span> test="q.sort == 'NEWEST'"&gt;ORDER BY p.created_at DESC, p.id DESC&lt;/<span class="kw">when</span>&gt;</pre></td><td class="explain">命中条件：q.sort == 'NEWEST'</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>            &lt;<span class="kw">otherwise</span>&gt;ORDER BY p.sort_order ASC, p.id ASC&lt;/<span class="kw">otherwise</span>&gt;</pre></td><td class="explain">默认排序（其余值）</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        &lt;/<span class="kw">choose</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        &lt;/<span class="kw">choose</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;choose&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        LIMIT #{q.limit} OFFSET #{q.offset}</pre></td><td class="explain">SQL 语句体</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;select&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="countPage" resultType="long"&gt;</pre></td><td class="explain">语句 countPage：对应接口方法同名</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        SELECT COUNT(*)</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        &lt;<span class="kw">include</span> refid="pageWhere"/&gt;</pre></td><td class="explain">引用上面的 SQL 片段</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;select&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">43</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectNewest" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 selectNewest：对应接口方法同名</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        SELECT *</pre></td><td class="explain">SQL 语句体</td></tr>
@@ -180,7 +180,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        WHERE status = 'ON_SALE'</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        ORDER BY created_at DESC, id DESC</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        LIMIT #{limit}</pre></td><td class="explain">SQL 语句体</td></tr>
-<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;select&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">51</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="selectFeatured" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 selectFeatured：对应接口方法同名</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        SELECT *</pre></td><td class="explain">SQL 语句体</td></tr>
@@ -188,7 +188,7 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        WHERE status = 'ON_SALE'</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        ORDER BY sort_order ASC, id ASC</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        LIMIT #{limit}</pre></td><td class="explain">SQL 语句体</td></tr>
-<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;select&gt; 容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">59</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">    &lt;!-- 下单锁商品：按 id 升序，所有事务用同一顺序，避免死锁 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    &lt;<span class="kw">select</span> id="lockByIds" resultType="org.csu.mycartoonstore.catalog.entity.Product"&gt;</pre></td><td class="explain">语句 lockByIds：对应接口方法同名</td></tr>
@@ -197,11 +197,11 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        WHERE id IN</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        &lt;<span class="kw">foreach</span> collection="ids" item="id" open="(" separator="," close=")"&gt;</pre></td><td class="explain">遍历集合参数，生成 IN (...)</td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>            #{id}</pre></td><td class="explain">SQL</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">foreach</span>&gt;</pre></td><td class="explain">SQL</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;/<span class="kw">foreach</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;foreach&gt; 容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        ORDER BY id</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        FOR UPDATE</pre></td><td class="explain">SQL</td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
-<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>&lt;/<span class="kw">mapper</span>&gt;</pre></td><td class="explain">映射文件结束</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;select&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>&lt;/<span class="kw">mapper</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;mapper&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="cartitemmapperjava">
@@ -304,8 +304,8 @@ SQL 的实际执行（字段映射、参数绑定、FOR UPDATE 语义）由 M01-
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        JOIN category c ON c.id = p.category_id</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>        WHERE i.user_id = #{userId}</pre></td><td class="explain">SQL 语句体</td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        ORDER BY i.id</pre></td><td class="explain">SQL 语句体</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">语句结束</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>&lt;/<span class="kw">mapper</span>&gt;</pre></td><td class="explain">映射文件结束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    &lt;/<span class="kw">select</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;select&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>&lt;/<span class="kw">mapper</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;mapper&gt; 容器；不产生新的内容。</td></tr>
 </tbody></table>
 </section>
 <section id="storeusermapperjava">

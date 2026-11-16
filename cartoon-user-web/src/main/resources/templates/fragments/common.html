@@ -14,7 +14,18 @@
         <div class="wrap">
             <span>官方正版 <span class="dot">/</span> 满 99 包邮 <span class="dot">/</span> 教学演示站点，商品与订单均为虚构</span>
             <!-- 登录身份在 M03 接入，这里先固定显示游客 -->
-            <span>游客</span>
+                        <!-- 已登录显示名字与退出，未登录给登录/注册入口 -->
+            <span th:if="${session.userId == null}">
+                <a th:href="@{/login}">登录</a>
+                <span class="dot">/</span>
+                <a th:href="@{/register}">注册</a>
+            </span>
+            <span th:unless="${session.userId == null}">
+                <b th:text="${session.displayName}">用户</b>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="link-btn">退出</button>
+                </form>
+            </span>
         </div>
     </div>
     <header class="site-header">

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.containsString;
@@ -51,4 +52,26 @@ class LayoutRenderTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/css"));
     }
+    @Test
+    @DisplayName("未登录时页头显示登录与注册入口")
+    void headerShowsLoginWhenAnonymous() throws Exception {
+        mockMvc.perform(get("/main"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(">登录<")))
+                .andExpect(content().string(containsString(">注册<")));
+    }
+
+    @Test
+    @DisplayName("已登录时页头显示名字与退出按钮")
+    void headerShowsUserNameWhenLoggedIn() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("userId", 1L);
+        session.setAttribute("displayName", "爱丽丝");
+
+        mockMvc.perform(get("/main").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("爱丽丝")))
+                .andExpect(content().string(containsString("退出")));
+    }
+
 }
