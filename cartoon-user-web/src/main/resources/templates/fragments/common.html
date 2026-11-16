@@ -13,8 +13,7 @@
     <div class="topbar">
         <div class="wrap">
             <span>官方正版 <span class="dot">/</span> 满 99 包邮 <span class="dot">/</span> 教学演示站点，商品与订单均为虚构</span>
-            <!-- 登录身份在 M03 接入，这里先固定显示游客 -->
-                        <!-- 已登录显示名字与退出，未登录给登录/注册入口 -->
+            <!-- 已登录显示名字与退出，未登录给登录/注册入口 -->
             <span th:if="${session.userId == null}">
                 <a th:href="@{/login}">登录</a>
                 <span class="dot">/</span>
@@ -46,7 +45,7 @@
                     <input name="keyword" placeholder="搜索商品名称">
                     <button type="submit">搜索</button>
                 </form>
-                <a class="cart-link" th:href="@{/cart}">购物车 <b>0</b></a>
+                <a class="cart-link" th:href="@{/cart}">购物车 <b th:text="${cartCount} ?: 0">0</b></a>
             </div>
         </div>
     </header>

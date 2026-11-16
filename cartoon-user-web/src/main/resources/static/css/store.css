@@ -326,3 +326,44 @@ button{font-family:inherit}
 .topbar a:hover{color:#fff}
 .logout-form{display:inline;margin-left:10px}
 .link-btn{background:none;border:0;color:var(--yellow);font:inherit;cursor:pointer;text-decoration:underline;padding:0}
+
+/* ===== M04-02：购物车 ===== */
+/* 表头与行共用同一套列宽，改列宽只改这一处 */
+.cart-head,.cart-row{display:grid;grid-template-columns:1fr 110px 200px 110px 70px;gap:16px;align-items:center}
+.cart-head{padding:0 14px 10px;font-size:11px;font-weight:800;letter-spacing:.18em;color:var(--muted);border-bottom:3px solid var(--ink)}
+.cart-row{padding:16px 14px;border-bottom:2px solid #e6ddc9;background:#fff}
+/* 失效行整行浅红底：和可结算行一眼能分开 */
+.cart-row.invalid{background:#fff5f3;border-left:4px solid var(--red);padding-left:10px}
+.cart-item{display:flex;gap:14px;align-items:center;min-width:0}
+.cart-item img{width:72px;height:72px;object-fit:cover;border:2px solid var(--ink);background:var(--paper-2);flex:none}
+.cart-item-text{min-width:0}
+.cart-item-text .title{display:block;font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cart-item-text .title:hover{color:var(--red)}
+.cart-item-text small{font-size:11px;color:var(--muted)}
+.cart-price,.cart-subtotal{font-weight:700;font-size:14px}
+.cart-subtotal{color:var(--red);font-weight:900}
+.cart-qty{display:flex;gap:6px;align-items:center}
+.cart-qty input{width:64px;border:2px solid var(--ink);padding:6px 8px;font-size:13px;background:#fff}
+.cart-qty .btn{padding:6px 10px;font-size:12px;box-shadow:none;border-width:2px}
+.cart-remove .link-btn{color:var(--muted);text-decoration:underline}
+.cart-remove .link-btn:hover{color:var(--red)}
+.cart-row .reason{margin:4px 0 0;font-size:12px;font-weight:700;color:var(--red)}
+/* 底部合计：左侧金额，右侧结算与提示 */
+.cart-foot{display:flex;flex-wrap:wrap;gap:24px;justify-content:space-between;align-items:flex-start;padding:22px 14px 0}
+.cart-sum p{margin:0 0 6px;font-size:13px;color:#4a4237}
+.cart-sum .cart-total{font-size:15px;font-weight:800;color:var(--ink)}
+.cart-sum .cart-total b{font-size:28px;color:var(--red);margin-left:8px}
+.cart-sum .hint{margin:8px 0 0}
+.cart-actions{text-align:right}
+.cart-actions .reason{margin:0 0 10px;font-size:12px;font-weight:700;color:var(--red)}
+.cart-actions .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.cart-actions .hint{margin:10px 0 0}
+.cart-empty p{margin:0 0 18px;font-size:14px}
+@media(max-width:900px){
+  .cart-head{display:none}
+  .cart-row{grid-template-columns:1fr 1fr;gap:10px 14px}
+  .cart-item{grid-column:1/-1}
+  .cart-qty{justify-content:flex-start}
+  .cart-foot{flex-direction:column}
+  .cart-actions{text-align:left;width:100%}
+}
