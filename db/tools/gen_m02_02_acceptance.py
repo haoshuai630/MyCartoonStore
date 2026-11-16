@@ -8,6 +8,13 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
+
+
+def CLS(line):
+    """注释行绿色标注。"""
+    return ' class="cmtline"' if line.strip().startswith(("//", "<!--", "/*", "*")) else ""
+
+from manual_notes import MANUAL  # noqa: E402
 from java_explainer import make_java_explainer  # noqa: E402
 
 ROOT = base.ROOT
@@ -47,6 +54,11 @@ def make_html_explainer(lines: list[str]):
         s = line.strip()
         if not s:
             return ""
+        if s in MANUAL:
+            return MANUAL[s]
+        if s.startswith("</"):
+            tag = re.match(r"</(\w+)", s)
+            return ("结构闭合：结束上面的 <" + tag.group(1) + "> 容器；不产生新的内容。") if tag else "结构闭合：结束上面的容器；不产生新的内容。"
         if s.upper().startswith("<!DOCTYPE"):
             return "HTML5 文档类型：浏览器按标准模式渲染"
         if s.startswith("<html"):
@@ -56,9 +68,17 @@ def make_html_explainer(lines: list[str]):
         if s in ("</body>", "</html>"):
             return "文档结束"
         if s.startswith("<!--"):
-            return "注释：说明本段的用途或约束"
+            return ""
         if 'class="wrap"' in s or 'class="wrap ' in s:
             return "内容宽度容器：统一左右留白与最大宽度"
+        if 'class="section-head"' in s:
+            return "栏目头：标题在左、总数或更多入口在右"
+        if 'class="work-cover"' in s:
+            return "作品卡封面区：使用该作品第一卷封面"
+        if 'class="work-body"' in s:
+            return "作品卡文字区：名称、code、品类数与在售数"
+        if 'class="work-meta"' in s:
+            return "品类数与在售数并排展示"
         if s == "<main>":
             return "页面主体区"
         if 'class="results"' in s:
@@ -120,6 +140,8 @@ def main() -> None:
                 rows.append(f'<tr class="gap"><td class="line">{i}</td><td></td><td></td></tr>')
                 continue
             cls = ' class="cmtline"' if line.lstrip().startswith(("<!--", "//")) else ""
+            is_cmt = line.strip().startswith(("//", "/*", "*", "<!--"))
+            text = "" if is_cmt else ((NOTES_TEXT.get(line.strip()) if "NOTES_TEXT" in globals() else "") or fn(i, line) or "本行是代码语句：执行调用或赋值，不改变其他状态。")
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre{cls}>{hi(line)}</pre></td>'
@@ -156,7 +178,6 @@ def main() -> None:
 <footer>2026-11-15 · M02-02 · 4 个文件、{total} 行。完整汇报见同目录 M02-02-布局资源.md。</footer>
 </body></html>
 """
-    doc = doc.replace('<td class="explain"></td>', '<td class="explain">—</td>')
     OUT.write_text(doc, encoding="utf-8")
     print(f"written: {OUT}  rows={total}")
 

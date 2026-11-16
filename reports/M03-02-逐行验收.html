@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M03-01 · 账号与密码 逐行验收</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M03-01 · 账号与密码（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">register.html</a><a href="#s2">AuthController.java</a><a href="#s3">RegisterPageTest.java</a></nav>
+</header>
+<main>
+<p class="note">所属模块：M02 商品浏览 / 任务 M02-08-01。内容：注册表单、两次密码一致校验、成功后跳登录、失败回填。
+验证：mvn -pl cartoon-user-web -am test → Tests run: 39, 0 失败。</p>
+<p class="note" style="margin-top:8px">种子数据与 Mapper XML 的改动不在此页逐行对照：SQL 由生成器产出（db/tools/gen_demo_sql.py），XML 只加了一个 if 条件。</p>
+<section id="s1">
+<h2>register.html<small>注册表单 · 45 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/auth/register.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE html&gt;</pre></td><td class="explain">HTML5 文档类型，浏览器按标准模式渲染。</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">根元素，声明 Thymeleaf 命名空间。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;head th:replace="~{fragments/common :: head('注册')}"&gt;&lt;/head&gt;</pre></td><td class="explain">复用公共 head 片段，标题由参数传入。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;body&gt;</pre></td><td class="explain">页面可见内容的起点。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;div th:replace="~{fragments/common :: header}"&gt;&lt;/div&gt;</pre></td><td class="explain">复用页头：品牌、导航、搜索、购物车徽标。</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;main&gt;</pre></td><td class="explain">页面主体区。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;section class="section"&gt;</pre></td><td class="explain">内容区段：注册表单所在。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;div class="wrap auth-box"&gt;</pre></td><td class="explain">限宽容器：注册表单居中、最大 520px。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;h1&gt;注册&lt;/h1&gt;</pre></td><td class="explain">页面标题。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;p class="hint"&gt;用户名 3–32 位字母、数字或下划线；密码至少 8 位。&lt;/p&gt;</pre></td><td class="explain">规则提示：先告诉用户要求，减少提交失败。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">            &lt;!-- 校验失败的原因显示在这里，不弹窗 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>            &lt;p class="auth-error" th:if="${error}" th:text="${error}"&gt;错误提示&lt;/p&gt;</pre></td><td class="explain">错误提示区：有 error 才渲染。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;form th:action="@{/register}" method="post" class="auth-form"&gt;</pre></td><td class="explain">提交到 /register，POST。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                    &lt;span&gt;用户名&lt;/span&gt;</pre></td><td class="explain">字段名：用户名。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                    &lt;input name="username" th:value="${username}" required maxlength="32" autocomplete="username"&gt;</pre></td><td class="explain">用户名输入：必填、最多 32 位，失败时回填。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                    &lt;span&gt;显示名（可不填）&lt;/span&gt;</pre></td><td class="explain">字段名：显示名，可空。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                    &lt;input name="displayName" th:value="${displayName}" maxlength="50"&gt;</pre></td><td class="explain">显示名输入：最多 50 位。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                    &lt;span&gt;密码&lt;/span&gt;</pre></td><td class="explain">字段名：密码。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                    &lt;input type="password" name="password" required minlength="8" autocomplete="new-password"&gt;</pre></td><td class="explain">密码输入：至少 8 位，浏览器不记忆旧值。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;label&gt;</pre></td><td class="explain">一个字段：字段名 + 输入框。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;span&gt;确认密码&lt;/span&gt;</pre></td><td class="explain">字段名：确认密码。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                    &lt;input type="password" name="confirmPassword" required minlength="8" autocomplete="new-password"&gt;</pre></td><td class="explain">确认密码输入，只用于与上面比对。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;button class="btn btn-primary" type="submit"&gt;注册&lt;/button&gt;</pre></td><td class="explain">提交注册。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            &lt;/form&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器；不产生新的内容。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>            &lt;p class="auth-switch"&gt;已有账号？&lt;a th:href="@{/login}"&gt;去登录&lt;/a&gt;&lt;/p&gt;</pre></td><td class="explain">去登录的入口。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        &lt;/div&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    &lt;/section&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>&lt;/main&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器；不产生新的内容。</td></tr>
+<tr class="gap"><td class="line">41</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>&lt;footer th:replace="~{fragments/common :: footer}"&gt;&lt;/footer&gt;</pre></td><td class="explain">复用页脚。</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>&lt;/body&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>&lt;/html&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器；不产生新的内容。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>AuthController.java<small>注册路由与表单校验 · 65 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/controller/AuthController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web.controller 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">用户实体（登录、角色、状态）</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.service.AccountService;</pre></td><td class="explain">账号服务：注册与登录校验</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">Spring MVC 注解，标记控制器</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">MVC 模型，控制器往里放数据给模板</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">映射 GET 请求路径</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PostMapping;</pre></td><td class="explain">映射 POST 请求路径</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.RequestParam;</pre></td><td class="explain">把表单字段绑定到方法参数</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.mvc.support.RedirectAttributes;</pre></td><td class="explain">重定向时携带一次性提示（flash）</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 注册页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> * &lt;p&gt;格式与唯一性校验都在 AccountService；控制器只多做一件 Service 不该管的事：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline"> * 确认两次密码一致。成功后不自动登录，跳登录页让用户自己登一次。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AuthController {</pre></td><td class="explain">注册与后续登录的入口控制器。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> AccountService accountService;</pre></td><td class="explain">字段 accountService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">public</span> AuthController(AccountService accountService) {</pre></td><td class="explain">注入账号服务，注册逻辑不在控制器里重写。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        this.accountService = accountService;</pre></td><td class="explain">保存服务引用。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 打开注册页：带一个空表单 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @GetMapping("/register")</pre></td><td class="explain">打开注册页。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> String registerPage() {</pre></td><td class="explain">打开注册页：带一个空表单</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        <span class="kw">return</span> "auth/register";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">     * 提交注册：成功跳登录页并提示，失败回到表单并显示原因。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     * &lt;p&gt;用 RedirectAttributes 传一次性提示，刷新不会重复提交。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @PostMapping("/register")</pre></td><td class="explain">提交注册。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">public</span> String register(@RequestParam String username,</pre></td><td class="explain">表单字段逐个绑定；只有四个值，不建 DTO。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                           @RequestParam String password,</pre></td><td class="explain">参数：明文密码，仅用于本次校验与散列。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                           @RequestParam String confirmPassword,</pre></td><td class="explain">参数：确认密码，只用于比对。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                           @RequestParam(required = false) String displayName,</pre></td><td class="explain">参数：显示名可空。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                           Model model,</pre></td><td class="explain">参数：失败时回填表单。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                           RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        if (!password.equals(confirmPassword)) {</pre></td><td class="explain">两次密码不一致直接回表单，不进 Service。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            <span class="kw">return</span> backToForm(model, username, displayName, "两次输入的密码不一致");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>            StoreUser created = accountService.register(username, password, displayName);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>            redirect.addFlashAttribute("message", "注册成功，" + created.getUsername() + "，请登录");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>            <span class="kw">return</span> "redirect:/login";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        } catch (BizException e) {</pre></td><td class="explain">业务异常（格式或重复）转成表单提示。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>            <span class="kw">return</span> backToForm(model, username, displayName, e.getMessage());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">57</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre class="cmtline">    /** 回到表单并回填已填内容，避免用户重填 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    <span class="kw">private</span> String backToForm(Model model, String username, String displayName, String error) {</pre></td><td class="explain">回到表单并回填已填内容，避免用户重填</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        model.addAttribute("error", error);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        model.addAttribute("username", username);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        model.addAttribute("displayName", displayName);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">return</span> "auth/register";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>RegisterPageTest.java<small>注册测试 4 例 · 85 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/RegisterPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">自动配置 MockMvc，用于不起端口发请求</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">模拟 MVC 请求，直接调控制器并拿到渲染结果</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">Hamcrest 匹配器：断言字符串包含某段文本</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET 请求</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST 请求</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">断言重定向目标</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> * 注册页测试：成功入库、密码是散列、重复与不一致的提示。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">class</span> RegisterPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">测试类：每个用例前重建七张表。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">字段 mockMvc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">字段 jdbc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @DisplayName("打开注册页返回表单")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">void</span> registerPageRenders() throws Exception {</pre></td><td class="explain">用例：注册页能打开并含表单字段。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        mockMvc.perform(get("/register"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                .andExpect(content().string(containsString("注册")))</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                .andExpect(content().string(containsString("confirmPassword")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @DisplayName("注册成功：跳登录页，库里是 BCrypt 散列")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">void</span> registerSucceeds() throws Exception {</pre></td><td class="explain">用例：注册成功后跳登录页。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        mockMvc.perform(post("/register")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                        .param("username", "newbie")</pre></td><td class="explain">表单参数：用户名。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                        .param("password", "Password123")</pre></td><td class="explain">表单参数：密码。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                        .param("confirmPassword", "Password123")</pre></td><td class="explain">表单参数：确认密码（与上面一致）。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                        .param("displayName", "新用户"))</pre></td><td class="explain">表单参数：显示名。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                .andExpect(redirectedUrl("/login"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">50</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        String hash = jdbc.queryForObject(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                "SELECT password_hash FROM store_user WHERE username = 'newbie'", String.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        assertThat(hash).startsWith("$2");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        assertThat(hash).isNotEqualTo("Password123");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">56</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    @DisplayName("用户名重复：留在注册页并提示")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    <span class="kw">void</span> registerDuplicate() throws Exception {</pre></td><td class="explain">用例：用户名已存在时留在注册页。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                + "VALUES ('alice', '$2a$10$0123456789012345678901234567890123456789012345678901', '爱丽丝', 'CUSTOMER', 'ENABLED')");</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        mockMvc.perform(post("/register")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                        .param("username", "alice")</pre></td><td class="explain">用已存在的用户名提交。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                        .param("password", "Password123")</pre></td><td class="explain">表单参数：密码。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                        .param("confirmPassword", "Password123"))</pre></td><td class="explain">确认密码。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                .andExpect(content().string(containsString("用户名已被占用")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>    @DisplayName("两次密码不一致：不写入数据库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    <span class="kw">void</span> registerPasswordMismatch() throws Exception {</pre></td><td class="explain">用例：两次密码不一致不写库。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        mockMvc.perform(post("/register")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                        .param("username", "mismatch")</pre></td><td class="explain">用户名：用于验证失败时没写库。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                        .param("password", "Password123")</pre></td><td class="explain">表单参数：密码。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                        .param("confirmPassword", "Password456"))</pre></td><td class="explain">确认密码故意与密码不一致。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                .andExpect(content().string(containsString("两次输入的密码不一致")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        Integer count = jdbc.queryForObject(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                "SELECT COUNT(*) FROM store_user WHERE username = 'mismatch'", Integer.<span class="kw">class</span>);</pre></td><td class="explain">确认失败时没有写入任何账号。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        assertThat(count).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-15 · M02-08-01 · 6 个文件、195 行。完整汇报见同目录 M03-02-注册页.md。</footer>
+</body></html>

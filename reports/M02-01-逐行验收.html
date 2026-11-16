@@ -46,24 +46,24 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">导入</td></tr>
 <tr class="gap"><td class="line">4</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre> * 分页结果：页内数据 + 总数 + 当前页信息。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> * &lt;p&gt;与 {@link PageQuery} 配套使用：查询条件由 PageQuery 归一，返回由 PageResult 承载。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * @param items    当前页数据</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> * @param total    符合条件的总数</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * @param page     当前页码（从 1 开始）</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * @param pageSize 每页数量</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline"> * 分页结果：页内数据 + 总数 + 当前页信息。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> * &lt;p&gt;与 {@link PageQuery} 配套使用：查询条件由 PageQuery 归一，返回由 PageResult 承载。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> * @param items    当前页数据</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * @param total    符合条件的总数</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * @param page     当前页码（从 1 开始）</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * @param pageSize 每页数量</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> record PageResult&lt;T&gt;(List&lt;T&gt; items, <span class="kw">long</span> total, <span class="kw">int</span> page, <span class="kw">int</span> pageSize) {</pre></td><td class="explain">record：不可变数据载体，编译器生成构造器与访问器</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    /** 由查询条件与总数构造，保证页码/页大小与查询一致。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /** 由查询条件与总数构造，保证页码/页大小与查询一致。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> &lt;T&gt; PageResult&lt;T&gt; of(List&lt;T&gt; items, <span class="kw">long</span> total, PageQuery query) {</pre></td><td class="explain">由查询条件与总数构造，保证页码/页大小与查询一致。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> PageResult&lt;&gt;(items, total, query.page(), query.pageSize());</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 总页数；无数据时为 0 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 总页数；无数据时为 0 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">int</span> totalPages() {</pre></td><td class="explain">总页数；无数据时为 0</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        if (total &lt;= 0) {</pre></td><td class="explain">total 为 0 时总页数直接给 0，避免臆造一个不存在的第 1 页</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            <span class="kw">return</span> 0;</pre></td><td class="explain">返回结果</td></tr>
@@ -71,17 +71,17 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        <span class="kw">return</span> (<span class="kw">int</span>) ((total + pageSize - 1) / pageSize);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">29</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    /** 是否还有上一页，模板据此决定是否渲染「上一页」 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">    /** 是否还有上一页，模板据此决定是否渲染「上一页」 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">public</span> boolean hasPrevious() {</pre></td><td class="explain">是否还有上一页，模板据此决定是否渲染「上一页」</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        <span class="kw">return</span> page &gt; 1;</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    /** 是否还有下一页 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /** 是否还有下一页 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">public</span> boolean hasNext() {</pre></td><td class="explain">是否还有下一页</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        <span class="kw">return</span> page &lt; totalPages();</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    /** 当前页没有任何数据 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">    /** 当前页没有任何数据 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">public</span> boolean isEmpty() {</pre></td><td class="explain">当前页没有任何数据</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        <span class="kw">return</span> items == null || items.isEmpty();</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
@@ -100,32 +100,32 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">导入</td></tr>
 <tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">导入</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre> * 列表页原始请求参数（都是字符串，由 Service 归一与校验）。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre> * &lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 也方便单测直接构造各种脏输入。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline"> * 列表页原始请求参数（都是字符串，由 Service 归一与校验）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * &lt;p&gt;不让 Controller 直接解析，是为了把"非法参数 → 400"集中在一处，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> * 也方便单测直接构造各种脏输入。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Getter</pre></td><td class="explain">注解</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>@Setter</pre></td><td class="explain">注解</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductSearchCommand {</pre></td><td class="explain">类声明</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    /** 分类 id，可为空 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 分类 id，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> String categoryId;</pre></td><td class="explain">分类 id，可为空</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    /** ALL / COMIC / MERCH，可为空 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** ALL / COMIC / MERCH，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> String productType;</pre></td><td class="explain">ALL / COMIC / MERCH，可为空</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> String sort;</pre></td><td class="explain">DEFAULT / PRICE_ASC / PRICE_DESC / NEWEST，可为空</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    /** 名称关键字，可为空 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 名称关键字，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">名称关键字，可为空</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    /** 页码，可为空 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 页码，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> String page;</pre></td><td class="explain">页码，可为空</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    /** 每页数量，可为空 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 每页数量，可为空 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> String pageSize;</pre></td><td class="explain">每页数量，可为空</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>}</pre></td><td class="explain">结束</td></tr>
 </tbody></table>
@@ -145,20 +145,20 @@ footer{color:#536176;font-size:13px}
 <tr class="gap"><td class="line">6</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">导入</td></tr>
 <tr class="gap"><td class="line">8</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre> * 商品详情视图：商品本身 + 两级分类 + 相册。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre> * @param product      商品</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre> * @param topCategory  一级分类（作品）</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre> * @param leafCategory 二级分类（单行本 / 官方周边）</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre> * @param images       相册，按 sort_order、id 升序；可能为空</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> * 商品详情视图：商品本身 + 两级分类 + 相册。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * @param product      商品</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * @param topCategory  一级分类（作品）</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * @param leafCategory 二级分类（单行本 / 官方周边）</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * @param images       相册，按 sort_order、id 升序；可能为空</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> record ProductDetail(Product product,</pre></td><td class="explain">record：不可变数据载体，编译器生成构造器与访问器</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                            Category topCategory,</pre></td><td class="explain">record 组件</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                            Category leafCategory,</pre></td><td class="explain">record 组件</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                            List&lt;ProductImage&gt; images) {</pre></td><td class="explain">相册可能为空，模板用 hasGallery() 判断是否回退封面</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    /** 没有相册时，详情页回退封面 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 没有相册时，详情页回退封面 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> boolean hasGallery() {</pre></td><td class="explain">没有相册时，详情页回退封面</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        <span class="kw">return</span> images != null &amp;&amp; !images.isEmpty();</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
@@ -192,25 +192,25 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">导入</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">导入</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre> * 商品浏览服务：列表查询、商品详情、分类树。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> * &lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline"> * 商品浏览服务：列表查询、商品详情、分类树。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> * &lt;p&gt;所有请求参数在这里归一与校验：非法枚举转 400，不存在或下架转 404。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline"> * Controller 只负责把表单原样传进来，不自己做判断。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>@Service</pre></td><td class="explain">注解</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CatalogService {</pre></td><td class="explain">类声明</td></tr>
 <tr class="gap"><td class="line">29</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    /** 商品类型白名单：ALL 表示不过滤 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">    /** 商品类型白名单：ALL 表示不过滤 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; TYPES = Set.of("ALL", "COMIC", "MERCH");</pre></td><td class="explain">商品类型白名单：ALL 表示不过滤</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    /** 排序白名单，与 ProductMapper.xml 的 choose 分支一一对应 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 排序白名单，与 ProductMapper.xml 的 choose 分支一一对应 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; SORTS = Set.of("DEFAULT", "PRICE_ASC", "PRICE_DESC", "NEWEST");</pre></td><td class="explain">排序白名单，与 ProductMapper.xml 的 choose 分支一一对应</td></tr>
 <tr class="gap"><td class="line">35</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    /** 商品列表默认每页 6 条 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /** 商品列表默认每页 6 条 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> DEFAULT_PAGE_SIZE = 6;</pre></td><td class="explain">商品列表默认每页 6 条</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    /** 关键字最大长度 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 关键字最大长度 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> KEYWORD_MAX_LENGTH = 120;</pre></td><td class="explain">关键字最大长度</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductMapper productMapper;</pre></td><td class="explain">字段 productMapper</td></tr>
@@ -225,9 +225,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        this.productImageMapper = productImageMapper;</pre></td><td class="explain">构造器注入：保存为字段</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">53</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    /**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>     * 列表查询：校验参数 → 查数据 → 包装分页。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>     */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">     * 列表查询：校验参数 → 查数据 → 包装分页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">public</span> PageResult&lt;Product&gt; search(ProductSearchCommand command) {</pre></td><td class="explain">列表查询：校验参数 → 查数据 → 包装分页。</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        PageQuery pageQuery = PageQuery.of(command.getPage(), command.getPageSize(), DEFAULT_PAGE_SIZE);</pre></td><td class="explain">先归一分页参数，非法页码/页大小在这里转 400</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        ProductQuery query = buildQuery(command, pageQuery);</pre></td><td class="explain">再把业务参数归一成 Mapper 可用对象</td></tr>
@@ -237,9 +237,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">return</span> PageResult.of(items, total, pageQuery);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">65</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    /**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>     * 商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>     */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre class="cmtline">     * 商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">public</span> ProductDetail detail(<span class="kw">long</span> productId) {</pre></td><td class="explain">商品详情：下架与不存在都返回 404，避免泄露"存在但下架"的信息。</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        Product product = productMapper.selectById(productId);</pre></td><td class="explain">按主键查商品</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        if (product == null || !"ON_SALE".equals(product.getStatus())) {</pre></td><td class="explain">不存在与已下架合并成同一个 404，不区分原因，避免泄露商品是否存在</td></tr>
@@ -261,7 +261,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> ProductDetail(product, top, leaf, images);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">89</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    /** 一级分类（作品），按 sort_order、id 升序 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">    /** 一级分类（作品），按 sort_order、id 升序 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; topCategories() {</pre></td><td class="explain">一级分类（作品），按 sort_order、id 升序</td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">构造 Lambda 查询</td></tr>
@@ -270,7 +270,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">按该列升序</td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">98</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>    /** 某个一级分类下的二级分类 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre class="cmtline">    /** 某个一级分类下的二级分类 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; childrenOf(<span class="kw">long</span> parentId) {</pre></td><td class="explain">某个一级分类下的二级分类</td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">构造 Lambda 查询</td></tr>
@@ -279,7 +279,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">按该列升序</td></tr>
 <tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">107</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    /** 全部分类，供列表页侧栏一次取完 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre class="cmtline">    /** 全部分类，供列表页侧栏一次取完 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    <span class="kw">public</span> List&lt;Category&gt; allCategories() {</pre></td><td class="explain">全部分类，供列表页侧栏一次取完</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>                Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">构造 Lambda 查询</td></tr>
@@ -288,9 +288,9 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                        .orderByAsc(Category::getId));</pre></td><td class="explain">按该列升序</td></tr>
 <tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">116</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>    // ---------------------------------------------------------------- 参数归一</pre></td><td class="explain">以下为参数归一与校验的私有方法</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 参数归一</pre></td><td class="explain"></td></tr>
 <tr class="gap"><td class="line">118</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>    /** 把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre class="cmtline">    /** 把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>    <span class="kw">private</span> ProductQuery buildQuery(ProductSearchCommand command, PageQuery pageQuery) {</pre></td><td class="explain">把原始字符串参数归一成 Mapper 能用的查询对象；非法值在这里转 400。</td></tr>
 <tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        ProductQuery query = <span class="kw">new</span> ProductQuery();</pre></td><td class="explain">组装 Mapper 参数对象</td></tr>
 <tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>        query.setCategoryId(parseCategoryId(command.getCategoryId()));</pre></td><td class="explain">写入查询条件</td></tr>
@@ -302,7 +302,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        <span class="kw">return</span> query;</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">130</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    /** 分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre class="cmtline">    /** 分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>    <span class="kw">private</span> Long parseCategoryId(String raw) {</pre></td><td class="explain">分类 id 只接受正整数；空串表示不过滤，格式错误直接 400。</td></tr>
 <tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白表示未传该参数，按缺省处理</td></tr>
 <tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">返回结果</td></tr>
@@ -318,7 +318,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>        }</pre></td><td class="explain">结束</td></tr>
 <tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">146</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    /** 白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre class="cmtline">    /** 白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    <span class="kw">private</span> String parseEnum(String raw, String defaultValue, Set&lt;String&gt; allowed, String fieldName) {</pre></td><td class="explain">白名单校验：缺省用默认值，不在白名单内一律 400，不做静默降级。</td></tr>
 <tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白表示未传该参数，按缺省处理</td></tr>
 <tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>            <span class="kw">return</span> defaultValue;</pre></td><td class="explain">返回结果</td></tr>
@@ -330,7 +330,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">158</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>    /** 关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre class="cmtline">    /** 关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    <span class="kw">private</span> String parseKeyword(String raw) {</pre></td><td class="explain">关键字去首尾空白；空串等价于不搜索；超长拒绝而不是截断。</td></tr>
 <tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        if (raw == null) {</pre></td><td class="explain">null 视为不搜索</td></tr>
 <tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">返回结果</td></tr>
@@ -345,10 +345,10 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">173</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>    /**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>     * 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>     * 不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>     */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre class="cmtline">     * 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre class="cmtline">     * 不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    <span class="kw">static</span> String escapeLike(String keyword) {</pre></td><td class="explain">不会变成"以 50 开头"的通配查询。MySQL 的 LIKE 默认转义符是反斜杠。 把 LIKE 的通配符转义成普通字符：用户输入 50% 只匹配包含 "50%" 的商品，</td></tr>
 <tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>        if (keyword == null) {</pre></td><td class="explain">null 直接透传，由 SQL 侧决定不拼 LIKE 条件</td></tr>
 <tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">返回结果</td></tr>

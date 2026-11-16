@@ -62,15 +62,15 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">导入</td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">导入</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>/**</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre> * &lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre> * 不用 Mock 证明 SQL 能跑。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre> *</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre> * &lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre> * 不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;</pre></td><td class="explain">注释续行</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre> */</pre></td><td class="explain">注释续行</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> * M01 集成测试：用真实 MySQL 验证数据库约束与自定义 SQL。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline"> * &lt;p&gt;每个用例前由基类重建七张表，起点固定为空库。所有断言都落在数据库或 Mapper 的真实行为上，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline"> * 不用 Mock 证明 SQL 能跑。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline"> * &lt;p&gt;注意：MySQL 的 CHECK 违规（错误码 3819）在 Spring 里是 {@code UncategorizedSQLException}，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline"> * 不是 {@code DataIntegrityViolationException}，所以统一断言 {@code DataAccessException} + 错误文案。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> DataAccessTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">类声明</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入依赖</td></tr>
@@ -230,13 +230,13 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        assertThat(salesOrderMapper.countByOrderNo("EXISTS-1")).isEqualTo(1);</pre></td><td class="explain">断言预期结果</td></tr>
 <tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">189</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>    /** 建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre class="cmtline">    /** 建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> newSecondaryCategory(String codeSuffix) {</pre></td><td class="explain">建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。</td></tr>
 <tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        <span class="kw">long</span> primaryId = insertPrimaryCategory("IP-" + codeSuffix, "作品-" + codeSuffix);</pre></td><td class="explain">属于 newSecondaryCategory：建一个一级 + 一个二级，返回二级 id；名称带 code 后缀，避免同级重名冲突。 的一步</td></tr>
 <tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        <span class="kw">return</span> insertSecondaryCategory("COMIC-" + codeSuffix, primaryId, "单行本");</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">195</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    /** 插入一个启用状态的普通用户，返回 id。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre class="cmtline">    /** 插入一个启用状态的普通用户，返回 id。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertUser(String username) {</pre></td><td class="explain">插入一个启用状态的普通用户，返回 id。</td></tr>
 <tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
 <tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
@@ -245,20 +245,20 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM store_user WHERE username = ?", Long.<span class="kw">class</span>, username);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">204</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>    /** 插入一级分类（parent_id 为空）。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre class="cmtline">    /** 插入一级分类（parent_id 为空）。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertPrimaryCategory(String code, String name) {</pre></td><td class="explain">插入一级分类（parent_id 为空）。</td></tr>
 <tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 0)", code, name);</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
 <tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">210</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>    /** 插入二级分类，父必须是一级。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre class="cmtline">    /** 插入二级分类，父必须是一级。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertSecondaryCategory(String code, <span class="kw">long</span> parentId, String name) {</pre></td><td class="explain">插入二级分类，父必须是一级。</td></tr>
 <tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,0)",</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
 <tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>                code, parentId, name);</pre></td><td class="explain">参数续行</td></tr>
 <tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, code);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">217</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>    /** 插入一个商品，返回 id；库存与状态由用例指定。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre class="cmtline">    /** 插入一个商品，返回 id；库存与状态由用例指定。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertProduct(String sku, <span class="kw">long</span> categoryId, String price, <span class="kw">int</span> stock, String status, <span class="kw">int</span> sortOrder) {</pre></td><td class="explain">插入一个商品，返回 id；库存与状态由用例指定。</td></tr>
 <tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, cover_image, price, stock, status, sort_order) "</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
 <tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
@@ -267,7 +267,7 @@ footer{color:#536176;font-size:13px}
 <tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.<span class="kw">class</span>, sku);</pre></td><td class="explain">返回结果</td></tr>
 <tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>    }</pre></td><td class="explain">结束</td></tr>
 <tr class="gap"><td class="line">226</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>    /** 插入一张订单（不含明细），返回 id。 */</pre></td><td class="explain">注释：说明该类型的职责与约束</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre class="cmtline">    /** 插入一张订单（不含明细），返回 id。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertOrder(String orderNo, <span class="kw">long</span> userId, String status, String total) {</pre></td><td class="explain">插入一张订单（不含明细），返回 id。</td></tr>
 <tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，用于准备与核对测试数据</td></tr>
 <tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>                        + "receiver_phone, receiver_address) VALUES (?,?,?,?,?,?,?)",</pre></td><td class="explain">注解</td></tr>
