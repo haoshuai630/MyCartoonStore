@@ -291,26 +291,26 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">private</span> String sameSitePath(HttpServletRequest request) {</pre></td><td class="explain">从 Referer 取站内路径；只接受与当前请求同源（协议、主机、端口一致）的来源。 不校验同源就会被外部页面构造成"登录后跳任意站"，所以宁可回首页也不接受陌生来源。</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        String referer = request.getHeader("Referer");</pre></td><td class="explain">取 Referer</td></tr>
 <tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        if (referer == null || referer.isBlank()) {</pre></td><td class="explain">没有来源就退回原地址逻辑</td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">解析失败或来源不可信：交回调用方按没有来源处理</td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        URI uri;</pre></td><td class="explain">先声明，try 里解析</td></tr>
-<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>            uri = URI.create(referer);</pre></td><td class="explain">解析失败按非法来源处理</td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        } catch (IllegalArgumentException e) {</pre></td><td class="explain">非法 URL：当作没有来源</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">解析失败或来源不可信：交回调用方按没有来源处理</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        if (uri.getScheme() == null || uri.getHost() == null) {</pre></td><td class="explain">相对地址或畸形地址不接受</td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">解析失败或来源不可信：交回调用方按没有来源处理</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        if (!uri.getScheme().equalsIgnoreCase(request.getScheme())</pre></td><td class="explain">协议必须一致，防 https→http 混用</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                || !Objects.equals(uri.getHost(), request.getServerName())) {</pre></td><td class="explain">主机名也必须一致，否则不是同源</td></tr>
-<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">解析失败或来源不可信：交回调用方按没有来源处理</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        <span class="kw">int</span> port = uri.getPort() == -1</pre></td><td class="explain">省略端口时按协议默认端口补</td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                ? ("https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80)</pre></td><td class="explain">三元分支：NOT_FOUND 给 404</td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                : uri.getPort();</pre></td><td class="explain">写了端口就用写的那个</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        if (port != request.getServerPort()) {</pre></td><td class="explain">端口不同也算外站来源，防止被构造成登录后跳站外</td></tr>
-<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">解析失败或来源不可信：交回调用方按没有来源处理</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        String path = uri.getRawPath();</pre></td><td class="explain">只取路径与查询串，不取 scheme/host</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        if (path == null || path.isBlank()) {</pre></td><td class="explain">没路径就回首页</td></tr>
@@ -546,7 +546,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">void</span> emptyCartShowsEmptyState() throws Exception {</pre></td><td class="explain">空车：显示空状态与去逛逛入口，不渲染表格</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_empty");</pre></td><td class="explain">建测试账号 cart_empty，返回用户 id</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                .andExpect(content().string(containsString("购物车还是空的")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(content().string(not(containsString("cart-row"))));</pre></td><td class="explain">断言响应内容</td></tr>
@@ -561,7 +561,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, book, 2);</pre></td><td class="explain">预置 2 件到 book 的车里</td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, badge, 1);</pre></td><td class="explain">预置 1 件到 badge 的车里</td></tr>
 <tr class="gap"><td class="line">54</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                .andExpect(content().string(containsString("商品SHOW-C01")))</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                .andExpect(content().string(containsString("¥28.00")))</pre></td><td class="explain">断言响应内容</td></tr>
@@ -579,7 +579,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, a, 2);</pre></td><td class="explain">预置 2 件到 a 的车里</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, b, 3);</pre></td><td class="explain">预置 3 件到 b 的车里</td></tr>
 <tr class="gap"><td class="line">72</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(get("/main").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(get("/main").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .andExpect(content().string(containsString("购物车 &lt;b&gt;5&lt;/b&gt;")));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
@@ -587,7 +587,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @DisplayName("游客的徽标固定为 0")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    <span class="kw">void</span> guestBadgeIsZero() throws Exception {</pre></td><td class="explain">游客的徽标固定为 0</td></tr>
-<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        mockMvc.perform(get("/main"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        mockMvc.perform(get("/main"))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(content().string(containsString("购物车 &lt;b&gt;0&lt;/b&gt;")));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
@@ -598,12 +598,12 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_add");</pre></td><td class="explain">建测试账号 cart_add，返回用户 id</td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "ADD-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 ADD-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr class="gap"><td class="line">91</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
 <tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                        .param("quantity", "2")</pre></td><td class="explain">表单参数 quantity="2"</td></tr>
 <tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                .andExpect(redirectedUrl("/cart"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                .andExpect(redirectedUrl("/cart"));</pre></td><td class="explain">断言重定向到 /cart</td></tr>
 <tr class="gap"><td class="line">98</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);</pre></td><td class="explain">断言该用户购物车条目数等于 1</td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        Integer quantity = jdbc.queryForObject("SELECT quantity FROM cart_item WHERE user_id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
@@ -618,9 +618,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "MERGE-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 MERGE-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        MockHttpSession session = CartFixture.session(userId);</pre></td><td class="explain">同一个会话连发两次请求，验证累加而不是新增</td></tr>
 <tr class="gap"><td class="line">111</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>                .param("productId", String.valueOf(productId)).param("quantity", "1").session(session));</pre></td><td class="explain">同会话加 1 件</td></tr>
-<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                .param("productId", String.valueOf(productId)).param("quantity", "2").session(session));</pre></td><td class="explain">同会话再加 2 件，验证累加</td></tr>
 <tr class="gap"><td class="line">116</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);</pre></td><td class="explain">断言该用户购物车条目数等于 1</td></tr>
@@ -634,12 +634,12 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    <span class="kw">void</span> guestAddRedirectsToDetailPage() throws Exception {</pre></td><td class="explain">游客加车：302 到登录页，回跳目标是详情页而不是 POST 地址</td></tr>
 <tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "GUEST-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 GUEST-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr class="gap"><td class="line">127</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
 <tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                        .param("quantity", "1")</pre></td><td class="explain">表单参数 quantity="1"</td></tr>
 <tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                        .header("Referer", "http://localhost/product/" + productId))</pre></td><td class="explain">带同源 Referer，模拟从详情页点加车</td></tr>
 <tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
-<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Fproduct%2F*"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Fproduct%2F*"));</pre></td><td class="explain">断言重定向到 /login?redirect=*%2Fproduct%2F*</td></tr>
 <tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">135</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
@@ -648,7 +648,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_zero");</pre></td><td class="explain">建测试账号 cart_zero，返回用户 id</td></tr>
 <tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "ZERO-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 ZERO-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr class="gap"><td class="line">141</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
 <tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                        .param("quantity", "0")</pre></td><td class="explain">表单参数 quantity="0"</td></tr>
 <tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
@@ -664,7 +664,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_stock");</pre></td><td class="explain">建测试账号 cart_stock，返回用户 id</td></tr>
 <tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "STOCK-C01", "28.00", 2, "ON_SALE");</pre></td><td class="explain">建商品 STOCK-C01：¥28.00、库存 2、ON_SALE</td></tr>
 <tr class="gap"><td class="line">157</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
 <tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                        .param("quantity", "3")</pre></td><td class="explain">表单参数 quantity="3"</td></tr>
 <tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
@@ -680,7 +680,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_draft");</pre></td><td class="explain">建测试账号 cart_draft，返回用户 id</td></tr>
 <tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "DRAFT-C01", "28.00", 10, "DRAFT");</pre></td><td class="explain">建商品 DRAFT-C01：¥28.00、库存 10、DRAFT</td></tr>
 <tr class="gap"><td class="line">173</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
 <tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
 <tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                        .param("quantity", "1")</pre></td><td class="explain">表单参数 quantity="1"</td></tr>
 <tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>

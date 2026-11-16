@@ -78,7 +78,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">36</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">public</span> CartService(CartItemMapper cartItemMapper, ProductMapper productMapper) {</pre></td><td class="explain">构造器：注入 cartItemMapper、productMapper</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        this.cartItemMapper = cartItemMapper;</pre></td><td class="explain">构造器注入：保存 cartItemMapper 到字段</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        this.productMapper = productMapper;</pre></td><td class="explain">注入商品 Mapper 字段。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        this.productMapper = productMapper;</pre></td><td class="explain">构造器注入：保存 productMapper 到字段</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
@@ -126,7 +126,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        item.setProductId(productId);</pre></td><td class="explain">新条目对应商品</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        item.setQuantity(quantity);</pre></td><td class="explain">首次加入的数量</td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        item.setVersion(0L);</pre></td><td class="explain">新条目版本从 0 开始，页面带回 0 才能改</td></tr>
-<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>            cartItemMapper.insert(item);</pre></td><td class="explain">插库；并发撞唯一键由上面的 catch 兜底</td></tr>
 <tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        } catch (DuplicateKeyException e) {</pre></td><td class="explain">并发下另一会话刚插入同一商品：唯一键冲突后按累加重试一次，不把 500 抛给用户</td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">            // 另一个会话刚好先插入：退化为"累加"，不把并发冲突报给用户</pre></td><td class="explain"></td></tr>
@@ -239,9 +239,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
 <tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不能为空");</pre></td><td class="explain">抛 400：文案带上字段名（不能为空）</td></tr>
 <tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
 <tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">解析成 long；格式错误在 catch 里转 400</td></tr>
-<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">0 与负数不是合法分类 id</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">id 只接受正整数：0 与负数一律 400</td></tr>
 <tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>                throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">抛 400：文案带上字段名（不正确）</td></tr>
 <tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
@@ -256,7 +256,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>            throw BizException.badRequest("数量不能为空");</pre></td><td class="explain">抛 400：数量不能为空</td></tr>
 <tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>        <span class="kw">int</span> value;</pre></td><td class="explain">先声明，try 里再赋值</td></tr>
-<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
 <tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>            value = Integer.parseInt(raw.trim());</pre></td><td class="explain">解析失败在 catch 里转 400，不吞异常</td></tr>
 <tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
 <tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
@@ -272,7 +272,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
 <tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
 <tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
 <tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">解析成 long；格式错误在 catch 里转 400</td></tr>
 <tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>            if (value &lt; 0) {</pre></td><td class="explain">负版本号只可能来自伪造或旧页面：409</td></tr>
 <tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>                throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">抛 409：购物车已变化，请刷新后重试</td></tr>
@@ -309,40 +309,40 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartLine {</pre></td><td class="explain">购物车行：条目 + 商品当前信息 + 可用性判定。 可用性在查询时计算，不落库：商品下架或数量超过当前库存时标记为失效， 失效行仍要显示（用户要看到原因并自己决定移除），但不参与结算金额。</td></tr>
 <tr class="gap"><td class="line">16</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /** cart_item.id，改数量与移除用它定位 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long itemId;</pre></td><td class="explain">cart_item.id，改数量与移除用它定位</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long itemId;</pre></td><td class="explain">itemId（Long）：cart_item.id，改数量与移除用它定位</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 商品 id，用于跳详情 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long productId;</pre></td><td class="explain">商品 id，用于跳详情</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long productId;</pre></td><td class="explain">productId（Long）：商品 id，用于跳详情</td></tr>
 <tr class="gap"><td class="line">22</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String productName;</pre></td><td class="explain">productName（String）</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String coverImage;</pre></td><td class="explain">coverImage（String）</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String categoryName;</pre></td><td class="explain">categoryName（String）</td></tr>
 <tr class="gap"><td class="line">26</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 商品当前单价，不存购物车 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal price;</pre></td><td class="explain">商品当前单价，不存购物车</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal price;</pre></td><td class="explain">price（BigDecimal）：商品当前单价，不存购物车</td></tr>
 <tr class="gap"><td class="line">29</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> quantity;</pre></td><td class="explain">quantity（int）</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** 商品当前库存，用于判断不足与提示"仅剩 n 件" */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> stock;</pre></td><td class="explain">商品当前库存，用于判断不足与提示"仅剩 n 件"</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> stock;</pre></td><td class="explain">stock（int）：商品当前库存，用于判断不足与提示"仅剩 n 件"</td></tr>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /** 商品当前状态：ON_SALE / DRAFT */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String productStatus;</pre></td><td class="explain">商品当前状态：ON_SALE / DRAFT</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String productStatus;</pre></td><td class="explain">productStatus（String）：商品当前状态：ON_SALE / DRAFT</td></tr>
 <tr class="gap"><td class="line">37</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">    /** 读页面时的版本号，改数量/移除必须原样带回 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">long</span> version;</pre></td><td class="explain">读页面时的版本号，改数量/移除必须原样带回</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">long</span> version;</pre></td><td class="explain">version（long）：读页面时的版本号，改数量/移除必须原样带回</td></tr>
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">     * 单个条目是否可结算。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">     * &lt;p&gt;下架与库存不足都算失效：前者后端已不允许下单，后者下单会超卖。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> boolean available;</pre></td><td class="explain">单个条目是否可结算。 下架与库存不足都算失效：前者后端已不允许下单，后者下单会超卖。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> boolean available;</pre></td><td class="explain">available（boolean）：单个条目是否可结算。 下架与库存不足都算失效：前者后端已不允许下单，后者下单会超卖。</td></tr>
 <tr class="gap"><td class="line">46</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">    /** 失效原因，可结算时为空 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String unavailableReason;</pre></td><td class="explain">失效原因，可结算时为空</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String unavailableReason;</pre></td><td class="explain">unavailableReason（String）：失效原因，可结算时为空</td></tr>
 <tr class="gap"><td class="line">49</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre class="cmtline">    /** 行小计 = 当前单价 × 数量，两位小数 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal lineAmount;</pre></td><td class="explain">行小计 = 当前单价 × 数量，两位小数</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal lineAmount;</pre></td><td class="explain">lineAmount（BigDecimal）：行小计 = 当前单价 × 数量，两位小数</td></tr>
 <tr class="gap"><td class="line">52</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">private</span> CartLine(Long itemId, Long productId, String productName, String coverImage, String categoryName,</pre></td><td class="explain">构造器：一行需要的全部字段（只读，构造后不再变）</td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                     BigDecimal price, <span class="kw">int</span> quantity, <span class="kw">int</span> stock, String productStatus, <span class="kw">long</span> version,</pre></td><td class="explain">构造器参数续行：价格、数量、库存、状态、版本</td></tr>
@@ -417,16 +417,16 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> List&lt;CartLine&gt; lines;</pre></td><td class="explain">lines（List&lt;CartLine&gt;）</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 页头徽标：全部条目数量之和，含失效条目（FR-C-01 §7） */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> badgeQuantity;</pre></td><td class="explain">页头徽标：全部条目数量之和，含失效条目（FR-C-01 §7）</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> badgeQuantity;</pre></td><td class="explain">badgeQuantity（int）：页头徽标：全部条目数量之和，含失效条目（FR-C-01 §7）</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 可结算件数 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> validQuantity;</pre></td><td class="explain">可结算件数</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> validQuantity;</pre></td><td class="explain">validQuantity（int）：可结算件数</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 应付总额 = 可结算行小计之和；无运费、无优惠 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal totalAmount;</pre></td><td class="explain">应付总额 = 可结算行小计之和；无运费、无优惠</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal totalAmount;</pre></td><td class="explain">totalAmount（BigDecimal）：应付总额 = 可结算行小计之和；无运费、无优惠</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 是否所有行都可用；空车视为 true，用 isSettleable() 判空 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> boolean allAvailable;</pre></td><td class="explain">是否所有行都可用；空车视为 true，用 isSettleable() 判空</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> boolean allAvailable;</pre></td><td class="explain">allAvailable（boolean）：是否所有行都可用；空车视为 true，用 isSettleable() 判空</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> invalidCount;</pre></td><td class="explain">invalidCount（int）</td></tr>
 <tr class="gap"><td class="line">35</td><td></td><td></td></tr>
@@ -499,11 +499,11 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    List&lt;CartItemView&gt; selectViewByUser(@Param("userId") Long userId);</pre></td><td class="explain">本人购物车全量（含失效条目），关联商品当前价格与库存</td></tr>
 <tr class="gap"><td class="line">22</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 加车前查已有条目，用于累加数量 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} AND product_id = #{productId}")</pre></td><td class="explain">按用户 + 商品查购物车条目，用于判断是否已加过。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} AND product_id = #{productId}")</pre></td><td class="explain">注解 SQL：条件里带归属，避免越权</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    CartItem findByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);</pre></td><td class="explain">加车前查已有条目，用于累加数量</td></tr>
 <tr class="gap"><td class="line">26</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">购物车条目数，给徽标用。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">注解 SQL：条件里带归属，避免越权</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">购物车种类数，用于 20 种上限</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 页头徽标：全部条目数量之和，空车返回 0 而不是 null */</pre></td><td class="explain"></td></tr>

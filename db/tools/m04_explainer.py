@@ -293,6 +293,9 @@ def explain(s: str, javadoc: str = "") -> str | None:
         "if (value < 0) {": "负版本号只可能来自伪造或旧页面：409",
         "CartItem item = new CartItem();": "组装新条目：归属、商品、数量、版本 0",
         "try {": "插入可能撞唯一键，所以包在 try 里",
+        "if (raw == null || raw.isBlank()) {": "空值/空白按出错处理，不当作缺省值",
+        "if (value <= 0) {": "id 只接受正整数：0 与负数一律 400",
+        "return null;": "解析失败或来源不可信：交回调用方按没有来源处理",
         "cartItemMapper.insert(item);": "插库；并发撞唯一键由上面的 catch 兜底",
         "CartItem existing = cartItemMapper.findByUserAndProduct(userId, productId);":
             "先查已有条目：有则累加，无则按种类上限新增",

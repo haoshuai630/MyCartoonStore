@@ -189,9 +189,14 @@ def render(task_id: str, meta: dict) -> None:
                     f'<td class="explain"></td></tr>'
                 )
                 continue
-            text = NOTES.get((rel, stripped)) or fn(i, line)
+            text = NOTES.get((rel, stripped))
+            if kind == "java":
+                # M04 专用规则优先于全局 MANUAL：后者是按代码原文匹配的，
+                # 同一个 "try {" / "return null;" 在别的文件里含义不同，会给出误导性说明
+                text = text or m04_explainer.explain(stripped, javadoc_above(lines, i - 1))
+            if not text:
+                text = fn(i, line)
             if kind == "java" and (not text or m04_explainer.is_generic(text)):
-                # 生成器没有专门规则时，从代码参数里取事实：夹具参数、断言目标、异常文案
                 text = m04_explainer.explain(stripped, javadoc_above(lines, i - 1)) or text
             if not text and stripped.startswith("import "):
                 text = import_hint(stripped)
