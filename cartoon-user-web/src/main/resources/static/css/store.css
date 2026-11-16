@@ -401,3 +401,32 @@ button{font-family:inherit}
   .steps{font-size:11px}
   .steps li{padding:6px 10px}
 }
+/* ===== M05-03：订单详情 ===== */
+/* 头部：左边订单号与时间，右边状态徽章 */
+.order-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid var(--ink);padding:18px 0 14px;margin-top:8px}
+.order-head h2{margin:4px 0 6px;font-size:24px;font-weight:900;letter-spacing:.04em}
+.order-status b{display:inline-block;border:3px solid var(--ink);background:var(--yellow);padding:6px 16px;font-size:14px;letter-spacing:.14em}
+/* 两栏：左明细、右收货与总额 */
+.order-grid{display:grid;grid-template-columns:1.5fr .8fr;gap:28px;align-items:start;margin-top:22px}
+.order-items,.order-side{border:3px solid var(--ink);background:#fff;box-shadow:6px 6px 0 var(--ink);padding:18px}
+.order-items h3,.order-side h3{margin:0 0 14px;font-size:15px;letter-spacing:.12em}
+.order-row{display:grid;grid-template-columns:56px 1fr 86px 52px 92px;gap:10px;align-items:center;padding:10px 0;border-top:2px solid #e6ddc9}
+.order-row:first-of-type{border-top:0}
+.order-row img{width:56px;height:56px;object-fit:cover;border:2px solid var(--ink);background:var(--paper-2)}
+.order-row-text{min-width:0}
+.order-row-text .title{display:block;font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order-row-text small{font-size:11px;color:var(--muted)}
+.order-line{text-align:right;font-weight:800;color:var(--red)}
+/* 收货信息用定义列表：每项一行，标签浅、值深 */
+.order-receiver{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.order-receiver li{display:flex;gap:12px;font-size:13px}
+.order-receiver span{color:var(--muted);flex:none;width:64px}
+.order-receiver b{font-weight:700;overflow-wrap:anywhere}
+.order-total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px solid var(--ink);margin-top:16px;padding-top:12px;font-weight:800}
+.order-total b{font-size:26px;color:var(--red)}
+@media(max-width:900px){
+  .order-grid{grid-template-columns:1fr}
+  .order-head{flex-direction:column;align-items:flex-start;gap:10px}
+  .order-row{grid-template-columns:48px 1fr 80px}
+  .order-row span:nth-child(4){display:none}
+}

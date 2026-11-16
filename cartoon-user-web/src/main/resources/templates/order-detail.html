@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('订单详情')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap">
+            <nav class="crumbs">
+                <a th:href="@{/main}">首页</a>
+                <span>/</span>
+                <b th:text="${order.orderNo}">订单号</b>
+            </nav>
+
+            <!-- 头部：状态、订单号、创建时间 -->
+            <div class="order-head">
+                <div>
+                    <span class="en">ORDER</span>
+                    <h2 th:text="${order.orderNo}">订单号</h2>
+                    <p class="hint">创建时间
+                        <span th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}">时间</span>
+                    </p>
+                </div>
+                <div class="order-status" th:switch="${order.status}">
+                    <b th:case="'PENDING_PAYMENT'">待支付</b>
+                    <b th:case="'PAID'">待发货</b>
+                    <b th:case="'SHIPPED'">已发货</b>
+                    <b th:case="'COMPLETED'">已完成</b>
+                    <b th:case="'CANCELLED'">已取消</b>
+                    <b th:case="*" th:text="${order.status}">状态</b>
+                </div>
+            </div>
+
+            <div class="order-grid">
+                <!-- 商品快照：名称、SKU、单价、数量、行金额都不是当前商品值，而是下单时的快照 -->
+                <div class="order-items">
+                    <h3>商品明细</h3>
+                    <div class="order-row" th:each="item : ${items}">
+                        <img th:src="@{${item.coverImageSnapshot}}" th:alt="${item.productNameSnapshot}">
+                        <div class="order-row-text">
+                            <a class="title" th:href="@{/product/{id}(id=${item.productId})}"
+                               th:text="${item.productNameSnapshot}">商品名</a>
+                            <small th:text="${item.skuSnapshot}">SKU</small>
+                        </div>
+                        <span th:text="'¥' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}">¥0.00</span>
+                        <span th:text="'× ' + ${item.quantity}">× 1</span>
+                        <span class="order-line" th:text="'¥' + ${#numbers.formatDecimal(item.lineAmount, 1, 2)}">¥0.00</span>
+                    </div>
+                </div>
+
+                <!-- 右侧：收货快照与总额；操作按钮等 M05-05/M06 接入后再出现 -->
+                <div class="order-side">
+                    <h3>收货信息</h3>
+                    <ul class="order-receiver">
+                        <li><span>收货人</span><b th:text="${order.receiverName}">姓名</b></li>
+                        <li><span>联系电话</span><b th:text="${order.receiverPhone}">电话</b></li>
+                        <li><span>详细地址</span><b th:text="${order.receiverAddress}">地址</b></li>
+                    </ul>
+                    <div class="order-total">
+                        <span>应付总额</span>
+                        <b th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</b>
+                    </div>
+                    <p class="hint">支付与取消在后续任务接入；本页只展示数据库里的真实状态。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

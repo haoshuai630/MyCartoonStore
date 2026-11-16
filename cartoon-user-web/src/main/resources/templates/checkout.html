@@ -44,8 +44,8 @@
                     <p class="hint">清单来自数据库当前值，确认后若商品或购物车变化，提交会被要求重新确认。</p>
                 </div>
 
-                <!-- 右：收货信息与总额；提交按钮在 M05-03 接入下单事务后启用 -->
-                <div class="checkout-side">
+                <!-- 右：收货信息与总额；提交后由 M05-03 的事务写订单 -->
+                <form class="checkout-side" th:action="@{/checkout}" method="post">
                     <h3>收货信息</h3>
                     <div class="receiver">
                         <label>收货人
@@ -66,11 +66,9 @@
                     </div>
                     <p class="hint" th:text="|请在 ${confirmMinutes} 分钟内提交订单；超时后需要重新确认。|">请在 10 分钟内提交订单。</p>
 
-                    <!-- M05-02 只做确认页；下单事务在 M05-03 接入，这里先禁用，避免点了没结果 -->
-                    <button type="button" class="btn btn-primary" disabled
-                            title="下单事务在 M05-03 接入">提交订单（M05-03 接入）</button>
-                    <p class="hint">当前只完成“确认订单”这一步：地址校验与下单在 M05-03 实现。</p>
-                </div>
+                    <button type="submit" class="btn btn-primary">提交订单</button>
+                    <p class="hint">提交成功后会生成待支付订单；支付与取消在后续任务接入。</p>
+                </form>
             </div>
         </div>
     </section>

@@ -10,7 +10,6 @@ import org.csu.mycartoonstore.cart.dto.CartItemView;
 import org.csu.mycartoonstore.cart.entity.CartItem;
 
 import java.util.List;
-
 /**
  * 购物车 Mapper。
  */
@@ -46,4 +45,18 @@ public interface CartItemMapper extends BaseMapper<CartItem> {
     @Delete("DELETE FROM cart_item WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")
     int deleteByIdAndUser(@Param("userId") Long userId, @Param("itemId") Long itemId,
                           @Param("version") long version);
+
+    /**
+     * 下单前锁住本人全部购物车行（按 id 升序），把同一辆车的并发提交串行化。
+     * <p>只锁 cart_item：商品行随后按 id 升序单独锁，避免 JOIN ... FOR UPDATE 顺带锁商品造成顺序不一致。</p>
+     */
+    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} ORDER BY id FOR UPDATE")
+    List<CartItem> selectItemsForUpdate(@Param("userId") Long userId);
+
+    /** 下单成功后删除本次核对的条目；返回行数用于校验"同一车只成交一次" */
+    @Delete({"<script>",
+            "DELETE FROM cart_item WHERE user_id = #{userId} AND id IN",
+            "<foreach item='id' collection='ids' open='(' separator=',' close=')'>#{id}</foreach>",
+            "</script>"})
+    int deleteByIdsAndUser(@Param("userId") Long userId, @Param("ids") List<Long> ids);
 }

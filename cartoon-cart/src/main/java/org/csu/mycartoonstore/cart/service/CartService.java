@@ -131,6 +131,29 @@ public class CartService {
         }
     }
 
+    /**
+     * 下单前锁住本人购物车并返回当前行。
+     *
+     * <p>先 {@code SELECT ... FOR UPDATE} 锁行，再读联表视图：
+     * 同一辆车的并发提交会在这里排队，后到的事务拿到的是已提交后的状态。</p>
+     */
+    public List<CartLine> lockForCheckout(long userId) {
+        cartItemMapper.selectItemsForUpdate(userId); // 锁住本人全部行，按 id 升序。
+        return lines(userId); // 再读当前行（价格、库存、状态都是最新值）。
+    }
+
+    /**
+     * 下单成功后删除本次核对的条目。
+     *
+     * @return 实际删除行数；调用方要求它等于本次条目数，否则回滚
+     */
+    public int removeCheckedItems(long userId, List<Long> cartItemIds) {
+        if (cartItemIds == null || cartItemIds.isEmpty()) {
+            return 0; // 没有条目可删，交给调用方按冲突处理。
+        }
+        return cartItemMapper.deleteByIdsAndUser(userId, cartItemIds); // 归属条件仍在 SQL 里。
+    }
+
     // ---------------------------------------------------------------- 内部规则
 
     /** 商品必须存在且上架；下架与不存在都按 404，不泄露"存在但下架" */

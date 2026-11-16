@@ -55,6 +55,26 @@ TASKS = {
             (WEB_TEST + "CheckoutPageTest.java", "CheckoutPageTest.java", "7 个用例", "java"),
         ],
     },
+    "03": {
+        "title": "M05-03 · 下单事务",
+        "out": "M05-03-逐行验收.html",
+        "note": "内容：POST /checkout、订单号生成、快照复核、锁车锁商品、写订单与明细、扣库存、删结算条目、事务回滚。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 87, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，157 用例。"
+                "CartService/CartItemMapper 只新增两个方法（锁车、按 id 删条目），其完整逐行见 M04-01 页；"
+                "本任务通过下单用例覆盖这两个方法的真实 SQL。",
+        "files": [
+            (ORDER + "service/OrderService.java", "OrderService.java", "下单事务：校验→锁→写→扣→删", "java"),
+            (ORDER + "service/OrderNoGenerator.java", "OrderNoGenerator.java", "订单号生成与查重", "java"),
+            (ORDER + "dto/PlacedOrder.java", "PlacedOrder.java", "下单返回值：订单 + 明细", "java"),
+            (ORDER + "service/OrderQueryService.java", "OrderQueryService.java", "本人订单与明细查询", "java"),
+            (WEB + "controller/CheckoutController.java", "CheckoutController.java", "提交订单：校验收货 → 调事务 → 跳详情", "java"),
+            (WEB + "controller/OrderController.java", "OrderController.java", "订单详情：本人订单只读页", "java"),
+            ("cartoon-user-web/src/main/resources/templates/order-detail.html", "order-detail.html",
+             "订单详情页：状态、快照明细、收货、总额", "html"),
+            (WEB_TEST + "PlaceOrderTest.java", "PlaceOrderTest.java", "6 个用例：正常/缺字段/车变/库存/回滚/归属", "java"),
+        ],
+    },
 }
 
 NOTES: dict[tuple[str, str], str] = {
@@ -172,6 +192,89 @@ NOTES: dict[tuple[str, str], str] = {
         "续行：订单与资料同样需要登录",
     (WEB_TEST + "CheckoutPageTest.java", "class CheckoutPageTest extends AbstractIntegrationTest {"):
         "集成测试：真实 MySQL + MockMvc",
+    # ---- M05-03 下单事务：控制流与流式调用没有行尾注释，这里补说明 ----
+    (ORDER + "service/OrderService.java", "public OrderService(CartService cartService,"):
+        "构造器注入六个协作方",
+    (ORDER + "service/OrderService.java", "CheckoutService checkoutService,"):
+        "参数续行：结算服务",
+    (ORDER + "service/OrderService.java", "ProductMapper productMapper,"):
+        "参数续行：商品 Mapper",
+    (ORDER + "service/OrderService.java", "SalesOrderMapper orderMapper,"):
+        "参数续行：订单 Mapper",
+    (ORDER + "service/OrderService.java", "SalesOrderItemMapper itemMapper,"):
+        "参数续行：明细 Mapper",
+    (ORDER + "service/OrderService.java", "if (snapshot == null || snapshot.getUserId() != userId) {"):
+        "没有快照或不是本人：409 重新确认",
+    (ORDER + "service/OrderService.java", "if (checkoutService.expired(snapshot)) {"):
+        "确认超过 10 分钟：409",
+    (ORDER + "service/OrderService.java", "List<CartLine> lines = cartService.lockForCheckout(userId);"):
+        "锁住本人车行，再读当前价格与库存",
+    (ORDER + "service/OrderService.java", "if (lines.isEmpty()) {"):
+        "车空：409 回购物车",
+    (ORDER + "service/OrderService.java", "if (!checkoutService.matches(snapshot, CartSummary.of(lines))) {"):
+        "与确认快照逐项不一致：409",
+    (ORDER + "service/OrderService.java", "List<Long> productIds = lines.stream()"):
+        "收集本车商品 id",
+    (ORDER + "service/OrderService.java", ".map(CartLine::getProductId)"):
+        "取商品 id",
+    (ORDER + "service/OrderService.java", ".distinct()"):
+        "同一商品只锁一次",
+    (ORDER + "service/OrderService.java", ".sorted()"):
+        "按 id 升序加锁，避免死锁",
+    (ORDER + "service/OrderService.java", ".toList();"):
+        "收集成列表",
+    (ORDER + "service/OrderService.java", "Map<Long, Product> products = productMapper.lockByIds(productIds).stream()"):
+        "按 id 升序锁商品行",
+    (ORDER + "service/OrderService.java", ".collect(Collectors.toMap(Product::getId, Function.identity()));"):
+        "id → 商品，便于逐行校验",
+    (ORDER + "service/OrderService.java", "Product product = products.get(line.getProductId());"):
+        "取本行商品（已锁定）",
+    (ORDER + "service/OrderService.java", "if (product.getStock() == null || product.getStock() < line.getQuantity()) {"):
+        "库存不足：409，整体回滚",
+    (ORDER + "service/OrderService.java", "BigDecimal total = lines.stream()"):
+        "总额由服务端计算",
+    (ORDER + "service/OrderService.java", ".map(CartLine::getLineAmount)"):
+        "取每行小计",
+    (ORDER + "service/OrderService.java", ".reduce(BigDecimal.ZERO.setScale(MoneyUtils.SCALE), BigDecimal::add);"):
+        "累加为订单总额",
+    (ORDER + "service/OrderService.java", "SalesOrder order = new SalesOrder();"):
+        "组装订单主表",
+    (ORDER + "service/OrderService.java", "List<SalesOrderItem> items = new ArrayList<>(lines.size());"):
+        "按行数预分配明细列表",
+    (ORDER + "service/OrderService.java", "SalesOrderItem item = new SalesOrderItem();"):
+        "组装一行明细（快照字段）",
+    (ORDER + "service/OrderService.java", "int rows = productMapper.deductStock(line.getProductId(), line.getQuantity());"):
+        "乐观扣库存：影响 0 行即失败",
+    (ORDER + "service/OrderService.java", "int deleted = cartService.removeCheckedItems(userId, lines.stream().map(CartLine::getItemId).toList());"):
+        "删除本次结算的条目",
+    (ORDER + "service/OrderService.java", "if (deleted != lines.size()) {"):
+        "删除行数不符：车被并发改过，回滚",
+    (ORDER + "service/OrderNoGenerator.java", "String candidate = PREFIX + TS.format(LocalDateTime.now(clock))"):
+        "拼订单号：CO + 时间戳 + 4 位随机数",
+    (WEB + "controller/CheckoutController.java", "public CheckoutController(CheckoutService checkoutService, CartService cartService,"):
+        "构造器注入：结算、购物车、下单三个服务",
+    (WEB + "controller/CheckoutController.java", "public String place(HttpSession session,"):
+        "提交订单入口：收货字段来自表单",
+    (WEB + "controller/CheckoutController.java", "Receiver receiver = ReceiverForm.parse(receiverName, receiverPhone, receiverAddress);"):
+        "收货三项校验：必填/去空白/限长/电话含数字",
+    (WEB_TEST + "PlaceOrderTest.java", "class PlaceOrderTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "PlaceOrderTest.java", 'assertThat(count("SELECT COUNT(*) FROM sales_order_item i JOIN sales_order o ON o.id = i.order_id "'):
+        "断言明细两条",
+    (WEB_TEST + "PlaceOrderTest.java", 'assertThat(value("SELECT status FROM sales_order WHERE order_no = ?", String.class, orderNo))'):
+        "断言初始状态为待支付",
+    (WEB_TEST + "PlaceOrderTest.java", 'assertThat(decimal("SELECT total_amount FROM sales_order WHERE order_no = ?", orderNo))'):
+        "断言订单总额",
+    (WEB_TEST + "PlaceOrderTest.java", ".removeCheckedItems(anyLong(), anyList());"):
+        "Spy 在删车这一步抛异常",
+    (WEB_TEST + "PlaceOrderTest.java", "org.assertj.core.api.Assertions.assertThatThrownBy(() -> place(session, NAME, PHONE, ADDRESS))"):
+        "MockMvc 把未处理异常原样抛出，这里断言异常冒出来",
+    (WEB_TEST + "PlaceOrderTest.java", "private org.springframework.test.web.servlet.ResultActions place(MockHttpSession session,"):
+        "夹具：用给定会话与收货信息提交订单",
+    (WEB_TEST + "PlaceOrderTest.java", "String name, String phone, String address)"):
+        "夹具参数续行",
+    (ORDER + "service/OrderQueryService.java", "return itemMapper.selectList(Wrappers.<SalesOrderItem>lambdaQuery()"):
+        "按订单 id 查明细，保持写入顺序",
 }
 
 

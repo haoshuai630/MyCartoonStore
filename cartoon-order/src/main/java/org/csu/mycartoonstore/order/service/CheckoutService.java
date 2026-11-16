@@ -68,14 +68,22 @@ public class CheckoutService {
             return false;
         }
         // 复核必须重新读库：会话里的快照只用来比，不能拿它当金额。
-        CartSummary current = cartService.summary(userId);
-        // 当前车失效了同样算"已变化"，让用户回去处理而不是带着坏行下单。
-        if (!current.isAllAvailable()) {
+        return matches(snapshot, cartService.summary(userId));
+    }
+
+    /**
+     * 快照与一辆车是否一致：下单事务里对"已锁定的车"复用同一套比较。
+     *
+     * <p>只看内容（条目、商品、数量、版本、价格、总额），不看确认时间——
+     * 超时由 {@link #expired(CheckoutSnapshot)} 单独判断。</p>
+     */
+    public boolean matches(CheckoutSnapshot snapshot, CartSummary current) {
+        // 当前车失效了同样算"已变化"，不能带着坏行下单。
+        if (snapshot == null || !current.isAllAvailable()) {
             return false;
         }
-
         // 用同一套转换规则生成当前快照，两边才处在同一口径上。
-        CheckoutSnapshot now = snapshotOf(userId, current);
+        CheckoutSnapshot now = snapshotOf(snapshot.getUserId(), current);
         List<CheckoutSnapshot.Line> before = snapshot.getLines(); // 确认时的行（已按条目 id 排序）。
         List<CheckoutSnapshot.Line> after = now.getLines(); // 当前车的行（同样排序）。
         // 条目数不同：有人加车或删车。
