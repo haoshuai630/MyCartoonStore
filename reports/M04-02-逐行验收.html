@@ -65,54 +65,54 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> * &lt;p&gt;写操作成功一律回 {@code /cart} 并用 Flash 提示；失败由全局异常处理器转成 4xx 错误页。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@Controller</pre></td><td class="explain">标记为控制器，返回的字符串按视图名解析。</td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartController {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartController {</pre></td><td class="explain">购物车页面与四个写操作。 控制器只做三件事：从会话取当前用户、把原始表单值交给 {@link CartService}、 决定重定向目标。数量、库存、归属、版本这些判断一律不在这一层。 写操作成功一律回 {@code /cart} 并用 Flash 提示；失败由全局异常处理器转成 4xx 错误页。</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">字段 cartService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">cartService：购物车服务</td></tr>
 <tr class="gap"><td class="line">29</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> CartController(CartService cartService) {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> CartController(CartService cartService) {</pre></td><td class="explain">构造器：注入 cartService</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">构造器注入：保存 cartService 到字段</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 购物车页：失效条目也渲染，页面自己决定是否禁用结算 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @GetMapping("/cart")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @GetMapping("/cart")</pre></td><td class="explain">路由：购物车页（登录后才能进）</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">public</span> String cart(HttpSession session, Model model) {</pre></td><td class="explain">购物车页：失效条目也渲染，页面自己决定是否禁用结算</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        CartSummary summary = cartService.summary(currentUserId(session));</pre></td><td class="explain">整页渲染：合计与失效判断都在服务层算好，模板只展示</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        model.addAttribute("cart", summary);</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        <span class="kw">return</span> "cart";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        <span class="kw">return</span> "cart";</pre></td><td class="explain">渲染购物车模板</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">    /** 加入购物车：同商品累加，回购物车看结果 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    @PostMapping("/cart/items")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">public</span> String addItem(@RequestParam String productId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                          @RequestParam(defaultValue = "1") String quantity,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    @PostMapping("/cart/items")</pre></td><td class="explain">路由：加入购物车</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">public</span> String addItem(@RequestParam String productId,</pre></td><td class="explain">加车入口：商品与数量按原始字符串交给服务层</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                          @RequestParam(defaultValue = "1") String quantity,</pre></td><td class="explain">数量缺省 1：详情页不填也能加一件</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                          HttpSession session,</pre></td><td class="explain">参数：登录成功后写入身份。</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                          RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        cartService.add(currentUserId(session), productId, quantity);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        cartService.add(currentUserId(session), productId, quantity);</pre></td><td class="explain">取当前用户后交给服务层加车</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        redirect.addFlashAttribute("message", "已加入购物车");</pre></td><td class="explain">一次性提示，刷新不会重复显示</td></tr>
-<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">成功后回购物车页（PRG：刷新不会重复提交）</td></tr>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">52</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">    /** 改数量：带旧 version，冲突时由服务层给 409 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    @PostMapping("/cart/items/{itemId}/quantity")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    <span class="kw">public</span> String changeQuantity(@PathVariable String itemId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                                 @RequestParam String quantity,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                                 @RequestParam String version,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    @PostMapping("/cart/items/{itemId}/quantity")</pre></td><td class="explain">路由：改数量</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    <span class="kw">public</span> String changeQuantity(@PathVariable String itemId,</pre></td><td class="explain">改数量入口：条目 id 来自路径</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                                 @RequestParam String quantity,</pre></td><td class="explain">数量必填（改数量场景）</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                                 @RequestParam String version,</pre></td><td class="explain">版本号必填；缺参数由 Spring 直接给 400</td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                                 HttpSession session,</pre></td><td class="explain">参数：登录成功后写入身份。</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                                 RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
-<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        cartService.changeQuantity(currentUserId(session), itemId, quantity, version);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        redirect.addFlashAttribute("message", "数量已更新");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        cartService.changeQuantity(currentUserId(session), itemId, quantity, version);</pre></td><td class="explain">取当前用户后交给服务层校验归属与版本</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        redirect.addFlashAttribute("message", "数量已更新");</pre></td><td class="explain">一次性提示：数量已更新</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">成功后回购物车页（PRG：刷新不会重复提交）</td></tr>
 <tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">64</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre class="cmtline">    /** 移除条目：同样带旧 version */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @PostMapping("/cart/items/{itemId}/remove")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">public</span> String removeItem(@PathVariable String itemId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                             @RequestParam String version,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @PostMapping("/cart/items/{itemId}/remove")</pre></td><td class="explain">路由：移除条目</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">public</span> String removeItem(@PathVariable String itemId,</pre></td><td class="explain">移除入口：条目 id 来自路径</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                             @RequestParam String version,</pre></td><td class="explain">版本号必填；缺参数由 Spring 直接给 400</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                             HttpSession session,</pre></td><td class="explain">参数：登录成功后写入身份。</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                             RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
-<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        cartService.remove(currentUserId(session), itemId, version);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        redirect.addFlashAttribute("message", "已移除该商品");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        cartService.remove(currentUserId(session), itemId, version);</pre></td><td class="explain">取当前用户后交给服务层删除</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        redirect.addFlashAttribute("message", "已移除该商品");</pre></td><td class="explain">一次性提示：已移除</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">成功后回购物车页（PRG：刷新不会重复提交）</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">75</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
@@ -121,9 +121,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre class="cmtline">     * 出现 NullPointerException——宁可给 401 也不要 500。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> currentUserId(HttpSession session) {</pre></td><td class="explain">当前登录用户 id。 受保护路径已由 LoginInterceptor 保证有会话；这里再判一次是防止以后改拦截规则时 出现 NullPointerException——宁可给 401 也不要 500。</td></tr>
-<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        Object userId = session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        if (userId instanceof Long id) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            <span class="kw">return</span> id;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        Object userId = session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">从会话取当前用户 id</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        if (userId instanceof Long id) {</pre></td><td class="explain">只认 Long：会话可能没有该属性或类型不对</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            <span class="kw">return</span> id;</pre></td><td class="explain">返回用户 id</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        throw <span class="kw">new</span> BizException(ErrorCode.UNAUTHORIZED);</pre></td><td class="explain">兜底：拦截规则被改动时给 401，而不是 NullPointerException → 500</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
@@ -154,31 +154,31 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> * &lt;p&gt;只对渲染成模板的请求生效：重定向不需要徽标，跳过可以少一次查询。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartBadgeInterceptor implements HandlerInterceptor {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartBadgeInterceptor implements HandlerInterceptor {</pre></td><td class="explain">徽标拦截器：渲染前把件数放进模型</td></tr>
 <tr class="gap"><td class="line">19</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 模板里使用的属性名 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String MODEL_KEY = "cartCount";</pre></td><td class="explain">模板里使用的属性名</td></tr>
 <tr class="gap"><td class="line">22</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">字段 cartService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">cartService：购物车服务</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">public</span> CartBadgeInterceptor(CartService cartService) {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">public</span> CartBadgeInterceptor(CartService cartService) {</pre></td><td class="explain">构造器：注入 cartService</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">构造器注入：保存 cartService 到字段</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                           ModelAndView modelAndView) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        if (modelAndView == null) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,</pre></td><td class="explain">postHandle：处理器执行完、视图渲染前</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                           ModelAndView modelAndView) {</pre></td><td class="explain">参数续行：这次请求的视图与模型</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        if (modelAndView == null) {</pre></td><td class="explain">没有视图（如异步请求）就跳过</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">本条路径不再继续（只加模型或只跳过徽标）</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        String viewName = modelAndView.getViewName();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        String viewName = modelAndView.getViewName();</pre></td><td class="explain">视图名用来识别重定向</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        if (viewName != null &amp;&amp; viewName.startsWith("redirect:")) {</pre></td><td class="explain">重定向不渲染页面，跳过可以省一次求和查询</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">本条路径不再继续（只加模型或只跳过徽标）</td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        Object userId = session == null ? null : session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">不主动建会话：游客请求不该被建出一个空会话</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        Object userId = session == null ? null : session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">不建会话；游客按 0 处理</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        <span class="kw">int</span> count = userId instanceof Long id ? cartService.badgeQuantity(id) : 0;</pre></td><td class="explain">游客固定 0；登录用户查真实件数</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        modelAndView.addObject(MODEL_KEY, count);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        modelAndView.addObject(MODEL_KEY, count);</pre></td><td class="explain">把 cartCount 放进模型，页头片段取用</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -208,18 +208,18 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：启动时加载其中的 Bean。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WebConfig implements WebMvcConfigurer {</pre></td><td class="explain">Web 层配置：集中声明受保护路径。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">字段 cartService：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">cartService：购物车服务</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> WebConfig(CartService cartService) {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> WebConfig(CartService cartService) {</pre></td><td class="explain">构造器：注入 cartService</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">构造器注入：保存 cartService 到字段</td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> addInterceptors(InterceptorRegistry registry) {</pre></td><td class="explain">注册拦截器，由 Spring 调用。</td></tr>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> LoginInterceptor())</pre></td><td class="explain">挂上登录拦截器。</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                .addPathPatterns("/cart", "/cart/**", "/orders", "/orders/**", "/profile", "/profile/**");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                .addPathPatterns("/cart", "/cart/**", "/orders", "/orders/**", "/profile", "/profile/**");</pre></td><td class="explain">受保护路径集中列在这里，新增公开页不用改</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">        // 徽标：所有页面都要显示，所以不限定路径</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> CartBadgeInterceptor(cartService));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> CartBadgeInterceptor(cartService));</pre></td><td class="explain">徽标拦截器对所有路径生效</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -260,28 +260,28 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">public</span> boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)</pre></td><td class="explain">处理前检查会话，返回 false 表示中断。</td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>            throws Exception {</pre></td><td class="explain">声明抛出异常，调用方或测试框架负责处理。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">不主动建会话：游客请求不该被建出一个空会话</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        if (session != null &amp;&amp; session.getAttribute(USER_ID) != null) {</pre></td><td class="explain">已登录：直接放行。</td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            <span class="kw">return</span> true;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            <span class="kw">return</span> true;</pre></td><td class="explain">已登录：放行</td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        String encoded = URLEncoder.encode(returnTarget(request), StandardCharsets.UTF_8);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        response.sendRedirect(request.getContextPath() + "/login?redirect=" + encoded);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        <span class="kw">return</span> false;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        String encoded = URLEncoder.encode(returnTarget(request), StandardCharsets.UTF_8);</pre></td><td class="explain">把回跳地址编码后放进 redirect 参数</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        response.sendRedirect(request.getContextPath() + "/login?redirect=" + encoded);</pre></td><td class="explain">302 到登录页</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        <span class="kw">return</span> false;</pre></td><td class="explain">拦下请求，不再进入控制器</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 登录后要回去的站内地址：GET 用原地址，POST 用来源页 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> String returnTarget(HttpServletRequest request) {</pre></td><td class="explain">登录后要回去的站内地址：GET 用原地址，POST 用来源页</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        if ("POST".equalsIgnoreCase(request.getMethod())) {</pre></td><td class="explain">POST 地址不能直接 GET（会 405），改记来源页，登录后回到详情页</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            String fromReferer = sameSitePath(request);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>            if (fromReferer != null) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                <span class="kw">return</span> fromReferer;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            String fromReferer = sameSitePath(request);</pre></td><td class="explain">POST 时取来源页作为回跳目标</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>            if (fromReferer != null) {</pre></td><td class="explain">来源可信就用它，否则退回原地址逻辑</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                <span class="kw">return</span> fromReferer;</pre></td><td class="explain">回来源页（详情页）</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        String target = request.getRequestURI();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        String target = request.getRequestURI();</pre></td><td class="explain">GET：用被拦的原地址</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        if (request.getQueryString() != null) {</pre></td><td class="explain">有查询串就一起带上，回跳后条件不丢。</td></tr>
-<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            target = target + "?" + request.getQueryString();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            target = target + "?" + request.getQueryString();</pre></td><td class="explain">查询串一并带回，翻页与筛选不丢</td></tr>
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">return</span> target;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">return</span> target;</pre></td><td class="explain">返回原地址</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">53</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
@@ -289,34 +289,34 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre class="cmtline">     * &lt;p&gt;不校验同源就会被外部页面构造成"登录后跳任意站"，所以宁可回首页也不接受陌生来源。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">private</span> String sameSitePath(HttpServletRequest request) {</pre></td><td class="explain">从 Referer 取站内路径；只接受与当前请求同源（协议、主机、端口一致）的来源。 不校验同源就会被外部页面构造成"登录后跳任意站"，所以宁可回首页也不接受陌生来源。</td></tr>
-<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        String referer = request.getHeader("Referer");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        if (referer == null || referer.isBlank()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        String referer = request.getHeader("Referer");</pre></td><td class="explain">取 Referer</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        if (referer == null || referer.isBlank()) {</pre></td><td class="explain">没有来源就退回原地址逻辑</td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        URI uri;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        URI uri;</pre></td><td class="explain">先声明，try 里解析</td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
-<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>            uri = URI.create(referer);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        } catch (IllegalArgumentException e) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>            uri = URI.create(referer);</pre></td><td class="explain">解析失败按非法来源处理</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        } catch (IllegalArgumentException e) {</pre></td><td class="explain">非法 URL：当作没有来源</td></tr>
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        if (uri.getScheme() == null || uri.getHost() == null) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        if (uri.getScheme() == null || uri.getHost() == null) {</pre></td><td class="explain">相对地址或畸形地址不接受</td></tr>
 <tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
 <tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        if (!uri.getScheme().equalsIgnoreCase(request.getScheme())</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                || !Objects.equals(uri.getHost(), request.getServerName())) {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        if (!uri.getScheme().equalsIgnoreCase(request.getScheme())</pre></td><td class="explain">协议必须一致，防 https→http 混用</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                || !Objects.equals(uri.getHost(), request.getServerName())) {</pre></td><td class="explain">主机名也必须一致，否则不是同源</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        <span class="kw">int</span> port = uri.getPort() == -1</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        <span class="kw">int</span> port = uri.getPort() == -1</pre></td><td class="explain">省略端口时按协议默认端口补</td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                ? ("https".equalsIgnoreCase(uri.getScheme()) ? 443 : 80)</pre></td><td class="explain">三元分支：NOT_FOUND 给 404</td></tr>
-<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                : uri.getPort();</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                : uri.getPort();</pre></td><td class="explain">写了端口就用写的那个</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        if (port != request.getServerPort()) {</pre></td><td class="explain">端口不同也算外站来源，防止被构造成登录后跳站外</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">没有输入就返回 null，SQL 侧会跳过该条件。</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        String path = uri.getRawPath();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        if (path == null || path.isBlank()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            <span class="kw">return</span> "/main";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        String path = uri.getRawPath();</pre></td><td class="explain">只取路径与查询串，不取 scheme/host</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        if (path == null || path.isBlank()) {</pre></td><td class="explain">没路径就回首页</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            <span class="kw">return</span> "/main";</pre></td><td class="explain">兜底回首页</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        <span class="kw">return</span> uri.getRawQuery() == null ? path : path + "?" + uri.getRawQuery();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        <span class="kw">return</span> uri.getRawQuery() == null ? path : path + "?" + uri.getRawQuery();</pre></td><td class="explain">带查询串一起回跳</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -339,9 +339,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">内容区段：注册表单所在。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">栏目头：标题在左、总数或更多入口在右</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="en"&gt;CART&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;购物车&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="en"&gt;CART&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;购物车&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/category}"&gt;继续选购&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
@@ -351,27 +351,27 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">            &lt;!-- 空车：给一个明确的去处，不留空白页 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="empty cart-empty" th:if="${cart.isEmpty()}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">p</span>&gt;购物车还是空的，去看看作品与周边吧。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">p</span>&gt;购物车还是空的，去看看作品与周边吧。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/main}"&gt;去逛逛&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">27</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            &lt;<span class="kw">div</span> th:unless="${cart.isEmpty()}"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="cart-list"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-head"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;商品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;单价&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;数量&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;小计&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;操作&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            &lt;<span class="kw">div</span> th:unless="${cart.isEmpty()}"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="cart-list"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-head"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;商品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;单价&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;数量&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;小计&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;操作&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">37</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">                    &lt;!-- 每一行一个条目；失效行保留并标出原因，不自动删除 --&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-row" th:each="line : ${cart.lines}" th:classappend="${line.invalid} ? 'invalid'"&gt;</pre></td><td class="explain">遍历后端传入的集合渲染</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-item"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-item"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                            &lt;<span class="kw">a</span> th:href="@{/product/{id}(id=${line.productId})}"&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                                &lt;<span class="kw">img</span> th:src="@{${line.coverImage}}" th:alt="${line.productName}"&gt;</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                            &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束整张作品卡的链接。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                            &lt;<span class="kw">div</span> class="cart-item-text"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                            &lt;<span class="kw">div</span> class="cart-item-text"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                                &lt;<span class="kw">a</span> class="title" th:href="@{/product/{id}(id=${line.productId})}"</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                                   th:text="${line.productName}"&gt;商品名&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                                &lt;<span class="kw">small</span> th:text="${line.categoryName}"&gt;分类&lt;/<span class="kw">small</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
@@ -382,36 +382,36 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-price" th:text="'¥' + ${#numbers.formatDecimal(line.price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">价格统一渲染为两位小数</td></tr>
 <tr class="gap"><td class="line">53</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">                        &lt;!-- 改数量带旧 version，页面放旧了会被后端拒绝并要求刷新 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                        &lt;<span class="kw">form</span> class="cart-qty" th:action="@{/cart/items/{id}/quantity(id=${line.itemId})}" method="post"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="hidden" name="version" th:value="${line.version}"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="number" name="quantity" th:value="${line.quantity}" min="1" max="99"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                            &lt;<span class="kw">button</span> type="submit" class="btn btn-ghost"&gt;更新&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                        &lt;<span class="kw">form</span> class="cart-qty" th:action="@{/cart/items/{id}/quantity(id=${line.itemId})}" method="post"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="hidden" name="version" th:value="${line.version}"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="number" name="quantity" th:value="${line.quantity}" min="1" max="99"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                            &lt;<span class="kw">button</span> type="submit" class="btn btn-ghost"&gt;更新&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                        &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr class="gap"><td class="line">60</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-subtotal"</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-subtotal"</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                             th:text="'¥' + ${#numbers.formatDecimal(line.lineAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">价格统一渲染为两位小数</td></tr>
 <tr class="gap"><td class="line">63</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                        &lt;<span class="kw">form</span> class="cart-remove" th:action="@{/cart/items/{id}/remove(id=${line.itemId})}" method="post"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="hidden" name="version" th:value="${line.version}"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                            &lt;<span class="kw">button</span> type="submit" class="link-btn"&gt;移除&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                        &lt;<span class="kw">form</span> class="cart-remove" th:action="@{/cart/items/{id}/remove(id=${line.itemId})}" method="post"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="hidden" name="version" th:value="${line.version}"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                            &lt;<span class="kw">button</span> type="submit" class="link-btn"&gt;移除&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                        &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">70</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="cart-foot"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-sum"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="cart-foot"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-sum"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                        &lt;<span class="kw">p</span>&gt;共 &lt;<span class="kw">b</span> th:text="${cart.badgeQuantity}"&gt;0&lt;/<span class="kw">b</span>&gt; 件（其中可结算 &lt;<span class="kw">b</span> th:text="${cart.validQuantity}"&gt;0&lt;/<span class="kw">b</span>&gt; 件）&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
-<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="cart-total"&gt;应付总额</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="cart-total"&gt;应付总额</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                            &lt;<span class="kw">b</span> th:text="'¥' + ${#numbers.formatDecimal(cart.totalAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">价格统一渲染为两位小数</td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束作品计数段落。</td></tr>
-<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="hint"&gt;商品合计即应付总额：无运费、无优惠、不勾选结算。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="hint"&gt;商品合计即应付总额：无运费、无优惠、不勾选结算。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
-<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-actions"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-actions"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="reason" th:if="${cart.invalidCount &gt; 0}"</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                           th:text="|有 ${cart.invalidCount} 个条目已失效，请先移除或换成可买的商品。|"&gt;有失效条目&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre class="cmtline">                        &lt;!-- 结算页在 M05 开放；这里只做状态呈现，不给一个点进去 404 的入口 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        &lt;<span class="kw">button</span> type="button" class="btn btn-primary" disabled</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                                th:title="${cart.settleable} ? '结算页在 M05 开放' : '请先处理失效条目'"&gt;去结算&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        &lt;<span class="kw">button</span> type="button" class="btn btn-primary" disabled</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                                th:title="${cart.settleable} ? '结算页在 M05 开放' : '请先处理失效条目'"&gt;去结算&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="hint" th:text="${cart.settleable} ? '结算页在 M05 开放。' : '失效条目无法结算。'"&gt;提示&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
@@ -443,7 +443,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">页面主体区。</td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度容器：统一左右留白。</td></tr>
 <tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">        &lt;!-- 面包屑：作品 → 单行本/周边 → 商品名，路径来自商品所属分类 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/main}"&gt;首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">导航：首页。</td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">面包屑分隔符。</td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/category(categoryId=${detail.topCategory().id})}" th:text="${detail.topCategory().name}"&gt;作品&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">站内链接，由 Thymeleaf 补上下文路径</td></tr>
@@ -455,7 +455,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="product-detail"&gt;</pre></td><td class="explain">详情两栏：左相册、右购买信息。</td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">            &lt;!-- 左侧：主图 + 相册缩略图；没有相册时只显示封面 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="gallery"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="gallery"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">img</span> class="gallery-main" th:src="@{${detail.product().coverImage}}"</pre></td><td class="explain">站内静态资源，路径与数据库里的 cover_image 一致</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                     th:alt="${detail.product().name}"&gt;</pre></td><td class="explain">alt 用商品名，图挂了也能读。</td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="thumbs" th:if="${detail.hasGallery()}"&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
@@ -465,7 +465,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">            &lt;!-- 右侧：购买信息 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="info"&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="info"&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                &lt;<span class="kw">span</span> class="cat" th:text="${detail.product().sku}"&gt;SKU&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                &lt;<span class="kw">h1</span> th:text="${detail.product().name}"&gt;商品名&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="summary" th:text="${detail.product().summary}"&gt;简介&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
@@ -474,19 +474,19 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                   th:text="${detail.product().stock == 0} ? '暂时缺货' : '库存 ' + ${detail.product().stock}"&gt;库存&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr class="gap"><td class="line">40</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">                &lt;!-- 加车走 POST /cart/items；游客会被拦到登录页，登录后回到本页再点一次 --&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                &lt;<span class="kw">form</span> class="buy" th:action="@{/cart/items}" method="post"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="hidden" name="productId" th:value="${detail.product().id}"&gt;</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="number" name="quantity" value="1" min="1" max="99"</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                &lt;<span class="kw">form</span> class="buy" th:action="@{/cart/items}" method="post"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="hidden" name="productId" th:value="${detail.product().id}"&gt;</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                    &lt;<span class="kw">input</span> type="number" name="quantity" value="1" min="1" max="99"</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                           th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}"&gt;</pre></td><td class="explain">上限为库存，缺货时禁用。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                    &lt;<span class="kw">button</span> type="submit" class="btn btn-primary"</pre></td><td class="explain">加入购物车按钮（M04 前是占位）。</td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                            th:disabled="${detail.product().stock == 0}"</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                            th:disabled="${detail.product().stock == 0}"</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                            th:text="${detail.product().stock == 0} ? '暂时缺货' : '加入购物车'"&gt;加入购物车&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束筛选表单。</td></tr>
 <tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="hint" th:if="${session.userId == null}"&gt;未登录：点「加入购物车」会先跳登录，回到本页后再点一次。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">空集合时不渲染该区块（空状态由另一段负责）</td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="hint" th:unless="${session.userId == null}"&gt;加入后可在页头「购物车」查看，数量会累加。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;<span class="kw">p</span> class="hint" th:unless="${session.userId == null}"&gt;加入后可在页头「购物车」查看，数量会累加。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr class="gap"><td class="line">52</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="desc"&gt;</pre></td><td class="explain">商品说明区，长描述放这里。</td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;商品说明&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;商品说明&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">—</td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                    &lt;<span class="kw">p</span> th:text="${detail.product().description}"&gt;描述&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">文本由后端数据渲染，不写死</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
 <tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束当前容器；不产生新的内容。</td></tr>
@@ -533,18 +533,18 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> * 购物车页面与加入购物车：空车、正常行、失效行、徽标、游客拦截。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre><span class="kw">class</span> CartPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre><span class="kw">class</span> CartPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">集成测试：真实 MySQL + MockMvc</td></tr>
 <tr class="gap"><td class="line">28</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">字段 mockMvc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">mockMvc：MockMvc：不起端口直接请求页面</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
-<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">字段 jdbc：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">jdbc：JdbcTemplate：直接建/查测试数据</td></tr>
 <tr class="gap"><td class="line">34</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @DisplayName("空车：显示空状态与去逛逛入口，不渲染表格")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">void</span> emptyCartShowsEmptyState() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_empty");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">void</span> emptyCartShowsEmptyState() throws Exception {</pre></td><td class="explain">空车：显示空状态与去逛逛入口，不渲染表格</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_empty");</pre></td><td class="explain">建测试账号 cart_empty，返回用户 id</td></tr>
 <tr class="gap"><td class="line">39</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
@@ -554,12 +554,12 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">45</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @DisplayName("购物车页：显示名称、单价、数量、小计与合计")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">void</span> cartPageShowsLinesAndTotals() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_show");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">long</span> book = CartFixture.createProduct(jdbc, "SHOW-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">long</span> badge = CartFixture.createProduct(jdbc, "SHOW-M01", "30.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, book, 2);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, badge, 1);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">void</span> cartPageShowsLinesAndTotals() throws Exception {</pre></td><td class="explain">购物车页：显示名称、单价、数量、小计与合计</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_show");</pre></td><td class="explain">建测试账号 cart_show，返回用户 id</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">long</span> book = CartFixture.createProduct(jdbc, "SHOW-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 SHOW-C01：¥28.00、库存 10、ON_SALE</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">long</span> badge = CartFixture.createProduct(jdbc, "SHOW-M01", "30.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 SHOW-M01：¥30.00、库存 10、ON_SALE</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, book, 2);</pre></td><td class="explain">预置 2 件到 book 的车里</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, badge, 1);</pre></td><td class="explain">预置 1 件到 badge 的车里</td></tr>
 <tr class="gap"><td class="line">54</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
@@ -572,12 +572,12 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">63</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @DisplayName("页头徽标：等于全部条目数量之和，跨页面可见")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">void</span> badgeShowsTotalQuantity() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_badge");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">long</span> a = CartFixture.createProduct(jdbc, "BADGE-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        <span class="kw">long</span> b = CartFixture.createProduct(jdbc, "BADGE-C02", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, a, 2);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, b, 3);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">void</span> badgeShowsTotalQuantity() throws Exception {</pre></td><td class="explain">页头徽标：等于全部条目数量之和，跨页面可见</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_badge");</pre></td><td class="explain">建测试账号 cart_badge，返回用户 id</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">long</span> a = CartFixture.createProduct(jdbc, "BADGE-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 BADGE-C01：¥28.00、库存 10、ON_SALE</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        <span class="kw">long</span> b = CartFixture.createProduct(jdbc, "BADGE-C02", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 BADGE-C02：¥28.00、库存 10、ON_SALE</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, a, 2);</pre></td><td class="explain">预置 2 件到 a 的车里</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, b, 3);</pre></td><td class="explain">预置 3 件到 b 的车里</td></tr>
 <tr class="gap"><td class="line">72</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(get("/main").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
@@ -586,7 +586,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">77</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @DisplayName("游客的徽标固定为 0")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    <span class="kw">void</span> guestBadgeIsZero() throws Exception {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    <span class="kw">void</span> guestBadgeIsZero() throws Exception {</pre></td><td class="explain">游客的徽标固定为 0</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        mockMvc.perform(get("/main"))</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(content().string(containsString("购物车 &lt;b&gt;0&lt;/b&gt;")));</pre></td><td class="explain">断言响应内容</td></tr>
@@ -594,96 +594,96 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">85</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    @DisplayName("加入购物车：写库并回到购物车页")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    <span class="kw">void</span> addItemCreatesLineAndRedirects() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_add");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "ADD-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    <span class="kw">void</span> addItemCreatesLineAndRedirects() throws Exception {</pre></td><td class="explain">加入购物车：写库并回到购物车页</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_add");</pre></td><td class="explain">建测试账号 cart_add，返回用户 id</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "ADD-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 ADD-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr class="gap"><td class="line">91</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                        .param("quantity", "2")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                        .param("quantity", "2")</pre></td><td class="explain">表单参数 quantity="2"</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                .andExpect(redirectedUrl("/cart"));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr class="gap"><td class="line">98</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);</pre></td><td class="explain">断言该用户购物车条目数等于 1</td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        Integer quantity = jdbc.queryForObject("SELECT quantity FROM cart_item WHERE user_id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                Integer.<span class="kw">class</span>, userId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        assertThat(quantity).isEqualTo(2);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                Integer.<span class="kw">class</span>, userId);</pre></td><td class="explain">查单值：数量或版本</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        assertThat(quantity).isEqualTo(2);</pre></td><td class="explain">断言quantity等于 2</td></tr>
 <tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">104</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    @DisplayName("同商品重复加入：数量累加，条目数不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    <span class="kw">void</span> addSameProductAccumulates() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_merge");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "MERGE-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        MockHttpSession session = CartFixture.session(userId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    <span class="kw">void</span> addSameProductAccumulates() throws Exception {</pre></td><td class="explain">同商品重复加入：数量累加，条目数不变</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_merge");</pre></td><td class="explain">建测试账号 cart_merge，返回用户 id</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "MERGE-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 MERGE-C01：¥28.00、库存 10、ON_SALE</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        MockHttpSession session = CartFixture.session(userId);</pre></td><td class="explain">同一个会话连发两次请求，验证累加而不是新增</td></tr>
 <tr class="gap"><td class="line">111</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>                .param("productId", String.valueOf(productId)).param("quantity", "1").session(session));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>                .param("productId", String.valueOf(productId)).param("quantity", "1").session(session));</pre></td><td class="explain">同会话加 1 件</td></tr>
 <tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                .param("productId", String.valueOf(productId)).param("quantity", "2").session(session));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                .param("productId", String.valueOf(productId)).param("quantity", "2").session(session));</pre></td><td class="explain">同会话再加 2 件，验证累加</td></tr>
 <tr class="gap"><td class="line">116</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);</pre></td><td class="explain">断言该用户购物车条目数等于 1</td></tr>
 <tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        Integer quantity = jdbc.queryForObject("SELECT quantity FROM cart_item WHERE user_id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
-<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>                Integer.<span class="kw">class</span>, userId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
-<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        assertThat(quantity).isEqualTo(3);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>                Integer.<span class="kw">class</span>, userId);</pre></td><td class="explain">查单值：数量或版本</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        assertThat(quantity).isEqualTo(3);</pre></td><td class="explain">断言quantity等于 3</td></tr>
 <tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">122</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    @DisplayName("游客加车：302 到登录页，回跳目标是详情页而不是 POST 地址")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    <span class="kw">void</span> guestAddRedirectsToDetailPage() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "GUEST-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    <span class="kw">void</span> guestAddRedirectsToDetailPage() throws Exception {</pre></td><td class="explain">游客加车：302 到登录页，回跳目标是详情页而不是 POST 地址</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "GUEST-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 GUEST-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr class="gap"><td class="line">127</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                        .param("quantity", "1")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                        .header("Referer", "http://localhost/product/" + productId))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                        .param("quantity", "1")</pre></td><td class="explain">表单参数 quantity="1"</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                        .header("Referer", "http://localhost/product/" + productId))</pre></td><td class="explain">带同源 Referer，模拟从详情页点加车</td></tr>
 <tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Fproduct%2F*"));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">135</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    @DisplayName("数量 0：400，不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    <span class="kw">void</span> addRejectsZeroQuantity() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_zero");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "ZERO-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    <span class="kw">void</span> addRejectsZeroQuantity() throws Exception {</pre></td><td class="explain">数量 0：400，不写库</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_zero");</pre></td><td class="explain">建测试账号 cart_zero，返回用户 id</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "ZERO-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品 ZERO-C01：¥28.00、库存 10、ON_SALE</td></tr>
 <tr class="gap"><td class="line">141</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                        .param("quantity", "0")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                        .param("quantity", "0")</pre></td><td class="explain">表单参数 quantity="0"</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
 <tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>                .andExpect(status().isBadRequest())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>                .andExpect(content().string(containsString("数量必须是 1–99 的整数")));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr class="gap"><td class="line">148</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isZero();</pre></td><td class="explain">断言该用户购物车条目数为 0</td></tr>
 <tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">151</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>    @DisplayName("加车数量超过库存：400，提示可购买数量")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    <span class="kw">void</span> addRejectsOverStock() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_stock");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "STOCK-C01", "28.00", 2, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    <span class="kw">void</span> addRejectsOverStock() throws Exception {</pre></td><td class="explain">加车数量超过库存：400，提示可购买数量</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_stock");</pre></td><td class="explain">建测试账号 cart_stock，返回用户 id</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "STOCK-C01", "28.00", 2, "ON_SALE");</pre></td><td class="explain">建商品 STOCK-C01：¥28.00、库存 2、ON_SALE</td></tr>
 <tr class="gap"><td class="line">157</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                        .param("quantity", "3")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                        .param("quantity", "3")</pre></td><td class="explain">表单参数 quantity="3"</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
 <tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>                .andExpect(status().isBadRequest())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>                .andExpect(content().string(containsString("最多可购买 2 件")));</pre></td><td class="explain">断言响应内容</td></tr>
 <tr class="gap"><td class="line">164</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isZero();</pre></td><td class="explain">断言该用户购物车条目数为 0</td></tr>
 <tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">167</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>    @DisplayName("加车下架商品：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
-<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>    <span class="kw">void</span> addRejectsDraftProduct() throws Exception {</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_draft");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
-<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "DRAFT-C01", "28.00", 10, "DRAFT");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>    <span class="kw">void</span> addRejectsDraftProduct() throws Exception {</pre></td><td class="explain">加车下架商品：404</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cart_draft");</pre></td><td class="explain">建测试账号 cart_draft，返回用户 id</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "DRAFT-C01", "28.00", 10, "DRAFT");</pre></td><td class="explain">建商品 DRAFT-C01：¥28.00、库存 10、DRAFT</td></tr>
 <tr class="gap"><td class="line">173</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
-<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                        .param("quantity", "1")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
-<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>                        .param("productId", String.valueOf(productId))</pre></td><td class="explain">表单参数 productId=productId</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                        .param("quantity", "1")</pre></td><td class="explain">表单参数 quantity="1"</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
 <tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
 <tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>

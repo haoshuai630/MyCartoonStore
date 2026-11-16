@@ -9,13 +9,15 @@
 from __future__ import annotations
 
 import pathlib
+import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import gen_m01_07_acceptance as base  # noqa: E402
 import gen_m02_02_acceptance as m22  # noqa: E402
-from java_explainer import make_java_explainer  # noqa: E402
+import m04_explainer  # noqa: E402
+from java_explainer import javadoc_above, make_java_explainer  # noqa: E402
 
 ROOT = base.ROOT
 
@@ -188,8 +190,20 @@ def render(task_id: str, meta: dict) -> None:
                 )
                 continue
             text = NOTES.get((rel, stripped)) or fn(i, line)
+            if kind == "java" and (not text or m04_explainer.is_generic(text)):
+                # 生成器没有专门规则时，从代码参数里取事实：夹具参数、断言目标、异常文案
+                text = m04_explainer.explain(stripped, javadoc_above(lines, i - 1)) or text
             if not text and stripped.startswith("import "):
                 text = import_hint(stripped)
+            if not text and kind == "java" and stripped.startswith("void "):
+                # 测试方法没有 javadoc：用上面的 @DisplayName 当说明
+                for back in range(i - 2, max(-1, i - 6), -1):
+                    m = re.search(r'@DisplayName\("(.+?)"\)', lines[back])
+                    if m:
+                        text = m.group(1)
+                        break
+            if not text:
+                text = "—"
             rows.append(
                 f'<tr tabindex="0" data-line="{i}"><td class="line">{i}</td>'
                 f'<td class="code"><pre>{hi(line)}</pre></td>'
