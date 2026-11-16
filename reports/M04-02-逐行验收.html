@@ -206,7 +206,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * 公开页面（首页、作品、列表、详情、登录、注册）不受影响。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：启动时加载其中的 Bean。</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WebConfig implements WebMvcConfigurer {</pre></td><td class="explain">Web 层配置：集中声明受保护路径。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WebConfig implements WebMvcConfigurer {</pre></td><td class="explain">Web 层配置：注册登录拦截器与购物车徽标拦截器。 受保护路径集中写在这里，新增模块时只改这一处； 公开页面（首页、作品、列表、详情、登录、注册）不受影响。</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">cartService：购物车服务</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
@@ -252,7 +252,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * &lt;p&gt;回跳地址分两种情况：GET 用被拦的原地址；POST 不能直接 GET（会 405），</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> * 改用来源页（Referer）的路径——用户在详情页点「加入购物车」被拦，登录后回详情页再点一次。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> LoginInterceptor implements HandlerInterceptor {</pre></td><td class="explain">登录拦截器：只拦受保护路径。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> LoginInterceptor implements HandlerInterceptor {</pre></td><td class="explain">登录拦截器：受保护路径在未登录时跳登录页，并记住回来的地址。 只拦明确列出的路径，不做"全站拦截 + 白名单"： 后者每新增一个页面都要记得放行，漏一次就把公开页面锁住了。 回跳地址分两种情况：GET 用被拦的原地址；POST 不能直接 GET（会 405）， 改用来源页（Referer）的路径——用户在详情页点「加入购物车」被拦，登录后回详情页再点一次。</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /** 会话里表示登录态的键，与 AuthController 写入的一致 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String USER_ID = "userId";</pre></td><td class="explain">会话里表示登录态的键，与 AuthController 写入的一致</td></tr>
