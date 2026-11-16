@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M05-02 · 结算页与购物车入口（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M05-02 · 结算页与购物车入口（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">CheckoutController.java</a><a href="#s2">checkout.html</a><a href="#s3">cart.html</a><a href="#s4">WebConfig.java</a><a href="#s5">CheckoutPageTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：GET /checkout 渲染、快照写进会话、空车/失效回购物车、购物车入口开关、游客拦截。验证：mvn -pl cartoon-user-web -am test → Tests run: 81, Failures: 0；mvn clean verify → 10 模块 SUCCESS，151 用例。store.css 只追加结算页样式，不逐行对照；POST 与下单事务在 M05-03。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>CheckoutController.java<small>确认页路由与快照入会话 · 63 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/controller/CheckoutController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">结算确认页：渲染确认信息并把快照放进会话。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">会话里保存确认快照，供 M05-03 提交时比对。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary;</pre></td><td class="explain">页面左侧的商品清单与合计。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.service.CartService;</pre></td><td class="explain">读车取展示数据。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">空车/失效时据异常回购物车。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">兜底未登录给 401。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot;</pre></td><td class="explain">生成并存入会话的快照类型。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.CheckoutService;</pre></td><td class="explain">生成快照、判断时限与变化。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.interceptor.LoginInterceptor;</pre></td><td class="explain">会话里 userId 的键。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">MVC 控制器。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">把页面数据放进模型。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">只注册 GET，POST 留给 M05-03。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.mvc.support.RedirectAttributes;</pre></td><td class="explain">重定向时带一次性提示。</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// M05-02：依据 docs/04 §2.3、docs/05 §4.5、AC-12/AC-13 的页面部分。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 负责渲染确认页、把快照写进会话、空车/失效时回购物车；不创建订单（M05-03）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">// 提交按钮先禁用并注明"下单在 M05-03 接入"，避免点了没有结果的半成品入口。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>@Controller</pre></td><td class="explain">注册为控制器，由组件扫描发现。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CheckoutController {</pre></td><td class="explain">CheckoutController：见类注释</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 会话里保存确认快照的键；M05-03 提交时按同一个键取。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String SNAPSHOT_KEY = "checkoutSnapshot";</pre></td><td class="explain">会话里保存确认快照的键；M05-03 提交时按同一个键取。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CheckoutService checkoutService;</pre></td><td class="explain">生成快照：空车/失效拦截、总额、确认时刻。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">页面展示用：行、单价、小计、合计。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">public</span> CheckoutController(CheckoutService checkoutService, CartService cartService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.checkoutService = checkoutService;</pre></td><td class="explain">保存结算服务。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">保存购物车服务。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">     * 打开结算确认页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">     * &lt;p&gt;空车或存在失效条目时重定向回购物车并提示，而不是甩一张错误页。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @GetMapping("/checkout")</pre></td><td class="explain">只处理 GET；提交订单是 M05-03 的 POST。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">public</span> String page(HttpSession session, Model model, RedirectAttributes redirect) {</pre></td><td class="explain">打开结算确认页。 空车或存在失效条目时重定向回购物车并提示，而不是甩一张错误页。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">会话里的当前用户。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        CheckoutSnapshot snapshot;</pre></td><td class="explain">本次确认的快照。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            snapshot = checkoutService.prepare(userId);</pre></td><td class="explain">空车/失效会在这里抛 400/409。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        } catch (BizException e) {</pre></td><td class="explain">业务异常（格式或重复）转成表单提示。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>            redirect.addFlashAttribute("error", e.getMessage());</pre></td><td class="explain">回购物车时显示原因。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>            <span class="kw">return</span> "redirect:/cart";</pre></td><td class="explain">比错误页更接近用户要做的下一步。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        session.setAttribute(SNAPSHOT_KEY, snapshot);</pre></td><td class="explain">存入会话，提交时用来比对。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        CartSummary cart = cartService.summary(userId);</pre></td><td class="explain">页面展示需要行的名称与金额。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        model.addAttribute("cart", cart);</pre></td><td class="explain">左侧商品清单与合计。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        model.addAttribute("snapshot", snapshot);</pre></td><td class="explain">右侧总额与确认时刻。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        model.addAttribute("confirmMinutes", CheckoutService.CONFIRM_TTL.toMinutes());</pre></td><td class="explain">页面提示 10 分钟。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        <span class="kw">return</span> "checkout";</pre></td><td class="explain">渲染结算确认页。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">    /** 当前登录用户 id：受保护路径已由拦截器保证有会话，这里兜底给 401。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> currentUserId(HttpSession session) {</pre></td><td class="explain">当前登录用户 id：受保护路径已由拦截器保证有会话，这里兜底给 401。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        Object userId = session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">取拦截器写入的 userId。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        if (userId instanceof Long id) {</pre></td><td class="explain">只认 Long：会话可能没有该属性或类型不对</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>            <span class="kw">return</span> id;</pre></td><td class="explain">正常路径：返回用户 id。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        throw <span class="kw">new</span> BizException(ErrorCode.UNAUTHORIZED);</pre></td><td class="explain">异常路径：401 而不是 500。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>checkout.html<small>确认页：步骤条、商品清单、收货表单、时限提示 · 82 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/checkout.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('确认订单')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">            &lt;!-- 步骤条：当前停在第二步；第三步在 M05-03 下单成功后展示 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>            &lt;ol class="steps"&gt;</pre></td><td class="explain">步骤条：购物车 → 确认订单 → 完成</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;li class="done"&gt;购物车&lt;/li&gt;</pre></td><td class="explain">已完成：购物车</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                &lt;li class="on"&gt;确认订单&lt;/li&gt;</pre></td><td class="explain">当前步骤：确认订单</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                &lt;li&gt;完成&lt;/li&gt;</pre></td><td class="explain">尚未到达：完成</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>            &lt;/ol&gt;</pre></td><td class="explain">结构闭合：结束 &lt;ol&gt; 容器</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">内容分组容器</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="en"&gt;CHECKOUT&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">栏目英文小标题</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;确认订单&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">页面标题</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/cart}"&gt;返回购物车&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">            &lt;!-- 从购物车重定向过来时的一次性提示（空车/失效） --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="auth-error" th:if="${error}" th:text="${error}"&gt;提示&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">从结算页被退回时的提示（空车/失效）</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="checkout-grid"&gt;</pre></td><td class="explain">两栏布局：左清单、右收货与总额</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">                &lt;!-- 左：商品清单，只读，数据来自数据库当前值 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="checkout-items"&gt;</pre></td><td class="explain">左栏：商品清单</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                    &lt;h3&gt;商品清单&lt;/h3&gt;</pre></td><td class="explain">左栏标题</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="checkout-row" th:each="line : ${cart.lines}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${line.coverImage}}" th:alt="${line.productName}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="checkout-row-text"&gt;</pre></td><td class="explain">行内文字区：名称与分类</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                            &lt;<span class="kw">a</span> class="title" th:href="@{/product/{id}(id=${line.productId})}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                               th:text="${line.productName}"&gt;商品名&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                            &lt;<span class="kw">small</span> th:text="${line.categoryName}"&gt;分类&lt;/<span class="kw">small</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="checkout-qty" th:text="'× ' + ${line.quantity}"&gt;× 1&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="checkout-line"</pre></td><td class="explain">行小计金额（按当前价 × 数量）</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                              th:text="'¥' + ${#numbers.formatDecimal(line.lineAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="hint"&gt;清单来自数据库当前值，确认后若商品或购物车变化，提交会被要求重新确认。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明清单取当前值、变化要重新确认</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">                &lt;!-- 右：收货信息与总额；提交按钮在 M05-03 接入下单事务后启用 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="checkout-side"&gt;</pre></td><td class="explain">右栏：收货信息与总额</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                    &lt;h3&gt;收货信息&lt;/h3&gt;</pre></td><td class="explain">右栏标题</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="receiver"&gt;</pre></td><td class="explain">收货表单容器</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                        &lt;label&gt;收货人</pre></td><td class="explain">收货人字段标签</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                            &lt;<span class="kw">input</span> name="receiverName" maxlength="50" placeholder="1–50 个字符"&gt;</pre></td><td class="explain">收货人输入，≤50 字符</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                        &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                        &lt;label&gt;联系电话</pre></td><td class="explain">联系电话字段标签</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                            &lt;<span class="kw">input</span> name="receiverPhone" maxlength="30" placeholder="至少包含数字，座机/手机均可"&gt;</pre></td><td class="explain">电话输入，≤30 且至少一位数字</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                        &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                        &lt;label&gt;详细地址</pre></td><td class="explain">详细地址字段标签</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                            &lt;<span class="kw">input</span> name="receiverAddress" maxlength="255" placeholder="1–255 个字符"&gt;</pre></td><td class="explain">地址输入，≤255 字符</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                        &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="hint"&gt;下单后地址会作为快照保存，之后修改商品不影响历史订单。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明地址会写进订单快照</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="checkout-total"&gt;</pre></td><td class="explain">总额区</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;应付总额&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">金额标签</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                        &lt;<span class="kw">b</span> th:text="'¥' + ${#numbers.formatDecimal(cart.totalAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="hint" th:text="|请在 ${confirmMinutes} 分钟内提交订单；超时后需要重新确认。|"&gt;请在 10 分钟内提交订单。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre class="cmtline">                    &lt;!-- M05-02 只做确认页；下单事务在 M05-03 接入，这里先禁用，避免点了没结果 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                    &lt;<span class="kw">button</span> type="button" class="btn btn-primary" disabled</pre></td><td class="explain">失效时保持禁用</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                            <span class="kw">title</span>="下单事务在 M05-03 接入"&gt;提交订单（M05-03 接入）&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="hint"&gt;当前只完成“确认订单”这一步：地址校验与下单在 M05-03 实现。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明本阶段范围</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>cart.html<small>购物车入口：可结算才给去结算链接 · 99 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/cart.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('购物车')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">内容分组容器</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="en"&gt;CART&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;购物车&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/category}"&gt;继续选购&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">            &lt;!-- 写操作成功后的一次性提示；刷新不会重复提交 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="auth-ok" th:if="${message}" th:text="${message}"&gt;已加入购物车&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">            &lt;!-- 从结算页被退回时的一次性提示（空车/失效） --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="auth-error" th:if="${error}" th:text="${error}"&gt;提示&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">从结算页被退回时的提示（空车/失效）</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">            &lt;!-- 空车：给一个明确的去处，不留空白页 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="empty cart-empty" th:if="${cart.isEmpty()}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                &lt;<span class="kw">p</span>&gt;购物车还是空的，去看看作品与周边吧。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/main}"&gt;去逛逛&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;<span class="kw">div</span> th:unless="${cart.isEmpty()}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="cart-list"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-head"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;商品&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;单价&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;数量&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;小计&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                        &lt;<span class="kw">span</span>&gt;操作&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">                    &lt;!-- 每一行一个条目；失效行保留并标出原因，不自动删除 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-row" th:each="line : ${cart.lines}" th:classappend="${line.invalid} ? 'invalid'"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-item"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                            &lt;<span class="kw">a</span> th:href="@{/product/{id}(id=${line.productId})}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                                &lt;<span class="kw">img</span> th:src="@{${line.coverImage}}" th:alt="${line.productName}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                            &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;a&gt; 容器</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                            &lt;<span class="kw">div</span> class="cart-item-text"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                                &lt;<span class="kw">a</span> class="title" th:href="@{/product/{id}(id=${line.productId})}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                                   th:text="${line.productName}"&gt;商品名&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                                &lt;<span class="kw">small</span> th:text="${line.categoryName}"&gt;分类&lt;/<span class="kw">small</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                                &lt;<span class="kw">p</span> class="reason" th:if="${line.invalid}" th:text="${line.unavailableReason}"&gt;失效原因&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-price" th:text="'¥' + ${#numbers.formatDecimal(line.price, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">55</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre class="cmtline">                        &lt;!-- 改数量带旧 version，页面放旧了会被后端拒绝并要求刷新 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                        &lt;<span class="kw">form</span> class="cart-qty" th:action="@{/cart/items/{id}/quantity(id=${line.itemId})}" method="post"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="hidden" name="version" th:value="${line.version}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="number" name="quantity" th:value="${line.quantity}" min="1" max="99"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                            &lt;<span class="kw">button</span> type="submit" class="btn btn-ghost"&gt;更新&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                        &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="cart-subtotal"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                             th:text="'¥' + ${#numbers.formatDecimal(line.lineAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                        &lt;<span class="kw">form</span> class="cart-remove" th:action="@{/cart/items/{id}/remove(id=${line.itemId})}" method="post"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                            &lt;<span class="kw">input</span> type="hidden" name="version" th:value="${line.version}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                            &lt;<span class="kw">button</span> type="submit" class="link-btn"&gt;移除&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                        &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="cart-foot"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-sum"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                        &lt;<span class="kw">p</span>&gt;共 &lt;<span class="kw">b</span> th:text="${cart.badgeQuantity}"&gt;0&lt;/<span class="kw">b</span>&gt; 件（其中可结算 &lt;<span class="kw">b</span> th:text="${cart.validQuantity}"&gt;0&lt;/<span class="kw">b</span>&gt; 件）&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="cart-total"&gt;应付总额</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                            &lt;<span class="kw">b</span> th:text="'¥' + ${#numbers.formatDecimal(cart.totalAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                        &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;p&gt; 容器</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="hint"&gt;商品合计即应付总额：无运费、无优惠、不勾选结算。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="cart-actions"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="reason" th:if="${cart.invalidCount &gt; 0}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                           th:text="|有 ${cart.invalidCount} 个条目已失效，请先移除或换成可买的商品。|"&gt;有失效条目&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre class="cmtline">                        &lt;!-- 全部可用才给入口；有失效条目时保持禁用并说明原因 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                        &lt;<span class="kw">a</span> class="btn btn-primary" th:if="${cart.settleable}" th:href="@{/checkout}"&gt;去结算&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">全部可用才给结算入口</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                        &lt;<span class="kw">button</span> type="button" class="btn btn-primary" disabled</pre></td><td class="explain">失效时保持禁用</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                                th:unless="${cart.settleable}"&gt;去结算&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">继续禁用按钮的收尾</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                        &lt;<span class="kw">p</span> class="hint" th:unless="${cart.settleable}"&gt;失效条目无法结算，请先处理。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明为什么不能结算</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">95</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">97</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>WebConfig.java<small>把 /checkout 加入受保护路径 · 29 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/config/WebConfig.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.config;</pre></td><td class="explain">Web 层配置：注册登录拦截器与购物车徽标拦截器。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.service.CartService;</pre></td><td class="explain">徽标拦截器要用它查件数。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.interceptor.CartBadgeInterceptor;</pre></td><td class="explain">给所有页面注入 cartCount。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.interceptor.LoginInterceptor;</pre></td><td class="explain">未登录跳登录并记住回跳地址。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">标记配置类，被组件扫描发现。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.config.annotation.InterceptorRegistry;</pre></td><td class="explain">拦截器注册表。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.config.annotation.WebMvcConfigurer;</pre></td><td class="explain">MVC 扩展点。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// M02-01 建立，M03-04 接入登录拦截，M04-02 接入徽标，M05-02 新增 /checkout。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 只做"注册拦截器"这一件事：路径集中写在这里，新增模块时只改这一处。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：不写业务逻辑。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> WebConfig implements WebMvcConfigurer {</pre></td><td class="explain">WebConfig：见类注释</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">徽标拦截器需要按用户查件数。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> WebConfig(CartService cartService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">保存购物车服务，交给徽标拦截器。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    @Override</pre></td><td class="explain">覆盖 MVC 扩展点：注册拦截器。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> addInterceptors(InterceptorRegistry registry) {</pre></td><td class="explain">注册拦截器，由 Spring 调用。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> LoginInterceptor())</pre></td><td class="explain">挂上登录拦截器。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                .addPathPatterns("/cart", "/cart/**", "/checkout", "/checkout/**",</pre></td><td class="explain">受保护路径集中列在这里；M05-02 新增 /checkout</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                        "/orders", "/orders/**", "/profile", "/profile/**");</pre></td><td class="explain">续行：订单与资料同样需要登录</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">        // 徽标：所有页面都要显示，所以不限定路径。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> CartBadgeInterceptor(cartService));</pre></td><td class="explain">徽标拦截器对所有路径生效</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>CheckoutPageTest.java<small>7 个用例 · 135 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/CheckoutPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">结算确认页：路由、快照入会话、空车/失效回购物车、入口开关。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot;</pre></td><td class="explain">断言会话里存的是快照。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.controller.CheckoutController;</pre></td><td class="explain">会话键常量。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">真实 MySQL + 重建表。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.CartFixture;</pre></td><td class="explain">建用户/商品/车条目。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入 MockMvc。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">造数据。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">带登录身份的会话。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">发起请求。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MvcResult;</pre></td><td class="explain">取会话里的快照。</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">页面内容断言。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.not;</pre></td><td class="explain">反向断言。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">内容断言。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">断言重定向。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;</pre></td><td class="explain">断言登录回跳。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">状态码断言。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">// M05-02：依据 docs/04 §2.3、docs/05 §4.5 与 AC-12/AC-13 的页面部分。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// 覆盖：结算页渲染、快照进会话、空车/失效回购物车、购物车入口开关、游客拦截。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// 不覆盖：提交订单（M05-03）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口，直接请求控制器。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre><span class="kw">class</span> CheckoutPageTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">集成测试：真实 MySQL + MockMvc</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造数据用。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">    /** 结算页展示商品、合计与 10 分钟提示。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @DisplayName("结算页展示商品、合计与 10 分钟提示")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">void</span> checkoutPageShowsItemsAndTotal() throws Exception {</pre></td><td class="explain">结算页展示商品、合计与 10 分钟提示。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "co_show");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        <span class="kw">long</span> book = CartFixture.createProduct(jdbc, "CO-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">单行本。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        <span class="kw">long</span> badge = CartFixture.createProduct(jdbc, "CO-M01", "30.00", 10, "ON_SALE");</pre></td><td class="explain">周边。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, book, 2);</pre></td><td class="explain">放 2 件。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, badge, 1);</pre></td><td class="explain">放 1 件。</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        mockMvc.perform(get("/checkout").session(CartFixture.session(userId)))</pre></td><td class="explain">打开确认页。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">页面正常。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                .andExpect(content().string(containsString("商品CO-C01")))</pre></td><td class="explain">清单里有第一件。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                .andExpect(content().string(containsString("商品CO-M01")))</pre></td><td class="explain">清单里有第二件。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                .andExpect(content().string(containsString("¥86.00")))</pre></td><td class="explain">56.00 + 30.00。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .andExpect(content().string(containsString("请在 10 分钟内提交订单")));</pre></td><td class="explain">时限提示。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">    /** 打开确认页会把快照写进会话，供提交时比对。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    @DisplayName("确认页把快照写进会话")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">void</span> checkoutStoresSnapshotInSession() throws Exception {</pre></td><td class="explain">打开确认页会把快照写进会话，供提交时比对。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "co_snap");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "CO-C02", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, productId, 2);</pre></td><td class="explain">放 2 件。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        MockHttpSession session = CartFixture.session(userId);</pre></td><td class="explain">同一个会话。</td></tr>
+<tr class="gap"><td class="line">63</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        MvcResult result = mockMvc.perform(get("/checkout").session(session))</pre></td><td class="explain">打开确认页。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常渲染。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">拿结果取会话。</td></tr>
+<tr class="gap"><td class="line">67</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        Object stored = result.getRequest().getSession().getAttribute(CheckoutController.SNAPSHOT_KEY);</pre></td><td class="explain">取快照。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        assertThat(stored).isInstanceOf(CheckoutSnapshot.<span class="kw">class</span>);</pre></td><td class="explain">类型正确。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        CheckoutSnapshot snapshot = (CheckoutSnapshot) stored;</pre></td><td class="explain">转成快照。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        assertThat(snapshot.getLines()).hasSize(1);</pre></td><td class="explain">一行。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        assertThat(snapshot.getLines().get(0).getQuantity()).isEqualTo(2);</pre></td><td class="explain">数量 2。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThat(snapshot.getTotalAmount()).isEqualByComparingTo("56.00");</pre></td><td class="explain">总额 56.00。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">75</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre class="cmtline">    /** 空车打开确认页：回购物车，不甩错误页。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @DisplayName("空车打开确认页：重定向回购物车")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    <span class="kw">void</span> emptyCartRedirectsToCart() throws Exception {</pre></td><td class="explain">空车打开确认页：回购物车，不甩错误页。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "co_empty");</pre></td><td class="explain">建账号但不加车。</td></tr>
+<tr class="gap"><td class="line">81</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        mockMvc.perform(get("/checkout").session(CartFixture.session(userId)))</pre></td><td class="explain">打开确认页。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">重定向而不是错误页。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                .andExpect(redirectedUrl("/cart"));</pre></td><td class="explain">回到购物车。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">86</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre class="cmtline">    /** 有失效条目：同样回购物车，先处理再结算。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>    @DisplayName("有失效条目：重定向回购物车")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    <span class="kw">void</span> invalidCartRedirectsToCart() throws Exception {</pre></td><td class="explain">有失效条目：同样回购物车，先处理再结算。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "co_invalid");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">long</span> soldOut = CartFixture.createProduct(jdbc, "CO-C03", "28.00", 0, "ON_SALE");</pre></td><td class="explain">库存 0。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, soldOut, 1);</pre></td><td class="explain">放 1 件，已经是失效行。</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        mockMvc.perform(get("/checkout").session(CartFixture.session(userId)))</pre></td><td class="explain">打开确认页。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">重定向。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                .andExpect(redirectedUrl("/cart"));</pre></td><td class="explain">回购物车处理。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre class="cmtline">    /** 全部可用时，购物车页给“去结算”入口。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    @DisplayName("购物车页：可结算时给去结算入口")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    <span class="kw">void</span> cartPageLinksToCheckoutWhenSettleable() throws Exception {</pre></td><td class="explain">全部可用时，购物车页给“去结算”入口。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "co_link");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "CO-C04", "28.00", 10, "ON_SALE");</pre></td><td class="explain">建商品。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, productId, 1);</pre></td><td class="explain">放 1 件。</td></tr>
+<tr class="gap"><td class="line">107</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">打开购物车。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常渲染。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>                .andExpect(content().string(containsString("href=\"/checkout\"")));</pre></td><td class="explain">有结算入口。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">112</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre class="cmtline">    /** 有失效条目时，购物车页不给入口，只给禁用按钮。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    @DisplayName("购物车页：失效条目不给出结算入口")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>    <span class="kw">void</span> cartPageHidesCheckoutWhenInvalid() throws Exception {</pre></td><td class="explain">有失效条目时，购物车页不给入口，只给禁用按钮。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "co_nolink");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        <span class="kw">long</span> soldOut = CartFixture.createProduct(jdbc, "CO-C05", "28.00", 0, "ON_SALE");</pre></td><td class="explain">库存 0。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, soldOut, 1);</pre></td><td class="explain">失效行。</td></tr>
+<tr class="gap"><td class="line">120</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">打开购物车。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常渲染。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>                .andExpect(content().string(not(containsString("href=\"/checkout\""))))</pre></td><td class="explain">没有可点入口。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>                .andExpect(content().string(containsString("失效条目无法结算")));</pre></td><td class="explain">说明原因。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">126</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre class="cmtline">    /** 游客打开确认页：拦到登录并带回跳。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>    @DisplayName("游客打开确认页：拦到登录页")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    <span class="kw">void</span> guestCheckoutRedirectsToLogin() throws Exception {</pre></td><td class="explain">游客打开确认页：拦到登录并带回跳。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>        mockMvc.perform(get("/checkout"))</pre></td><td class="explain">不带会话。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">302 到登录。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Fcheckout*"));</pre></td><td class="explain">登录后回确认页。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-16 · M05-02 · 结算页与购物车入口 · 5 个文件、408 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

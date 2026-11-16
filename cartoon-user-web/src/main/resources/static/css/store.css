@@ -367,3 +367,37 @@ button{font-family:inherit}
   .cart-foot{flex-direction:column}
   .cart-actions{text-align:left;width:100%}
 }
+/* ===== M05-02：结算确认页 ===== */
+/* 步骤条：当前步骤高亮，已完成步骤用浅底，用户能看到自己走到哪一步 */
+.steps{display:flex;list-style:none;margin:26px 0 0;padding:0;font-size:12px;font-weight:800;letter-spacing:.14em}
+.steps li{padding:8px 18px;border:2px solid var(--ink);border-right:0;background:#fff;color:var(--muted)}
+.steps li:last-child{border-right:2px solid var(--ink)}
+.steps li.done{background:var(--paper-2);color:var(--ink)}
+.steps li.on{background:var(--ink);color:var(--yellow)}
+/* 两栏：左边商品清单，右边收货信息与总额 */
+.checkout-grid{display:grid;grid-template-columns:1.35fr .9fr;gap:28px;align-items:start;margin-top:22px}
+.checkout-items{border:3px solid var(--ink);background:#fff;box-shadow:6px 6px 0 var(--ink);padding:18px}
+.checkout-side{border:3px solid var(--ink);background:#fff;box-shadow:6px 6px 0 var(--ink);padding:18px}
+.checkout-items h3,.checkout-side h3{margin:0 0 14px;font-size:15px;letter-spacing:.12em}
+.checkout-row{display:grid;grid-template-columns:56px 1fr 56px 92px;gap:12px;align-items:center;padding:10px 0;border-top:2px solid #e6ddc9}
+.checkout-row:first-of-type{border-top:0}
+.checkout-row img{width:56px;height:56px;object-fit:cover;border:2px solid var(--ink);background:var(--paper-2)}
+.checkout-row-text{min-width:0}
+.checkout-row-text .title{display:block;font-weight:800;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.checkout-row-text .title:hover{color:var(--red)}
+.checkout-row-text small{font-size:11px;color:var(--muted)}
+.checkout-qty{font-size:13px;color:#4a4237}
+.checkout-line{text-align:right;font-weight:800;color:var(--red)}
+/* 收货表单：三项纵向排，标签在上，窄屏时不挤成一行 */
+.receiver{display:flex;flex-direction:column;gap:12px}
+.receiver label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:800;letter-spacing:.12em}
+.receiver input{border:2px solid var(--ink);padding:10px;font-size:14px;background:#fff}
+.checkout-total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px solid var(--ink);margin-top:18px;padding-top:12px;font-weight:800}
+.checkout-total b{font-size:26px;color:var(--red)}
+.checkout-side .btn{margin-top:14px;width:100%;justify-content:center}
+.checkout-side .btn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+@media(max-width:900px){
+  .checkout-grid{grid-template-columns:1fr}
+  .steps{font-size:11px}
+  .steps li{padding:6px 10px}
+}

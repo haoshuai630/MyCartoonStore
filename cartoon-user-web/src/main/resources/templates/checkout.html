@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('确认订单')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap">
+            <!-- 步骤条：当前停在第二步；第三步在 M05-03 下单成功后展示 -->
+            <ol class="steps">
+                <li class="done">购物车</li>
+                <li class="on">确认订单</li>
+                <li>完成</li>
+            </ol>
+
+            <div class="section-head">
+                <div>
+                    <span class="en">CHECKOUT</span>
+                    <h2>确认订单</h2>
+                </div>
+                <a th:href="@{/cart}">返回购物车</a>
+            </div>
+
+            <!-- 从购物车重定向过来时的一次性提示（空车/失效） -->
+            <p class="auth-error" th:if="${error}" th:text="${error}">提示</p>
+
+            <div class="checkout-grid">
+                <!-- 左：商品清单，只读，数据来自数据库当前值 -->
+                <div class="checkout-items">
+                    <h3>商品清单</h3>
+                    <div class="checkout-row" th:each="line : ${cart.lines}">
+                        <img th:src="@{${line.coverImage}}" th:alt="${line.productName}">
+                        <div class="checkout-row-text">
+                            <a class="title" th:href="@{/product/{id}(id=${line.productId})}"
+                               th:text="${line.productName}">商品名</a>
+                            <small th:text="${line.categoryName}">分类</small>
+                        </div>
+                        <span class="checkout-qty" th:text="'× ' + ${line.quantity}">× 1</span>
+                        <span class="checkout-line"
+                              th:text="'¥' + ${#numbers.formatDecimal(line.lineAmount, 1, 2)}">¥0.00</span>
+                    </div>
+                    <p class="hint">清单来自数据库当前值，确认后若商品或购物车变化，提交会被要求重新确认。</p>
+                </div>
+
+                <!-- 右：收货信息与总额；提交按钮在 M05-03 接入下单事务后启用 -->
+                <div class="checkout-side">
+                    <h3>收货信息</h3>
+                    <div class="receiver">
+                        <label>收货人
+                            <input name="receiverName" maxlength="50" placeholder="1–50 个字符">
+                        </label>
+                        <label>联系电话
+                            <input name="receiverPhone" maxlength="30" placeholder="至少包含数字，座机/手机均可">
+                        </label>
+                        <label>详细地址
+                            <input name="receiverAddress" maxlength="255" placeholder="1–255 个字符">
+                        </label>
+                    </div>
+                    <p class="hint">下单后地址会作为快照保存，之后修改商品不影响历史订单。</p>
+
+                    <div class="checkout-total">
+                        <span>应付总额</span>
+                        <b th:text="'¥' + ${#numbers.formatDecimal(cart.totalAmount, 1, 2)}">¥0.00</b>
+                    </div>
+                    <p class="hint" th:text="|请在 ${confirmMinutes} 分钟内提交订单；超时后需要重新确认。|">请在 10 分钟内提交订单。</p>
+
+                    <!-- M05-02 只做确认页；下单事务在 M05-03 接入，这里先禁用，避免点了没结果 -->
+                    <button type="button" class="btn btn-primary" disabled
+                            title="下单事务在 M05-03 接入">提交订单（M05-03 接入）</button>
+                    <p class="hint">当前只完成“确认订单”这一步：地址校验与下单在 M05-03 实现。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

@@ -207,6 +207,6 @@ class CartMutationTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("可结算 <b>1</b> 件")))
                 .andExpect(content().string(containsString("¥28.00")))
                 .andExpect(content().string(containsString("有 2 个条目已失效")))
-                .andExpect(content().string(containsString("失效条目无法结算。")));
+                .andExpect(content().string(containsString("失效条目无法结算，请先处理。")));
     }
 }

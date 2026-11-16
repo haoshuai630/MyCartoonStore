@@ -18,6 +18,8 @@
 
             <!-- 写操作成功后的一次性提示；刷新不会重复提交 -->
             <p class="auth-ok" th:if="${message}" th:text="${message}">已加入购物车</p>
+            <!-- 从结算页被退回时的一次性提示（空车/失效） -->
+            <p class="auth-error" th:if="${error}" th:text="${error}">提示</p>
 
             <!-- 空车：给一个明确的去处，不留空白页 -->
             <div class="empty cart-empty" th:if="${cart.isEmpty()}">
@@ -79,10 +81,11 @@
                     <div class="cart-actions">
                         <p class="reason" th:if="${cart.invalidCount > 0}"
                            th:text="|有 ${cart.invalidCount} 个条目已失效，请先移除或换成可买的商品。|">有失效条目</p>
-                        <!-- 结算页在 M05 开放；这里只做状态呈现，不给一个点进去 404 的入口 -->
+                        <!-- 全部可用才给入口；有失效条目时保持禁用并说明原因 -->
+                        <a class="btn btn-primary" th:if="${cart.settleable}" th:href="@{/checkout}">去结算</a>
                         <button type="button" class="btn btn-primary" disabled
-                                th:title="${cart.settleable} ? '结算页在 M05 开放' : '请先处理失效条目'">去结算</button>
-                        <p class="hint" th:text="${cart.settleable} ? '结算页在 M05 开放。' : '失效条目无法结算。'">提示</p>
+                                th:unless="${cart.settleable}">去结算</button>
+                        <p class="hint" th:unless="${cart.settleable}">失效条目无法结算，请先处理。</p>
                     </div>
                 </div>
             </div>

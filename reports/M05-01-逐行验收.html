@@ -26,49 +26,48 @@ footer{color:#536176;font-size:13px}
 <body>
 <header>
 <h1>M05-01 · 结算服务与快照（逐行验收）</h1>
-<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
 <nav><a href="#s1">CheckoutService.java</a><a href="#s2">CheckoutSnapshot.java</a><a href="#s3">Receiver.java</a><a href="#s4">ReceiverForm.java</a><a href="#s5">OrderTimeConfig.java</a><a href="#s6">CheckoutServiceTest.java</a></nav>
 </header>
 <main>
 <p class="note">内容：结算快照、空车/失效拦截、提交前逐项复核、10 分钟确认时限、收货字段校验、快照可序列化。验证：mvn -pl cartoon-order -am test → Tests run: 20, Failures: 0；mvn clean verify → 10 模块 SUCCESS，144 用例。</p>
-<p class="note" style="margin-top:8px">说明口径：行尾注释与 javadoc 优先；没有注释的规则行由 <code>gen_m04_acceptance.py</code> 的 NOTES 补充；
-import、注解、括号等结构性代码渲染为「—」。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
 <section id="s1">
 <h2>CheckoutService.java<small>生成快照、复核车是否变化、确认时限 · 110 行</small></h2>
 <p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/service/CheckoutService.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
-<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service; // 结算确认：把确认页看到的内容固化成快照并复核。</pre></td><td class="explain">结算确认：把确认页看到的内容固化成快照并复核。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service;</pre></td><td class="explain">结算确认：把确认页看到的内容固化成快照并复核。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartLine; // 取行的条目 id、商品 id、数量、版本、单价。</pre></td><td class="explain">取行的条目 id、商品 id、数量、版本、单价。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary; // 汇总提供失效标记、件数与总额。</pre></td><td class="explain">汇总提供失效标记、件数与总额。</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.service.CartService; // 读车只走购物车模块的公开服务，不碰它的 Mapper。</pre></td><td class="explain">读车只走购物车模块的公开服务，不碰它的 Mapper。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException; // 空车与失效条目用业务异常转成 4xx。</pre></td><td class="explain">空车与失效条目用业务异常转成 4xx。</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot; // 返回给会话保存的快照类型。</pre></td><td class="explain">返回给会话保存的快照类型。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service; // 注册为业务服务，由 Spring 注入控制器。</pre></td><td class="explain">注册为业务服务，由 Spring 注入控制器。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartLine;</pre></td><td class="explain">取行的条目 id、商品 id、数量、版本、单价。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary;</pre></td><td class="explain">汇总提供失效标记、件数与总额。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.service.CartService;</pre></td><td class="explain">读车只走购物车模块的公开服务，不碰它的 Mapper。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">空车与失效条目用业务异常转成 4xx。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot;</pre></td><td class="explain">返回给会话保存的快照类型。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">注册为业务服务，由 Spring 注入控制器。</td></tr>
 <tr class="gap"><td class="line">9</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.time.Clock; // 取当前时刻：测试可注入固定时钟，避免依赖真实时间。</pre></td><td class="explain">取当前时刻：测试可注入固定时钟，避免依赖真实时间。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.time.Duration; // 表示 10 分钟确认时限。</pre></td><td class="explain">表示 10 分钟确认时限。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList; // 按行数预分配，避免循环里反复扩容。</pre></td><td class="explain">按行数预分配，避免循环里反复扩容。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.util.List; // 快照行列表。</pre></td><td class="explain">快照行列表。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">取当前时刻：测试可注入固定时钟，避免依赖真实时间。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.time.Duration;</pre></td><td class="explain">表示 10 分钟确认时限。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList;</pre></td><td class="explain">按行数预分配，避免循环里反复扩容。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">快照行列表。</td></tr>
 <tr class="gap"><td class="line">14</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// M05-01：依据 docs/01 FR-O-01、docs/02 §7.2 与 docs/tasks/M05-任务清单.md。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 负责把"确认页看到的内容"固化成快照，并在提交前判断车/价是否变过、确认是否超时。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 不写库、不锁价、不占库存、不生成订单——下单事务属于 M05-03。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>@Service // 业务服务：控制器只调它，不自己算金额。</pre></td><td class="explain">业务服务：控制器只调它，不自己算金额。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>@Service</pre></td><td class="explain">业务服务：控制器只调它，不自己算金额。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CheckoutService {</pre></td><td class="explain">CheckoutService：见类注释</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** 确认时限：从打开确认页起 10 分钟内必须提交订单，超时重新确认 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> Duration CONFIRM_TTL = Duration.ofMinutes(10);</pre></td><td class="explain">确认时限：从打开确认页起 10 分钟内必须提交订单，超时重新确认</td></tr>
 <tr class="gap"><td class="line">23</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService; // 读车入口：价格、库存、失效都以它返回的当前值为准。</pre></td><td class="explain">读车入口：价格、库存、失效都以它返回的当前值为准。</td></tr>
-<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Clock clock; // 取确认时刻与提交时刻；测试注入固定时钟。</pre></td><td class="explain">取确认时刻与提交时刻；测试注入固定时钟。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartService cartService;</pre></td><td class="explain">读车入口：价格、库存、失效都以它返回的当前值为准。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Clock clock;</pre></td><td class="explain">取确认时刻与提交时刻；测试注入固定时钟。</td></tr>
 <tr class="gap"><td class="line">26</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">public</span> CheckoutService(CartService cartService, Clock clock) { // 构造器注入，测试里可替换成 Mock 与固定时钟。</pre></td><td class="explain">构造器注入，测试里可替换成 Mock 与固定时钟。</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        this.cartService = cartService; // 保存购物车服务，后续 prepare/unchanged 都用它。</pre></td><td class="explain">保存购物车服务，后续 prepare/unchanged 都用它。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.clock = clock; // 保存时钟，确认与超时判断都用同一个来源。</pre></td><td class="explain">保存时钟，确认与超时判断都用同一个来源。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">public</span> CheckoutService(CartService cartService, Clock clock) {</pre></td><td class="explain">构造器注入：购物车服务与时钟（测试可用固定时钟）</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        this.cartService = cartService;</pre></td><td class="explain">保存购物车服务，后续 prepare/unchanged 都用它。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.clock = clock;</pre></td><td class="explain">保存时钟，确认与超时判断都用同一个来源。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">31</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** 生成结算快照：空车与失效条目都直接拒绝。 */</pre></td><td class="explain"></td></tr>
@@ -83,7 +82,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        if (!summary.isAllAvailable()) {</pre></td><td class="explain">任一失效条目都不能整车结算（FR-C-02），先回购物车处理</td></tr>
 <tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            throw BizException.conflict("有失效条目，请先移除或更换后再结算");</pre></td><td class="explain">抛 409：有失效条目，请先移除或更换后再结算</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> snapshotOf(userId, summary); // 把当前车固化成快照，供提交时比对。</pre></td><td class="explain">把当前车固化成快照，供提交时比对。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> snapshotOf(userId, summary);</pre></td><td class="explain">把当前车固化成快照，供提交时比对</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">46</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
@@ -118,8 +117,8 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">76</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre class="cmtline">        // 用同一套转换规则生成当前快照，两边才处在同一口径上。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        CheckoutSnapshot now = snapshotOf(userId, current);</pre></td><td class="explain">用同一套规则生成当前快照，再逐项比</td></tr>
-<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        List&lt;CheckoutSnapshot.Line&gt; before = snapshot.getLines(); // 确认时的行（已按条目 id 排序）。</pre></td><td class="explain">确认时的行（已按条目 id 排序）。</td></tr>
-<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        List&lt;CheckoutSnapshot.Line&gt; after = now.getLines(); // 当前车的行（同样排序）。</pre></td><td class="explain">当前车的行（同样排序）。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        List&lt;CheckoutSnapshot.Line&gt; before = snapshot.getLines();</pre></td><td class="explain">确认时的行（已按条目 id 排序）。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        List&lt;CheckoutSnapshot.Line&gt; after = now.getLines();</pre></td><td class="explain">当前车的行（同样排序）。</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre class="cmtline">        // 条目数不同：有人加车或删车。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        if (before.size() != after.size()) {</pre></td><td class="explain">条目数不同：有人加车或删了车</td></tr>
 <tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>            <span class="kw">return</span> false;</pre></td><td class="explain">拦下请求，不再进入控制器</td></tr>
@@ -137,17 +136,17 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">95</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre class="cmtline">    /** 把当前车转成快照：单价取商品当前价，不取任何页面回传值。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    <span class="kw">private</span> CheckoutSnapshot snapshotOf(<span class="kw">long</span> userId, CartSummary summary) {</pre></td><td class="explain">把当前车转成快照：单价取商品当前价，不取任何页面回传值。</td></tr>
-<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        List&lt;CheckoutSnapshot.Line&gt; lines = <span class="kw">new</span> ArrayList&lt;&gt;(summary.getLines().size()); // 按车行数预分配。</pre></td><td class="explain">按车行数预分配。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        List&lt;CheckoutSnapshot.Line&gt; lines = <span class="kw">new</span> ArrayList&lt;&gt;(summary.getLines().size());</pre></td><td class="explain">按车行数预分配。</td></tr>
 <tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre class="cmtline">        // 只搬服务端算好的值：单价、数量、版本都来自购物车查询结果。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        for (CartLine line : summary.getLines()) {</pre></td><td class="explain">逐行转成快照行</td></tr>
 <tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>            lines.add(<span class="kw">new</span> CheckoutSnapshot.Line(</pre></td><td class="explain">只取服务端算出的行数据，页面回传值一律不用</td></tr>
-<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                    line.getItemId(), // 条目 id：提交时按它比对与删除。</pre></td><td class="explain">条目 id：提交时按它比对与删除。</td></tr>
-<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                    line.getProductId(), // 商品 id：防止同一行被换成别的商品。</pre></td><td class="explain">商品 id：防止同一行被换成别的商品。</td></tr>
-<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                    line.getQuantity(), // 数量：改过就要重新确认。</pre></td><td class="explain">数量：改过就要重新确认。</td></tr>
-<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                    line.getVersion(), // 购物车版本：同数量改两次也能被发现。</pre></td><td class="explain">购物车版本：同数量改两次也能被发现。</td></tr>
-<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>                    line.getPrice())); // 当前单价；金额一律由服务端计算。</pre></td><td class="explain">当前单价；金额一律由服务端计算。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                    line.getItemId(),</pre></td><td class="explain">条目 id：提交时按它比对与删除。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                    line.getProductId(),</pre></td><td class="explain">商品 id：防止同一行被换成别的商品。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                    line.getQuantity(),</pre></td><td class="explain">数量：改过就要重新确认。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                    line.getVersion(),</pre></td><td class="explain">购物车版本：同数量改两次也能被发现。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>                    line.getPrice()));</pre></td><td class="explain">当前单价；金额一律由服务端计算。</td></tr>
 <tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> CheckoutSnapshot(userId, lines, summary.getTotalAmount(), clock.instant()); // 记下确认时刻。</pre></td><td class="explain">记下确认时刻。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> CheckoutSnapshot(userId, lines, summary.getTotalAmount(), clock.instant());</pre></td><td class="explain">记下确认时刻。</td></tr>
 <tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -157,28 +156,28 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/dto/CheckoutSnapshot.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
-<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto; // 结算确认快照：记住"确认时看到什么"，提交时用来判断车是否变了。</pre></td><td class="explain">结算确认快照：记住"确认时看到什么"，提交时用来判断车是否变了。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto;</pre></td><td class="explain">结算确认快照：记住"确认时看到什么"，提交时用来判断车是否变了。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter; // 生成 getter，省掉一堆只读方法的样板代码。</pre></td><td class="explain">生成 getter，省掉一堆只读方法的样板代码。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter，省掉一堆只读方法的样板代码。</td></tr>
 <tr class="gap"><td class="line">4</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.io.Serial; // 标记序列化相关成员，配合 serialVersionUID 使用。</pre></td><td class="explain">标记序列化相关成员，配合 serialVersionUID 使用。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.io.Serializable; // 快照要放进 Servlet Session，必须可序列化。</pre></td><td class="explain">快照要放进 Servlet Session，必须可序列化。</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal; // 金额一律 BigDecimal，不用 double。</pre></td><td class="explain">金额一律 BigDecimal，不用 double。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.time.Instant; // 记录确认时刻，用于 10 分钟时限。</pre></td><td class="explain">记录确认时刻，用于 10 分钟时限。</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList; // 复制一份再排序，不改调用方的列表。</pre></td><td class="explain">复制一份再排序，不改调用方的列表。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List; // 行列表类型。</pre></td><td class="explain">行列表类型。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.util.Objects; // 生成 hashCode 时组合多个字段。</pre></td><td class="explain">生成 hashCode 时组合多个字段。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.io.Serial;</pre></td><td class="explain">标记序列化相关成员，配合 serialVersionUID 使用。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.io.Serializable;</pre></td><td class="explain">快照要放进 Servlet Session，必须可序列化。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额一律 BigDecimal，不用 double。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.time.Instant;</pre></td><td class="explain">记录确认时刻，用于 10 分钟时限。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList;</pre></td><td class="explain">复制一份再排序，不改调用方的列表。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">行列表类型。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.util.Objects;</pre></td><td class="explain">生成 hashCode 时组合多个字段。</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">// M05-01：依据 docs/01 FR-O-01、docs/02 §7.2。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">// 只做"确认凭据"：不锁价、不占库存、不参与金额计算；放 Session 所以要可序列化。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// 行按 cartItemId 升序保存，提交时两边同序比对；确认时刻用于 10 分钟时限。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Getter // 所有字段只读：快照生成后不允许再改。</pre></td><td class="explain">所有字段只读：快照生成后不允许再改。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Getter</pre></td><td class="explain">所有字段只读：快照生成后不允许再改。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CheckoutSnapshot implements Serializable {</pre></td><td class="explain">CheckoutSnapshot：见类注释</td></tr>
 <tr class="gap"><td class="line">18</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Serial // 序列化相关字段的标记。</pre></td><td class="explain">序列化相关字段的标记。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> serialVersionUID = 1L; // 会话序列化版本号：以后改字段时递增。</pre></td><td class="explain">会话序列化版本号：以后改字段时递增。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Serial</pre></td><td class="explain">序列化相关字段的标记。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> serialVersionUID = 1L;</pre></td><td class="explain">会话序列化版本号：以后改字段时递增。</td></tr>
 <tr class="gap"><td class="line">21</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 快照归属用户；提交时与当前会话比对，防止拿别人的快照下单 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">long</span> userId;</pre></td><td class="explain">userId（long）：快照归属用户；提交时与当前会话比对，防止拿别人的快照下单</td></tr>
@@ -194,22 +193,22 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">33</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 构造时排序并冻结：快照生成后不再变化。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">public</span> CheckoutSnapshot(<span class="kw">long</span> userId, List&lt;Line&gt; lines, BigDecimal totalAmount, Instant confirmedAt) {</pre></td><td class="explain">构造器：注入 userId、lines、totalAmount、confirmedAt</td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        this.userId = userId; // 记下这是谁的车。</pre></td><td class="explain">记下这是谁的车。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        this.userId = userId;</pre></td><td class="explain">记下这是谁的车。</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">        // 复制后排序：不改调用方的列表，且保证提交时两边同序。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        List&lt;Line&gt; sorted = <span class="kw">new</span> ArrayList&lt;&gt;(lines);</pre></td><td class="explain">复制后排序，不改调用方的列表</td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        sorted.sort((a, b) -&gt; Long.compare(a.getCartItemId(), b.getCartItemId())); // 按条目 id 升序。</pre></td><td class="explain">按条目 id 升序。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        sorted.sort((a, b) -&gt; Long.compare(a.getCartItemId(), b.getCartItemId()));</pre></td><td class="explain">按条目 id 排序：查询顺序不同不算变化</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">        // 冻结行列表：会话里的快照不能被后续请求改掉。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        this.lines = List.copyOf(sorted);</pre></td><td class="explain">不可变列表：会话里的快照不能被后续请求改掉</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        this.totalAmount = totalAmount; // 总额只作显示与比对，不参与下单金额计算。</pre></td><td class="explain">总额只作显示与比对，不参与下单金额计算。</td></tr>
-<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        this.confirmedAt = confirmedAt; // 记录确认时刻，提交时判时限。</pre></td><td class="explain">记录确认时刻，提交时判时限。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        this.totalAmount = totalAmount;</pre></td><td class="explain">总额只作显示与比对，不参与下单金额计算。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        this.confirmedAt = confirmedAt;</pre></td><td class="explain">记录确认时刻；提交时用它判断是否超过 10 分钟</td></tr>
 <tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">45</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">    /** 快照里的一行：核对版本与价格用，不信任页面回传的任何金额。 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Getter // 行也只读：给出 getter 即可。</pre></td><td class="explain">行也只读：给出 getter 即可。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Getter</pre></td><td class="explain">行也只读：给出 getter 即可。</td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">class</span> Line implements Serializable {</pre></td><td class="explain">快照里的一行：核对版本与价格用，不信任页面回传的任何金额。</td></tr>
 <tr class="gap"><td class="line">49</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        @Serial // 序列化相关字段的标记。</pre></td><td class="explain">序列化相关字段的标记。</td></tr>
-<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> serialVersionUID = 1L; // 行对象的序列化版本号。</pre></td><td class="explain">行对象的序列化版本号。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        @Serial</pre></td><td class="explain">序列化相关字段的标记。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> serialVersionUID = 1L;</pre></td><td class="explain">行对象的序列化版本号。</td></tr>
 <tr class="gap"><td class="line">52</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">        /** cart_item.id：删除已结算条目时按它定位 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        <span class="kw">private</span> <span class="kw">final</span> <span class="kw">long</span> cartItemId;</pre></td><td class="explain">cartItemId（long）：cart_item.id：删除已结算条目时按它定位</td></tr>
@@ -228,38 +227,38 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">67</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">        /** 一行快照：字段全部来自服务端查询结果。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        <span class="kw">public</span> Line(<span class="kw">long</span> cartItemId, <span class="kw">long</span> productId, <span class="kw">int</span> quantity, <span class="kw">long</span> cartVersion, BigDecimal price) {</pre></td><td class="explain">构造器：注入 cartItemId、productId、quantity、cartVersion、price</td></tr>
-<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            this.cartItemId = cartItemId; // 条目定位用。</pre></td><td class="explain">条目定位用。</td></tr>
-<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>            this.productId = productId; // 商品身份用。</pre></td><td class="explain">商品身份用。</td></tr>
-<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>            this.quantity = quantity; // 数量快照。</pre></td><td class="explain">数量快照。</td></tr>
-<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            this.cartVersion = cartVersion; // 版本快照。</pre></td><td class="explain">版本快照。</td></tr>
-<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            this.price = price; // 单价快照，仅用于比对。</pre></td><td class="explain">单价快照，仅用于比对。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            this.cartItemId = cartItemId;</pre></td><td class="explain">条目定位用。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>            this.productId = productId;</pre></td><td class="explain">商品身份用。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>            this.quantity = quantity;</pre></td><td class="explain">数量快照。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            this.cartVersion = cartVersion;</pre></td><td class="explain">版本快照。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            this.price = price;</pre></td><td class="explain">单价快照，仅用于比对。</td></tr>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">76</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre class="cmtline">        /** 与当前车行逐项比对：任一项不同都算变了。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        <span class="kw">public</span> boolean sameAs(Line other) {</pre></td><td class="explain">与当前车行逐项比对：任一项不同都算变了。</td></tr>
 <tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre class="cmtline">            // 价格按数值比：28.0 与 28.00 是同一个价，不能卡在刻度上。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>            <span class="kw">return</span> other != null</pre></td><td class="explain">逐项比对，任一项不同就算车变了</td></tr>
-<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &amp;&amp; cartItemId == other.cartItemId // 同一行：条目 id 必须一致。</pre></td><td class="explain">同一行：条目 id 必须一致。</td></tr>
-<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    &amp;&amp; productId == other.productId // 同一件商品：不能偷偷换货。</pre></td><td class="explain">同一件商品：不能偷偷换货。</td></tr>
-<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                    &amp;&amp; quantity == other.quantity // 数量没被改。</pre></td><td class="explain">数量没被改。</td></tr>
-<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                    &amp;&amp; cartVersion == other.cartVersion // 版本没被改（同数量改两次也能发现）。</pre></td><td class="explain">版本没被改（同数量改两次也能发现）。</td></tr>
-<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                    &amp;&amp; price.compareTo(other.price) == 0; // 价格按数值相等。</pre></td><td class="explain">价格按数值相等。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &amp;&amp; cartItemId == other.cartItemId</pre></td><td class="explain">同一行：条目 id 必须一致。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    &amp;&amp; productId == other.productId</pre></td><td class="explain">同一件商品：不能偷偷换货。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                    &amp;&amp; quantity == other.quantity</pre></td><td class="explain">数量没被改。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                    &amp;&amp; cartVersion == other.cartVersion</pre></td><td class="explain">版本没被改（同数量改两次也能发现）。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                    &amp;&amp; price.compareTo(other.price) == 0;</pre></td><td class="explain">价格用 compareTo，28.0 与 28.00 视为相同</td></tr>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">87</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
-<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">public</span> boolean equals(Object o) {</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">public</span> boolean equals(Object o) {</pre></td><td class="explain">结构行：参与语法组织</td></tr>
 <tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>            if (this == o) {</pre></td><td class="explain">同一个引用直接相等</td></tr>
-<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                <span class="kw">return</span> true; // 同一个引用直接相等。</pre></td><td class="explain">同一个引用直接相等。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                <span class="kw">return</span> true;</pre></td><td class="explain">同一个引用直接相等。</td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>            if (!(o instanceof Line other)) {</pre></td><td class="explain">类型不对就不相等</td></tr>
-<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                <span class="kw">return</span> false; // 类型不对就不相等。</pre></td><td class="explain">类型不对就不相等。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                <span class="kw">return</span> false;</pre></td><td class="explain">类型不对就不相等。</td></tr>
 <tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre class="cmtline">            // equals 与 sameAs 同口径，避免测试与集合里出现两种"相等"。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>            <span class="kw">return</span> sameAs(other);</pre></td><td class="explain">复用同一套逐项比较</td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">99</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
-<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        <span class="kw">public</span> <span class="kw">int</span> hashCode() {</pre></td><td class="explain">—</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        <span class="kw">public</span> <span class="kw">int</span> hashCode() {</pre></td><td class="explain">结构行：参与语法组织</td></tr>
 <tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre class="cmtline">            // 价格先去掉尾零，保证与 equals 的数值口径一致。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>            <span class="kw">return</span> Objects.hash(cartItemId, productId, quantity, cartVersion, price.stripTrailingZeros());</pre></td><td class="explain">hash 与 equals 口径一致：价格先去掉尾零</td></tr>
 <tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
@@ -272,22 +271,22 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/dto/Receiver.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
-<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto; // 校验通过的收货信息：下单时直接写进订单快照。</pre></td><td class="explain">校验通过的收货信息：下单时直接写进订单快照。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto;</pre></td><td class="explain">校验通过的收货信息：下单时直接写进订单快照。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter; // 生成 getter，字段只读。</pre></td><td class="explain">生成 getter，字段只读。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter，字段只读。</td></tr>
 <tr class="gap"><td class="line">4</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.io.Serial; // 序列化成员标记。</pre></td><td class="explain">序列化成员标记。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.io.Serializable; // 可能随快照一起进 Session，保持可序列化。</pre></td><td class="explain">可能随快照一起进 Session，保持可序列化。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.io.Serial;</pre></td><td class="explain">序列化成员标记。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.io.Serializable;</pre></td><td class="explain">可能随快照一起进 Session，保持可序列化。</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// M05-01：依据 docs/01 FR-O-01 的收货字段规则。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 只负责携带"已经校验并去空白"的三项；校验逻辑在 ReceiverForm。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter // 三项都只读：构造后不再修改。</pre></td><td class="explain">三项都只读：构造后不再修改。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">三项都只读：构造后不再修改。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> Receiver implements Serializable {</pre></td><td class="explain">Receiver：见类注释</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    @Serial // 序列化相关字段的标记。</pre></td><td class="explain">序列化相关字段的标记。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> serialVersionUID = 1L; // 会话序列化版本号。</pre></td><td class="explain">会话序列化版本号。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    @Serial</pre></td><td class="explain">序列化相关字段的标记。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> serialVersionUID = 1L;</pre></td><td class="explain">会话序列化版本号。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 收货人，去首尾空白后 1–50 字符 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String name;</pre></td><td class="explain">name（String）：收货人，去首尾空白后 1–50 字符</td></tr>
@@ -300,9 +299,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr class="gap"><td class="line">24</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 三项都已校验：这里不再重复判断。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">public</span> Receiver(String name, String phone, String address) {</pre></td><td class="explain">构造器：注入 name、phone、address</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        this.name = name; // 收货人快照。</pre></td><td class="explain">收货人快照。</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        this.phone = phone; // 联系电话快照。</pre></td><td class="explain">联系电话快照。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.address = address; // 地址快照。</pre></td><td class="explain">地址快照。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        this.name = name;</pre></td><td class="explain">收货人快照。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        this.phone = phone;</pre></td><td class="explain">联系电话快照。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.address = address;</pre></td><td class="explain">地址快照。</td></tr>
 <tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -312,11 +311,11 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/dto/ReceiverForm.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
-<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto; // 收货表单校验：必填、去空白、按列宽限长。</pre></td><td class="explain">收货表单校验：必填、去空白、按列宽限长。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto;</pre></td><td class="explain">收货表单校验：必填、去空白、按列宽限长。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException; // 校验失败转 400，文案带字段名。</pre></td><td class="explain">校验失败转 400，文案带字段名。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">校验失败转 400，文案带字段名。</td></tr>
 <tr class="gap"><td class="line">4</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">// M05-01：依据 docs/01 FR-O-01 与 docs/03 的列宽（50 / 30 / 255）。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">// 只做校验与去空白，不碰数据库；电话不限定 11 位手机号。</pre></td><td class="explain"></td></tr>
@@ -331,19 +330,19 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 详细地址长度上限，与 receiver_address VARCHAR(255) 一致 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> ADDRESS_MAX = 255;</pre></td><td class="explain">与 receiver_address VARCHAR(255) 对齐</td></tr>
 <tr class="gap"><td class="line">17</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> ReceiverForm() { // 工具类不允许实例化。</pre></td><td class="explain">工具类不允许实例化。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> ReceiverForm() {</pre></td><td class="explain">工具类不允许实例化。</td></tr>
 <tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">20</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** 校验并返回去空白后的收货信息，任何一项不合法都抛 400。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> Receiver parse(String rawName, String rawPhone, String rawAddress) {</pre></td><td class="explain">校验并返回去空白后的收货信息，任何一项不合法都抛 400。</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        String name = require(rawName, "收货人", NAME_MAX); // 必填 + ≤50。</pre></td><td class="explain">必填 + ≤50。</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        String phone = require(rawPhone, "联系电话", PHONE_MAX); // 必填 + ≤30。</pre></td><td class="explain">必填 + ≤30。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        String name = require(rawName, "收货人", NAME_MAX);</pre></td><td class="explain">必填 + ≤50。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        String phone = require(rawPhone, "联系电话", PHONE_MAX);</pre></td><td class="explain">必填 + ≤30。</td></tr>
 <tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">        // 轻校验：电话至少含一位数字，拦掉纯文字乱填；不限定手机号格式。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        if (phone.codePoints().noneMatch(Character::isDigit)) {</pre></td><td class="explain">轻校验：至少一位数字，拦纯文字但不限定号码格式</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>            throw BizException.badRequest("联系电话必须包含数字"); // 提示仍不规定号码格式。</pre></td><td class="explain">提示仍不规定号码格式。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>            throw BizException.badRequest("联系电话必须包含数字");</pre></td><td class="explain">提示仍不规定号码格式。</td></tr>
 <tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        String address = require(rawAddress, "详细地址", ADDRESS_MAX); // 必填 + ≤255。</pre></td><td class="explain">必填 + ≤255。</td></tr>
-<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> Receiver(name, phone, address); // 三项都通过才构造。</pre></td><td class="explain">三项都通过才构造。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        String address = require(rawAddress, "详细地址", ADDRESS_MAX);</pre></td><td class="explain">必填 + ≤255。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> Receiver(name, phone, address);</pre></td><td class="explain">三项都通过才构造。</td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">32</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 去首尾空白后必须非空且不超长；超长拒绝而不是截断。 */</pre></td><td class="explain"></td></tr>
@@ -351,13 +350,13 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">        // null 当空串：必填判断只写一处，不散落到三个调用点。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        String value = raw == null ? "" : raw.strip();</pre></td><td class="explain">null 当空串：必填判断只写一处</td></tr>
 <tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        if (value.isEmpty()) {</pre></td><td class="explain">空与全空白都算没填</td></tr>
-<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>            throw BizException.badRequest(field + "不能为空"); // 空与全空白都算没填。</pre></td><td class="explain">空与全空白都算没填。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>            throw BizException.badRequest(field + "不能为空");</pre></td><td class="explain">空与全空白都算没填。</td></tr>
 <tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">        // 超长直接拒：截断会让用户以为存进去了。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        if (value.length() &gt; max) {</pre></td><td class="explain">超长拒绝而不是截断，避免用户以为存进去了</td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            throw BizException.badRequest(field + "不能超过 " + max + " 个字符"); // 提示带字段名与上限。</pre></td><td class="explain">提示带字段名与上限。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>            throw BizException.badRequest(field + "不能超过 " + max + " 个字符");</pre></td><td class="explain">提示带字段名与上限。</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> value; // 返回去空白后的值。</pre></td><td class="explain">返回去空白后的值。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">返回去空白后的值。</td></tr>
 <tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -367,24 +366,24 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/config/OrderTimeConfig.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
-<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.config; // 订单模块的时间源：统一提供一个时钟，便于测试固定时间。</pre></td><td class="explain">订单模块的时间源：统一提供一个时钟，便于测试固定时间。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.config;</pre></td><td class="explain">订单模块的时间源：统一提供一个时钟，便于测试固定时间。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Bean; // 声明 Spring Bean。</pre></td><td class="explain">声明 Spring Bean。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration; // 标记配置类，被组件扫描发现。</pre></td><td class="explain">标记配置类，被组件扫描发现。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Bean;</pre></td><td class="explain">声明 Spring Bean。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">标记配置类，被组件扫描发现。</td></tr>
 <tr class="gap"><td class="line">5</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.time.Clock; // 注入给业务服务，避免每处直接调 Instant.now()。</pre></td><td class="explain">注入给业务服务，避免每处直接调 Instant.now()。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">注入给业务服务，避免每处直接调 Instant.now()。</td></tr>
 <tr class="gap"><td class="line">7</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// M05-01：结算确认需要"确认时刻"与"10 分钟时限"，集中到一个可替换的 Clock。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 生产用系统时钟；测试直接 new CheckoutService(cartService, Clock.fixed(...))，不依赖这里。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Configuration // 配置类：只声明 Bean，不写业务。</pre></td><td class="explain">配置类：只声明 Bean，不写业务。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：只声明 Bean，不写业务。</td></tr>
 <tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderTimeConfig {</pre></td><td class="explain">OrderTimeConfig：见类注释</td></tr>
 <tr class="gap"><td class="line">12</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">    /** 系统默认时区的时钟：订单时间统一取自这里。 */</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    @Bean // 交给 Spring 管理，CheckoutService 构造器自动注入。</pre></td><td class="explain">交给 Spring 管理，CheckoutService 构造器自动注入。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    @Bean</pre></td><td class="explain">交给 Spring 管理，CheckoutService 构造器自动注入。</td></tr>
 <tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">public</span> Clock clock() {</pre></td><td class="explain">系统默认时区的时钟：订单时间统一取自这里。</td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>        <span class="kw">return</span> Clock.systemDefaultZone(); // 与数据库 DATETIME、页面时区保持一致。</pre></td><td class="explain">与数据库 DATETIME、页面时区保持一致。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>        <span class="kw">return</span> Clock.systemDefaultZone();</pre></td><td class="explain">与数据库 DATETIME、页面时区保持一致。</td></tr>
 <tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
@@ -394,53 +393,53 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <p class="path">cartoon-order/src/test/java/org/csu/mycartoonstore/order/service/CheckoutServiceTest.java</p>
 <table>
 <colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
-<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
 <tbody>
-<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service; // 验证结算快照与提交前复核，不碰数据库。</pre></td><td class="explain">验证结算快照与提交前复核，不碰数据库。</td></tr>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service;</pre></td><td class="explain">验证结算快照与提交前复核，不碰数据库。</td></tr>
 <tr class="gap"><td class="line">2</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView; // 用真实视图构造购物车行，不另造 DTO。</pre></td><td class="explain">用真实视图构造购物车行，不另造 DTO。</td></tr>
-<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartLine; // 复用购物车模块的行转换。</pre></td><td class="explain">复用购物车模块的行转换。</td></tr>
-<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary; // 汇总提供失效标记与总额。</pre></td><td class="explain">汇总提供失效标记与总额。</td></tr>
-<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.service.CartService; // 被测服务的协作方，这里用 Mock。</pre></td><td class="explain">被测服务的协作方，这里用 Mock。</td></tr>
-<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException; // 校验失败抛的业务异常。</pre></td><td class="explain">校验失败抛的业务异常。</td></tr>
-<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode; // 断言 400 / 409 用。</pre></td><td class="explain">断言 400 / 409 用。</td></tr>
-<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot; // 被测快照类型。</pre></td><td class="explain">被测快照类型。</td></tr>
-<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.Receiver; // 收货校验的返回值。</pre></td><td class="explain">收货校验的返回值。</td></tr>
-<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.ReceiverForm; // 收货字段校验入口。</pre></td><td class="explain">收货字段校验入口。</td></tr>
-<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach; // 每个用例前重建 Mock。</pre></td><td class="explain">每个用例前重建 Mock。</td></tr>
-<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName; // 用例名进入测试报告。</pre></td><td class="explain">用例名进入测试报告。</td></tr>
-<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test; // JUnit 用例入口。</pre></td><td class="explain">JUnit 用例入口。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">用真实视图构造购物车行，不另造 DTO。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartLine;</pre></td><td class="explain">复用购物车模块的行转换。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary;</pre></td><td class="explain">汇总提供失效标记与总额。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.service.CartService;</pre></td><td class="explain">被测服务的协作方，这里用 Mock。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">校验失败抛的业务异常。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">断言 400 / 409 用。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot;</pre></td><td class="explain">被测快照类型。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.Receiver;</pre></td><td class="explain">收货校验的返回值。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.ReceiverForm;</pre></td><td class="explain">收货字段校验入口。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">每个用例前重建 Mock。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名进入测试报告。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 用例入口。</td></tr>
 <tr class="gap"><td class="line">15</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.io.ByteArrayInputStream; // 反序列化来源。</pre></td><td class="explain">反序列化来源。</td></tr>
-<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.io.ByteArrayOutputStream; // 序列化目标，模拟 Session。</pre></td><td class="explain">序列化目标，模拟 Session。</td></tr>
-<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.io.ObjectInputStream; // 读回快照。</pre></td><td class="explain">读回快照。</td></tr>
-<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.io.ObjectOutputStream; // 写出快照。</pre></td><td class="explain">写出快照。</td></tr>
-<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal; // 价格与金额断言。</pre></td><td class="explain">价格与金额断言。</td></tr>
-<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.time.Clock; // 固定时钟：确认时刻与超时判断都可复现。</pre></td><td class="explain">固定时钟：确认时刻与超时判断都可复现。</td></tr>
-<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> java.time.Instant; // 表示确认时刻。</pre></td><td class="explain">表示确认时刻。</td></tr>
-<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> java.time.ZoneOffset; // 固定时区，避免本地时区影响断言。</pre></td><td class="explain">固定时区，避免本地时区影响断言。</td></tr>
-<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> java.util.List; // 空车用 List.of()。</pre></td><td class="explain">空车用 List.of()。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.io.ByteArrayInputStream;</pre></td><td class="explain">反序列化来源。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.io.ByteArrayOutputStream;</pre></td><td class="explain">序列化目标，模拟 Session。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.io.ObjectInputStream;</pre></td><td class="explain">读回快照。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.io.ObjectOutputStream;</pre></td><td class="explain">写出快照。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">价格与金额断言。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">固定时钟：确认时刻与超时判断都可复现。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> java.time.Instant;</pre></td><td class="explain">表示确认时刻。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> java.time.ZoneOffset;</pre></td><td class="explain">固定时区，避免本地时区影响断言。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">空车用 List.of()。</td></tr>
 <tr class="gap"><td class="line">25</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat; // 值断言。</pre></td><td class="explain">值断言。</td></tr>
-<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy; // 异常断言。</pre></td><td class="explain">异常断言。</td></tr>
-<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock; // 造 Mock 的车服务。</pre></td><td class="explain">造 Mock 的车服务。</td></tr>
-<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when; // 设定车的内容。</pre></td><td class="explain">设定车的内容。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">异常断言。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock;</pre></td><td class="explain">造 Mock 的车服务。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">设定车的内容。</td></tr>
 <tr class="gap"><td class="line">30</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">// M05-01：依据 docs/01 FR-O-01 与 docs/02 §7.2；服务层部分。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">// 覆盖快照内容、空车/失效拦截、五种车变化、他人快照、序列化与收货字段。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">// 不覆盖 Controller 与下单事务（M05-02 / M05-03）。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre><span class="kw">class</span> CheckoutServiceTest {</pre></td><td class="explain">测试类：Mock CartService，验证快照与比对</td></tr>
 <tr class="gap"><td class="line">35</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> USER = 1L; // 固定用 1 号用户，所有用例同一身份。</pre></td><td class="explain">固定用 1 号用户，所有用例同一身份。</td></tr>
-<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Instant CONFIRMED_AT = Instant.parse("2026-11-16T10:00:00Z"); // 固定确认时刻。</pre></td><td class="explain">固定确认时刻。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> USER = 1L;</pre></td><td class="explain">固定用 1 号用户，所有用例同一身份。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Instant CONFIRMED_AT = Instant.parse("2026-11-16T10:00:00Z");</pre></td><td class="explain">固定确认时刻。</td></tr>
 <tr class="gap"><td class="line">38</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> CartService cartService; // 购物车服务 Mock：只提供 summary。</pre></td><td class="explain">购物车服务 Mock：只提供 summary。</td></tr>
-<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> CheckoutService service; // 被测对象。</pre></td><td class="explain">被测对象。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> CartService cartService;</pre></td><td class="explain">购物车服务 Mock：只提供 summary。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> CheckoutService service;</pre></td><td class="explain">被测对象。</td></tr>
 <tr class="gap"><td class="line">41</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @BeforeEach // 每个用例前重置，避免 Mock 状态互相污染。</pre></td><td class="explain">每个用例前重置，避免 Mock 状态互相污染。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前重置，避免 Mock 状态互相污染。</td></tr>
 <tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">void</span> setUp() {</pre></td><td class="explain">每个用例前重建 Mock 与服务。</td></tr>
-<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        cartService = mock(CartService.<span class="kw">class</span>); // 造一个假的车服务。</pre></td><td class="explain">造一个假的车服务。</td></tr>
-<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        service = <span class="kw">new</span> CheckoutService(cartService, Clock.fixed(CONFIRMED_AT, ZoneOffset.UTC)); // 时钟固定在 10:00。</pre></td><td class="explain">时钟固定在 10:00。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        cartService = mock(CartService.<span class="kw">class</span>);</pre></td><td class="explain">造一个假的车服务。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        service = <span class="kw">new</span> CheckoutService(cartService, Clock.fixed(CONFIRMED_AT, ZoneOffset.UTC));</pre></td><td class="explain">时钟固定在 10:00。</td></tr>
 <tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">47</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre class="cmtline">    /** 五型之外的第一条：快照按条目 id 升序，金额取购物车汇总。 */</pre></td><td class="explain"></td></tr>
@@ -449,18 +448,18 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    <span class="kw">void</span> prepareBuildsSnapshotInItemOrder() {</pre></td><td class="explain">五型之外的第一条：快照按条目 id 升序，金额取购物车汇总。</td></tr>
 <tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre class="cmtline">        // 故意先给条目 20 再给 10：验证快照会按条目 id 重新排序。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(</pre></td><td class="explain">准备当前车（可多行，按可变参数传入）</td></tr>
-<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L), // 条目 20：数量 1、¥30.00。</pre></td><td class="explain">视图行：数量 1、价格 30.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                view(10L, 8L, 2, "28.00", 10, "ON_SALE", 3L))); // 条目 10：数量 2、¥28.00、版本 3。</pre></td><td class="explain">视图行：数量 2、价格 28.00、库存 10、ON_SALE、版本 3L</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L),</pre></td><td class="explain">条目 20：数量 1、¥30.00。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                view(10L, 8L, 2, "28.00", 10, "ON_SALE", 3L)));</pre></td><td class="explain">条目 10：数量 2、¥28.00、版本 3。</td></tr>
 <tr class="gap"><td class="line">56</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 被测动作：生成结算快照。</pre></td><td class="explain">被测动作：生成结算快照。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">58</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre class="cmtline">        // 断言：行按 id 升序（10、20），单价与购物车版本原样带入，总额为两行之和。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThat(snapshot.getUserId()).isEqualTo(USER); // 快照归当前用户。</pre></td><td class="explain">快照归当前用户。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThat(snapshot.getUserId()).isEqualTo(USER);</pre></td><td class="explain">快照归当前用户。</td></tr>
 <tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        assertThat(snapshot.getLines()).extracting(CheckoutSnapshot.Line::getCartItemId)</pre></td><td class="explain">取出条目 id 列，按顺序比对</td></tr>
-<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                .containsExactly(10L, 20L); // 条目标识按 id 升序。</pre></td><td class="explain">条目标识按 id 升序。</td></tr>
-<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(snapshot.getLines().get(0).getPrice()).isEqualByComparingTo("28.00"); // 单价原样。</pre></td><td class="explain">单价原样。</td></tr>
-<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThat(snapshot.getLines().get(0).getCartVersion()).isEqualTo(3L); // 版本原样。</pre></td><td class="explain">版本原样。</td></tr>
-<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        assertThat(snapshot.getTotalAmount()).isEqualByComparingTo("86.00"); // 56.00 + 30.00。</pre></td><td class="explain">56.00 + 30.00。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                .containsExactly(10L, 20L);</pre></td><td class="explain">条目标识按 id 升序。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(snapshot.getLines().get(0).getPrice()).isEqualByComparingTo("28.00");</pre></td><td class="explain">单价原样。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThat(snapshot.getLines().get(0).getCartVersion()).isEqualTo(3L);</pre></td><td class="explain">版本原样。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        assertThat(snapshot.getTotalAmount()).isEqualByComparingTo("86.00");</pre></td><td class="explain">56.00 + 30.00。</td></tr>
 <tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">67</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">    /** 空车没有可确认的内容：400，提示先选购。 */</pre></td><td class="explain"></td></tr>
@@ -473,8 +472,8 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre class="cmtline">        // 断言 400 与"购物车为空"文案。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.prepare(USER))</pre></td><td class="explain">调用 service.prepare(USER，期望抛出业务异常</td></tr>
 <tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>, e -&gt; {</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
-<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST); // 参数/状态问题给 400。</pre></td><td class="explain">参数/状态问题给 400。</td></tr>
-<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("购物车为空"); // 文案指向可操作的下一步。</pre></td><td class="explain">文案指向可操作的下一步。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST);</pre></td><td class="explain">参数/状态问题给 400。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("购物车为空");</pre></td><td class="explain">文案指向可操作的下一步。</td></tr>
 <tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                });</pre></td><td class="explain">断言代码块结束</td></tr>
 <tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">82</td><td></td><td></td></tr>
@@ -484,14 +483,14 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    <span class="kw">void</span> prepareRejectsInvalidLine() {</pre></td><td class="explain">有失效条目：409，先处理再结算。</td></tr>
 <tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre class="cmtline">        // 第二行库存 0：数量 3 超过库存，属失效条目。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(</pre></td><td class="explain">准备当前车（可多行，按可变参数传入）</td></tr>
-<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                view(10L, 8L, 2, "28.00", 10, "ON_SALE", 0L), // 正常行。</pre></td><td class="explain">视图行：数量 2、价格 28.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                view(20L, 9L, 3, "30.00", 0, "ON_SALE", 0L))); // 库存 0 的失效行。</pre></td><td class="explain">视图行：数量 3、价格 30.00、库存 0、ON_SALE、版本 0L</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                view(10L, 8L, 2, "28.00", 10, "ON_SALE", 0L),</pre></td><td class="explain">正常行。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                view(20L, 9L, 3, "30.00", 0, "ON_SALE", 0L)));</pre></td><td class="explain">库存 0 的失效行。</td></tr>
 <tr class="gap"><td class="line">91</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre class="cmtline">        // 断言 409：整车不可结算，提示先处理失效条目。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.prepare(USER))</pre></td><td class="explain">调用 service.prepare(USER，期望抛出业务异常</td></tr>
 <tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>, e -&gt; {</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
-<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT); // 与 M04 的"失效不可结算"一致。</pre></td><td class="explain">与 M04 的"失效不可结算"一致。</td></tr>
-<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("失效条目"); // 让用户知道回去处理什么。</pre></td><td class="explain">让用户知道回去处理什么。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT);</pre></td><td class="explain">与 M04 的"失效不可结算"一致。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("失效条目");</pre></td><td class="explain">让用户知道回去处理什么。</td></tr>
 <tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                });</pre></td><td class="explain">断言代码块结束</td></tr>
 <tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">99</td><td></td><td></td></tr>
@@ -501,9 +500,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    <span class="kw">void</span> unchangedWhenNothingChanged() {</pre></td><td class="explain">车没变：复核通过。</td></tr>
 <tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre class="cmtline">        // 车里一行：数量 2、¥28.00、上架。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        CartSummary summary = summaryOf(view(10L, 8L, 2, "28.00", 10, "ON_SALE", 0L));</pre></td><td class="explain">先准备一辆车，后面反复复用</td></tr>
-<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summary); // 之后每次读都是这辆车。</pre></td><td class="explain">之后每次读都是这辆车。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summary);</pre></td><td class="explain">之后每次读都是这辆车。</td></tr>
 <tr class="gap"><td class="line">107</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 先按这辆车生成快照。</pre></td><td class="explain">先按这辆车生成快照。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">109</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre class="cmtline">        // 再读一次仍是同一辆车：复核通过。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        assertThat(service.unchanged(USER, snapshot)).isTrue();</pre></td><td class="explain">断言车没变、可以下单</td></tr>
@@ -515,7 +514,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>    <span class="kw">void</span> changedWhenQuantityDiffers() {</pre></td><td class="explain">另一个标签页改数量：复核失败，要求重新确认。</td></tr>
 <tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre class="cmtline">        // 快照基于数量 2。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 2, "28.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
-<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 记下确认时的样子。</pre></td><td class="explain">记下确认时的样子。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">121</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre class="cmtline">        // 另一个标签页把数量 2 改成 3，购物车版本随之 +1。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 3, "28.00", 10, "ON_SALE", 1L)));</pre></td><td class="explain">同一行数量 2→3、版本 0→1：模拟另一个标签页改车</td></tr>
@@ -530,7 +529,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>    <span class="kw">void</span> changedWhenPriceDiffers() {</pre></td><td class="explain">后台改价：复核失败，不静默按新价成交。</td></tr>
 <tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre class="cmtline">        // 快照基于 ¥28.00。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
-<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 记下确认价。</pre></td><td class="explain">记下确认价。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">136</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre class="cmtline">        // 后台在确认之后把价格 28 改成 29：不能按快照价成交。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "29.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
@@ -545,20 +544,20 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    <span class="kw">void</span> changedWhenItemSetDiffers() {</pre></td><td class="explain">条目被删或被加：复核失败。</td></tr>
 <tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre class="cmtline">        // 快照基于两行。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(</pre></td><td class="explain">准备当前车（可多行，按可变参数传入）</td></tr>
-<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>                view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L), // 第一行。</pre></td><td class="explain">视图行：数量 1、价格 28.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L))); // 第二行。</pre></td><td class="explain">视图行：数量 1、价格 30.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 两行的快照。</pre></td><td class="explain">两行的快照。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>                view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L),</pre></td><td class="explain">第一行。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">第二行。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">153</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre class="cmtline">        // 删掉一行：条目数变少。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
-<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        assertThat(service.unchanged(USER, snapshot)).isFalse(); // 条目不齐，必须重新确认。</pre></td><td class="explain">条目不齐，必须重新确认。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        assertThat(service.unchanged(USER, snapshot)).isFalse();</pre></td><td class="explain">断言车已变化、必须重新确认</td></tr>
 <tr class="gap"><td class="line">157</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre class="cmtline">        // 再加一行：条目数变多。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(</pre></td><td class="explain">准备当前车（可多行，按可变参数传入）</td></tr>
-<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L), // 原第一行。</pre></td><td class="explain">视图行：数量 1、价格 28.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L), // 原第二行。</pre></td><td class="explain">视图行：数量 1、价格 30.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>                view(30L, 7L, 1, "19.00", 10, "ON_SALE", 0L))); // 新加的一行。</pre></td><td class="explain">视图行：数量 1、价格 19.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        assertThat(service.unchanged(USER, snapshot)).isFalse(); // 新增条目也算变化。</pre></td><td class="explain">新增条目也算变化。</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L),</pre></td><td class="explain">原第一行。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L),</pre></td><td class="explain">原第二行。</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>                view(30L, 7L, 1, "19.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">新加的一行。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        assertThat(service.unchanged(USER, snapshot)).isFalse();</pre></td><td class="explain">断言车已变化、必须重新确认</td></tr>
 <tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">165</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre class="cmtline">    /** 确认后商品下架：复核失败。 */</pre></td><td class="explain"></td></tr>
@@ -567,7 +566,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>    <span class="kw">void</span> changedWhenCartBecomesInvalid() {</pre></td><td class="explain">确认后商品下架：复核失败。</td></tr>
 <tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre class="cmtline">        // 快照基于上架商品。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
-<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 生成快照。</pre></td><td class="explain">生成快照。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">173</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre class="cmtline">        // 商品被下架：DRAFT 状态让整辆车不可结算。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "DRAFT", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
@@ -582,11 +581,11 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>    <span class="kw">void</span> snapshotOfOtherUserIsRejected() {</pre></td><td class="explain">别人的快照不能用：复核失败。</td></tr>
 <tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre class="cmtline">        // 先给 USER 生成一份合法快照。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
-<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 快照归属 USER。</pre></td><td class="explain">快照归属 USER。</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">188</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre class="cmtline">        // 快照属于 USER：换个 userId 复核、或根本没有快照，都必须拒绝。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        assertThat(service.unchanged(USER + 1, snapshot)).isFalse(); // 不是本人的快照。</pre></td><td class="explain">不是本人的快照。</td></tr>
-<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>        assertThat(service.unchanged(USER, null)).isFalse(); // 没有快照。</pre></td><td class="explain">没有快照。</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        assertThat(service.unchanged(USER + 1, snapshot)).isFalse();</pre></td><td class="explain">不是本人的快照。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>        assertThat(service.unchanged(USER, null)).isFalse();</pre></td><td class="explain">没有快照。</td></tr>
 <tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">193</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre class="cmtline">    /** 快照可序列化：放进 Session 再取出来仍能复核。 */</pre></td><td class="explain"></td></tr>
@@ -595,25 +594,25 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>    <span class="kw">void</span> snapshotSurvivesSerialization() throws Exception {</pre></td><td class="explain">快照可序列化：放进 Session 再取出来仍能复核。</td></tr>
 <tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre class="cmtline">        // 快照两行：条目 10 数量 2、条目 20 数量 1。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(</pre></td><td class="explain">准备当前车（可多行，按可变参数传入）</td></tr>
-<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>                view(10L, 8L, 2, "28.00", 10, "ON_SALE", 1L), // 第一行。</pre></td><td class="explain">视图行：数量 2、价格 28.00、库存 10、ON_SALE、版本 1L</td></tr>
-<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L))); // 第二行。</pre></td><td class="explain">视图行：数量 1、价格 30.00、库存 10、ON_SALE、版本 0L</td></tr>
-<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 生成快照。</pre></td><td class="explain">生成快照。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>                view(10L, 8L, 2, "28.00", 10, "ON_SALE", 1L),</pre></td><td class="explain">第一行。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>                view(20L, 9L, 1, "30.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">第二行。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">203</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>        ByteArrayOutputStream bytes = <span class="kw">new</span> ByteArrayOutputStream(); // 序列化目标。</pre></td><td class="explain">序列化目标。</td></tr>
-<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>        try (ObjectOutputStream out = <span class="kw">new</span> ObjectOutputStream(bytes)) { // 自动关闭流。</pre></td><td class="explain">自动关闭流。</td></tr>
-<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>            out.writeObject(snapshot); // 模拟写进 Session。</pre></td><td class="explain">模拟写进 Session。</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>        ByteArrayOutputStream bytes = <span class="kw">new</span> ByteArrayOutputStream();</pre></td><td class="explain">把快照真的序列化一遍：模拟放进 Session</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>        try (ObjectOutputStream out = <span class="kw">new</span> ObjectOutputStream(bytes)) {</pre></td><td class="explain">自动关闭流。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>            out.writeObject(snapshot);</pre></td><td class="explain">模拟写进 Session。</td></tr>
 <tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
-<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        CheckoutSnapshot restored; // 反序列化结果。</pre></td><td class="explain">反序列化结果。</td></tr>
-<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>        try (ObjectInputStream in = <span class="kw">new</span> ObjectInputStream(<span class="kw">new</span> ByteArrayInputStream(bytes.toByteArray()))) { // 从字节读回。</pre></td><td class="explain">从字节读回。</td></tr>
-<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>            restored = (CheckoutSnapshot) in.readObject(); // 模拟从 Session 取出。</pre></td><td class="explain">模拟从 Session 取出。</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        CheckoutSnapshot restored;</pre></td><td class="explain">反序列化结果。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>        try (ObjectInputStream in = <span class="kw">new</span> ObjectInputStream(<span class="kw">new</span> ByteArrayInputStream(bytes.toByteArray()))) {</pre></td><td class="explain">从字节读回。</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>            restored = (CheckoutSnapshot) in.readObject();</pre></td><td class="explain">反序列化后应能继续复核，证明会话里存得住</td></tr>
 <tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">212</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre class="cmtline">        // 断言：行数不变、行序不变、仍能通过复核。</pre></td><td class="explain"></td></tr>
-<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>        assertThat(restored.getLines()).hasSize(2); // 两行都还在。</pre></td><td class="explain">两行都还在。</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>        assertThat(restored.getLines()).hasSize(2);</pre></td><td class="explain">行数与行序都保持不变</td></tr>
 <tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        assertThat(restored.getLines()).extracting(CheckoutSnapshot.Line::getCartItemId)</pre></td><td class="explain">取出条目 id 列，按顺序比对</td></tr>
-<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>                .containsExactly(10L, 20L); // 行序保持。</pre></td><td class="explain">行序保持。</td></tr>
-<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        assertThat(restored.getConfirmedAt()).isEqualTo(CONFIRMED_AT); // 确认时刻也随快照保存。</pre></td><td class="explain">确认时刻也随快照保存。</td></tr>
-<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        assertThat(service.unchanged(USER, restored)).isTrue(); // 取出的快照仍可用来复核。</pre></td><td class="explain">取出的快照仍可用来复核。</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>                .containsExactly(10L, 20L);</pre></td><td class="explain">行序保持。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        assertThat(restored.getConfirmedAt()).isEqualTo(CONFIRMED_AT);</pre></td><td class="explain">确认时刻也随快照保存。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        assertThat(service.unchanged(USER, restored)).isTrue();</pre></td><td class="explain">取出的快照仍可用来复核。</td></tr>
 <tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">220</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre class="cmtline">    /** 快照记住确认时刻：提交时据此判断是否超过 10 分钟。 */</pre></td><td class="explain"></td></tr>
@@ -622,9 +621,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>    <span class="kw">void</span> snapshotRemembersConfirmationTime() {</pre></td><td class="explain">快照记住确认时刻：提交时据此判断是否超过 10 分钟。</td></tr>
 <tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre class="cmtline">        // 固定时钟下生成快照。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>        when(cartService.summary(USER)).thenReturn(summaryOf(view(10L, 8L, 1, "28.00", 10, "ON_SALE", 0L)));</pre></td><td class="explain">准备当前购物车：数量、价格、状态按用例设定</td></tr>
-<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER); // 确认时刻取时钟。</pre></td><td class="explain">确认时刻取时钟。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>        CheckoutSnapshot snapshot = service.prepare(USER);</pre></td><td class="explain">被测动作：生成结算快照</td></tr>
 <tr class="gap"><td class="line">228</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        assertThat(snapshot.getConfirmedAt()).isEqualTo(CONFIRMED_AT); // 与注入的固定时钟一致。</pre></td><td class="explain">与注入的固定时钟一致。</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        assertThat(snapshot.getConfirmedAt()).isEqualTo(CONFIRMED_AT);</pre></td><td class="explain">断言快照记住了确认时刻</td></tr>
 <tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">231</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre class="cmtline">    /** 确认时限：10 分钟内有效，正好第 10 分钟算过期。 */</pre></td><td class="explain"></td></tr>
@@ -659,7 +658,7 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="261"><td class="line">261</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
 <tr tabindex="0" data-line="262"><td class="line">262</td><td class="code"><pre>    @DisplayName("没有快照：按已过期处理")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
 <tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>    <span class="kw">void</span> expiredWithoutSnapshot() {</pre></td><td class="explain">没有快照：按已过期处理，宁可让用户重新确认。</td></tr>
-<tr tabindex="0" data-line="264"><td class="line">264</td><td class="code"><pre>        assertThat(service.expired(null)).isTrue(); // 会话丢了或从未确认过。</pre></td><td class="explain">会话丢了或从未确认过。</td></tr>
+<tr tabindex="0" data-line="264"><td class="line">264</td><td class="code"><pre>        assertThat(service.expired(null)).isTrue();</pre></td><td class="explain">没有快照也要判过期</td></tr>
 <tr tabindex="0" data-line="265"><td class="line">265</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">266</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="267"><td class="line">267</td><td class="code"><pre class="cmtline">    /** 收货信息：去首尾空白后保存。 */</pre></td><td class="explain"></td></tr>
@@ -669,9 +668,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre class="cmtline">        // 三项都带首尾空白：保存的必须是去掉空白后的值。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>        Receiver receiver = ReceiverForm.parse("  张三  ", " 13800000000 ", " 某市某区某路 1 号 ");</pre></td><td class="explain">输入带首尾空白：应被去掉后再保存</td></tr>
 <tr class="gap"><td class="line">273</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>        assertThat(receiver.getName()).isEqualTo("张三"); // 收货人去空白。</pre></td><td class="explain">收货人去空白。</td></tr>
-<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>        assertThat(receiver.getPhone()).isEqualTo("13800000000"); // 电话去空白。</pre></td><td class="explain">电话去空白。</td></tr>
-<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>        assertThat(receiver.getAddress()).isEqualTo("某市某区某路 1 号"); // 地址去空白。</pre></td><td class="explain">地址去空白。</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>        assertThat(receiver.getName()).isEqualTo("张三");</pre></td><td class="explain">收货人去空白。</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>        assertThat(receiver.getPhone()).isEqualTo("13800000000");</pre></td><td class="explain">电话去空白。</td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>        assertThat(receiver.getAddress()).isEqualTo("某市某区某路 1 号");</pre></td><td class="explain">地址去空白。</td></tr>
 <tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">278</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre class="cmtline">    /** 收货信息：三项必填，空与全空白都拒绝。 */</pre></td><td class="explain"></td></tr>
@@ -681,15 +680,15 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre class="cmtline">        // 收货人：全空白。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse(" ", "138", "地址"))</pre></td><td class="explain">调用 ReceiverForm.parse(" ", "138", "地址"，期望抛出业务异常</td></tr>
 <tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>, e -&gt; {</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
-<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST); // 缺字段给 400。</pre></td><td class="explain">缺字段给 400。</td></tr>
-<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("收货人"); // 文案指出是哪个字段。</pre></td><td class="explain">文案指出是哪个字段。</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST);</pre></td><td class="explain">缺字段给 400。</td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("收货人");</pre></td><td class="explain">文案指出是哪个字段。</td></tr>
 <tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>                });</pre></td><td class="explain">断言代码块结束</td></tr>
 <tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre class="cmtline">        // 电话：空串。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("张三", "", "地址"))</pre></td><td class="explain">调用 ReceiverForm.parse("张三", "", "地址"，期望抛出业务异常</td></tr>
-<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>                .hasMessageContaining("联系电话"); // 电话为空也要说清楚。</pre></td><td class="explain">断言提示包含「联系电话」</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>                .hasMessageContaining("联系电话");</pre></td><td class="explain">电话为空也要说清楚。</td></tr>
 <tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre class="cmtline">        // 地址：null。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("张三", "138", null))</pre></td><td class="explain">调用 ReceiverForm.parse("张三", "138", null，期望抛出业务异常</td></tr>
-<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>                .hasMessageContaining("详细地址"); // null 当空串处理。</pre></td><td class="explain">断言提示包含「详细地址」</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>                .hasMessageContaining("详细地址");</pre></td><td class="explain">null 当空串处理。</td></tr>
 <tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">296</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre class="cmtline">    /** 收货信息：超长按字段拒绝，不截断。 */</pre></td><td class="explain"></td></tr>
@@ -698,11 +697,11 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="300"><td class="line">300</td><td class="code"><pre>    <span class="kw">void</span> receiverRejectsTooLongFields() {</pre></td><td class="explain">收货信息：超长按字段拒绝，不截断。</td></tr>
 <tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre class="cmtline">        // 各超 1 个字符：收货人 51、电话 31、地址 256。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("名".repeat(51), "138", "地址"))</pre></td><td class="explain">调用 ReceiverForm.parse("名".repeat(51), "138", "地址"，期望抛出业务异常</td></tr>
-<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>                .hasMessageContaining("50"); // 收货人上限 50。</pre></td><td class="explain">断言提示包含「50」</td></tr>
+<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>                .hasMessageContaining("50");</pre></td><td class="explain">收货人上限 50。</td></tr>
 <tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("张三", "1".repeat(31), "地址"))</pre></td><td class="explain">调用 ReceiverForm.parse("张三", "1".repeat(31), "地址"，期望抛出业务异常</td></tr>
-<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>                .hasMessageContaining("30"); // 电话上限 30。</pre></td><td class="explain">断言提示包含「30」</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>                .hasMessageContaining("30");</pre></td><td class="explain">电话上限 30。</td></tr>
 <tr tabindex="0" data-line="306"><td class="line">306</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("张三", "138", "址".repeat(256)))</pre></td><td class="explain">调用 ReceiverForm.parse("张三", "138", "址".repeat(256，期望抛出业务异常</td></tr>
-<tr tabindex="0" data-line="307"><td class="line">307</td><td class="code"><pre>                .hasMessageContaining("255"); // 地址上限 255。</pre></td><td class="explain">断言提示包含「255」</td></tr>
+<tr tabindex="0" data-line="307"><td class="line">307</td><td class="code"><pre>                .hasMessageContaining("255");</pre></td><td class="explain">地址上限 255。</td></tr>
 <tr tabindex="0" data-line="308"><td class="line">308</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">309</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="310"><td class="line">310</td><td class="code"><pre class="cmtline">    /** 收货信息：长度边界值可用。 */</pre></td><td class="explain"></td></tr>
@@ -712,9 +711,9 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre class="cmtline">        // 正好等于上限：必须通过，否则列宽与校验口径不一致。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="315"><td class="line">315</td><td class="code"><pre>        Receiver receiver = ReceiverForm.parse("名".repeat(50), "1".repeat(30), "址".repeat(255));</pre></td><td class="explain">长度正好等于上限：必须通过</td></tr>
 <tr class="gap"><td class="line">316</td><td></td><td></td></tr>
-<tr tabindex="0" data-line="317"><td class="line">317</td><td class="code"><pre>        assertThat(receiver.getName()).hasSize(50); // 收货人正好 50。</pre></td><td class="explain">收货人正好 50。</td></tr>
-<tr tabindex="0" data-line="318"><td class="line">318</td><td class="code"><pre>        assertThat(receiver.getPhone()).hasSize(30); // 电话正好 30。</pre></td><td class="explain">电话正好 30。</td></tr>
-<tr tabindex="0" data-line="319"><td class="line">319</td><td class="code"><pre>        assertThat(receiver.getAddress()).hasSize(255); // 地址正好 255。</pre></td><td class="explain">地址正好 255。</td></tr>
+<tr tabindex="0" data-line="317"><td class="line">317</td><td class="code"><pre>        assertThat(receiver.getName()).hasSize(50);</pre></td><td class="explain">收货人正好 50。</td></tr>
+<tr tabindex="0" data-line="318"><td class="line">318</td><td class="code"><pre>        assertThat(receiver.getPhone()).hasSize(30);</pre></td><td class="explain">电话正好 30。</td></tr>
+<tr tabindex="0" data-line="319"><td class="line">319</td><td class="code"><pre>        assertThat(receiver.getAddress()).hasSize(255);</pre></td><td class="explain">地址正好 255。</td></tr>
 <tr tabindex="0" data-line="320"><td class="line">320</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">321</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="322"><td class="line">322</td><td class="code"><pre class="cmtline">    /** 收货信息：电话至少含一位数字，纯文字被拒。 */</pre></td><td class="explain"></td></tr>
@@ -724,11 +723,11 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="326"><td class="line">326</td><td class="code"><pre class="cmtline">        // 纯中文与纯字母都不算电话。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="327"><td class="line">327</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("张三", "电话见地址", "某市某路 1 号"))</pre></td><td class="explain">调用 ReceiverForm.parse("张三", "电话见地址", "某市某路 1 号"，期望抛出业务异常</td></tr>
 <tr tabindex="0" data-line="328"><td class="line">328</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>, e -&gt; {</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
-<tr tabindex="0" data-line="329"><td class="line">329</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST); // 仍是 400。</pre></td><td class="explain">仍是 400。</td></tr>
-<tr tabindex="0" data-line="330"><td class="line">330</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("数字"); // 文案说明缺什么。</pre></td><td class="explain">文案说明缺什么。</td></tr>
+<tr tabindex="0" data-line="329"><td class="line">329</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST);</pre></td><td class="explain">仍是 400。</td></tr>
+<tr tabindex="0" data-line="330"><td class="line">330</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("数字");</pre></td><td class="explain">文案说明缺什么。</td></tr>
 <tr tabindex="0" data-line="331"><td class="line">331</td><td class="code"><pre>                });</pre></td><td class="explain">断言代码块结束</td></tr>
 <tr tabindex="0" data-line="332"><td class="line">332</td><td class="code"><pre>        assertThatThrownBy(() -&gt; ReceiverForm.parse("张三", "abcdefg", "某市某路 1 号"))</pre></td><td class="explain">调用 ReceiverForm.parse("张三", "abcdefg", "某市某路 1 号"，期望抛出业务异常</td></tr>
-<tr tabindex="0" data-line="333"><td class="line">333</td><td class="code"><pre>                .hasMessageContaining("数字"); // 纯字母同样拒绝。</pre></td><td class="explain">断言提示包含「数字」</td></tr>
+<tr tabindex="0" data-line="333"><td class="line">333</td><td class="code"><pre>                .hasMessageContaining("数字");</pre></td><td class="explain">纯字母同样拒绝。</td></tr>
 <tr tabindex="0" data-line="334"><td class="line">334</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">335</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="336"><td class="line">336</td><td class="code"><pre class="cmtline">    /** 收货信息：座机、国际号等带分隔符的号码可用。 */</pre></td><td class="explain"></td></tr>
@@ -737,37 +736,37 @@ import、注解、括号等结构性代码渲染为「—」。</p>
 <tr tabindex="0" data-line="339"><td class="line">339</td><td class="code"><pre>    <span class="kw">void</span> receiverAcceptsPhoneWithSeparators() {</pre></td><td class="explain">收货信息：座机、国际号等带分隔符的号码可用。</td></tr>
 <tr tabindex="0" data-line="340"><td class="line">340</td><td class="code"><pre class="cmtline">        // 座机：区号 + 短横线。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="341"><td class="line">341</td><td class="code"><pre>        assertThat(ReceiverForm.parse("张三", "010-12345678", "某市某路 1 号").getPhone())</pre></td><td class="explain">断言座机号码原样保存</td></tr>
-<tr tabindex="0" data-line="342"><td class="line">342</td><td class="code"><pre>                .isEqualTo("010-12345678"); // 原样保存，不重排格式。</pre></td><td class="explain">原样保存，不重排格式。</td></tr>
+<tr tabindex="0" data-line="342"><td class="line">342</td><td class="code"><pre>                .isEqualTo("010-12345678");</pre></td><td class="explain">原样保存，不重排格式。</td></tr>
 <tr tabindex="0" data-line="343"><td class="line">343</td><td class="code"><pre class="cmtline">        // 国际号：加号与空格。</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="344"><td class="line">344</td><td class="code"><pre>        assertThat(ReceiverForm.parse("张三", "+86 138 0000 0000", "某市某路 1 号").getPhone())</pre></td><td class="explain">断言国际号原样保存</td></tr>
-<tr tabindex="0" data-line="345"><td class="line">345</td><td class="code"><pre>                .isEqualTo("+86 138 0000 0000"); // 仍不规定格式，只要求含数字。</pre></td><td class="explain">仍不规定格式，只要求含数字。</td></tr>
+<tr tabindex="0" data-line="345"><td class="line">345</td><td class="code"><pre>                .isEqualTo("+86 138 0000 0000");</pre></td><td class="explain">仍不规定格式，只要求含数字。</td></tr>
 <tr tabindex="0" data-line="346"><td class="line">346</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">347</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="348"><td class="line">348</td><td class="code"><pre class="cmtline">    /** 把若干购物车视图转成汇总；复用购物车模块的转换，保证与页面同一口径。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="349"><td class="line">349</td><td class="code"><pre>    <span class="kw">private</span> CartSummary summaryOf(CartItemView... views) {</pre></td><td class="explain">夹具：把若干购物车视图转成汇总</td></tr>
-<tr tabindex="0" data-line="350"><td class="line">350</td><td class="code"><pre>        <span class="kw">return</span> CartSummary.of(java.util.Arrays.stream(views).map(CartLine::from).toList()); // 走真实转换。</pre></td><td class="explain">走真实转换。</td></tr>
+<tr tabindex="0" data-line="350"><td class="line">350</td><td class="code"><pre>        <span class="kw">return</span> CartSummary.of(java.util.Arrays.stream(views).map(CartLine::from).toList());</pre></td><td class="explain">复用购物车模块的转换，保证与页面同一口径</td></tr>
 <tr tabindex="0" data-line="351"><td class="line">351</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">352</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="353"><td class="line">353</td><td class="code"><pre class="cmtline">    /** 换一个时刻的被测服务：用来验证 10 分钟时限。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="354"><td class="line">354</td><td class="code"><pre>    <span class="kw">private</span> CheckoutService at(Instant instant) {</pre></td><td class="explain">换一个时刻的被测服务：用来验证 10 分钟时限。</td></tr>
-<tr tabindex="0" data-line="355"><td class="line">355</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> CheckoutService(cartService, Clock.fixed(instant, ZoneOffset.UTC)); // 同一辆车、不同时钟。</pre></td><td class="explain">同一辆车、不同时钟。</td></tr>
+<tr tabindex="0" data-line="355"><td class="line">355</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> CheckoutService(cartService, Clock.fixed(instant, ZoneOffset.UTC));</pre></td><td class="explain">同一辆车、不同时钟：专门验证时限</td></tr>
 <tr tabindex="0" data-line="356"><td class="line">356</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr class="gap"><td class="line">357</td><td></td><td></td></tr>
 <tr tabindex="0" data-line="358"><td class="line">358</td><td class="code"><pre class="cmtline">    /** 造一行购物车视图：数量、单价、库存、状态、版本按用例传。 */</pre></td><td class="explain"></td></tr>
 <tr tabindex="0" data-line="359"><td class="line">359</td><td class="code"><pre>    <span class="kw">private</span> CartItemView view(<span class="kw">long</span> itemId, <span class="kw">long</span> productId, <span class="kw">int</span> quantity, String price, <span class="kw">int</span> stock,</pre></td><td class="explain">夹具：按参数造一行购物车视图（含状态与库存）</td></tr>
 <tr tabindex="0" data-line="360"><td class="line">360</td><td class="code"><pre>                              String status, <span class="kw">long</span> version) {</pre></td><td class="explain">方法参数续行：行视图剩余字段</td></tr>
-<tr tabindex="0" data-line="361"><td class="line">361</td><td class="code"><pre>        CartItemView view = <span class="kw">new</span> CartItemView(); // 新建行视图。</pre></td><td class="explain">新建行视图。</td></tr>
-<tr tabindex="0" data-line="362"><td class="line">362</td><td class="code"><pre>        view.setId(itemId); // 条目 id。</pre></td><td class="explain">夹具：行 id</td></tr>
-<tr tabindex="0" data-line="363"><td class="line">363</td><td class="code"><pre>        view.setProductId(productId); // 商品 id。</pre></td><td class="explain">夹具：商品 id</td></tr>
-<tr tabindex="0" data-line="364"><td class="line">364</td><td class="code"><pre>        view.setProductName("测试商品" + productId); // 名称带 id，断言好定位。</pre></td><td class="explain">夹具：商品名</td></tr>
-<tr tabindex="0" data-line="365"><td class="line">365</td><td class="code"><pre>        view.setCoverImage("images/products/T/cover.svg"); // 封面路径不校验存在性。</pre></td><td class="explain">夹具：封面路径（测试不校验图片是否存在）</td></tr>
-<tr tabindex="0" data-line="366"><td class="line">366</td><td class="code"><pre>        view.setCategoryName("单行本"); // 分类名。</pre></td><td class="explain">夹具：分类名</td></tr>
-<tr tabindex="0" data-line="367"><td class="line">367</td><td class="code"><pre>        view.setPrice(<span class="kw">new</span> BigDecimal(price)); // 单价用 BigDecimal。</pre></td><td class="explain">夹具：当前单价</td></tr>
-<tr tabindex="0" data-line="368"><td class="line">368</td><td class="code"><pre>        view.setQuantity(quantity); // 数量。</pre></td><td class="explain">夹具：数量</td></tr>
-<tr tabindex="0" data-line="369"><td class="line">369</td><td class="code"><pre>        view.setStock(stock); // 当前库存。</pre></td><td class="explain">夹具：当前库存</td></tr>
-<tr tabindex="0" data-line="370"><td class="line">370</td><td class="code"><pre>        view.setProductStatus(status); // ON_SALE / DRAFT。</pre></td><td class="explain">夹具：商品状态（ON_SALE / DRAFT）</td></tr>
-<tr tabindex="0" data-line="371"><td class="line">371</td><td class="code"><pre>        view.setVersion(version); // 购物车版本。</pre></td><td class="explain">夹具：版本号</td></tr>
-<tr tabindex="0" data-line="372"><td class="line">372</td><td class="code"><pre>        <span class="kw">return</span> view; // 返回构造好的视图。</pre></td><td class="explain">返回构造好的视图。</td></tr>
+<tr tabindex="0" data-line="361"><td class="line">361</td><td class="code"><pre>        CartItemView view = <span class="kw">new</span> CartItemView();</pre></td><td class="explain">新建行视图。</td></tr>
+<tr tabindex="0" data-line="362"><td class="line">362</td><td class="code"><pre>        view.setId(itemId);</pre></td><td class="explain">条目 id。</td></tr>
+<tr tabindex="0" data-line="363"><td class="line">363</td><td class="code"><pre>        view.setProductId(productId);</pre></td><td class="explain">商品 id。</td></tr>
+<tr tabindex="0" data-line="364"><td class="line">364</td><td class="code"><pre>        view.setProductName("测试商品" + productId);</pre></td><td class="explain">名称带 id，断言好定位。</td></tr>
+<tr tabindex="0" data-line="365"><td class="line">365</td><td class="code"><pre>        view.setCoverImage("images/products/T/cover.svg");</pre></td><td class="explain">封面路径不校验存在性。</td></tr>
+<tr tabindex="0" data-line="366"><td class="line">366</td><td class="code"><pre>        view.setCategoryName("单行本");</pre></td><td class="explain">分类名。</td></tr>
+<tr tabindex="0" data-line="367"><td class="line">367</td><td class="code"><pre>        view.setPrice(<span class="kw">new</span> BigDecimal(price));</pre></td><td class="explain">单价用 BigDecimal。</td></tr>
+<tr tabindex="0" data-line="368"><td class="line">368</td><td class="code"><pre>        view.setQuantity(quantity);</pre></td><td class="explain">数量。</td></tr>
+<tr tabindex="0" data-line="369"><td class="line">369</td><td class="code"><pre>        view.setStock(stock);</pre></td><td class="explain">当前库存。</td></tr>
+<tr tabindex="0" data-line="370"><td class="line">370</td><td class="code"><pre>        view.setProductStatus(status);</pre></td><td class="explain">ON_SALE / DRAFT。</td></tr>
+<tr tabindex="0" data-line="371"><td class="line">371</td><td class="code"><pre>        view.setVersion(version);</pre></td><td class="explain">购物车版本。</td></tr>
+<tr tabindex="0" data-line="372"><td class="line">372</td><td class="code"><pre>        <span class="kw">return</span> view;</pre></td><td class="explain">返回构造好的视图。</td></tr>
 <tr tabindex="0" data-line="373"><td class="line">373</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
 <tr tabindex="0" data-line="374"><td class="line">374</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
 </tbody></table>
