@@ -38,15 +38,17 @@
                 <p class="stock" th:classappend="${detail.product().stock == 0} ? 'zero'"
                    th:text="${detail.product().stock == 0} ? '暂时缺货' : '库存 ' + ${detail.product().stock}">库存</p>
 
-                <!-- 购物车在 M04 实现，这里先占位并禁用，避免点了 404 -->
-                <form class="buy" action="#" method="post">
-                    <input type="number" name="quantity" value="1" min="1"
+                <!-- 加车走 POST /cart/items；游客会被拦到登录页，登录后回到本页再点一次 -->
+                <form class="buy" th:action="@{/cart/items}" method="post">
+                    <input type="hidden" name="productId" th:value="${detail.product().id}">
+                    <input type="number" name="quantity" value="1" min="1" max="99"
                            th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}">
                     <button type="submit" class="btn btn-primary"
                             th:disabled="${detail.product().stock == 0}"
                             th:text="${detail.product().stock == 0} ? '暂时缺货' : '加入购物车'">加入购物车</button>
                 </form>
-                <p class="hint">购物车功能在 M04 开放，当前按钮为占位。</p>
+                <p class="hint" th:if="${session.userId == null}">未登录：点「加入购物车」会先跳登录，回到本页后再点一次。</p>
+                <p class="hint" th:unless="${session.userId == null}">加入后可在页头「购物车」查看，数量会累加。</p>
 
                 <div class="desc">
                     <h2>商品说明</h2>

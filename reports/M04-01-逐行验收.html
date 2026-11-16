@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M04-01 · 购物车服务与数据访问（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M04-01 · 购物车服务与数据访问（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列完整源码，右列是该行的说明。</p>
+<nav><a href="#s1">CartService.java</a><a href="#s2">CartLine.java</a><a href="#s3">CartSummary.java</a><a href="#s4">CartItemMapper.java</a><a href="#s5">CartServiceTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：加车累加、数量 1–99、每车 20 种、库存校验、归属与版本校验、行小计与汇总口径。验证：mvn -pl cartoon-cart -am test → Tests run: 18, Failures: 0, Errors: 0。</p>
+<p class="note" style="margin-top:8px">说明口径：行尾注释与 javadoc 优先；没有注释的规则行由 <code>gen_m04_acceptance.py</code> 的 NOTES 补充；
+import、注解、括号等结构性代码渲染为「—」。</p>
+<section id="s1">
+<h2>CartService.java<small>购物车规则：加车/改量/移除/汇总 · 243 行</small></h2>
+<p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/service/CartService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.service;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.service 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">购物车联表视图：商品当前价、库存、分类名</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartLine;</pre></td><td class="explain">购物车行：条目 + 商品当前信息 + 可用性</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary;</pre></td><td class="explain">购物车汇总：徽标、可结算件数、总额</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.entity.CartItem;</pre></td><td class="explain">购物车条目实体</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">购物车数据访问</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品数据访问</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">唯一键冲突异常</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">标记为业务服务，由 Spring 托管</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline"> * 购物车服务：加车、改数量、移除、汇总。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline"> * &lt;p&gt;所有规则集中在这里，Controller 只传原始表单值：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline"> * 数量 1–99、每车最多 20 种、加车与改量都校验&lt;b&gt;累加后&lt;/b&gt;的数量与库存、</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline"> * 改量与移除带 {@code version} 做旧页面检测、归属校验写进 SQL 的 WHERE。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> * &lt;p&gt;购物车不占库存、不存价格：页面上看到的价格与库存永远来自 {@code product} 当前值。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@Service</pre></td><td class="explain">标记为业务服务，由 Spring 注入到控制器。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartService {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 每车最多 20 种 SKU（FR-C-01 §2） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> MAX_KINDS = 20;</pre></td><td class="explain">每车最多 20 种 SKU；超限拒绝而不是静默丢掉新商品</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 同一 SKU 合计 1–99，与数据库 CHECK 一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> MAX_QUANTITY = 99;</pre></td><td class="explain">单 SKU 上限，与 cart_item 的 CHECK (quantity BETWEEN 1 AND 99) 对齐</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CartItemMapper cartItemMapper;</pre></td><td class="explain">字段 cartItemMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductMapper productMapper;</pre></td><td class="explain">字段 productMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">public</span> CartService(CartItemMapper cartItemMapper, ProductMapper productMapper) {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        this.cartItemMapper = cartItemMapper;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        this.productMapper = productMapper;</pre></td><td class="explain">注入商品 Mapper 字段。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">41</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">     * 本人购物车汇总：失效行也返回，由调用方决定是提示还是拦住结算。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">public</span> CartSummary summary(<span class="kw">long</span> userId) {</pre></td><td class="explain">页面汇总：失效行也返回，由页面提示原因，不替用户隐藏</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        <span class="kw">return</span> CartSummary.of(lines(userId));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">48</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre class="cmtline">    /** 本人购物车行，含失效行 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    <span class="kw">public</span> List&lt;CartLine&gt; lines(<span class="kw">long</span> userId) {</pre></td><td class="explain">本人购物车行，含失效行</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        List&lt;CartItemView&gt; views = cartItemMapper.selectViewByUser(userId);</pre></td><td class="explain">查出该用户购物车视图，含商品当前价与库存。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        <span class="kw">return</span> views.stream().map(CartLine::from).toList();</pre></td><td class="explain">视图转行对象：可用性与行小计只在这里算一次</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">    /** 页头徽标：全部条目数量之和（含失效条目） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">int</span> badgeQuantity(<span class="kw">long</span> userId) {</pre></td><td class="explain">页头徽标：全部条目数量之和（含失效条目）</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        <span class="kw">return</span> cartItemMapper.sumQuantityByUser(userId);</pre></td><td class="explain">徽标走 SQL 求和，包含失效条目（FR-C-01 §7）</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">59</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">     * 加入购物车：同商品累加，累加后校验 99 上限与库存。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">     * &lt;p&gt;并发下两个会话同时加同一商品时，靠唯一键 {@code uk_cart_user_product} 兜底：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre class="cmtline">     * 后插入的一方拿到 {@link DuplicateKeyException}，再按"已存在则累加"重试一次。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> add(<span class="kw">long</span> userId, String productIdRaw, String quantityRaw) {</pre></td><td class="explain">加入购物车：同商品累加，累加后校验 99 上限与库存。 并发下两个会话同时加同一商品时，靠唯一键 {@code uk_cart_user_product} 兜底： 后插入的一方拿到 {@link DuplicateKeyException}，再按"已存在则累加"重试一次。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        <span class="kw">long</span> productId = parseId(productIdRaw, "商品编号");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">int</span> quantity = parseQuantity(quantityRaw);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        Product product = requireOnSaleProduct(productId);</pre></td><td class="explain">先确认商品在售再加车；下架与不存在同为 404</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        CartItem existing = cartItemMapper.findByUserAndProduct(userId, productId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        if (existing != null) {</pre></td><td class="explain">同商品已在车里：走累加分支，不再插第二条</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            mergeInto(existing, quantity, product);</pre></td><td class="explain">累加后统一校验 99 上限与库存</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">76</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        if (cartItemMapper.countByUser(userId) &gt;= MAX_KINDS) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>            throw BizException.badRequest("购物车最多放 " + MAX_KINDS + " 种商品，请先移除不需要的");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        ensureStock(quantity, product);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">81</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        CartItem item = <span class="kw">new</span> CartItem();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        item.setUserId(userId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        item.setProductId(productId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        item.setQuantity(quantity);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        item.setVersion(0L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>            cartItemMapper.insert(item);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        } catch (DuplicateKeyException e) {</pre></td><td class="explain">并发下另一会话刚插入同一商品：唯一键冲突后按累加重试一次，不把 500 抛给用户</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">            // 另一个会话刚好先插入：退化为"累加"，不把并发冲突报给用户</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>            mergeInto(cartItemMapper.findByUserAndProduct(userId, productId), quantity, product);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre class="cmtline">     * 改数量：归属、版本、库存三道检查都过了才写。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> changeQuantity(<span class="kw">long</span> userId, String itemIdRaw, String quantityRaw, String versionRaw) {</pre></td><td class="explain">改数量：归属、版本、库存三道检查都过了才写。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        <span class="kw">long</span> itemId = parseId(itemIdRaw, "条目编号");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        <span class="kw">int</span> quantity = parseQuantity(quantityRaw);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersion(versionRaw);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">102</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        CartItem item = requireOwnItem(userId, itemId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        requireVersion(item, version);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">105</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        Product product = productMapper.selectById(item.getProductId());</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        if (product == null || !"ON_SALE".equals(product.getStatus())) {</pre></td><td class="explain">不存在与已下架合并成同一个 404，不区分原因，避免泄露商品是否存在</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>            throw BizException.conflict("商品已下架，请移除该条目");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        ensureStock(quantity, product);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">111</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        <span class="kw">int</span> rows = cartItemMapper.updateQuantity(userId, itemId, quantity, version);</pre></td><td class="explain">归属与版本都写进 WHERE：影响 0 行说明条目不属于本人或页面已过期</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">117</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre class="cmtline">     * 移除条目：同样校验归属与版本，避免旧页面把别人或新数量的条目删掉。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> remove(<span class="kw">long</span> userId, String itemIdRaw, String versionRaw) {</pre></td><td class="explain">移除条目：同样校验归属与版本，避免旧页面把别人或新数量的条目删掉。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>        <span class="kw">long</span> itemId = parseId(itemIdRaw, "条目编号");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersion(versionRaw);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">124</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        CartItem item = requireOwnItem(userId, itemId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        requireVersion(item, version);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">127</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        <span class="kw">int</span> rows = cartItemMapper.deleteByIdAndUser(userId, itemId, version);</pre></td><td class="explain">删除同样带 user_id 与 version，旧页面删不掉新状态的条目</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">133</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 内部规则</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">135</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre class="cmtline">    /** 商品必须存在且上架；下架与不存在都按 404，不泄露"存在但下架" */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    <span class="kw">private</span> Product requireOnSaleProduct(<span class="kw">long</span> productId) {</pre></td><td class="explain">商品必须存在且上架；下架与不存在都按 404，不泄露"存在但下架"</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        Product product = productMapper.selectById(productId);</pre></td><td class="explain">按主键取商品，取不到时下面抛 404。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        if (product == null || !"ON_SALE".equals(product.getStatus())) {</pre></td><td class="explain">不存在与已下架合并成同一个 404，不区分原因，避免泄露商品是否存在</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>            throw BizException.notFound("商品不存在或已下架");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">144</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre class="cmtline">    /** 条目必须存在且属于本人：不是本人给 403，不存在给 404 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>    <span class="kw">private</span> CartItem requireOwnItem(<span class="kw">long</span> userId, <span class="kw">long</span> itemId) {</pre></td><td class="explain">条目必须存在且属于本人：不是本人给 403，不存在给 404</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>        CartItem item = cartItemMapper.selectById(itemId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        if (item == null) {</pre></td><td class="explain">条目已不存在：404，不泄露它曾经属于谁</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>            throw BizException.notFound("购物车条目不存在，可能已被移除");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        if (!item.getUserId().equals(userId)) {</pre></td><td class="explain">不是本人 → 403；仅靠 SQL 影响行数无法区分 403 与 409，所以先查归属</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>            throw BizException.forbidden("无权操作他人的购物车");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        <span class="kw">return</span> item;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">156</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre class="cmtline">    /** 旧页面带回过期版本号时拒绝，不覆盖其他会话改过的新数量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> requireVersion(CartItem item, <span class="kw">long</span> version) {</pre></td><td class="explain">旧页面带回过期版本号时拒绝，不覆盖其他会话改过的新数量</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        if (item.getVersion() == null || item.getVersion() != version) {</pre></td><td class="explain">版本对不上说明页面是旧的：409，绝不覆盖其他会话改过的新数量</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">163</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre class="cmtline">    /** 累加进已有条目：先算总数，再一次性校验上限与库存 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> mergeInto(CartItem existing, <span class="kw">int</span> added, Product product) {</pre></td><td class="explain">累加进已有条目：先算总数，再一次性校验上限与库存</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        if (existing == null) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>        <span class="kw">int</span> newQuantity = existing.getQuantity() + added;</pre></td><td class="explain">校验累加后的总数，不只校验本次输入（FR-C-01 §2）</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        if (newQuantity &gt; MAX_QUANTITY) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>            throw BizException.badRequest("同一商品最多 " + MAX_QUANTITY + " 件");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        ensureStock(newQuantity, product);</pre></td><td class="explain">累加后仍不能超过库存，否则页面会立刻变失效</td></tr>
+<tr class="gap"><td class="line">174</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        <span class="kw">int</span> rows = cartItemMapper.updateQuantity(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                existing.getUserId(), existing.getId(), newQuantity, existing.getVersion());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">181</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre class="cmtline">    /** 库存校验：购物车不占库存，但也不能放进买不到的数量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> ensureStock(<span class="kw">int</span> quantity, Product product) {</pre></td><td class="explain">库存校验：购物车不占库存，但也不能放进买不到的数量</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        <span class="kw">int</span> stock = product.getStock() == null ? 0 : product.getStock();</pre></td><td class="explain">库存为空按 0 处理：宁可拒绝，也不放一个买不到的数量进车</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        if (stock &lt;= 0) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>            throw BizException.badRequest("商品暂时缺货");</pre></td><td class="explain">库存 0 单独给缺货文案，避免出现「最多可买 0 件」这种怪提示</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>        if (quantity &gt; stock) {</pre></td><td class="explain">库存不足时把可买上限告诉用户，而不是只说失败</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>            throw BizException.badRequest("库存不足，最多可购买 " + stock + " 件");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">192</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 参数解析</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">194</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre class="cmtline">    /** 表单里的 id：空、非数字、非正数一律 400，不静默当成 0 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseId(String raw, String fieldName) {</pre></td><td class="explain">表单里的 id：空、非数字、非正数一律 400，不静默当成 0</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不能为空");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">0 与负数不是合法分类 id</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>                throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>            throw BizException.badRequest(fieldName + "不正确");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">210</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre class="cmtline">    /** 数量必须是 1–99 的整数：小数、0、负数、超上限都不写库 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> parseQuantity(String raw) {</pre></td><td class="explain">数量必须是 1–99 的整数：小数、0、负数、超上限都不写库</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>            throw BizException.badRequest("数量不能为空");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>        <span class="kw">int</span> value;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>            value = Integer.parseInt(raw.trim());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>        if (value &lt; 1 || value &gt; MAX_QUANTITY) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>            throw BizException.badRequest("数量必须是 1–99 的整数");</pre></td><td class="explain">数量非法统一一句话：0、100、小数、非数字都不写库</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">227</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre class="cmtline">    /** 版本号：缺失说明页面是旧的，直接要求刷新 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseVersion(String raw) {</pre></td><td class="explain">版本号：缺失说明页面是旧的，直接要求刷新</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">缺必填参数直接 400，不把空串当 0</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        try {</pre></td><td class="explain">解析分类 id：只有纯数字才算合法输入。</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>            if (value &lt; 0) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>                throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">返回解析成功的数字。</td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>            throw BizException.conflict("购物车已变化，请刷新后重试");</pre></td><td class="explain">转成业务异常（400/404）</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>CartLine.java<small>购物车行视图与失效判定 · 94 行</small></h2>
+<p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/dto/CartLine.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.dto;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.dto 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.money.MoneyUtils;</pre></td><td class="explain">引入 MoneyUtils</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline"> * 购物车行：条目 + 商品当前信息 + 可用性判定。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> * &lt;p&gt;可用性在查询时计算，不落库：商品下架或数量超过当前库存时标记为失效，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * 失效行仍要显示（用户要看到原因并自己决定移除），但不参与结算金额。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@Getter</pre></td><td class="explain">Lombok：为所有字段生成 getter，省掉手写方法。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartLine {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /** cart_item.id，改数量与移除用它定位 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long itemId;</pre></td><td class="explain">cart_item.id，改数量与移除用它定位</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 商品 id，用于跳详情 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long productId;</pre></td><td class="explain">商品 id，用于跳详情</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String productName;</pre></td><td class="explain">字段 productName：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String coverImage;</pre></td><td class="explain">字段 coverImage：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String categoryName;</pre></td><td class="explain">字段 categoryName：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 商品当前单价，不存购物车 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal price;</pre></td><td class="explain">商品当前单价，不存购物车</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> quantity;</pre></td><td class="explain">字段 quantity：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** 商品当前库存，用于判断不足与提示"仅剩 n 件" */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> stock;</pre></td><td class="explain">商品当前库存，用于判断不足与提示"仅剩 n 件"</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /** 商品当前状态：ON_SALE / DRAFT */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String productStatus;</pre></td><td class="explain">商品当前状态：ON_SALE / DRAFT</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">    /** 读页面时的版本号，改数量/移除必须原样带回 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">long</span> version;</pre></td><td class="explain">读页面时的版本号，改数量/移除必须原样带回</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">     * 单个条目是否可结算。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">     * &lt;p&gt;下架与库存不足都算失效：前者后端已不允许下单，后者下单会超卖。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> boolean available;</pre></td><td class="explain">单个条目是否可结算。 下架与库存不足都算失效：前者后端已不允许下单，后者下单会超卖。</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">    /** 失效原因，可结算时为空 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String unavailableReason;</pre></td><td class="explain">失效原因，可结算时为空</td></tr>
+<tr class="gap"><td class="line">49</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre class="cmtline">    /** 行小计 = 当前单价 × 数量，两位小数 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal lineAmount;</pre></td><td class="explain">行小计 = 当前单价 × 数量，两位小数</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">private</span> CartLine(Long itemId, Long productId, String productName, String coverImage, String categoryName,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                     BigDecimal price, <span class="kw">int</span> quantity, <span class="kw">int</span> stock, String productStatus, <span class="kw">long</span> version,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                     boolean available, String unavailableReason, BigDecimal lineAmount) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        this.itemId = itemId;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        this.productId = productId;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        this.productName = productName;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        this.coverImage = coverImage;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        this.categoryName = categoryName;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        this.price = price;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        this.quantity = quantity;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        this.stock = stock;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        this.productStatus = productStatus;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        this.version = version;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        this.available = available;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        this.unavailableReason = unavailableReason;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        this.lineAmount = lineAmount;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre class="cmtline">     * 由查询结果构造：失效原因与行小计都在这里一次算好，模板只做展示。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> CartLine from(CartItemView view) {</pre></td><td class="explain">由查询结果构造：失效原因与行小计都在这里一次算好，模板只做展示。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        boolean onSale = "ON_SALE".equals(view.getProductStatus());</pre></td><td class="explain">只有 ON_SALE 可结算；DRAFT 仍需展示并给出移除入口</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        boolean enough = view.getStock() != null &amp;&amp; view.getQuantity() &lt;= view.getStock();</pre></td><td class="explain">数量超过当前库存即失效：购物车不预占库存，库存可能被别处买走</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        String reason = null;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        if (!onSale) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>            reason = "已下架";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        } else if (!enough) {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>            reason = "库存不足，仅剩 " + (view.getStock() == null ? 0 : view.getStock()) + " 件";</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        BigDecimal amount = MoneyUtils.multiply(view.getPrice(), view.getQuantity());</pre></td><td class="explain">行小计按商品当前价重算，购物车不存价格</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> CartLine(view.getId(), view.getProductId(), view.getProductName(), view.getCoverImage(),</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                view.getCategoryName(), view.getPrice(), view.getQuantity(),</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                view.getStock() == null ? 0 : view.getStock(), view.getProductStatus(), view.getVersion(),</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                onSale &amp;&amp; enough, reason, amount);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">    /** 失效行在页面上的样式挂钩 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    <span class="kw">public</span> boolean isInvalid() {</pre></td><td class="explain">失效行在页面上的样式挂钩</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">return</span> !available;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>CartSummary.java<small>徽标、可结算件数与总额 · 72 行</small></h2>
+<p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/dto/CartSummary.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.dto;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.dto 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.money.MoneyUtils;</pre></td><td class="explain">引入 MoneyUtils</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline"> * 购物车汇总：行 + 件数 + 金额 + 能否结算。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline"> * &lt;p&gt;三个数容易混，这里写清口径：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline"> * {@code badgeQuantity} 是页头徽标（全部行数量之和，含失效行）；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline"> * {@code validQuantity} 是真正可结算的件数；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * {@code totalAmount} 只累加可结算行的小计。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>@Getter</pre></td><td class="explain">Lombok：为所有字段生成 getter，省掉手写方法。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CartSummary {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> List&lt;CartLine&gt; lines;</pre></td><td class="explain">字段 lines：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 页头徽标：全部条目数量之和，含失效条目（FR-C-01 §7） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> badgeQuantity;</pre></td><td class="explain">页头徽标：全部条目数量之和，含失效条目（FR-C-01 §7）</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 可结算件数 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> validQuantity;</pre></td><td class="explain">可结算件数</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 应付总额 = 可结算行小计之和；无运费、无优惠 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal totalAmount;</pre></td><td class="explain">应付总额 = 可结算行小计之和；无运费、无优惠</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 是否所有行都可用；空车视为 true，用 isSettleable() 判空 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> boolean allAvailable;</pre></td><td class="explain">是否所有行都可用；空车视为 true，用 isSettleable() 判空</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> invalidCount;</pre></td><td class="explain">字段 invalidCount：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> CartSummary(List&lt;CartLine&gt; lines, <span class="kw">int</span> badgeQuantity, <span class="kw">int</span> validQuantity,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                        BigDecimal totalAmount, boolean allAvailable, <span class="kw">int</span> invalidCount) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        this.lines = lines;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        this.badgeQuantity = badgeQuantity;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        this.validQuantity = validQuantity;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        this.totalAmount = totalAmount;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        this.allAvailable = allAvailable;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        this.invalidCount = invalidCount;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">    /** 由行列表汇总；金额一次算完，模板不再做乘法 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> CartSummary of(List&lt;CartLine&gt; lines) {</pre></td><td class="explain">由行列表汇总；金额一次算完，模板不再做乘法</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        <span class="kw">int</span> badge = 0;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">int</span> valid = 0;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">int</span> invalid = 0;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        BigDecimal total = BigDecimal.ZERO.setScale(MoneyUtils.SCALE);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        for (CartLine line : lines) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>            badge += line.getQuantity();</pre></td><td class="explain">徽标含失效条目，与页面提示的「共 N 件」一致</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>            if (line.isAvailable()) {</pre></td><td class="explain">失效行只计件数，不计可结算件数与金额</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                valid += line.getQuantity();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                total = total.add(line.getLineAmount());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>            } else {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                invalid++;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> CartSummary(List.copyOf(lines), badge, valid, total, invalid == 0, invalid);</pre></td><td class="explain">全可用才允许去结算；行列表做不可变拷贝，防止模板层改数据</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">63</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">public</span> boolean isEmpty() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        <span class="kw">return</span> lines.isEmpty();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">67</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">    /** 车非空且全部可用才允许去结算（FR-C-02） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">public</span> boolean isSettleable() {</pre></td><td class="explain">车非空且全部可用才允许去结算（FR-C-02）</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        <span class="kw">return</span> !lines.isEmpty() &amp;&amp; allAvailable;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>CartItemMapper.java<small>按用户改量、删除、徽标求和 · 48 行</small></h2>
+<p class="path">cartoon-cart/src/main/java/org/csu/mycartoonstore/cart/mapper/CartItemMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.mapper;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.mapper 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.mapper.BaseMapper;</pre></td><td class="explain">MyBatis-Plus 基类 Mapper：提供单表 CRUD</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Delete;</pre></td><td class="explain">引入 Delete</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Mapper;</pre></td><td class="explain">标记为 MyBatis 接口，扫描后生成实现</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Param;</pre></td><td class="explain">给 Mapper 参数起名，XML 里用 #{名字} 引用</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Select;</pre></td><td class="explain">注解 SQL：把查询直接写在方法上</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.apache.ibatis.annotations.Update;</pre></td><td class="explain">注解 SQL：把更新语句写在方法上</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">购物车联表视图：商品当前价、库存、分类名</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.entity.CartItem;</pre></td><td class="explain">购物车条目实体</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * 购物车 Mapper。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>@Mapper</pre></td><td class="explain">标记为 MyBatis 接口：启动时由 @MapperScan 扫描并生成实现类。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">interface</span> CartItemMapper <span class="kw">extends</span> BaseMapper&lt;CartItem&gt; {</pre></td><td class="explain">购物车 Mapper：单表 CRUD + 联表视图。</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 本人购物车全量（含失效条目），关联商品当前价格与库存 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    List&lt;CartItemView&gt; selectViewByUser(@Param("userId") Long userId);</pre></td><td class="explain">本人购物车全量（含失效条目），关联商品当前价格与库存</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 加车前查已有条目，用于累加数量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @Select("SELECT * FROM cart_item WHERE user_id = #{userId} AND product_id = #{productId}")</pre></td><td class="explain">按用户 + 商品查购物车条目，用于判断是否已加过。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    CartItem findByUserAndProduct(@Param("userId") Long userId, @Param("productId") Long productId);</pre></td><td class="explain">加车前查已有条目，用于累加数量</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 购物车种类数，用于 20 种上限 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Select("SELECT COUNT(*) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">购物车条目数，给徽标用。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">int</span> countByUser(@Param("userId") Long userId);</pre></td><td class="explain">购物车种类数，用于 20 种上限</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 页头徽标：全部条目数量之和，空车返回 0 而不是 null */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Select("SELECT COALESCE(SUM(quantity), 0) FROM cart_item WHERE user_id = #{userId}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">int</span> sumQuantityByUser(@Param("userId") Long userId);</pre></td><td class="explain">页头徽标：全部条目数量之和，空车返回 0 而不是 null</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">     * 改数量：把归属与版本一起写进 WHERE。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     * &lt;p&gt;影响 0 行说明"不是本人的条目"或"页面已过期"，由 Service 区分成 403 / 409。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Update("UPDATE cart_item SET quantity = #{quantity}, version = version + 1 "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            + "WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">int</span> updateQuantity(@Param("userId") Long userId, @Param("itemId") Long itemId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                       @Param("quantity") <span class="kw">int</span> quantity, @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">    /** 移除：同样带 user_id 与 version，避免越权与旧页面覆盖 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @Delete("DELETE FROM cart_item WHERE id = #{itemId} AND user_id = #{userId} AND version = #{version}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    <span class="kw">int</span> deleteByIdAndUser(@Param("userId") Long userId, @Param("itemId") Long itemId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                          @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>CartServiceTest.java<small>18 个用例：累加/上限/库存/归属/版本/汇总 · 311 行</small></h2>
+<p class="path">cartoon-cart/src/test/java/org/csu/mycartoonstore/cart/service/CartServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（注释行保持原位）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.cart.service;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.cart.service 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartItemView;</pre></td><td class="explain">购物车联表视图：商品当前价、库存、分类名</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.dto.CartSummary;</pre></td><td class="explain">购物车汇总：徽标、可结算件数、总额</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.entity.CartItem;</pre></td><td class="explain">购物车条目实体</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.cart.mapper.CartItemMapper;</pre></td><td class="explain">购物车数据访问</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品数据访问</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码枚举，用来区分 400 与 404</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">JUnit 5 注解，每个用例前执行</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">唯一键冲突异常</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">AssertJ 断言：期望抛出异常</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">Mockito：匹配任意参数</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.anyInt;</pre></td><td class="explain">静态导入 anyInt</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.anyLong;</pre></td><td class="explain">静态导入 anyLong</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock;</pre></td><td class="explain">Mockito：创建接口的假实现</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.never;</pre></td><td class="explain">静态导入 never</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verify;</pre></td><td class="explain">静态导入 verify</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">Mockito：设定假实现的返回值</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline"> * 购物车服务测试：累加、上限、库存、归属、版本冲突与汇总口径。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline"> *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline"> * &lt;p&gt;Mapper 全部 Mock，只验证 Service 的分支与抛出的错误码；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline"> * 真实 SQL 的归属与版本条件由集成测试覆盖。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre><span class="kw">class</span> CartServiceTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> USER = 1L;</pre></td><td class="explain">字段 USER：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> CartItemMapper cartItemMapper;</pre></td><td class="explain">字段 cartItemMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> ProductMapper productMapper;</pre></td><td class="explain">字段 productMapper：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">private</span> CartService service;</pre></td><td class="explain">字段 service：由构造器注入或在本类内初始化，供本类方法使用。</td></tr>
+<tr class="gap"><td class="line">42</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前执行，用来重置数据</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">void</span> setUp() {</pre></td><td class="explain">每个用例前重建 Mock 与服务。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        cartItemMapper = mock(CartItemMapper.<span class="kw">class</span>);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        productMapper = mock(ProductMapper.<span class="kw">class</span>);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        service = <span class="kw">new</span> CartService(cartItemMapper, productMapper);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">49</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 加车</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">51</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    @DisplayName("首次加入：插入一条数量等于本次输入")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">void</span> addInsertsNewItem() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 10, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        when(cartItemMapper.findByUserAndProduct(USER, 9L)).thenReturn(null);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        when(cartItemMapper.countByUser(USER)).thenReturn(3);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">58</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        service.add(USER, "9", "2");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        verify(cartItemMapper).insert(any(CartItem.<span class="kw">class</span>));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">63</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @DisplayName("同商品重复加入：按累加后的数量更新，而不是再插一条")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">void</span> addAccumulatesExisting() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 10, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        when(cartItemMapper.findByUserAndProduct(USER, 9L)).thenReturn(item(77L, USER, 9L, 2, 3L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        when(cartItemMapper.updateQuantity(USER, 77L, 5, 3L)).thenReturn(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        service.add(USER, "9", "3");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        verify(cartItemMapper, never()).insert(any(CartItem.<span class="kw">class</span>));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        verify(cartItemMapper).updateQuantity(USER, 77L, 5, 3L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">76</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @DisplayName("数量 0 / 100 / 小数 / 非数字：400，且不碰数据库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    <span class="kw">void</span> addRejectsInvalidQuantity() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        for (String raw : List.of("0", "-1", "100", "1.5", "abc", "")) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>            assertThatThrownBy(() -&gt; service.add(USER, "9", raw))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    .as("数量 %s", raw)</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                    .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                            e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.BAD_REQUEST));</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        verify(cartItemMapper, never()).insert(any(CartItem.<span class="kw">class</span>));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">88</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    @DisplayName("累加后超过 99：400，原条目不动")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    <span class="kw">void</span> addRejectsAccumulatedOverLimit() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 200, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        when(cartItemMapper.findByUserAndProduct(USER, 9L)).thenReturn(item(77L, USER, 9L, 98, 0L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.add(USER, "9", "2"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                .hasMessageContaining("99");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    @DisplayName("累加后超过库存：400，提示可购买数量")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    <span class="kw">void</span> addRejectsAccumulatedOverStock() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 3, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        when(cartItemMapper.findByUserAndProduct(USER, 9L)).thenReturn(item(77L, USER, 9L, 2, 0L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">105</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.add(USER, "9", "2"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>                .hasMessageContaining("最多可购买 3 件");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">110</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>    @DisplayName("商品不存在或已下架：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>    <span class="kw">void</span> addRejectsMissingOrDraftProduct() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(null);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        when(productMapper.selectById(10L)).thenReturn(product(10L, "28.00", 10, "DRAFT"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">116</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.add(USER, "9", "1"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.add(USER, "10", "1"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">124</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>    @DisplayName("已有 20 种商品：拒绝第 21 种")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>    <span class="kw">void</span> addRejectsWhenKindsFull() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 10, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        when(cartItemMapper.findByUserAndProduct(USER, 9L)).thenReturn(null);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>        when(cartItemMapper.countByUser(USER)).thenReturn(CartService.MAX_KINDS);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">131</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.add(USER, "9", "1"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>                .hasMessageContaining("20 种");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>        verify(cartItemMapper, never()).insert(any(CartItem.<span class="kw">class</span>));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">136</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    @DisplayName("并发下插入撞唯一键：退化为累加，不报 500")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>    <span class="kw">void</span> addFallsBackToAccumulateOnDuplicateKey() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 10, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>        when(cartItemMapper.findByUserAndProduct(USER, 9L))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                .thenReturn(null, item(77L, USER, 9L, 1, 0L));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>        when(cartItemMapper.insert(any(CartItem.<span class="kw">class</span>)))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                .thenThrow(<span class="kw">new</span> DuplicateKeyException("uk_cart_user_product"));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>        when(cartItemMapper.updateQuantity(USER, 77L, 2, 0L)).thenReturn(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">146</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>        service.add(USER, "9", "1");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">148</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        verify(cartItemMapper).updateQuantity(USER, 77L, 2, 0L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">151</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 改数量</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">153</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>    @DisplayName("改数量：校验通过后带旧版本写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityWritesWithVersion() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, USER, 9L, 2, 4L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 10, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        when(cartItemMapper.updateQuantity(USER, 77L, 6, 4L)).thenReturn(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">160</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        service.changeQuantity(USER, "77", "6", "4");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">162</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        verify(cartItemMapper).updateQuantity(USER, 77L, 6, 4L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">165</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>    @DisplayName("改他人条目：403，不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityRejectsOtherUser() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, 2L, 9L, 2, 0L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">170</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeQuantity(USER, "77", "3", "0"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.FORBIDDEN));</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">176</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    @DisplayName("旧版本提交：409，不覆盖新数量")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityRejectsStaleVersion() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, USER, 9L, 2, 5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">181</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeQuantity(USER, "77", "3", "4"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT));</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">187</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>    @DisplayName("改成超过库存：400，不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityRejectsOverStock() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, USER, 9L, 2, 0L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 3, "ON_SALE"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">193</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeQuantity(USER, "77", "4", "0"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>                .hasMessageContaining("最多可购买 3 件");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>        verify(cartItemMapper, never()).updateQuantity(anyLong(), anyLong(), anyInt(), anyLong());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">198</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>    @DisplayName("条目对应商品已下架：409，先移除再买")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>    <span class="kw">void</span> changeQuantityRejectsDraftProduct() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, USER, 9L, 2, 0L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>        when(productMapper.selectById(9L)).thenReturn(product(9L, "28.00", 10, "DRAFT"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">204</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeQuantity(USER, "77", "2", "0"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>                .hasMessageContaining("已下架");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">208</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 移除</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">210</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>    @DisplayName("移除本人条目：带旧版本删除")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>    <span class="kw">void</span> removeDeletesOwnItem() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, USER, 9L, 2, 1L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        when(cartItemMapper.deleteByIdAndUser(USER, 77L, 1L)).thenReturn(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">216</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        service.remove(USER, "77", "1");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">218</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        verify(cartItemMapper).deleteByIdAndUser(USER, 77L, 1L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">221</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>    @DisplayName("移除时版本已变：409，不删除")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>    <span class="kw">void</span> removeRejectsStaleVersion() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>        when(cartItemMapper.selectById(77L)).thenReturn(item(77L, USER, 9L, 2, 2L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">226</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.remove(USER, "77", "1"))</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT));</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>        verify(cartItemMapper, never()).deleteByIdAndUser(anyLong(), anyLong(), anyLong());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">232</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 汇总</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">234</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>    @DisplayName("汇总：徽标含失效行，金额只算可用行")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>    <span class="kw">void</span> summaryCountsBadgeAndOnlyValidAmount() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="238"><td class="line">238</td><td class="code"><pre>        when(cartItemMapper.selectViewByUser(USER)).thenReturn(List.of(</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>                view(1L, 9L, 2, "28.00", 10, "ON_SALE", 0L),</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>                view(2L, 10L, 1, "30.00", 0, "ON_SALE", 0L),</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>                view(3L, 11L, 3, "50.00", 5, "DRAFT", 0L)));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">242</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>        CartSummary summary = service.summary(USER);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">244</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>        assertThat(summary.getBadgeQuantity()).isEqualTo(6);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="246"><td class="line">246</td><td class="code"><pre>        assertThat(summary.getValidQuantity()).isEqualTo(2);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="247"><td class="line">247</td><td class="code"><pre>        assertThat(summary.getTotalAmount()).isEqualByComparingTo("56.00");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="248"><td class="line">248</td><td class="code"><pre>        assertThat(summary.getInvalidCount()).isEqualTo(2);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="249"><td class="line">249</td><td class="code"><pre>        assertThat(summary.isAllAvailable()).isFalse();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="250"><td class="line">250</td><td class="code"><pre>        assertThat(summary.isSettleable()).isFalse();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="251"><td class="line">251</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">252</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="253"><td class="line">253</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="254"><td class="line">254</td><td class="code"><pre>    @DisplayName("汇总：空车徽标 0、总额 0.00，且不可结算")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="255"><td class="line">255</td><td class="code"><pre>    <span class="kw">void</span> summaryOfEmptyCart() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="256"><td class="line">256</td><td class="code"><pre>        when(cartItemMapper.selectViewByUser(USER)).thenReturn(List.of());</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">257</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="258"><td class="line">258</td><td class="code"><pre>        CartSummary summary = service.summary(USER);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">259</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="260"><td class="line">260</td><td class="code"><pre>        assertThat(summary.isEmpty()).isTrue();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="261"><td class="line">261</td><td class="code"><pre>        assertThat(summary.getBadgeQuantity()).isZero();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="262"><td class="line">262</td><td class="code"><pre>        assertThat(summary.getTotalAmount()).isEqualByComparingTo("0.00");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>        assertThat(summary.isSettleable()).isFalse();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="264"><td class="line">264</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">265</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="267"><td class="line">267</td><td class="code"><pre>    @DisplayName("徽标直接取 SQL 求和结果")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>    <span class="kw">void</span> badgeDelegatesToMapper() {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>        when(cartItemMapper.sumQuantityByUser(USER)).thenReturn(7);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">270</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre>        assertThat(service.badgeQuantity(USER)).isEqualTo(7);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">273</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 夹具</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">275</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>    <span class="kw">private</span> Product product(<span class="kw">long</span> id, String price, <span class="kw">int</span> stock, String status) {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>        Product p = <span class="kw">new</span> Product();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="278"><td class="line">278</td><td class="code"><pre>        p.setId(id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>        p.setName("测试商品" + id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>        p.setPrice(<span class="kw">new</span> BigDecimal(price));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>        p.setStock(stock);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>        p.setStatus(status);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre>        <span class="kw">return</span> p;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">285</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>    <span class="kw">private</span> CartItem item(<span class="kw">long</span> id, <span class="kw">long</span> userId, <span class="kw">long</span> productId, <span class="kw">int</span> quantity, <span class="kw">long</span> version) {</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>        CartItem i = <span class="kw">new</span> CartItem();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>        i.setId(id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre>        i.setUserId(userId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>        i.setProductId(productId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>        i.setQuantity(quantity);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre>        i.setVersion(version);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>        <span class="kw">return</span> i;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">295</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>    <span class="kw">private</span> CartItemView view(<span class="kw">long</span> id, <span class="kw">long</span> productId, <span class="kw">int</span> quantity, String price, <span class="kw">int</span> stock,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre>                              String status, <span class="kw">long</span> version) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="298"><td class="line">298</td><td class="code"><pre>        CartItemView v = <span class="kw">new</span> CartItemView();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="299"><td class="line">299</td><td class="code"><pre>        v.setId(id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="300"><td class="line">300</td><td class="code"><pre>        v.setProductId(productId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre>        v.setProductName("测试商品" + productId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>        v.setCoverImage("images/products/T/cover.svg");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>        v.setCategoryName("单行本");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>        v.setPrice(<span class="kw">new</span> BigDecimal(price));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>        v.setQuantity(quantity);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="306"><td class="line">306</td><td class="code"><pre>        v.setStock(stock);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="307"><td class="line">307</td><td class="code"><pre>        v.setProductStatus(status);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="308"><td class="line">308</td><td class="code"><pre>        v.setVersion(version);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="309"><td class="line">309</td><td class="code"><pre>        <span class="kw">return</span> v;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="310"><td class="line">310</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="311"><td class="line">311</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-16 · M04-01 · 购物车服务与数据访问 · 5 个文件、768 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

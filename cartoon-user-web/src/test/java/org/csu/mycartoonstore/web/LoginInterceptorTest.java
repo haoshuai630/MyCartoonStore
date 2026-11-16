@@ -16,8 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 登录拦截测试：未登录被拦到登录页，已登录放行。
  *
- * <p>受保护页面本身在 M04/M05 才实现，这里不关心它们返回什么，
- * 只断言"有没有被重定向到登录页"。</p>
+ * <p>这里只关心"有没有被重定向到登录页"；购物车页本身的渲染与数据在
+ * {@link CartPageTest} 里断言。</p>
  */
 @AutoConfigureMockMvc
 class LoginInterceptorTest extends AbstractIntegrationTest {
@@ -42,13 +42,13 @@ class LoginInterceptorTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("已登录访问购物车：不再跳登录")
+    @DisplayName("已登录访问购物车：不再跳登录，进入购物车页")
     void loggedInPassesThrough() throws Exception {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("userId", 1L);
 
         mockMvc.perform(get("/cart").session(session))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk());
     }
 
     @Test

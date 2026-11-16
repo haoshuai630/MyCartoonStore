@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('购物车')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap">
+            <div class="section-head">
+                <div>
+                    <span class="en">CART</span>
+                    <h2>购物车</h2>
+                </div>
+                <a th:href="@{/category}">继续选购</a>
+            </div>
+
+            <!-- 写操作成功后的一次性提示；刷新不会重复提交 -->
+            <p class="auth-ok" th:if="${message}" th:text="${message}">已加入购物车</p>
+
+            <!-- 空车：给一个明确的去处，不留空白页 -->
+            <div class="empty cart-empty" th:if="${cart.isEmpty()}">
+                <p>购物车还是空的，去看看作品与周边吧。</p>
+                <a class="btn btn-primary" th:href="@{/main}">去逛逛</a>
+            </div>
+
+            <div th:unless="${cart.isEmpty()}">
+                <div class="cart-list">
+                    <div class="cart-head">
+                        <span>商品</span>
+                        <span>单价</span>
+                        <span>数量</span>
+                        <span>小计</span>
+                        <span>操作</span>
+                    </div>
+
+                    <!-- 每一行一个条目；失效行保留并标出原因，不自动删除 -->
+                    <div class="cart-row" th:each="line : ${cart.lines}" th:classappend="${line.invalid} ? 'invalid'">
+                        <div class="cart-item">
+                            <a th:href="@{/product/{id}(id=${line.productId})}">
+                                <img th:src="@{${line.coverImage}}" th:alt="${line.productName}">
+                            </a>
+                            <div class="cart-item-text">
+                                <a class="title" th:href="@{/product/{id}(id=${line.productId})}"
+                                   th:text="${line.productName}">商品名</a>
+                                <small th:text="${line.categoryName}">分类</small>
+                                <p class="reason" th:if="${line.invalid}" th:text="${line.unavailableReason}">失效原因</p>
+                            </div>
+                        </div>
+
+                        <div class="cart-price" th:text="'¥' + ${#numbers.formatDecimal(line.price, 1, 2)}">¥0.00</div>
+
+                        <!-- 改数量带旧 version，页面放旧了会被后端拒绝并要求刷新 -->
+                        <form class="cart-qty" th:action="@{/cart/items/{id}/quantity(id=${line.itemId})}" method="post">
+                            <input type="hidden" name="version" th:value="${line.version}">
+                            <input type="number" name="quantity" th:value="${line.quantity}" min="1" max="99">
+                            <button type="submit" class="btn btn-ghost">更新</button>
+                        </form>
+
+                        <div class="cart-subtotal"
+                             th:text="'¥' + ${#numbers.formatDecimal(line.lineAmount, 1, 2)}">¥0.00</div>
+
+                        <form class="cart-remove" th:action="@{/cart/items/{id}/remove(id=${line.itemId})}" method="post">
+                            <input type="hidden" name="version" th:value="${line.version}">
+                            <button type="submit" class="link-btn">移除</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="cart-foot">
+                    <div class="cart-sum">
+                        <p>共 <b th:text="${cart.badgeQuantity}">0</b> 件（其中可结算 <b th:text="${cart.validQuantity}">0</b> 件）</p>
+                        <p class="cart-total">应付总额
+                            <b th:text="'¥' + ${#numbers.formatDecimal(cart.totalAmount, 1, 2)}">¥0.00</b>
+                        </p>
+                        <p class="hint">商品合计即应付总额：无运费、无优惠、不勾选结算。</p>
+                    </div>
+                    <div class="cart-actions">
+                        <p class="reason" th:if="${cart.invalidCount > 0}"
+                           th:text="|有 ${cart.invalidCount} 个条目已失效，请先移除或换成可买的商品。|">有失效条目</p>
+                        <!-- 结算页在 M05 开放；这里只做状态呈现，不给一个点进去 404 的入口 -->
+                        <button type="button" class="btn btn-primary" disabled
+                                th:title="${cart.settleable} ? '结算页在 M05 开放' : '请先处理失效条目'">去结算</button>
+                        <p class="hint" th:text="${cart.settleable} ? '结算页在 M05 开放。' : '失效条目无法结算。'">提示</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
