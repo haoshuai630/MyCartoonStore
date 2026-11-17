@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.csu.mycartoonstore.catalog.dto.AdminProductQuery;
+import org.csu.mycartoonstore.catalog.dto.AdminProductRow;
 import org.csu.mycartoonstore.catalog.dto.CategoryUsage;
 import org.csu.mycartoonstore.catalog.dto.ProductQuery;
 import org.csu.mycartoonstore.catalog.entity.Product;
@@ -54,4 +56,23 @@ public interface ProductMapper extends BaseMapper<Product> {
      */
     @Select("SELECT category_id AS categoryId, COUNT(*) AS productCount FROM product GROUP BY category_id")
     List<CategoryUsage> countByCategory();
+
+    /** 后台列表：含下架商品，可筛状态与分类；按 id 倒序（最近录入在前） */
+    List<AdminProductRow> selectAdminPage(@Param("q") AdminProductQuery query);
+
+    /** 与后台列表同条件的总数 */
+    long countAdminPage(@Param("q") AdminProductQuery query);
+
+    /**
+     * 保存商品资料：版本一致才写入，同时 version + 1。
+     *
+     * @return 影响行数；0 表示版本已变（或商品被删），调用方转 409
+     */
+    @Update("""
+            UPDATE product SET name = #{p.name}, category_id = #{p.categoryId}, price = #{p.price},
+                   summary = #{p.summary}, description = #{p.description}, cover_image = #{p.coverImage},
+                   sort_order = #{p.sortOrder}, version = version + 1
+             WHERE id = #{p.id} AND version = #{p.version}
+            """)
+    int updateProfile(@Param("p") Product product);
 }

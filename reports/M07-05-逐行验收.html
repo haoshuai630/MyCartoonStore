@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M07-05 · 商品查询与维护服务（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M07-05 · 商品查询与维护服务（逐行验收）</h1>
+<p>一行源码一行记录，行号取自原文件。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">AdminProductQuery.java</a><a href="#s2">AdminProductRow.java</a><a href="#s3">ProductForm.java</a><a href="#s4">CategoryOption.java</a><a href="#s5">ProductMapper.java</a><a href="#s6">ProductMapper.xml</a><a href="#s7">ProductAdminService.java</a><a href="#s8">ProductAdminServiceTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：后台商品列表（含下架，按一级/二级分类、名称、状态筛选，id 倒序分页）、新增（默认 DRAFT，SKU/名称/二级分类/价格/库存/封面/排序校验）、编辑（只改资料与价格，版本冲突 409）、分类下拉（表单只列二级、筛选列两级）与编辑回显。只做服务层，页面在 M07-06。验证：mvn -pl cartoon-catalog -am test → Tests run: 54（新增 18）, Failures: 0。ProductMapper 的 java 只对照新增 import 与方法；XML 只对照 adminWhere 与两个后台查询。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>AdminProductQuery.java<small>后台列表查询条件 · 全文件 29 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/AdminProductQuery.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">后台商品列表的查询条件：与前台列表分开，因为这里要看下架商品。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">生成 setter。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">// M07-05：依据 docs/01 FR-A-03、docs/04 §3.3。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">// 与 ProductQuery 的差别：</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">//   1. 状态可筛选（ALL / DRAFT / ON_SALE），前台永远只看 ON_SALE；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">//   2. 排序固定 id 倒序（最近录入在前），不开放给页面选择；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">//   3. 分类既可以给一级（取子树），也可以给二级（精确）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Getter</pre></td><td class="explain">读取。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Setter</pre></td><td class="explain">组装。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminProductQuery {</pre></td><td class="explain">后台列表条件：含下架、可筛状态，排序固定 id 倒序。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 一级或二级分类 id；为空表示全部 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">一级时取子树。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">    /** 商品名称关键字，已去首尾空白并转义 LIKE 通配符 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> String keyword;</pre></td><td class="explain">为空表示不搜索。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** ALL / DRAFT / ON_SALE */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> String status;</pre></td><td class="explain">非法值在 Service 转 400。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /** 当前页数量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> limit;</pre></td><td class="explain">由 PageQuery 归一。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 偏移量 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> offset;</pre></td><td class="explain">(page-1)*pageSize。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>AdminProductRow.java<small>列表行：商品字段 + 分类名称 · 全文件 40 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/AdminProductRow.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">后台商品列表的一行：商品字段 + 分类名称。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">MyBatis 结果映射需要写。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">价格。</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// M07-05：后台列表要显示"分类名称"，而 Product 实体只有 category_id。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 用一次 JOIN 把名称带出来，避免页面里逐行再查分类。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">读取。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Setter</pre></td><td class="explain">结果映射。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminProductRow {</pre></td><td class="explain">列表行：JOIN 出分类名，避免页面逐行查库。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">    /** 商品 id（页面定位用） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> Long id;</pre></td><td class="explain">编辑入口按它跳。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">    /** SKU：创建后不可改 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> String sku;</pre></td><td class="explain">只展示。</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 商品名 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> String name;</pre></td><td class="explain">可编辑。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 二级分类名称 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> String categoryName;</pre></td><td class="explain">来自 JOIN。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">    /** 价格 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> BigDecimal price;</pre></td><td class="explain">展示两位小数。</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    /** 可销售库存 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> stock;</pre></td><td class="explain">只展示，补货走 M07-07。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** DRAFT / ON_SALE */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> String status;</pre></td><td class="explain">页面显示「上架 / 下架」。</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /** 排序值 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> sortOrder;</pre></td><td class="explain">越小越靠前。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">    /** 乐观锁版本：编辑表单要带上 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> version;</pre></td><td class="explain">冲突检测用。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>ProductForm.java<small>新增与编辑共用的表单 · 全文件 45 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/ProductForm.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">后台商品表单：新增与编辑共用。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> lombok.Setter;</pre></td><td class="explain">表单绑定需要写。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">// M07-05：依据 docs/01 FR-A-03、docs/04 §3.3。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">// price / stock 用字符串接收：页面填错时能给出"必须是数字/两位小数"的具体文案，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// 而不是让 Spring 的类型转换抛 BindException。解析与范围校验都在 Service。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>@Getter</pre></td><td class="explain">读取。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Setter</pre></td><td class="explain">绑定。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductForm {</pre></td><td class="explain">商品表单：price/stock 用字符串接，便于给具体错误文案。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">    /** 商品 id：编辑时有值 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> Long id;</pre></td><td class="explain">由路径参数设置。</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** SKU：新增必填、创建后不可改 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> String sku;</pre></td><td class="explain">1–40 位大写字母、数字与连字符。</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 商品名：1–120 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> String name;</pre></td><td class="explain">去首尾空白。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 所属二级分类 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> Long categoryId;</pre></td><td class="explain">必须指向二级分类。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 价格（原始字符串） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> String price;</pre></td><td class="explain">&gt;0，最多两位小数。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 初始库存（原始字符串）：只在新增时生效 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> String stock;</pre></td><td class="explain">编辑页不出现该输入。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">    /** 简介：可空，≤500 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> String summary;</pre></td><td class="explain">列表与详情用。</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 描述：可空纯文本 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> String description;</pre></td><td class="explain">模板转义输出。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">    /** 封面站内路径：必填，≤255 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">private</span> String coverImage;</pre></td><td class="explain">例如 images/products/STARLINE-C01/cover.svg。</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">    /** 排序：非负，缺省 0 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">private</span> Integer sortOrder;</pre></td><td class="explain">越小越靠前。</td></tr>
+<tr class="gap"><td class="line">42</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">    /** 乐观锁版本：编辑时由隐藏域带回 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">private</span> Long version;</pre></td><td class="explain">保存时校验。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>CategoryOption.java<small>分类下拉项 · 全文件 21 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/CategoryOption.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">商品表单里的分类下拉项。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter。</td></tr>
+<tr class="gap"><td class="line">4</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">// M07-05：商品只能挂二级分类，下拉里显示「作品 / 品类」，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">// 让管理员一眼看出归属，不必记编码。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>@Getter</pre></td><td class="explain">只读。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CategoryOption {</pre></td><td class="explain">分类下拉项：已拼好「作品 / 品类」。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">    /** 二级分类 id：提交给商品表单 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Long id;</pre></td><td class="explain">商品的 category_id。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">    /** 显示文本：作品名 / 品类名 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String label;</pre></td><td class="explain">已拼好，模板直接输出。</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 组装一个选项。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> CategoryOption(Long id, String label) {</pre></td><td class="explain">构造器：注入 id、label</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        this.id = id;</pre></td><td class="explain">分类 id。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        this.label = label;</pre></td><td class="explain">显示文本。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>ProductMapper.java<small>后台列表与条件更新 · 本任务改动行 20 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/mapper/ProductMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.AdminProductQuery;</pre></td><td class="explain">引入 AdminProductQuery</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.AdminProductRow;</pre></td><td class="explain">引入 AdminProductRow</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">    /** 后台列表：含下架商品，可筛状态与分类；按 id 倒序（最近录入在前） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    List&lt;AdminProductRow&gt; selectAdminPage(@Param("q") AdminProductQuery query);</pre></td><td class="explain">后台列表：含下架商品，可筛状态与分类；按 id 倒序（最近录入在前）</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">    /** 与后台列表同条件的总数 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">long</span> countAdminPage(@Param("q") AdminProductQuery query);</pre></td><td class="explain">与后台列表同条件的总数</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre class="cmtline">     * 保存商品资料：版本一致才写入，同时 version + 1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre class="cmtline">     * @return 影响行数；0 表示版本已变（或商品被删），调用方转 409</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    @Update("""</pre></td><td class="explain">注解 SQL：条件里带归属，避免越权</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>            UPDATE product SET name = #{p.name}, category_id = #{p.categoryId}, price = #{p.price},</pre></td><td class="explain">只写资料与价格列：SKU、库存、状态不在这里改。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                   summary = #{p.summary}, description = #{p.description}, cover_image = #{p.coverImage},</pre></td><td class="explain">续行：简介、描述、封面。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                   sort_order = #{p.sortOrder}, version = version + 1</pre></td><td class="explain">续行：排序 + 版本自增。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>             WHERE id = #{p.id} AND version = #{p.version}</pre></td><td class="explain">续行：版本作条件，影响 0 行即冲突。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>            """)</pre></td><td class="explain">注解 SQL 结束。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    <span class="kw">int</span> updateProfile(@Param("p") Product product);</pre></td><td class="explain">返回影响行数：0 表示版本已变。</td></tr>
+</tbody></table>
+</section>
+<section id="s6">
+<h2>ProductMapper.xml<small>后台列表 SQL 与分组计数后新增的两个查询 · 本任务改动行 31 行</small></h2>
+<p class="path">cartoon-catalog/src/main/resources/mapper/ProductMapper.xml</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">    &lt;!-- 后台列表条件：含下架；分类给一级时取子树，给二级时精确 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    &lt;sql id="adminWhere"&gt;</pre></td><td class="explain">后台列表公共条件：与 count 共用，避免两处 SQL 走样。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        FROM product <span class="kw">p</span></pre></td><td class="explain">商品表起头。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        JOIN category c ON c.id = p.category_id</pre></td><td class="explain">JOIN 分类：既能按一级/二级筛选，也能带出分类名。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        &lt;where&gt;</pre></td><td class="explain">动态条件容器：没有条件时不生成 WHERE。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>            &lt;if test="q.categoryId != null"&gt;</pre></td><td class="explain">分类：给了就筛。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                AND (c.id = #{q.categoryId} OR c.parent_id = #{q.categoryId})</pre></td><td class="explain">一级取子树、二级精确。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            &lt;/if&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;if&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>            &lt;if test="q.status != null and q.status != 'ALL'"&gt;</pre></td><td class="explain">状态：ALL 不筛。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                AND p.status = #{q.status}</pre></td><td class="explain">DRAFT / ON_SALE。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            &lt;/if&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;if&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            &lt;if test="q.keyword != null and q.keyword != ''"&gt;</pre></td><td class="explain">关键字：服务层已转义通配符。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                AND p.name LIKE CONCAT('%', #{q.keyword}, '%')</pre></td><td class="explain">只搜名称，与前台列表一致。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>            &lt;/if&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;if&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        &lt;/where&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;where&gt; 容器；不产生新的内容。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    &lt;/sql&gt;</pre></td><td class="explain">结构闭合：结束上面的 &lt;sql&gt; 容器；不产生新的内容。</td></tr>
+<tr class="gap"><td class="line">79</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre class="cmtline">    &lt;!-- 后台列表：最近录入在前，排序不接受页面参数 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    &lt;select id="selectAdminPage" resultType="org.csu.mycartoonstore.catalog.dto.AdminProductRow"&gt;</pre></td><td class="explain">后台列表查询：返回行对象。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        SELECT p.id AS id, p.sku AS sku, p.name AS name, c.name AS categoryName,</pre></td><td class="explain">显式列清单 + 分类名。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>               p.price AS price, p.stock AS stock, p.status AS status,</pre></td><td class="explain">续行：价格、库存、状态。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>               p.sort_order AS sortOrder, p.version AS version</pre></td><td class="explain">续行：排序与版本。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        &lt;include refid="adminWhere"/&gt;</pre></td><td class="explain">复用公共条件。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        ORDER BY p.id DESC</pre></td><td class="explain">最近录入在前，翻页稳定。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        LIMIT #{q.limit} OFFSET #{q.offset}</pre></td><td class="explain">分页。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    &lt;/select&gt;</pre></td><td class="explain">结构闭合：结束作品下拉。</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    &lt;select id="countAdminPage" resultType="long"&gt;</pre></td><td class="explain">总数查询：与列表同条件。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        SELECT COUNT(*)</pre></td><td class="explain">计数。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        &lt;include refid="adminWhere"/&gt;</pre></td><td class="explain">复用公共条件。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    &lt;/select&gt;</pre></td><td class="explain">结构闭合：结束作品下拉。</td></tr>
+</tbody></table>
+</section>
+<section id="s7">
+<h2>ProductAdminService.java<small>列表、新增、编辑与全部校验 · 全文件 420 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.service;</pre></td><td class="explain">后台商品查询与维护：列表、新增、编辑（版本校验）。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.toolkit.Wrappers;</pre></td><td class="explain">条件构造。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.AdminProductQuery;</pre></td><td class="explain">列表条件。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.AdminProductRow;</pre></td><td class="explain">列表行。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.CategoryOption;</pre></td><td class="explain">分类下拉项。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductForm;</pre></td><td class="explain">表单。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Category;</pre></td><td class="explain">分类实体。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.CategoryMapper;</pre></td><td class="explain">分类查询。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品读写。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">400/404/409。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.page.PageQuery;</pre></td><td class="explain">分页归一。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.page.PageResult;</pre></td><td class="explain">分页结果。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.springframework.dao.DuplicateKeyException;</pre></td><td class="explain">并发下 SKU 唯一键兜底。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">业务服务。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> org.springframework.transaction.annotation.Transactional;</pre></td><td class="explain">写操作同事务。</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> java.math.RoundingMode;</pre></td><td class="explain">两位小数。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList;</pre></td><td class="explain">组装下拉。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">列表。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">状态白名单。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> java.util.regex.Pattern;</pre></td><td class="explain">SKU 格式。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// M07-05：依据 docs/01 FR-A-03、docs/03 §2.3、docs/04 §3.3、docs/06 AC-25/AC-27。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// 负责：后台列表（含下架、可按一级/二级分类与状态筛选）、新增（默认 DRAFT）、编辑（版本冲突 409）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// 不做：上下架与补货（M07-07）、删除（用下架代替）、页面渲染（M07-06）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">// 商品的所有写操作都必须维护 version：新增由数据库默认 0，编辑由 SQL 里 version+1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>@Service</pre></td><td class="explain">业务服务：只被后台控制器调用。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductAdminService {</pre></td><td class="explain">商品后台服务：列表/新增/编辑；上下架与补货留给 M07-07。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 新增商品的初始状态：完善后再显式上架 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String STATUS_DRAFT = "DRAFT";</pre></td><td class="explain">与数据库默认值一致。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /** 状态白名单：列表筛选用 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; STATUSES = Set.of("ALL", "DRAFT", "ON_SALE");</pre></td><td class="explain">非法值 400。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** SKU 格式：1–40 位大写字母、数字与连字符 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Pattern SKU = Pattern.compile("^[A-Z0-9-]{1,40}$");</pre></td><td class="explain">与 docs/04 §3.3 一致。</td></tr>
+<tr class="gap"><td class="line">41</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">    /** 后台列表每页 10 条 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> PAGE_SIZE = 10;</pre></td><td class="explain">与 docs/04 §4 的"其他列表缺省 10"一致。</td></tr>
+<tr class="gap"><td class="line">44</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre class="cmtline">    /** 名称上限：VARCHAR(120) */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> NAME_MAX = 120;</pre></td><td class="explain">去空白后判断。</td></tr>
+<tr class="gap"><td class="line">47</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre class="cmtline">    /** 简介上限：VARCHAR(500) */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> SUMMARY_MAX = 500;</pre></td><td class="explain">可空。</td></tr>
+<tr class="gap"><td class="line">50</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre class="cmtline">    /** 封面上限：VARCHAR(255) */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> COVER_MAX = 255;</pre></td><td class="explain">必填。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /** 关键字上限：与前台列表一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> KEYWORD_MAX = 120;</pre></td><td class="explain">超长 400。</td></tr>
+<tr class="gap"><td class="line">56</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre class="cmtline">    /** 价格上限：DECIMAL(12,2) */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> BigDecimal PRICE_MAX = <span class="kw">new</span> BigDecimal("9999999999.99");</pre></td><td class="explain">超出即拒绝。</td></tr>
+<tr class="gap"><td class="line">59</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">    /** 初始库存上限：教学场景足够，避免误填把 INT 撑爆 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> STOCK_MAX = 1_000_000;</pre></td><td class="explain">正整数校验。</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductMapper productMapper;</pre></td><td class="explain">商品读写。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CategoryMapper categoryMapper;</pre></td><td class="explain">分类存在性与下拉。</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">public</span> ProductAdminService(ProductMapper productMapper, CategoryMapper categoryMapper) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        this.productMapper = productMapper;</pre></td><td class="explain">保存商品 Mapper。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        this.categoryMapper = categoryMapper;</pre></td><td class="explain">保存分类 Mapper。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre class="cmtline">     * 后台列表：含下架商品，可按分类（一级取子树）、名称、状态筛选，按 id 倒序。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre class="cmtline">     * &lt;p&gt;所有参数在这里归一与校验：状态不在白名单、页码/页大小越界、关键字超长都给 400，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre class="cmtline">     * 不把非法值带进 SQL。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    <span class="kw">public</span> PageResult&lt;AdminProductRow&gt; search(String rawCategoryId, String rawKeyword, String rawStatus,</pre></td><td class="explain">列表入口：参数都是原始字符串，在这里归一。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                                              String rawPage, String rawPageSize) {</pre></td><td class="explain">续行：页码与页大小。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        PageQuery pageQuery = PageQuery.of(rawPage, rawPageSize, PAGE_SIZE);</pre></td><td class="explain">页码与页大小。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        String status = parseStatus(rawStatus);</pre></td><td class="explain">白名单。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        Long categoryId = parseCategoryId(rawCategoryId);</pre></td><td class="explain">一级或二级。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        String keyword = parseKeyword(rawKeyword);</pre></td><td class="explain">转义 LIKE。</td></tr>
+<tr class="gap"><td class="line">83</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        AdminProductQuery query = <span class="kw">new</span> AdminProductQuery();</pre></td><td class="explain">组装查询条件。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        query.setCategoryId(categoryId);</pre></td><td class="explain">分类过滤。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        query.setStatus(status);</pre></td><td class="explain">状态过滤。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        query.setKeyword(keyword);</pre></td><td class="explain">名称包含。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        query.setLimit(pageQuery.pageSize());</pre></td><td class="explain">每页数量。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        query.setOffset(pageQuery.offset());</pre></td><td class="explain">偏移量。</td></tr>
+<tr class="gap"><td class="line">90</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        List&lt;AdminProductRow&gt; rows = productMapper.selectAdminPage(query);</pre></td><td class="explain">当前页。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">long</span> total = productMapper.countAdminPage(query);</pre></td><td class="explain">同条件总数。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        <span class="kw">return</span> PageResult.of(rows, total, pageQuery);</pre></td><td class="explain">交给页面。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">95</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre class="cmtline">    /** 按 id 取商品：不存在 404。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    <span class="kw">public</span> Product detail(<span class="kw">long</span> id) {</pre></td><td class="explain">按 id 取商品：不存在 404。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        Product product = productMapper.selectById(id);</pre></td><td class="explain">主键查询。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        if (product == null) {</pre></td><td class="explain">不存在即 404。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>            throw BizException.notFound("商品不存在");</pre></td><td class="explain">与越权同码，不泄露存在性。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">已存在的商品。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre class="cmtline">     * 新增商品：状态固定 DRAFT，版本由数据库默认 0。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre class="cmtline">     * &lt;p&gt;SKU 唯一由服务先查一次给出可读的 409；并发下由唯一键兜底。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">校验 + 写入同一事务。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    <span class="kw">public</span> Product create(ProductForm form) {</pre></td><td class="explain">新增商品：状态固定 DRAFT，版本由数据库默认 0。 SKU 唯一由服务先查一次给出可读的 409；并发下由唯一键兜底。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        String sku = normalizeSku(form.getSku());</pre></td><td class="explain">格式与唯一性。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        String name = normalizeName(form.getName());</pre></td><td class="explain">1–120。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        Category category = requireLeafCategory(form.getCategoryId());</pre></td><td class="explain">必须是二级分类。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        BigDecimal price = parsePrice(form.getPrice());</pre></td><td class="explain">&gt;0、两位小数。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        <span class="kw">int</span> stock = parseStock(form.getStock(), 0);</pre></td><td class="explain">新增时的初始库存。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        String summary = normalizeSummary(form.getSummary());</pre></td><td class="explain">可空 ≤500。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        String coverImage = normalizeCover(form.getCoverImage());</pre></td><td class="explain">必填 ≤255。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        <span class="kw">int</span> sortOrder = normalizeSort(form.getSortOrder());</pre></td><td class="explain">非负，缺省 0。</td></tr>
+<tr class="gap"><td class="line">120</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        if (skuExists(sku)) {</pre></td><td class="explain">先查一次，给出可读文案。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>            throw BizException.conflict("SKU 已存在");</pre></td><td class="explain">409。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">124</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        Product product = <span class="kw">new</span> Product();</pre></td><td class="explain">新商品。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        product.setSku(sku);</pre></td><td class="explain">创建后不可改。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        product.setName(name);</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        product.setCategoryId(category.getId());</pre></td><td class="explain">挂在二级分类上。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        product.setPrice(price);</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>        product.setStock(stock);</pre></td><td class="explain">初始库存。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>        product.setSummary(summary);</pre></td><td class="explain">简介。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>        product.setDescription(form.getDescription());</pre></td><td class="explain">描述：纯文本，模板转义。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        product.setCoverImage(coverImage);</pre></td><td class="explain">封面路径。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>        product.setSortOrder(sortOrder);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>        product.setStatus(STATUS_DRAFT);</pre></td><td class="explain">新增默认下架，完善后显式上架。</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        try {</pre></td><td class="explain">并发下唯一键兜底。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>            productMapper.insert(product);</pre></td><td class="explain">version 留给数据库默认 0。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        } catch (DuplicateKeyException e) {</pre></td><td class="explain">并发下两个请求同时通过查重。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>            throw BizException.conflict("SKU 已存在");</pre></td><td class="explain">交回页面刷新重试。</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">返回带自增 id 的实体。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">143</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre class="cmtline">     * 编辑商品：只改资料与价格，不改 SKU、库存、状态。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre class="cmtline">     * &lt;p&gt;版本一致才写入（SQL 里 version+1）；影响 0 行说明别处已改过，返回 409 让页面刷新，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre class="cmtline">     * 不覆盖别人刚保存的库存或价格（AC-27）。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">校验 + 条件更新同一事务。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>    <span class="kw">public</span> Product update(<span class="kw">long</span> id, ProductForm form) {</pre></td><td class="explain">编辑商品：只改资料与价格，不改 SKU、库存、状态。 版本一致才写入（SQL 里 version+1）；影响 0 行说明别处已改过，返回 409 让页面刷新， 不覆盖别人刚保存的库存或价格（AC-27）。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        Product existing = detail(id);</pre></td><td class="explain">不存在 404。</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        String name = normalizeName(form.getName());</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        Category category = requireLeafCategory(form.getCategoryId());</pre></td><td class="explain">分类必须是二级。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        BigDecimal price = parsePrice(form.getPrice());</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        String summary = normalizeSummary(form.getSummary());</pre></td><td class="explain">简介。</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>        String coverImage = normalizeCover(form.getCoverImage());</pre></td><td class="explain">封面。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        <span class="kw">int</span> sortOrder = normalizeSort(form.getSortOrder());</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersion(form.getVersion());</pre></td><td class="explain">隐藏域带回的版本。</td></tr>
+<tr class="gap"><td class="line">160</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        Product update = <span class="kw">new</span> Product();</pre></td><td class="explain">只装要改的列。</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>        update.setId(id);</pre></td><td class="explain">条件里的 id。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        update.setVersion(version);</pre></td><td class="explain">条件里的版本。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>        update.setName(name);</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        update.setCategoryId(category.getId());</pre></td><td class="explain">分类。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        update.setPrice(price);</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>        update.setSummary(summary);</pre></td><td class="explain">简介。</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        update.setDescription(form.getDescription());</pre></td><td class="explain">描述：允许清空。</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>        update.setCoverImage(coverImage);</pre></td><td class="explain">封面。</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        update.setSortOrder(sortOrder);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        <span class="kw">int</span> rows = productMapper.updateProfile(update);</pre></td><td class="explain">WHERE id=? AND version=?</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">版本已被别人改掉。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>            throw BizException.conflict("数据已发生变化，请刷新后重试");</pre></td><td class="explain">409。</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        <span class="kw">return</span> existing;</pre></td><td class="explain">调用方只需提示成功并回列表。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">177</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre class="cmtline">    /** 编辑页回填：价格转成两位小数字符串，库存不放进表单（编辑页库存只读）。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>    <span class="kw">public</span> ProductForm form(<span class="kw">long</span> id) {</pre></td><td class="explain">编辑页回填：价格转成两位小数字符串，库存不放进表单（编辑页库存只读）。</td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>        Product product = detail(id);</pre></td><td class="explain">不存在 404。</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>        ProductForm form = <span class="kw">new</span> ProductForm();</pre></td><td class="explain">复用同一个表单类型。</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>        form.setId(product.getId());</pre></td><td class="explain">主键。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        form.setSku(product.getSku());</pre></td><td class="explain">只读展示。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        form.setName(product.getName());</pre></td><td class="explain">可改。</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        form.setCategoryId(product.getCategoryId());</pre></td><td class="explain">可改。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>        form.setPrice(product.getPrice() == null ? "" : product.getPrice().toPlainString());</pre></td><td class="explain">原样回显两位小数。</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        form.setStock(String.valueOf(product.getStock()));</pre></td><td class="explain">只读展示，不参与提交。</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>        form.setSummary(product.getSummary());</pre></td><td class="explain">可空。</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>        form.setDescription(product.getDescription());</pre></td><td class="explain">可空。</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        form.setCoverImage(product.getCoverImage());</pre></td><td class="explain">可改。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>        form.setSortOrder(product.getSortOrder());</pre></td><td class="explain">可改。</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        form.setVersion(product.getVersion());</pre></td><td class="explain">隐藏域带回。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        <span class="kw">return</span> form;</pre></td><td class="explain">交给模板。</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">195</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre class="cmtline">    /** 新增页的初始值：状态 DRAFT、排序 0、库存 0。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>    <span class="kw">public</span> ProductForm blankForm() {</pre></td><td class="explain">新增页的初始值：状态 DRAFT、排序 0、库存 0。</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        ProductForm form = <span class="kw">new</span> ProductForm();</pre></td><td class="explain">空表单。</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        form.setStock("0");</pre></td><td class="explain">初始库存缺省 0。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        form.setSortOrder(0);</pre></td><td class="explain">排序缺省 0。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>        <span class="kw">return</span> form;</pre></td><td class="explain">交给模板。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">203</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre class="cmtline">    /** 商品表单的分类下拉：只列二级分类，显示「作品 / 品类」。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>    <span class="kw">public</span> List&lt;CategoryOption&gt; categoryOptions() {</pre></td><td class="explain">商品表单的分类下拉：只列二级分类，显示「作品 / 品类」。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>        List&lt;Category&gt; all = allCategories();</pre></td><td class="explain">一次取全部分类。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        List&lt;CategoryOption&gt; options = <span class="kw">new</span> ArrayList&lt;&gt;();</pre></td><td class="explain">结果。</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        for (Category top : all) {</pre></td><td class="explain">外层遍历一级。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>            if (top.getParentId() != null) {</pre></td><td class="explain">只处理一级，二级在内层跟随。</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>                continue;</pre></td><td class="explain">二级在内层跟随父级。</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>            for (Category child : all) {</pre></td><td class="explain">内层找它的二级。</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>                if (top.getId().equals(child.getParentId())) {</pre></td><td class="explain">同一父级。</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>                    options.add(<span class="kw">new</span> CategoryOption(child.getId(), top.getName() + " / " + child.getName()));</pre></td><td class="explain">提交二级 id。</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>                }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        <span class="kw">return</span> options;</pre></td><td class="explain">顺序与分类排序一致。</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">220</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre class="cmtline">    /** 列表筛选的分类下拉：一级与二级都列出来，一级表示"整个作品"。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>    <span class="kw">public</span> List&lt;CategoryOption&gt; filterOptions() {</pre></td><td class="explain">列表筛选的分类下拉：一级与二级都列出来，一级表示"整个作品"。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>        List&lt;Category&gt; all = allCategories();</pre></td><td class="explain">同一份数据。</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        List&lt;CategoryOption&gt; options = <span class="kw">new</span> ArrayList&lt;&gt;();</pre></td><td class="explain">结果。</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>        for (Category top : all) {</pre></td><td class="explain">外层一级。</td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>            if (top.getParentId() != null) {</pre></td><td class="explain">筛选项也按一级分组。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>                continue;</pre></td><td class="explain">一级已被取过，跳过二级行。</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>            options.add(<span class="kw">new</span> CategoryOption(top.getId(), top.getName()));</pre></td><td class="explain">一级：取该作品全部商品。</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>            for (Category child : all) {</pre></td><td class="explain">内层二级。</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>                if (top.getId().equals(child.getParentId())) {</pre></td><td class="explain">同一父级。</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>                    options.add(<span class="kw">new</span> CategoryOption(child.getId(), "　" + child.getName()));</pre></td><td class="explain">缩进显示。</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>                }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>        <span class="kw">return</span> options;</pre></td><td class="explain">交给筛选表单。</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">238</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 校验</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">240</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre class="cmtline">    /** 分类必须存在且是二级分类：商品只能挂在品类下。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>    <span class="kw">private</span> Category requireLeafCategory(Long categoryId) {</pre></td><td class="explain">分类必须存在且是二级分类：商品只能挂在品类下。</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>        if (categoryId == null) {</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="244"><td class="line">244</td><td class="code"><pre>            throw BizException.badRequest("所属分类不能为空");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="246"><td class="line">246</td><td class="code"><pre>        Category category = categoryMapper.selectById(categoryId);</pre></td><td class="explain">主键查询。</td></tr>
+<tr tabindex="0" data-line="247"><td class="line">247</td><td class="code"><pre>        if (category == null || category.getParentId() == null) {</pre></td><td class="explain">不存在或是一级。</td></tr>
+<tr tabindex="0" data-line="248"><td class="line">248</td><td class="code"><pre>            throw BizException.badRequest("所属分类必须是二级分类");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="249"><td class="line">249</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="250"><td class="line">250</td><td class="code"><pre>        <span class="kw">return</span> category;</pre></td><td class="explain">已确认的二级分类。</td></tr>
+<tr tabindex="0" data-line="251"><td class="line">251</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">252</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="253"><td class="line">253</td><td class="code"><pre class="cmtline">    /** SKU：去空白、大写、1–40 位。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="254"><td class="line">254</td><td class="code"><pre>    <span class="kw">private</span> String normalizeSku(String raw) {</pre></td><td class="explain">SKU：去空白、大写、1–40 位。</td></tr>
+<tr tabindex="0" data-line="255"><td class="line">255</td><td class="code"><pre>        String sku = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="256"><td class="line">256</td><td class="code"><pre>        if (sku.isEmpty()) {</pre></td><td class="explain">SKU 必填。</td></tr>
+<tr tabindex="0" data-line="257"><td class="line">257</td><td class="code"><pre>            throw BizException.badRequest("SKU 不能为空");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="258"><td class="line">258</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="259"><td class="line">259</td><td class="code"><pre>        if (!SKU.matcher(sku).matches()) {</pre></td><td class="explain">与文档的字符集一致。</td></tr>
+<tr tabindex="0" data-line="260"><td class="line">260</td><td class="code"><pre>            throw BizException.badRequest("SKU 只能使用大写字母、数字与连字符，1–40 位");</pre></td><td class="explain">抛 400：SKU 只能使用大写字母、数字与连字符，1–40 位</td></tr>
+<tr tabindex="0" data-line="261"><td class="line">261</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="262"><td class="line">262</td><td class="code"><pre>        <span class="kw">return</span> sku;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">264</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="265"><td class="line">265</td><td class="code"><pre class="cmtline">    /** 名称：去空白、1–120。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre>    <span class="kw">private</span> String normalizeName(String raw) {</pre></td><td class="explain">名称：去空白、1–120。</td></tr>
+<tr tabindex="0" data-line="267"><td class="line">267</td><td class="code"><pre>        String name = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>        if (name.isEmpty()) {</pre></td><td class="explain">名称必填。</td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>            throw BizException.badRequest("商品名不能为空");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="270"><td class="line">270</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre>        if (name.length() &gt; NAME_MAX) {</pre></td><td class="explain">名称超长与列宽一致。</td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>            throw BizException.badRequest("商品名不能超过 " + NAME_MAX + " 个字符");</pre></td><td class="explain">与列宽一致。</td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>        <span class="kw">return</span> name;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">276</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre class="cmtline">    /** 简介：可空，去空白后 ≤500。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="278"><td class="line">278</td><td class="code"><pre>    <span class="kw">private</span> String normalizeSummary(String raw) {</pre></td><td class="explain">简介：可空，去空白后 ≤500。</td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">空简介按不填处理。</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>        String summary = raw.trim();</pre></td><td class="explain">去掉首尾空白。</td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre>        if (summary.length() &gt; SUMMARY_MAX) {</pre></td><td class="explain">简介超长。</td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>            throw BizException.badRequest("简介不能超过 " + SUMMARY_MAX + " 个字符");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>        <span class="kw">return</span> summary;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">288</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre class="cmtline">    /** 封面：必填、≤255。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>    <span class="kw">private</span> String normalizeCover(String raw) {</pre></td><td class="explain">封面：必填、≤255。</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>        String cover = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre>        if (cover.isEmpty()) {</pre></td><td class="explain">封面必填。</td></tr>
+<tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>            throw BizException.badRequest("封面路径不能为空");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>        if (cover.length() &gt; COVER_MAX) {</pre></td><td class="explain">封面超长。</td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>            throw BizException.badRequest("封面路径不能超过 " + COVER_MAX + " 个字符");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="298"><td class="line">298</td><td class="code"><pre>        <span class="kw">return</span> cover;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="299"><td class="line">299</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">300</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre class="cmtline">    /** 排序：空按 0，负数拒绝。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> normalizeSort(Integer raw) {</pre></td><td class="explain">排序：空按 0，负数拒绝。</td></tr>
+<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>        if (raw == null) {</pre></td><td class="explain">null 视为不搜索</td></tr>
+<tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>            <span class="kw">return</span> 0;</pre></td><td class="explain">缺省。</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="306"><td class="line">306</td><td class="code"><pre>        if (raw &lt; 0) {</pre></td><td class="explain">排序不能为负。</td></tr>
+<tr tabindex="0" data-line="307"><td class="line">307</td><td class="code"><pre>            throw BizException.badRequest("排序不能为负数");</pre></td><td class="explain">与文档一致。</td></tr>
+<tr tabindex="0" data-line="308"><td class="line">308</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="309"><td class="line">309</td><td class="code"><pre>        <span class="kw">return</span> raw;</pre></td><td class="explain">合法值。</td></tr>
+<tr tabindex="0" data-line="310"><td class="line">310</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">311</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="312"><td class="line">312</td><td class="code"><pre class="cmtline">    /** 价格：数字、&gt;0、最多两位小数、不超 DECIMAL(12,2)。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="313"><td class="line">313</td><td class="code"><pre>    <span class="kw">private</span> BigDecimal parsePrice(String raw) {</pre></td><td class="explain">价格：数字、&gt;0、最多两位小数、不超 DECIMAL(12,2)。</td></tr>
+<tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre>        String text = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="315"><td class="line">315</td><td class="code"><pre>        if (text.isEmpty()) {</pre></td><td class="explain">价格必填。</td></tr>
+<tr tabindex="0" data-line="316"><td class="line">316</td><td class="code"><pre>            throw BizException.badRequest("价格不能为空");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="317"><td class="line">317</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="318"><td class="line">318</td><td class="code"><pre>        BigDecimal value;</pre></td><td class="explain">先声明，解析失败在下面处理。</td></tr>
+<tr tabindex="0" data-line="319"><td class="line">319</td><td class="code"><pre>        try {</pre></td><td class="explain">解析失败按 400。</td></tr>
+<tr tabindex="0" data-line="320"><td class="line">320</td><td class="code"><pre>            value = <span class="kw">new</span> BigDecimal(text);</pre></td><td class="explain">交给 BigDecimal 解析，避免 double 精度问题。</td></tr>
+<tr tabindex="0" data-line="321"><td class="line">321</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="322"><td class="line">322</td><td class="code"><pre>            throw BizException.badRequest("价格必须是数字");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="323"><td class="line">323</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="324"><td class="line">324</td><td class="code"><pre>        if (value.compareTo(BigDecimal.ZERO) &lt;= 0) {</pre></td><td class="explain">价格必须大于 0。</td></tr>
+<tr tabindex="0" data-line="325"><td class="line">325</td><td class="code"><pre>            throw BizException.badRequest("价格必须大于 0");</pre></td><td class="explain">与 CHECK 约束一致。</td></tr>
+<tr tabindex="0" data-line="326"><td class="line">326</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="327"><td class="line">327</td><td class="code"><pre>        if (value.scale() &gt; 2) {</pre></td><td class="explain">超过两位小数直接拒绝，不做静默舍入。</td></tr>
+<tr tabindex="0" data-line="328"><td class="line">328</td><td class="code"><pre>            throw BizException.badRequest("价格最多两位小数");</pre></td><td class="explain">不做静默舍入。</td></tr>
+<tr tabindex="0" data-line="329"><td class="line">329</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="330"><td class="line">330</td><td class="code"><pre>        if (value.compareTo(PRICE_MAX) &gt; 0) {</pre></td><td class="explain">超出 DECIMAL(12,2)。</td></tr>
+<tr tabindex="0" data-line="331"><td class="line">331</td><td class="code"><pre>            throw BizException.badRequest("价格超出可存储范围");</pre></td><td class="explain">DECIMAL(12,2)。</td></tr>
+<tr tabindex="0" data-line="332"><td class="line">332</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="333"><td class="line">333</td><td class="code"><pre>        <span class="kw">return</span> value.setScale(2, RoundingMode.UNNECESSARY);</pre></td><td class="explain">统一两位小数，数据库列也是两位。</td></tr>
+<tr tabindex="0" data-line="334"><td class="line">334</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">335</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="336"><td class="line">336</td><td class="code"><pre class="cmtline">    /** 库存：空按默认值，非负整数，不超上限。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="337"><td class="line">337</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> parseStock(String raw, <span class="kw">int</span> defaultValue) {</pre></td><td class="explain">库存：空按默认值，非负整数，不超上限。</td></tr>
+<tr tabindex="0" data-line="338"><td class="line">338</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="339"><td class="line">339</td><td class="code"><pre>            <span class="kw">return</span> defaultValue;</pre></td><td class="explain">新增页缺省 0。</td></tr>
+<tr tabindex="0" data-line="340"><td class="line">340</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="341"><td class="line">341</td><td class="code"><pre>        <span class="kw">int</span> value;</pre></td><td class="explain">先声明，try 里再赋值</td></tr>
+<tr tabindex="0" data-line="342"><td class="line">342</td><td class="code"><pre>        try {</pre></td><td class="explain">整数字面量解析。</td></tr>
+<tr tabindex="0" data-line="343"><td class="line">343</td><td class="code"><pre>            value = Integer.parseInt(raw.trim());</pre></td><td class="explain">只接受整数。</td></tr>
+<tr tabindex="0" data-line="344"><td class="line">344</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="345"><td class="line">345</td><td class="code"><pre>            throw BizException.badRequest("库存必须是整数");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="346"><td class="line">346</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="347"><td class="line">347</td><td class="code"><pre>        if (value &lt; 0) {</pre></td><td class="explain">负版本号只可能来自伪造或旧页面：409</td></tr>
+<tr tabindex="0" data-line="348"><td class="line">348</td><td class="code"><pre>            throw BizException.badRequest("库存不能为负数");</pre></td><td class="explain">与 CHECK 一致。</td></tr>
+<tr tabindex="0" data-line="349"><td class="line">349</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="350"><td class="line">350</td><td class="code"><pre>        if (value &gt; STOCK_MAX) {</pre></td><td class="explain">库存上限。</td></tr>
+<tr tabindex="0" data-line="351"><td class="line">351</td><td class="code"><pre>            throw BizException.badRequest("库存不能超过 " + STOCK_MAX);</pre></td><td class="explain">防误填。</td></tr>
+<tr tabindex="0" data-line="352"><td class="line">352</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="353"><td class="line">353</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">合法值。</td></tr>
+<tr tabindex="0" data-line="354"><td class="line">354</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">355</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="356"><td class="line">356</td><td class="code"><pre class="cmtline">    /** 版本号：编辑时必须带，缺了就不允许保存（否则无法发现并发覆盖）。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="357"><td class="line">357</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseVersion(Long raw) {</pre></td><td class="explain">版本号：编辑时必须带，缺了就不允许保存（否则无法发现并发覆盖）。</td></tr>
+<tr tabindex="0" data-line="358"><td class="line">358</td><td class="code"><pre>        if (raw == null || raw &lt; 0) {</pre></td><td class="explain">缺版本或负版本都不允许保存。</td></tr>
+<tr tabindex="0" data-line="359"><td class="line">359</td><td class="code"><pre>            throw BizException.badRequest("缺少版本号，请刷新后重试");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="360"><td class="line">360</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="361"><td class="line">361</td><td class="code"><pre>        <span class="kw">return</span> raw;</pre></td><td class="explain">合法版本。</td></tr>
+<tr tabindex="0" data-line="362"><td class="line">362</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">363</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="364"><td class="line">364</td><td class="code"><pre class="cmtline">    /** 状态白名单：空按 ALL。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="365"><td class="line">365</td><td class="code"><pre>    <span class="kw">private</span> String parseStatus(String raw) {</pre></td><td class="explain">状态白名单：空按 ALL。</td></tr>
+<tr tabindex="0" data-line="366"><td class="line">366</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="367"><td class="line">367</td><td class="code"><pre>            <span class="kw">return</span> "ALL";</pre></td><td class="explain">不筛选。</td></tr>
+<tr tabindex="0" data-line="368"><td class="line">368</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="369"><td class="line">369</td><td class="code"><pre>        String status = raw.trim();</pre></td><td class="explain">去掉空白。</td></tr>
+<tr tabindex="0" data-line="370"><td class="line">370</td><td class="code"><pre>        if (!STATUSES.contains(status)) {</pre></td><td class="explain">状态不在白名单。</td></tr>
+<tr tabindex="0" data-line="371"><td class="line">371</td><td class="code"><pre>            throw BizException.badRequest("商品状态不合法");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="372"><td class="line">372</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="373"><td class="line">373</td><td class="code"><pre>        <span class="kw">return</span> status;</pre></td><td class="explain">ALL / DRAFT / ON_SALE。</td></tr>
+<tr tabindex="0" data-line="374"><td class="line">374</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">375</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="376"><td class="line">376</td><td class="code"><pre class="cmtline">    /** 分类 id：空表示不过滤；格式错误或非正数 400。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="377"><td class="line">377</td><td class="code"><pre>    <span class="kw">private</span> Long parseCategoryId(String raw) {</pre></td><td class="explain">分类 id：空表示不过滤；格式错误或非正数 400。</td></tr>
+<tr tabindex="0" data-line="378"><td class="line">378</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="379"><td class="line">379</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">不过滤。</td></tr>
+<tr tabindex="0" data-line="380"><td class="line">380</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="381"><td class="line">381</td><td class="code"><pre>        try {</pre></td><td class="explain">分类参数解析。</td></tr>
+<tr tabindex="0" data-line="382"><td class="line">382</td><td class="code"><pre>            <span class="kw">long</span> value = Long.parseLong(raw.trim());</pre></td><td class="explain">只接受整数。</td></tr>
+<tr tabindex="0" data-line="383"><td class="line">383</td><td class="code"><pre>            if (value &lt;= 0) {</pre></td><td class="explain">id 只接受正整数：0 与负数一律 400</td></tr>
+<tr tabindex="0" data-line="384"><td class="line">384</td><td class="code"><pre>                throw BizException.badRequest("分类参数格式不正确");</pre></td><td class="explain">0 与负数无效。</td></tr>
+<tr tabindex="0" data-line="385"><td class="line">385</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="386"><td class="line">386</td><td class="code"><pre>            <span class="kw">return</span> value;</pre></td><td class="explain">合法 id。</td></tr>
+<tr tabindex="0" data-line="387"><td class="line">387</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="388"><td class="line">388</td><td class="code"><pre>            throw BizException.badRequest("分类参数格式不正确");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="389"><td class="line">389</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="390"><td class="line">390</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">391</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="392"><td class="line">392</td><td class="code"><pre class="cmtline">    /** 关键字：去空白、超长 400、通配符转义。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="393"><td class="line">393</td><td class="code"><pre>    <span class="kw">private</span> String parseKeyword(String raw) {</pre></td><td class="explain">关键字：去空白、超长 400、通配符转义。</td></tr>
+<tr tabindex="0" data-line="394"><td class="line">394</td><td class="code"><pre>        if (raw == null) {</pre></td><td class="explain">null 视为不搜索</td></tr>
+<tr tabindex="0" data-line="395"><td class="line">395</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">不搜索。</td></tr>
+<tr tabindex="0" data-line="396"><td class="line">396</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="397"><td class="line">397</td><td class="code"><pre>        String keyword = raw.trim();</pre></td><td class="explain">去首尾空白。</td></tr>
+<tr tabindex="0" data-line="398"><td class="line">398</td><td class="code"><pre>        if (keyword.isEmpty()) {</pre></td><td class="explain">空关键字等价于不搜索。</td></tr>
+<tr tabindex="0" data-line="399"><td class="line">399</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">等价于不搜索。</td></tr>
+<tr tabindex="0" data-line="400"><td class="line">400</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="401"><td class="line">401</td><td class="code"><pre>        if (keyword.length() &gt; KEYWORD_MAX) {</pre></td><td class="explain">关键字超长。</td></tr>
+<tr tabindex="0" data-line="402"><td class="line">402</td><td class="code"><pre>            throw BizException.badRequest("搜索关键字不能超过 " + KEYWORD_MAX + " 个字符");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="403"><td class="line">403</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="404"><td class="line">404</td><td class="code"><pre>        <span class="kw">return</span> CatalogService.escapeLike(keyword);</pre></td><td class="explain">复用前台列表的转义规则。</td></tr>
+<tr tabindex="0" data-line="405"><td class="line">405</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">406</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="407"><td class="line">407</td><td class="code"><pre class="cmtline">    /** SKU 是否已存在：新增时查重。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="408"><td class="line">408</td><td class="code"><pre>    <span class="kw">private</span> boolean skuExists(String sku) {</pre></td><td class="explain">SKU 是否已存在：新增时查重。</td></tr>
+<tr tabindex="0" data-line="409"><td class="line">409</td><td class="code"><pre>        <span class="kw">return</span> productMapper.selectCount(Wrappers.&lt;Product&gt;lambdaQuery()</pre></td><td class="explain">SKU 查重。</td></tr>
+<tr tabindex="0" data-line="410"><td class="line">410</td><td class="code"><pre>                .eq(Product::getSku, sku)) &gt; 0;</pre></td><td class="explain">唯一键不区分大小写，这里也按库比较。</td></tr>
+<tr tabindex="0" data-line="411"><td class="line">411</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">412</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="413"><td class="line">413</td><td class="code"><pre class="cmtline">    /** 全部分类：按父级、排序、id 排好，供下拉与筛选复用。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="414"><td class="line">414</td><td class="code"><pre>    <span class="kw">private</span> List&lt;Category&gt; allCategories() {</pre></td><td class="explain">全部分类：按父级、排序、id 排好，供下拉与筛选复用。</td></tr>
+<tr tabindex="0" data-line="415"><td class="line">415</td><td class="code"><pre>        <span class="kw">return</span> categoryMapper.selectList(Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">分类按父级、排序、id 排序。</td></tr>
+<tr tabindex="0" data-line="416"><td class="line">416</td><td class="code"><pre>                .orderByAsc(Category::getParentId)</pre></td><td class="explain">一级在前。</td></tr>
+<tr tabindex="0" data-line="417"><td class="line">417</td><td class="code"><pre>                .orderByAsc(Category::getSortOrder)</pre></td><td class="explain">同级按排序。</td></tr>
+<tr tabindex="0" data-line="418"><td class="line">418</td><td class="code"><pre>                .orderByAsc(Category::getId));</pre></td><td class="explain">稳定顺序。</td></tr>
+<tr tabindex="0" data-line="419"><td class="line">419</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="420"><td class="line">420</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s8">
+<h2>ProductAdminServiceTest.java<small>18 个用例：参数、字段、版本与下拉 · 全文件 323 行</small></h2>
+<p class="path">cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/service/ProductAdminServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.service;</pre></td><td class="explain">后台商品服务：列表、新增、编辑与校验。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.AdminProductRow;</pre></td><td class="explain">列表行。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.CategoryOption;</pre></td><td class="explain">下拉项。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ProductForm;</pre></td><td class="explain">表单。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Category;</pre></td><td class="explain">分类实体。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.CategoryMapper;</pre></td><td class="explain">分类查询。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品读写。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.page.PageResult;</pre></td><td class="explain">分页结果。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.extension.ExtendWith;</pre></td><td class="explain">Mockito 扩展。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.mockito.ArgumentCaptor;</pre></td><td class="explain">捕获写入对象。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> org.mockito.InjectMocks;</pre></td><td class="explain">被测对象。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> org.mockito.Mock;</pre></td><td class="explain">协作方。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> org.mockito.junit.jupiter.MockitoExtension;</pre></td><td class="explain">Mockito 生命周期。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">列表。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">异常断言。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">任意参数。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.never;</pre></td><td class="explain">不该发生的调用。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verify;</pre></td><td class="explain">行为断言。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">打桩。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">// M07-05：依据 docs/01 FR-A-03、docs/06 AC-25/AC-27。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">// 覆盖：列表参数归一与白名单、新增的字段校验与默认 DRAFT、编辑的版本冲突、分类下拉与表单回显。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">// 不覆盖：页面渲染（M07-06）、上下架与补货（M07-07）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>@ExtendWith(MockitoExtension.<span class="kw">class</span>)</pre></td><td class="explain">用 Mockito 驱动。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre><span class="kw">class</span> ProductAdminServiceTest {</pre></td><td class="explain">18 个用例：列表参数、新增字段、编辑版本、下拉与回显。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @Mock</pre></td><td class="explain">商品读写。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">private</span> ProductMapper productMapper;</pre></td><td class="explain">productMapper：商品数据访问（只读当前状态与库存）</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @Mock</pre></td><td class="explain">分类查询。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">private</span> CategoryMapper categoryMapper;</pre></td><td class="explain">categoryMapper（CategoryMapper）</td></tr>
+<tr class="gap"><td class="line">42</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    @InjectMocks</pre></td><td class="explain">被测服务。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">private</span> ProductAdminService service;</pre></td><td class="explain">service（ProductAdminService）</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 列表</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">47</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @Test</pre></td><td class="explain">空参数：第 1 页、每页 10 条、状态 ALL。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @DisplayName("列表：空参数用默认分页与 ALL")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    <span class="kw">void</span> searchUsesDefaults() {</pre></td><td class="explain">用例：空参数用默认分页与 ALL。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        when(productMapper.selectAdminPage(any())).thenReturn(List.of());</pre></td><td class="explain">没有数据。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        when(productMapper.countAdminPage(any())).thenReturn(0L);</pre></td><td class="explain">总数 0。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        PageResult&lt;AdminProductRow&gt; result = service.search(null, null, null, null, null);</pre></td><td class="explain">什么都不传。</td></tr>
+<tr class="gap"><td class="line">55</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        assertThat(result.page()).isEqualTo(1);</pre></td><td class="explain">默认第 1 页。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        assertThat(result.pageSize()).isEqualTo(10);</pre></td><td class="explain">后台默认 10 条。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        assertThat(result.isEmpty()).isTrue();</pre></td><td class="explain">空结果。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    @Test</pre></td><td class="explain">状态只认 ALL / DRAFT / ON_SALE。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    @DisplayName("列表：非法状态 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    <span class="kw">void</span> searchBadStatus() {</pre></td><td class="explain">用例：非法状态 → 400。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.search(null, null, "SOLD", null, null))</pre></td><td class="explain">调用 service.search(null, null, "SOLD", null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">业务异常。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">错误码。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .isEqualTo(ErrorCode.BAD_REQUEST);</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">69</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    @Test</pre></td><td class="explain">页码非法：交给 PageQuery 归一/拒绝。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    @DisplayName("列表：非法页码 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>    <span class="kw">void</span> searchBadPage() {</pre></td><td class="explain">用例：非法页码 → 400。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.search(null, null, null, "abc", null))</pre></td><td class="explain">调用 service.search(null, null, null, "abc", null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                .isEqualTo(ErrorCode.BAD_REQUEST);</pre></td><td class="explain">断言 400。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @Test</pre></td><td class="explain">关键字超长：400，不静默截断。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @DisplayName("列表：超长关键字 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> searchLongKeyword() {</pre></td><td class="explain">用例：超长关键字 → 400。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.search(null, "长".repeat(121), null, null, null))</pre></td><td class="explain">调用 service.search(null, "长".repeat(121), null, null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                .hasMessageContaining("120");</pre></td><td class="explain">提示上限。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">86</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    @Test</pre></td><td class="explain">分类参数格式错：400。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    @DisplayName("列表：分类参数非数字 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>    <span class="kw">void</span> searchBadCategory() {</pre></td><td class="explain">用例：分类参数非数字 → 400。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.search("abc", null, null, null, null))</pre></td><td class="explain">调用 service.search("abc", null, null, null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                .isEqualTo(ErrorCode.BAD_REQUEST);</pre></td><td class="explain">断言 400。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">95</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 新增</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">97</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    @Test</pre></td><td class="explain">正常新增：状态 DRAFT、价格两位小数、库存与排序按填写。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>    @DisplayName("新增：默认 DRAFT，价格统一两位小数")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>    <span class="kw">void</span> createOk() {</pre></td><td class="explain">用例：新增默认 DRAFT、价格两位小数。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">二级分类存在。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        when(productMapper.selectCount(any())).thenReturn(0L);</pre></td><td class="explain">SKU 不重复。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        ArgumentCaptor&lt;Product&gt; saved = ArgumentCaptor.forClass(Product.<span class="kw">class</span>);</pre></td><td class="explain">捕获写入。</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        service.create(form(" STARLINE-C09 ", " 第9卷 ", "8", " 28.5 ", "3", 2));</pre></td><td class="explain">SKU 两侧带空格。</td></tr>
+<tr class="gap"><td class="line">106</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        verify(productMapper).insert(saved.capture());</pre></td><td class="explain">写入一次。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        assertThat(saved.getValue().getStatus()).isEqualTo("DRAFT");</pre></td><td class="explain">默认下架。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        assertThat(saved.getValue().getSku()).isEqualTo("STARLINE-C09");</pre></td><td class="explain">去空白后入库。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        assertThat(saved.getValue().getPrice()).isEqualTo(<span class="kw">new</span> BigDecimal("28.50"));</pre></td><td class="explain">两位小数。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        assertThat(saved.getValue().getStock()).isEqualTo(3);</pre></td><td class="explain">初始库存。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        assertThat(saved.getValue().getSortOrder()).isEqualTo(2);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">114</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    @Test</pre></td><td class="explain">SKU 必须是全大写：小写直接 400，不静默转换。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>    @DisplayName("新增：小写 SKU → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>    <span class="kw">void</span> createLowercaseSku() {</pre></td><td class="explain">用例：小写 SKU 被拒，不写库。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("starline", "第9卷", "8", "28.00", "0", 0)))</pre></td><td class="explain">调用 service.create(form("starline", "第9卷", "8", "28.00", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>                .hasMessageContaining("大写");</pre></td><td class="explain">文案说明字符集。</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        verify(productMapper, never()).insert(any(Product.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">123</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    @Test</pre></td><td class="explain">SKU 重复：409。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    @DisplayName("新增：SKU 重复 → 409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>    <span class="kw">void</span> createDuplicateSku() {</pre></td><td class="explain">用例：SKU 重复 → 409。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        when(productMapper.selectCount(any())).thenReturn(1L);</pre></td><td class="explain">SKU 已存在。</td></tr>
+<tr class="gap"><td class="line">129</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("STARLINE-C09", "第9卷", "8", "28.00", "0", 0)))</pre></td><td class="explain">调用 service.create(form("STARLINE-C09", "第9卷", "8", "28.00", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                .hasMessage("SKU 已存在");</pre></td><td class="explain">断言重复文案。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">134</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    @Test</pre></td><td class="explain">分类必须挂二级：一级分类被拒。</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    @DisplayName("新增：分类是一级 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    <span class="kw">void</span> createCategoryIsTop() {</pre></td><td class="explain">用例：分类是一级 → 400。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        when(categoryMapper.selectById(7L)).thenReturn(top(7L, "星轨列车"));</pre></td><td class="explain">一级分类。</td></tr>
+<tr class="gap"><td class="line">139</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("STARLINE-C09", "第9卷", "7", "28.00", "0", 0)))</pre></td><td class="explain">调用 service.create(form("STARLINE-C09", "第9卷", "7", "28.00", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                .hasMessage("所属分类必须是二级分类");</pre></td><td class="explain">断言分类文案。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">144</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    @Test</pre></td><td class="explain">价格边界：0、三位小数、非数字都拒绝。</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>    @DisplayName("新增：价格非法 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    <span class="kw">void</span> createBadPrice() {</pre></td><td class="explain">用例：价格 0 / 三位小数 / 非数字都拒绝。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法；价格在查重之前就被校验。</td></tr>
+<tr class="gap"><td class="line">149</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("S-1", "商品", "8", "0", "0", 0)))</pre></td><td class="explain">调用 service.create(form("S-1", "商品", "8", "0", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">必须大于 0。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("S-1", "商品", "8", "12.345", "0", 0)))</pre></td><td class="explain">调用 service.create(form("S-1", "商品", "8", "12.345", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">最多两位小数。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("S-1", "商品", "8", "abc", "0", 0)))</pre></td><td class="explain">调用 service.create(form("S-1", "商品", "8", "abc", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">必须是数字。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">157</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    @Test</pre></td><td class="explain">库存为负：400。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>    @DisplayName("新增：负库存 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    <span class="kw">void</span> createNegativeStock() {</pre></td><td class="explain">用例：负库存 → 400。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法；库存在查重之前就被校验。</td></tr>
+<tr class="gap"><td class="line">162</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form("S-2", "商品", "8", "10.00", "-1", 0)))</pre></td><td class="explain">调用 service.create(form("S-2", "商品", "8", "10.00", "-1", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>                .hasMessageContaining("不能为负");</pre></td><td class="explain">断言提示包含「不能为负」</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">167</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>    @Test</pre></td><td class="explain">封面必填。</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>    @DisplayName("新增：封面为空 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>    <span class="kw">void</span> createBlankCover() {</pre></td><td class="explain">用例：封面为空 → 400。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法；封面在查重之前就被校验。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        ProductForm form = form("S-3", "商品", "8", "10.00", "0", 0);</pre></td><td class="explain">正常字段。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        form.setCoverImage("  ");</pre></td><td class="explain">封面空白。</td></tr>
+<tr class="gap"><td class="line">174</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form))</pre></td><td class="explain">调用 service.create(form，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>                .hasMessageContaining("封面");</pre></td><td class="explain">断言提示包含「封面」</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">179</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 编辑</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">181</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    @Test</pre></td><td class="explain">编辑：只写资料列，版本进条件，SKU 与库存不写。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>    @DisplayName("编辑：版本进条件，SKU 与库存不写")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>    <span class="kw">void</span> updateWritesProfileOnly() {</pre></td><td class="explain">用例：编辑只写资料列，版本进条件。</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">已存在，版本 3。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法。</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        when(productMapper.updateProfile(any())).thenReturn(1);</pre></td><td class="explain">条件更新成功。</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>        ArgumentCaptor&lt;Product&gt; saved = ArgumentCaptor.forClass(Product.<span class="kw">class</span>);</pre></td><td class="explain">捕获更新对象。</td></tr>
+<tr class="gap"><td class="line">189</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        ProductForm form = form("HACKED", "新名字", "8", "39.90", "999", 9);</pre></td><td class="explain">表单里故意带 SKU 与库存。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>        form.setVersion(3L);</pre></td><td class="explain">隐藏域带回的版本。</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        service.update(5L, form);</pre></td><td class="explain">提交编辑。</td></tr>
+<tr class="gap"><td class="line">193</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>        verify(productMapper).updateProfile(saved.capture());</pre></td><td class="explain">只走条件更新。</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>        assertThat(saved.getValue().getId()).isEqualTo(5L);</pre></td><td class="explain">条件 id。</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>        assertThat(saved.getValue().getVersion()).isEqualTo(3L);</pre></td><td class="explain">条件版本。</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>        assertThat(saved.getValue().getName()).isEqualTo("新名字");</pre></td><td class="explain">名称生效。</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        assertThat(saved.getValue().getSku()).isNull();</pre></td><td class="explain">SKU 不写。</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        assertThat(saved.getValue().getStock()).isNull();</pre></td><td class="explain">库存不写。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        assertThat(saved.getValue().getPrice()).isEqualTo(<span class="kw">new</span> BigDecimal("39.90"));</pre></td><td class="explain">价格两位小数。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">202</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>    @Test</pre></td><td class="explain">版本冲突：影响 0 行 → 409（AC-27）。</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>    @DisplayName("编辑：版本冲突 → 409（AC-27）")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>    <span class="kw">void</span> updateVersionConflict() {</pre></td><td class="explain">用例：旧版本保存 → 409（AC-27）。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">已存在。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法。</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>        when(productMapper.updateProfile(any())).thenReturn(0);</pre></td><td class="explain">版本已被别人改掉。</td></tr>
+<tr class="gap"><td class="line">209</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>        ProductForm stale = form("S-5", "新名字", "8", "39.90", "0", 9);</pre></td><td class="explain">旧页面提交。</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>        stale.setVersion(2L);</pre></td><td class="explain">旧页面手里的版本是 2，库里已经是 3。</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.update(5L, stale))</pre></td><td class="explain">调用 service.update(5L, stale，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>                .hasMessage("数据已发生变化，请刷新后重试");</pre></td><td class="explain">可读的 409 文案。</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">216</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>    @Test</pre></td><td class="explain">缺少版本号：400，避免"没有条件"的更新。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>    @DisplayName("编辑：缺版本号 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    <span class="kw">void</span> updateMissingVersion() {</pre></td><td class="explain">用例：缺版本号 → 400。</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">已存在。</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法。</td></tr>
+<tr class="gap"><td class="line">222</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.update(5L, form("S-5", "新名字", "8", "39.90", "0", null)))</pre></td><td class="explain">调用 service.update(5L, form("S-5", "新名字", "8", "39.90", "0", null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>                .hasMessageContaining("版本号");</pre></td><td class="explain">断言提示包含「版本号」</td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">227</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    @Test</pre></td><td class="explain">商品不存在：404。</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>    @DisplayName("编辑：商品不存在 → 404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>    <span class="kw">void</span> updateMissing() {</pre></td><td class="explain">用例：商品不存在 → 404。</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>        when(productMapper.selectById(404L)).thenReturn(null);</pre></td><td class="explain">查不到。</td></tr>
+<tr class="gap"><td class="line">232</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.update(404L, form("S-5", "名字", "8", "1.00", "0", 0)))</pre></td><td class="explain">调用 service.update(404L, form("S-5", "名字", "8", "1.00", "0", 0，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">断言 404。</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">238</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 下拉与回显</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">240</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>    @Test</pre></td><td class="explain">分类下拉：只列二级，显示「作品 / 品类」。</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>    @DisplayName("下拉：只列二级，带作品前缀")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>    <span class="kw">void</span> categoryOptions() {</pre></td><td class="explain">用例：分类下拉只列二级并带作品前缀。</td></tr>
+<tr tabindex="0" data-line="244"><td class="line">244</td><td class="code"><pre>        when(categoryMapper.selectList(any())).thenReturn(List.of(</pre></td><td class="explain">准备：一个作品两个品类。</td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>                top(7L, "星轨列车"), leaf(8L, 7L, "单行本"), leaf(9L, 7L, "徽章")));</pre></td><td class="explain">一个作品两个品类。</td></tr>
+<tr class="gap"><td class="line">246</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="247"><td class="line">247</td><td class="code"><pre>        List&lt;CategoryOption&gt; options = service.categoryOptions();</pre></td><td class="explain">取下拉。</td></tr>
+<tr class="gap"><td class="line">248</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="249"><td class="line">249</td><td class="code"><pre>        assertThat(options).hasSize(2);</pre></td><td class="explain">只有二级。</td></tr>
+<tr tabindex="0" data-line="250"><td class="line">250</td><td class="code"><pre>        assertThat(options.get(0).getLabel()).isEqualTo("星轨列车 / 单行本");</pre></td><td class="explain">前缀是作品名。</td></tr>
+<tr tabindex="0" data-line="251"><td class="line">251</td><td class="code"><pre>        assertThat(options.get(1).getId()).isEqualTo(9L);</pre></td><td class="explain">提交的是二级 id。</td></tr>
+<tr tabindex="0" data-line="252"><td class="line">252</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">253</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="254"><td class="line">254</td><td class="code"><pre>    @Test</pre></td><td class="explain">编辑回显：价格两位小数、版本带出。</td></tr>
+<tr tabindex="0" data-line="255"><td class="line">255</td><td class="code"><pre>    @DisplayName("回显：价格与版本")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="256"><td class="line">256</td><td class="code"><pre>    <span class="kw">void</span> formEchoes() {</pre></td><td class="explain">用例：编辑回显价格与版本。</td></tr>
+<tr tabindex="0" data-line="257"><td class="line">257</td><td class="code"><pre>        Product product = product(5L, "S-5", 4L);</pre></td><td class="explain">版本 4。</td></tr>
+<tr tabindex="0" data-line="258"><td class="line">258</td><td class="code"><pre>        product.setPrice(<span class="kw">new</span> BigDecimal("28.00"));</pre></td><td class="explain">两位小数。</td></tr>
+<tr tabindex="0" data-line="259"><td class="line">259</td><td class="code"><pre>        product.setStock(6);</pre></td><td class="explain">库存只读展示。</td></tr>
+<tr tabindex="0" data-line="260"><td class="line">260</td><td class="code"><pre>        product.setSummary("简介");</pre></td><td class="explain">可空字段。</td></tr>
+<tr tabindex="0" data-line="261"><td class="line">261</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product);</pre></td><td class="explain">已存在。</td></tr>
+<tr class="gap"><td class="line">262</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>        ProductForm form = service.form(5L);</pre></td><td class="explain">取表单。</td></tr>
+<tr class="gap"><td class="line">264</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="265"><td class="line">265</td><td class="code"><pre>        assertThat(form.getPrice()).isEqualTo("28.00");</pre></td><td class="explain">原样回显。</td></tr>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre>        assertThat(form.getVersion()).isEqualTo(4L);</pre></td><td class="explain">隐藏域带回。</td></tr>
+<tr tabindex="0" data-line="267"><td class="line">267</td><td class="code"><pre>        assertThat(form.getStock()).isEqualTo("6");</pre></td><td class="explain">只读展示。</td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>        assertThat(form.getSku()).isEqualTo("S-5");</pre></td><td class="explain">只读展示。</td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">270</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 夹具</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">272</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre class="cmtline">    /** 造表单：常用字段一次给全 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>    <span class="kw">private</span> ProductForm form(String sku, String name, String categoryId, String price, String stock, Integer sort) {</pre></td><td class="explain">造表单：常用字段一次给全</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>        ProductForm form = <span class="kw">new</span> ProductForm();</pre></td><td class="explain">空表单。</td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>        form.setSku(sku);</pre></td><td class="explain">SKU。</td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>        form.setName(name);</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="278"><td class="line">278</td><td class="code"><pre>        form.setCategoryId(categoryId == null ? null : Long.valueOf(categoryId));</pre></td><td class="explain">分类。</td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>        form.setPrice(price);</pre></td><td class="explain">价格原串。</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>        form.setStock(stock);</pre></td><td class="explain">库存原串。</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>        form.setSummary("简介");</pre></td><td class="explain">可空。</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>        form.setDescription("描述");</pre></td><td class="explain">可空。</td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre>        form.setCoverImage("images/products/S/cover.svg");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>        form.setSortOrder(sort);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>        <span class="kw">return</span> form;</pre></td><td class="explain">交给服务。</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">287</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre class="cmtline">    /** 造一级分类 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre>    <span class="kw">private</span> Category top(<span class="kw">long</span> id, String name) {</pre></td><td class="explain">造一级分类</td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>        Category category = <span class="kw">new</span> Category();</pre></td><td class="explain">空实体。</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>        category.setId(id);</pre></td><td class="explain">主键。</td></tr>
+<tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre>        category.setParentId(null);</pre></td><td class="explain">一级。</td></tr>
+<tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>        category.setName(name);</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>        category.setSortOrder(1);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>        <span class="kw">return</span> category;</pre></td><td class="explain">交给用例。</td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">297</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="298"><td class="line">298</td><td class="code"><pre class="cmtline">    /** 造二级分类 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="299"><td class="line">299</td><td class="code"><pre>    <span class="kw">private</span> Category leaf(<span class="kw">long</span> id, <span class="kw">long</span> parentId, String name) {</pre></td><td class="explain">造二级分类</td></tr>
+<tr tabindex="0" data-line="300"><td class="line">300</td><td class="code"><pre>        Category category = <span class="kw">new</span> Category();</pre></td><td class="explain">空实体。</td></tr>
+<tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre>        category.setId(id);</pre></td><td class="explain">主键。</td></tr>
+<tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>        category.setParentId(parentId);</pre></td><td class="explain">父级。</td></tr>
+<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>        category.setName(name);</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>        category.setSortOrder(1);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>        <span class="kw">return</span> category;</pre></td><td class="explain">交给用例。</td></tr>
+<tr tabindex="0" data-line="306"><td class="line">306</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">307</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="308"><td class="line">308</td><td class="code"><pre class="cmtline">    /** 造商品实体 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="309"><td class="line">309</td><td class="code"><pre>    <span class="kw">private</span> Product product(<span class="kw">long</span> id, String sku, <span class="kw">long</span> version) {</pre></td><td class="explain">夹具：按参数造一个商品（价格、库存、状态）</td></tr>
+<tr tabindex="0" data-line="310"><td class="line">310</td><td class="code"><pre>        Product product = <span class="kw">new</span> Product();</pre></td><td class="explain">空实体。</td></tr>
+<tr tabindex="0" data-line="311"><td class="line">311</td><td class="code"><pre>        product.setId(id);</pre></td><td class="explain">主键。</td></tr>
+<tr tabindex="0" data-line="312"><td class="line">312</td><td class="code"><pre>        product.setSku(sku);</pre></td><td class="explain">SKU。</td></tr>
+<tr tabindex="0" data-line="313"><td class="line">313</td><td class="code"><pre>        product.setName("旧名字");</pre></td><td class="explain">名称。</td></tr>
+<tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre>        product.setCategoryId(8L);</pre></td><td class="explain">分类。</td></tr>
+<tr tabindex="0" data-line="315"><td class="line">315</td><td class="code"><pre>        product.setCoverImage("images/products/S/cover.svg");</pre></td><td class="explain">封面。</td></tr>
+<tr tabindex="0" data-line="316"><td class="line">316</td><td class="code"><pre>        product.setPrice(<span class="kw">new</span> BigDecimal("28.00"));</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="317"><td class="line">317</td><td class="code"><pre>        product.setStock(5);</pre></td><td class="explain">库存。</td></tr>
+<tr tabindex="0" data-line="318"><td class="line">318</td><td class="code"><pre>        product.setStatus("DRAFT");</pre></td><td class="explain">状态。</td></tr>
+<tr tabindex="0" data-line="319"><td class="line">319</td><td class="code"><pre>        product.setSortOrder(0);</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="320"><td class="line">320</td><td class="code"><pre>        product.setVersion(version);</pre></td><td class="explain">版本。</td></tr>
+<tr tabindex="0" data-line="321"><td class="line">321</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">交给用例。</td></tr>
+<tr tabindex="0" data-line="322"><td class="line">322</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="323"><td class="line">323</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-17 · M07-05 · 商品查询与维护服务 · 8 个文件、929 行（兜底 0 行）。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

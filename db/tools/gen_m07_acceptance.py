@@ -29,6 +29,7 @@ ADM_RES = "cartoon-admin-web/src/main/resources/templates/"
 ADM_TEST = "cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/"
 CAT = "cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/"
 CAT_TEST = "cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/"
+CAT_XML = "cartoon-catalog/src/main/resources/mapper/"
 
 TASKS = {
     "01": {
@@ -151,6 +152,34 @@ TASKS = {
              "14 个页面用例", "java", None),
             (ADM_TEST + "support/AdminFixture.java", "AdminFixture.java",
              "夹具新增 createCategory", "java", [(52, 57)]),
+        ],
+    },
+    "05": {
+        "title": "M07-05 · 商品查询与维护服务",
+        "out": "M07-05-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：后台商品列表（含下架，按一级/二级分类、名称、状态筛选，id 倒序分页）、新增（默认 DRAFT，"
+                "SKU/名称/二级分类/价格/库存/封面/排序校验）、编辑（只改资料与价格，版本冲突 409）、"
+                "分类下拉（表单只列二级、筛选列两级）与编辑回显。只做服务层，页面在 M07-06。"
+                "验证：mvn -pl cartoon-catalog -am test → Tests run: 54（新增 18）, Failures: 0。"
+                "ProductMapper 的 java 只对照新增 import 与方法；XML 只对照 adminWhere 与两个后台查询。",
+        "files": [
+            (CAT + "dto/AdminProductQuery.java", "AdminProductQuery.java",
+             "后台列表查询条件", "java", None),
+            (CAT + "dto/AdminProductRow.java", "AdminProductRow.java",
+             "列表行：商品字段 + 分类名称", "java", None),
+            (CAT + "dto/ProductForm.java", "ProductForm.java",
+             "新增与编辑共用的表单", "java", None),
+            (CAT + "dto/CategoryOption.java", "CategoryOption.java",
+             "分类下拉项", "java", None),
+            (CAT + "mapper/ProductMapper.java", "ProductMapper.java",
+             "后台列表与条件更新", "java", [(8, 9), (60, 77)]),
+            (CAT_XML + "ProductMapper.xml", "ProductMapper.xml",
+             "后台列表 SQL 与分组计数后新增的两个查询", "xml", [(63, 93)]),
+            (CAT + "service/ProductAdminService.java", "ProductAdminService.java",
+             "列表、新增、编辑与全部校验", "java", None),
+            (CAT_TEST + "service/ProductAdminServiceTest.java", "ProductAdminServiceTest.java",
+             "18 个用例：参数、字段、版本与下拉", "java", None),
         ],
     },
 }
@@ -473,6 +502,98 @@ LINE_NOTES: dict[tuple[str, int], str] = {
     (ADM_RES + "admin/main.html", 33): "一句话说明。",
     (ADM_RES + "admin/main.html", 34): "已接入，显示「进入」。",
     (ADM_RES + "admin/main.html", 35): "卡片闭合：链接结束。",
+    # ---- dto/AdminProductQuery.java ----
+    (CAT + "dto/AdminProductQuery.java", 13): "后台列表条件：含下架、可筛状态，排序固定 id 倒序。",
+    # ---- dto/AdminProductRow.java ----
+    (CAT + "dto/AdminProductRow.java", 12): "列表行：JOIN 出分类名，避免页面逐行查库。",
+    # ---- dto/ProductForm.java ----
+    (CAT + "dto/ProductForm.java", 11): "商品表单：price/stock 用字符串接，便于给具体错误文案。",
+    # ---- dto/CategoryOption.java ----
+    (CAT + "dto/CategoryOption.java", 8): "分类下拉项：已拼好「作品 / 品类」。",
+    # ---- mapper/ProductMapper.java ----
+    (CAT + "mapper/ProductMapper.java", 72): "只写资料与价格列：SKU、库存、状态不在这里改。",
+    (CAT + "mapper/ProductMapper.java", 73): "续行：简介、描述、封面。",
+    (CAT + "mapper/ProductMapper.java", 74): "续行：排序 + 版本自增。",
+    (CAT + "mapper/ProductMapper.java", 75): "续行：版本作条件，影响 0 行即冲突。",
+    (CAT + "mapper/ProductMapper.java", 77): "返回影响行数：0 表示版本已变。",
+    # ---- ProductMapper.xml ----
+    (CAT_XML + "ProductMapper.xml", 64): "后台列表公共条件：与 count 共用，避免两处 SQL 走样。",
+    (CAT_XML + "ProductMapper.xml", 65): "商品表起头。",
+    (CAT_XML + "ProductMapper.xml", 66): "JOIN 分类：既能按一级/二级筛选，也能带出分类名。",
+    (CAT_XML + "ProductMapper.xml", 67): "动态条件容器：没有条件时不生成 WHERE。",
+    (CAT_XML + "ProductMapper.xml", 68): "分类：给了就筛。",
+    (CAT_XML + "ProductMapper.xml", 69): "一级取子树、二级精确。",
+    (CAT_XML + "ProductMapper.xml", 71): "状态：ALL 不筛。",
+    (CAT_XML + "ProductMapper.xml", 72): "DRAFT / ON_SALE。",
+    (CAT_XML + "ProductMapper.xml", 74): "关键字：服务层已转义通配符。",
+    (CAT_XML + "ProductMapper.xml", 75): "只搜名称，与前台列表一致。",
+    (CAT_XML + "ProductMapper.xml", 81): "后台列表查询：返回行对象。",
+    (CAT_XML + "ProductMapper.xml", 82): "显式列清单 + 分类名。",
+    (CAT_XML + "ProductMapper.xml", 83): "续行：价格、库存、状态。",
+    (CAT_XML + "ProductMapper.xml", 84): "续行：排序与版本。",
+    (CAT_XML + "ProductMapper.xml", 85): "复用公共条件。",
+    (CAT_XML + "ProductMapper.xml", 86): "最近录入在前，翻页稳定。",
+    (CAT_XML + "ProductMapper.xml", 87): "分页。",
+    (CAT_XML + "ProductMapper.xml", 90): "总数查询：与列表同条件。",
+    (CAT_XML + "ProductMapper.xml", 91): "计数。",
+    (CAT_XML + "ProductMapper.xml", 92): "复用公共条件。",
+    # ---- service/ProductAdminService.java ----
+    (CAT + "service/ProductAdminService.java", 31): "商品后台服务：列表/新增/编辑；上下架与补货留给 M07-07。",
+    (CAT + "service/ProductAdminService.java", 77): "列表入口：参数都是原始字符串，在这里归一。",
+    (CAT + "service/ProductAdminService.java", 78): "续行：页码与页大小。",
+    (CAT + "service/ProductAdminService.java", 99): "不存在即 404。",
+    (CAT + "service/ProductAdminService.java", 136): "并发下唯一键兜底。",
+    (CAT + "service/ProductAdminService.java", 209): "只处理一级，二级在内层跟随。",
+    (CAT + "service/ProductAdminService.java", 226): "筛选项也按一级分组。",
+    (CAT + "service/ProductAdminService.java", 227): "一级已被取过，跳过二级行。",
+    (CAT + "service/ProductAdminService.java", 256): "SKU 必填。",
+    (CAT + "service/ProductAdminService.java", 268): "名称必填。",
+    (CAT + "service/ProductAdminService.java", 271): "名称超长与列宽一致。",
+    (CAT + "service/ProductAdminService.java", 283): "简介超长。",
+    (CAT + "service/ProductAdminService.java", 292): "封面必填。",
+    (CAT + "service/ProductAdminService.java", 295): "封面超长。",
+    (CAT + "service/ProductAdminService.java", 306): "排序不能为负。",
+    (CAT + "service/ProductAdminService.java", 315): "价格必填。",
+    (CAT + "service/ProductAdminService.java", 318): "先声明，解析失败在下面处理。",
+    (CAT + "service/ProductAdminService.java", 319): "解析失败按 400。",
+    (CAT + "service/ProductAdminService.java", 324): "价格必须大于 0。",
+    (CAT + "service/ProductAdminService.java", 327): "超过两位小数直接拒绝，不做静默舍入。",
+    (CAT + "service/ProductAdminService.java", 330): "超出 DECIMAL(12,2)。",
+    (CAT + "service/ProductAdminService.java", 342): "整数字面量解析。",
+    (CAT + "service/ProductAdminService.java", 350): "库存上限。",
+    (CAT + "service/ProductAdminService.java", 358): "缺版本或负版本都不允许保存。",
+    (CAT + "service/ProductAdminService.java", 370): "状态不在白名单。",
+    (CAT + "service/ProductAdminService.java", 381): "分类参数解析。",
+    (CAT + "service/ProductAdminService.java", 398): "空关键字等价于不搜索。",
+    (CAT + "service/ProductAdminService.java", 401): "关键字超长。",
+    (CAT + "service/ProductAdminService.java", 409): "SKU 查重。",
+    (CAT + "service/ProductAdminService.java", 415): "分类按父级、排序、id 排序。",
+    # ---- service/ProductAdminServiceTest.java ----
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 35): "18 个用例：列表参数、新增字段、编辑版本、下拉与回显。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 50): "用例：空参数用默认分页与 ALL。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 63): "用例：非法状态 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 72): "用例：非法页码 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 76): "断言 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 81): "用例：超长关键字 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 89): "用例：分类参数非数字 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 93): "断言 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 100): "用例：新增默认 DRAFT、价格两位小数。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 117): "用例：小写 SKU 被拒，不写库。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 126): "用例：SKU 重复 → 409。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 132): "断言重复文案。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 137): "用例：分类是一级 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 142): "断言分类文案。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 147): "用例：价格 0 / 三位小数 / 非数字都拒绝。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 160): "用例：负库存 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 170): "用例：封面为空 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 184): "用例：编辑只写资料列，版本进条件。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 205): "用例：旧版本保存 → 409（AC-27）。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 219): "用例：缺版本号 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 230): "用例：商品不存在 → 404。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 236): "断言 404。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 243): "用例：分类下拉只列二级并带作品前缀。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 244): "准备：一个作品两个品类。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 256): "用例：编辑回显价格与版本。",
 }
 
 
