@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('个人资料')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap auth-box">
+            <h1>个人资料</h1>
+            <!-- 说明只读字段与可空字段，避免用户以为能改用户名 -->
+            <p class="hint">用户名与角色不可修改；邮箱、电话可以留空。</p>
+
+            <!-- 保存成功的一次性提示 -->
+            <p class="auth-ok" th:if="${message}" th:text="${message}">资料已保存</p>
+            <!-- 校验失败的原因显示在这里，不弹窗 -->
+            <p class="auth-error" th:if="${error}" th:text="${error}">错误提示</p>
+
+            <form th:action="@{/profile}" method="post" class="auth-form">
+                <label>
+                    <span>用户名（只读）</span>
+                    <!-- 不带 name：既不会被提交，也不给用户改的机会 -->
+                    <input th:value="${user.username}" readonly>
+                </label>
+                <label>
+                    <span>显示名</span>
+                    <input name="displayName" th:value="${displayName}" required maxlength="50">
+                </label>
+                <label>
+                    <span>邮箱（可不填）</span>
+                    <!-- 只用长度上限，不做格式校验：教学账号允许随意填写 -->
+                    <input name="email" th:value="${email}" maxlength="100" autocomplete="email">
+                </label>
+                <label>
+                    <span>电话（可不填）</span>
+                    <input name="phone" th:value="${phone}" maxlength="30" autocomplete="tel">
+                </label>
+                <button class="btn btn-primary" type="submit">保存</button>
+            </form>
+
+            <p class="auth-switch"><a th:href="@{/main}">返回首页</a></p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>
