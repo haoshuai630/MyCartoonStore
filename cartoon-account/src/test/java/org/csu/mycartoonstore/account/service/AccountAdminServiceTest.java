@@ -34,9 +34,12 @@ class AccountAdminServiceTest {
     @Mock // 账号 Mapper。
     private StoreUserMapper userMapper;
 
+    @Mock // 密码编码器：重置密码时用。
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     /** 被测服务 */
     private AccountAdminService service() {
-        return new AccountAdminService(userMapper); // 每次构造新实例。
+        return new AccountAdminService(userMapper, passwordEncoder); // 每次构造新实例。
     }
 
     @Test // 只列顾客、按 id 升序、映射五列。
@@ -155,6 +158,74 @@ class AccountAdminServiceTest {
                 .isInstanceOf(BizException.class)
                 .extracting(e -> ((BizException) e).code())
                 .isEqualTo(ErrorCode.BAD_REQUEST);
+    }
+
+    // ---------------------------------------------------------------- 资料与密码（M10-02）
+
+    @Test // 改三项资料：只调 updateProfile，三列都归一。
+    @DisplayName("改资料：只写显示名、邮箱与电话")
+    void updateProfileWritesThreeColumns() {
+        when(userMapper.selectById(2L)).thenReturn(user(2L, "alice", "旧名字", "ENABLED")); // 顾客存在。
+        when(userMapper.updateProfile(2L, "新名字", "a@example.com", "13800000000")).thenReturn(1); // 写成功。
+
+        var profile = service().updateProfile(2L, " 新名字 ", " a@example.com ", "13800000000"); // 去空白后写入。
+
+        assertThat(profile.getDisplayName()).isEqualTo("新名字"); // 返回校验后的显示名。
+        verify(userMapper).updateProfile(2L, "新名字", "a@example.com", "13800000000"); // 三列定向更新。
+        verify(userMapper, never()).updateStatus(anyLong(), anyString()); // 不碰状态。
+    }
+
+    @Test // 显示名空：400，不写库。
+    @DisplayName("改资料：显示名为空 → 400")
+    void updateProfileBlankName() {
+        when(userMapper.selectById(2L)).thenReturn(user(2L, "alice", "爱丽丝", "ENABLED"));
+
+        assertThatThrownBy(() -> service().updateProfile(2L, "   ", null, null))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.BAD_REQUEST);
+        verify(userMapper, never()).updateProfile(anyLong(), anyString(), any(), any()); // 不写库。
+    }
+
+    @Test // 管理员不能被改资料。
+    @DisplayName("改资料：目标是管理员 → 404")
+    void updateProfileAdminRejected() {
+        StoreUser admin = user(1L, "root", "管理员", "ENABLED");
+        admin.setRole("ADMIN");
+        when(userMapper.selectById(1L)).thenReturn(admin);
+
+        assertThatThrownBy(() -> service().updateProfile(1L, "新名字", null, null))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND);
+    }
+
+    @Test // 重置：返回 12 位临时密码，库里写的是它的散列。
+    @DisplayName("重置密码：写 BCrypt 散列并返回一次性明文")
+    void resetPasswordWritesHash() {
+        when(userMapper.selectById(2L)).thenReturn(user(2L, "alice", "爱丽丝", "ENABLED"));
+        when(passwordEncoder.encode(anyString())).thenReturn("HASHED"); // 编码器打桩。
+        when(userMapper.updatePassword(2L, "HASHED")).thenReturn(1);
+
+        String temp = service().resetPassword(2L); // 生成并写入。
+
+        assertThat(temp).hasSize(12); // 定长 12。
+        verify(passwordEncoder).encode(temp); // 编码的就是返回值。
+        verify(userMapper).updatePassword(2L, "HASHED"); // 只写散列。
+    }
+
+    @Test // 管理员不能被重置。
+    @DisplayName("重置密码：目标是管理员 → 404")
+    void resetPasswordAdminRejected() {
+        StoreUser admin = user(1L, "root", "管理员", "ENABLED");
+        admin.setRole("ADMIN");
+        when(userMapper.selectById(1L)).thenReturn(admin);
+
+        assertThatThrownBy(() -> service().resetPassword(1L))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND);
+        verify(userMapper, never()).updatePassword(anyLong(), anyString()); // 不写库。
     }
 
     /** 造顾客：id、用户名、显示名、状态 */
