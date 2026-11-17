@@ -20,6 +20,9 @@ ROOT = g5.ROOT
 
 PAY = "cartoon-payment/src/main/java/org/csu/mycartoonstore/payment/"
 PAY_TEST = "cartoon-payment/src/test/java/org/csu/mycartoonstore/payment/"
+WEB = "cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/"
+WEB_TEST = "cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/"
+WEB_RES = "cartoon-user-web/src/main/resources/templates/"
 
 TASKS = {
     "01": {
@@ -36,6 +39,24 @@ TASKS = {
             (PAY + "domain/PaymentResult.java", "PaymentResult.java", "三种支付结局", "java"),
             (PAY_TEST + "service/PaymentServiceTest.java", "PaymentServiceTest.java", "10 个状态迁移用例", "java"),
             (PAY_TEST + "service/PaymentNoGeneratorTest.java", "PaymentNoGeneratorTest.java", "3 个凭证生成用例", "java"),
+        ],
+    },
+    "02": {
+        "title": "M06-02 · 支付页与入口",
+        "out": "M06-02-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：GET /payment/{orderNo} 的状态分流（待支付渲染、已支付跳详情、已取消 409）、"
+                "POST success/failure 的跳转与提示、/payment/** 纳入登录拦截、详情页与列表卡片的支付/取消入口、"
+                "取消前二次确认、支付页样式。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 114, Failures: 0, Errors: 0（新增 9）。"
+                "store.css 只追加支付页与卡片操作样式，不逐行对照；状态迁移与凭证内容在 M06-03 的 AC-20 用例验证。",
+        "files": [
+            (WEB + "controller/PaymentController.java", "PaymentController.java", "支付页路由、两个动作与跳转", "java"),
+            (WEB + "config/WebConfig.java", "WebConfig.java", "把 /payment/** 加入受保护路径", "java"),
+            (WEB_RES + "payment.html", "payment.html", "支付页：大字金额、教学声明、两个按钮", "html"),
+            (WEB_RES + "order-detail.html", "order-detail.html", "详情页：待支付给「去支付」", "html"),
+            (WEB_RES + "orders.html", "orders.html", "列表卡片：待支付给「去支付/取消」", "html"),
+            (WEB_TEST + "PaymentPageTest.java", "PaymentPageTest.java", "8 个页面与入口用例", "java"),
         ],
     },
 }
@@ -89,6 +110,87 @@ NOTES: dict[tuple[str, str], str] = {
     (PAY_TEST + "service/PaymentServiceTest.java",
      "e -> assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));"):
         "续行：只断言 404",
+    # ---- M06-02 控制器：方法声明与续行 ----
+    (WEB + "config/WebConfig.java", "public class WebConfig implements WebMvcConfigurer {"):
+        "只注册拦截器：受保护路径集中在这一处。",
+    (WEB + "controller/PaymentController.java", "public class PaymentController {"):
+        "支付页与两个动作的路由；状态判断交给 PaymentService。",
+    (WEB + "controller/PaymentController.java",
+     "public String page(@PathVariable String orderNo, HttpSession session, Model model,"):
+        "支付页：待支付渲染，已支付跳详情，已取消 409。",
+    (WEB + "controller/PaymentController.java",
+     "public String success(@PathVariable String orderNo, HttpSession session, RedirectAttributes redirect) {"):
+        "支付成功：调服务层后回详情，提示区分首次与重复。",
+    (WEB + "controller/PaymentController.java",
+     "public String failure(@PathVariable String orderNo, HttpSession session, RedirectAttributes redirect) {"):
+        "支付失败：不写库，回支付页提示可重试。",
+    (WEB + "controller/PaymentController.java",
+     "RedirectAttributes redirect) {"):
+        "参数续行：一次性提示放在重定向属性里",
+    (WEB + "controller/PaymentController.java",
+     "redirect.addFlashAttribute(\"message\", result == PaymentResult.ALREADY_PAID"):
+        "两种结果对应两种提示，避免把重复支付说成刚成功",
+    (WEB + "controller/PaymentController.java",
+     "? \"订单已支付，无需重复支付\" : \"支付成功，订单已支付\");"):
+        "续行：三元表达式的两个文案",
+    # ---- M06-02 页面：关键行的"为什么" ----
+    (WEB_RES + "payment.html", '<div class="pay-card">'):
+        "支付卡片：金额、声明与两个动作集中在一张卡里",
+    (WEB_RES + "payment.html", '<span class="en">MOCK PAYMENT</span>'):
+        "栏目英文小标题",
+    (WEB_RES + "payment.html", '<h2>模拟支付</h2>'):
+        "页面标题：明确这是模拟支付",
+    (WEB_RES + "payment.html", '<p class="pay-no">'):
+        "订单号与创建时间：核对是哪一单",
+    (WEB_RES + "payment.html", '<b th:text="${order.orderNo}">CO00000000000000</b>'):
+        "订单号由服务端生成，页面只读",
+    (WEB_RES + "payment.html",
+     '<span th:text="|创建于 ${#temporals.format(order.createdAt, \'yyyy-MM-dd HH:mm\')}|">创建时间</span>'):
+        "创建时间：和订单详情保持同一格式",
+    (WEB_RES + "payment.html", '<div class="pay-amount">'):
+        "大字金额区",
+    (WEB_RES + "payment.html", '<small>应付总额</small>'):
+        "金额标签：待支付用「应付」",
+    (WEB_RES + "payment.html",
+     '<b th:text="\'¥\' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</b>'):
+        "金额只取订单总额，页面不参与计算",
+    (WEB_RES + "payment.html", '<p class="pay-notice">教学模拟支付，不涉及真实资金</p>'):
+        "教学声明：本页不涉及真实资金",
+    (WEB_RES + "payment.html", '<div class="pay-actions">'):
+        "两个显式动作区：成功与失败都是按钮",
+    (WEB_RES + "payment.html",
+     '<button type="submit" class="btn btn-primary">模拟支付成功</button>'):
+        "提交到 POST success：真的迁移状态并写凭证",
+    (WEB_RES + "payment.html",
+     '<button type="submit" class="btn btn-ghost">模拟支付失败</button>'):
+        "提交到 POST failure：不写库，只提示可重试",
+    (WEB_RES + "payment.html", '<div class="pay-links">'):
+        "离开支付页的两个入口：回详情或取消",
+    (WEB_RES + "payment.html",
+     '<a th:href="@{/orders/{no}(no=${order.orderNo})}">返回订单详情</a>'):
+        "不支付也能回详情，不强制完成支付",
+    (WEB_RES + "payment.html",
+     '<button type="submit" class="link-btn">取消订单</button>'):
+        "取消待支付订单，库存会恢复",
+    (WEB_RES + "order-detail.html",
+     '<a class="btn btn-primary order-action" th:if="${order.status == \'PENDING_PAYMENT\'}"'):
+        "只有待支付才显示支付入口",
+    (WEB_RES + "order-detail.html",
+     'th:href="@{/payment/{no}(no=${order.orderNo})}">去支付</a>'):
+        "进入模拟支付页，金额与声明在那边展示",
+    (WEB_RES + "orders.html", '<div class="order-card-actions">'):
+        "卡片操作区：待支付两个动作，其余仅查看",
+    (WEB_RES + "orders.html",
+     '<a class="btn btn-ghost" th:if="${card.status == \'PENDING_PAYMENT\'}"'):
+        "待支付卡片才有支付入口",
+    (WEB_RES + "orders.html",
+     'th:href="@{/payment/{no}(no=${card.orderNo})}">去支付</a>'):
+        "从列表直接进入支付页",
+    (WEB_RES + "orders.html", '<form th:if="${card.status == \'PENDING_PAYMENT\'}"'):
+        "待支付卡片才有取消表单，取消后回详情看结果",
+    (WEB_RES + "orders.html",
+     '<button type="submit" class="btn btn-ghost">取消</button>'):
+        "取消后库存恢复，页面回详情",
 }
 
 

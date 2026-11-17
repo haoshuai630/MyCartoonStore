@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('模拟支付')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <section class="section">
+        <div class="wrap">
+            <!-- 面包屑：与详情页同一套层级 -->
+            <nav class="crumbs">
+                <a th:href="@{/main}">首页</a>
+                <span>/</span>
+                <a th:href="@{/orders}">我的订单</a>
+                <span>/</span>
+                <a th:href="@{/orders/{no}(no=${order.orderNo})}" th:text="${order.orderNo}">订单号</a>
+                <span>/</span>
+                <b>模拟支付</b>
+            </nav>
+
+            <!-- 支付失败回到本页时的一次性提示 -->
+            <p class="auth-ok" th:if="${message}" th:text="${message}">支付失败，可重试</p>
+
+            <!-- 支付卡片：金额、声明、两个显式动作 -->
+            <div class="pay-card">
+                <span class="en">MOCK PAYMENT</span>
+                <h2>模拟支付</h2>
+                <p class="pay-no">
+                    订单号 <b th:text="${order.orderNo}">CO00000000000000</b>
+                    <span th:text="|创建于 ${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}|">创建时间</span>
+                </p>
+
+                <!-- 大字金额：只取订单总额，页面不参与计算 -->
+                <div class="pay-amount">
+                    <small>应付总额</small>
+                    <b th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</b>
+                </div>
+
+                <!-- 教学声明：本页不涉及真实资金 -->
+                <p class="pay-notice">教学模拟支付，不涉及真实资金</p>
+
+                <!-- 两个 POST 动作：成功与失败都是显式按钮，没有第三方渠道 -->
+                <div class="pay-actions">
+                    <form th:action="@{/payment/{no}/success(no=${order.orderNo})}" method="post">
+                        <button type="submit" class="btn btn-primary">模拟支付成功</button>
+                    </form>
+                    <form th:action="@{/payment/{no}/failure(no=${order.orderNo})}" method="post">
+                        <button type="submit" class="btn btn-ghost">模拟支付失败</button>
+                    </form>
+                </div>
+
+                <!-- 不支付也能离开：回详情或直接取消 -->
+                <div class="pay-links">
+                    <a th:href="@{/orders/{no}(no=${order.orderNo})}">返回订单详情</a>
+                    <form th:action="@{/orders/{no}/cancel(no=${order.orderNo})}" method="post"
+                          onsubmit="return confirm('取消后将关闭订单并释放库存，确定取消吗？')">
+                        <button type="submit" class="link-btn">取消订单</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

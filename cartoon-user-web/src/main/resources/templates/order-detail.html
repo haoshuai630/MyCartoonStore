@@ -92,11 +92,15 @@
                         <span th:text="${order.paidAt != null} ? '已模拟支付' : '应付总额'">应付总额</span>
                         <b th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</b>
                     </div>
-                    <p class="hint">模拟支付在 M06 接入；本页展示数据库里的真实快照与状态。</p>
+
+                    <!-- 待支付的两种操作：进入支付页 / 关闭订单 -->
+                    <a class="btn btn-primary order-action" th:if="${order.status == 'PENDING_PAYMENT'}"
+                       th:href="@{/payment/{no}(no=${order.orderNo})}">去支付</a>
 
                     <!-- 待支付才能取消；取消后库存恢复，购物车不自动回填 -->
                     <form th:if="${order.status == 'PENDING_PAYMENT'}"
-                          th:action="@{/orders/{no}/cancel(no=${order.orderNo})}" method="post" class="order-action">
+                          th:action="@{/orders/{no}/cancel(no=${order.orderNo})}" method="post" class="order-action"
+                          onsubmit="return confirm('取消后将关闭订单并释放库存，确定取消吗？')">
                         <button type="submit" class="btn btn-danger">取消订单</button>
                     </form>
                     <p class="hint" th:if="${order.status == 'PENDING_PAYMENT'}">取消后库存会恢复，购物车不会自动回填。</p>

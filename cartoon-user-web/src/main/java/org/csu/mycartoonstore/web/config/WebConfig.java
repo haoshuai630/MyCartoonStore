@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration; // 标记配置类�
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry; // 拦截器注册表。
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer; // MVC 扩展点。
 
-// M02-01 建立，M03-04 接入登录拦截，M04-02 接入徽标，M05-02 新增 /checkout。
+// M02-01 建立，M03-04 接入登录拦截，M04-02 接入徽标，M05-02 新增 /checkout，M06-02 新增 /payment。
 // 只做"注册拦截器"这一件事：路径集中写在这里，新增模块时只改这一处。
 @Configuration // 配置类：不写业务逻辑。
 public class WebConfig implements WebMvcConfigurer {
@@ -22,7 +22,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new LoginInterceptor())
                 .addPathPatterns("/cart", "/cart/**", "/checkout", "/checkout/**",
-                        "/orders", "/orders/**", "/profile", "/profile/**"); // 受保护路径集中列在这里；M05-02 新增 /checkout。
+                        "/orders", "/orders/**", "/payment", "/payment/**",
+                        "/profile", "/profile/**"); // 受保护路径集中列在这里；M06-02 新增 /payment。
         // 徽标：所有页面都要显示，所以不限定路径。
         registry.addInterceptor(new CartBadgeInterceptor(cartService));
     }
