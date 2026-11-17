@@ -186,3 +186,16 @@ h1, h2, h3 { margin: 0; font-weight: 900; letter-spacing: .02em; }
 .hint-inline { color: var(--muted); font-size: 11px; }
 .empty { border: 3px dashed var(--ink); background: #fff; padding: 40px; text-align: center; margin-top: 24px; }
 .empty p { color: var(--muted); font-size: 13px; margin: 8px 0 18px; }
+
+/* ---------- 商品维护（M07-06 起复用） ---------- */
+.filter-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; border: 3px solid var(--ink); background: #fff; box-shadow: 5px 5px 0 var(--ink); padding: 14px 16px; margin: 0 0 22px; }
+.filter-bar .field { min-width: 150px; }
+.filter-bar .btn { padding: 9px 16px; }
+.filter-bar .link-btn { align-self: center; font-size: 12px; font-weight: 800; color: #4a4237; }
+.status-tag { display: inline-block; border: 2px solid var(--ink); padding: 1px 8px; font-size: 11px; font-weight: 900; }
+.status-tag.on { background: #cfe8d5; }
+.status-tag.off { background: #e9e2d2; color: var(--muted); }
+.pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 18px; font-size: 13px; font-weight: 700; }
+.pager a, .pager .disabled { border: 2px solid var(--ink); padding: 5px 12px; background: #fff; }
+.pager a:hover { background: var(--yellow); }
+.pager .disabled { color: #b8ad99; border-style: dashed; }

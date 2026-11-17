@@ -56,6 +56,16 @@ public final class AdminFixture {
         return jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.class, code); // 用例要用 id。
     }
 
+    /** 在指定二级分类下建商品，返回 id；状态由用例给 */
+    public static long createProductIn(JdbcTemplate jdbc, String sku, long categoryId,
+                                       String price, int stock, String status) {
+        jdbc.update("INSERT INTO product (sku, category_id, name, summary, description, cover_image, "
+                        + "price, stock, status, sort_order) VALUES (?,?,?,?,?,?,?,?,?,1)",
+                sku, categoryId, "商品" + sku, "一句话简介", "商品说明", // 名称由 SKU 派生，便于断言。
+                "images/products/" + sku + "/cover.svg", new BigDecimal(price), stock, status); // 封面按 SKU 拼。
+        return jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.class, sku); // 用例要用 id。
+    }
+
     /** 建"作品 + 单行本 + 商品"，返回商品 id；sku 同时用作分类 code 前缀保证唯一 */
     public static long createProduct(JdbcTemplate jdbc, String sku, String price, int stock, String status) {
         String workCode = sku.replaceAll("[^A-Za-z0-9]", "").toUpperCase(); // 分类编码只允许大写。

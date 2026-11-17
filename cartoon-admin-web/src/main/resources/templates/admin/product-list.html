@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('商品维护')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 标题区：列表含下架商品，新增后默认下架 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">PRODUCTS</span>
+                    <h1>商品维护</h1>
+                    <p class="lead">列表包含下架商品。新增后默认为下架，完善资料后在列表里显式上架；
+                        库存不改这里，补货有单独入口。</p>
+                </div>
+                <div class="head-actions">
+                    <a class="btn btn-primary" th:href="@{/products/new}">新增商品</a>
+                </div>
+            </div>
+
+            <!-- 一次性提示：新增/编辑/上下架/补货成功后 -->
+            <p class="alert" th:if="${message}" th:text="${message}">已保存</p>
+
+            <!-- 筛选：分类、名称、状态；提交后整页刷新 -->
+            <form class="filter-bar" method="get" th:action="@{/products}">
+                <label class="field">
+                    <span>分类</span>
+                    <select name="categoryId">
+                        <option value="">全部分类</option>
+                        <option th:each="opt : ${filterOptions}" th:value="${opt.id}"
+                                th:text="${opt.label}" th:selected="${opt.id.toString() == categoryId}">分类</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>商品名称</span>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="按名称包含搜索">
+                </label>
+                <label class="field">
+                    <span>状态</span>
+                    <select name="status">
+                        <option value="ALL" th:selected="${status == 'ALL'}">全部</option>
+                        <option value="ON_SALE" th:selected="${status == 'ON_SALE'}">已上架</option>
+                        <option value="DRAFT" th:selected="${status == 'DRAFT'}">已下架</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn">查询</button>
+                <a class="link-btn" th:href="@{/products}">重置</a>
+            </form>
+
+            <!-- 列表：价格两位小数、库存只读、状态徽章 -->
+            <div class="panel" th:if="${!page.empty}">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="width:60px" class="num">ID</th>
+                        <th style="width:150px">SKU</th>
+                        <th>名称</th>
+                        <th style="width:150px">分类</th>
+                        <th style="width:100px" class="num">价格</th>
+                        <th style="width:80px" class="num">库存</th>
+                        <th style="width:100px">状态</th>
+                        <th style="width:80px" class="num">排序</th>
+                        <th style="width:200px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${page.items}">
+                        <td class="num" th:text="${row.id}">1</td>
+                        <td><code th:text="${row.sku}">SKU</code></td>
+                        <td><b th:text="${row.name}">名称</b></td>
+                        <td th:text="${row.categoryName}">分类</td>
+                        <td class="num" th:text="'¥' + ${#numbers.formatDecimal(row.price, 1, 2)}">¥0.00</td>
+                        <td class="num" th:text="${row.stock}">0</td>
+                        <td>
+                            <span class="status-tag" th:classappend="${row.status == 'ON_SALE'} ? 'on' : 'off'"
+                                  th:text="${row.status == 'ON_SALE'} ? '已上架' : '已下架'">状态</span>
+                        </td>
+                        <td class="num" th:text="${row.sortOrder}">0</td>
+                        <td class="row-actions">
+                            <a class="link-btn" th:href="@{/products/{id}/edit(id=${row.id})}">编辑</a>
+                            <!-- 上下架与补货入口在 M07-07 接入 -->
+                            <small class="hint-inline">上下架 / 补货随后接入</small>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- 翻页：保留筛选条件 -->
+                <div class="pager">
+                    <a th:if="${page.hasPrevious}"
+                       th:href="@{/products(categoryId=${categoryId}, keyword=${keyword}, status=${status}, page=${page.page - 1})}">上一页</a>
+                    <span th:if="${!page.hasPrevious}" class="disabled">上一页</span>
+                    <span th:text="|第 ${page.page} / ${page.totalPages} 页，共 ${page.total} 件|">第 1 / 1 页</span>
+                    <a th:if="${page.hasNext}"
+                       th:href="@{/products(categoryId=${categoryId}, keyword=${keyword}, status=${status}, page=${page.page + 1})}">下一页</a>
+                    <span th:if="${!page.hasNext}" class="disabled">下一页</span>
+                </div>
+            </div>
+
+            <!-- 空状态：区分"还没有商品"与"筛选没结果" -->
+            <div class="empty" th:if="${page.empty}">
+                <b th:text="${keyword != null and !keyword.isBlank()} ? '没有匹配的商品' : '还没有商品'">还没有商品</b>
+                <p th:text="${keyword != null and !keyword.isBlank()} ? '换个关键字或清空筛选再试。' : '新增第一件商品后，记得上架才会出现在用户端。'">说明</p>
+                <a class="btn" th:href="@{/products}">清空筛选</a>
+                <a class="btn btn-primary" th:href="@{/products/new}">新增商品</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

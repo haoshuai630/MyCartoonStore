@@ -182,6 +182,28 @@ TASKS = {
              "18 个用例：参数、字段、版本与下拉", "java", None),
         ],
     },
+    "06": {
+        "title": "M07-06 · 商品页面",
+        "out": "M07-06-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：五条商品路由（列表与筛选、新增表单/提交、编辑表单/提交）、两个模板、控制台与导航接入、"
+                "校验失败回表单并给出 400/409、11 个 MockMvc 用例覆盖 AC-25/AC-27。"
+                "验证：mvn -pl cartoon-admin-web -am test → Tests run: 37（新增 11）, Failures: 0。"
+                "admin.css 只追加筛选条/分页/状态徽章样式，不逐行对照。",
+        "note": "内容：五条商品路由（列表与筛选、新增表单/提交、编辑表单/提交）、两个模板、控制台与导航接入、"
+                "校验失败回表单并给出 400/409、11 个 MockMvc 用例覆盖 AC-25/AC-27。"
+                "验证：mvn -pl cartoon-admin-web -am test → Tests run: 37（新增 11）, Failures: 0。"
+                "按 docs/10 §5 的产物分类：Java 逐行对照；两个模板（product-list / product-form）与导航、"
+                "控制台的少量改动用汇报里的「模板分区说明」手工表说明，不再逐行展开；admin.css 同样不逐行。",
+        "files": [
+            (ADM + "controller/AdminProductController.java", "AdminProductController.java",
+             "五条路由与失败回表单", "java", None),
+            (ADM_TEST + "ProductAdminPageTest.java", "ProductAdminPageTest.java",
+             "11 个页面用例", "java", None),
+            (ADM_TEST + "support/AdminFixture.java", "AdminFixture.java",
+             "夹具新增 createProductIn", "java", [(59, 67)]),
+        ],
+    },
 }
 
 # 只有"没有行尾注释、规则解释器也认不出"的行才需要登记。
@@ -594,6 +616,36 @@ LINE_NOTES: dict[tuple[str, int], str] = {
     (CAT_TEST + "service/ProductAdminServiceTest.java", 243): "用例：分类下拉只列二级并带作品前缀。",
     (CAT_TEST + "service/ProductAdminServiceTest.java", 244): "准备：一个作品两个品类。",
     (CAT_TEST + "service/ProductAdminServiceTest.java", 256): "用例：编辑回显价格与版本。",
+    (ADM + "controller/AdminProductController.java", 25): "商品维护控制器：五条路由；校验、解析与版本冲突都在服务层。",
+    (ADM + "controller/AdminProductController.java", 34): "列表：筛选参数原样交给服务归一。",
+    (ADM + "controller/AdminProductController.java", 52): "新增表单：分类下拉只列二级。",
+    (ADM + "controller/AdminProductController.java", 62): "新增提交：失败回表单并带 400/409。",
+    (ADM + "controller/AdminProductController.java", 63): "参数：表单、模型、一次性提示、响应状态。",
+    (ADM + "controller/AdminProductController.java", 64): "续行：响应对象用来设置失败状态码。",
+    (ADM + "controller/AdminProductController.java", 65): "SKU、价格、分类等业务失败都在服务层抛出。",
+    (ADM + "controller/AdminProductController.java", 75): "编辑表单：SKU 与库存只读，版本放隐藏域。",
+    (ADM + "controller/AdminProductController.java", 88): "编辑提交：只改资料与价格。",
+    (ADM + "controller/AdminProductController.java", 89): "参数同新增，另外带路径里的商品 id。",
+    (ADM + "controller/AdminProductController.java", 90): "续行：响应对象用来设置失败状态码。",
+    (ADM + "controller/AdminProductController.java", 92): "版本冲突与字段非法时回表单。",
+    (ADM + "controller/AdminProductController.java", 107): "失败回表单：保留输入并设 400/409。",
+    (ADM + "controller/AdminProductController.java", 108): "续行：响应与模型；编辑时还要带只读的库存与状态。",
+    # ---- 商品页面用例 ----
+    (ADM_TEST + "ProductAdminPageTest.java", 26): "商品页面的 11 个用例：AC-25/AC-27。",
+    (ADM_TEST + "ProductAdminPageTest.java", 36): "用例：列表含下架并显示状态徽章。",
+    (ADM_TEST + "ProductAdminPageTest.java", 51): "用例：按状态筛选。",
+    (ADM_TEST + "ProductAdminPageTest.java", 64): "用例：按名称包含搜索。",
+    (ADM_TEST + "ProductAdminPageTest.java", 77): "用例：新增表单的分类下拉只列二级。",
+    (ADM_TEST + "ProductAdminPageTest.java", 89): "用例：新增默认 DRAFT（AC-25）。",
+    (ADM_TEST + "ProductAdminPageTest.java", 114): "用例：小写 SKU → 400 且不写库。",
+    (ADM_TEST + "ProductAdminPageTest.java", 132): "用例：价格三位小数 → 400。",
+    (ADM_TEST + "ProductAdminPageTest.java", 148): "用例：分类是一级 → 400。",
+    (ADM_TEST + "ProductAdminPageTest.java", 164): "用例：编辑页 SKU 与库存只读、版隐藏在隐藏域。",
+    (ADM_TEST + "ProductAdminPageTest.java", 177): "用例：保存成功且版本 +1、SKU 与库存不变（AC-27）。",
+    (ADM_TEST + "ProductAdminPageTest.java", 205): "用例：旧版本保存 → 409 且不覆盖（AC-27）。",
+    # ---- 商品页夹具 ----
+    (ADM_TEST + "support/AdminFixture.java", 60): "在指定二级分类下建商品：状态由用例给。",
+    (ADM_TEST + "support/AdminFixture.java", 61): "续行：价格与库存。",
 }
 
 

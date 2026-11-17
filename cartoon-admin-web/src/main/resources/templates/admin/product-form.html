@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head(${editing} ? '编辑商品' : '新增商品')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 面包屑：商品维护 / 新增或编辑 -->
+            <nav class="crumb">
+                <a th:href="@{/products}">商品维护</a>
+                <span>/</span>
+                <b th:text="${editing} ? '编辑商品' : '新增商品'">新增商品</b>
+            </nav>
+
+            <!-- 校验失败的红字：文案来自服务层 -->
+            <p class="alert error" th:if="${error}" th:text="${error}">价格必须大于 0</p>
+
+            <form class="panel" method="post"
+                  th:action="${editing} ? @{/products/{id}(id=${form.id})} : @{/products}">
+                <h2 th:text="${editing} ? '编辑商品' : '新增商品'">新增商品</h2>
+
+                <div class="form-grid">
+                    <!-- SKU：新增可填，编辑只读 -->
+                    <label class="field">
+                        <span>SKU</span>
+                        <input type="text" name="sku" th:value="${form.sku}"
+                               th:readonly="${editing}" maxlength="40" placeholder="例如 STARLINE-C07">
+                        <small th:if="${!editing}">1–40 位大写字母、数字与连字符，创建后不可修改</small>
+                        <small th:if="${editing}">SKU 创建后不可修改</small>
+                    </label>
+
+                    <!-- 名称 -->
+                    <label class="field">
+                        <span>商品名</span>
+                        <input type="text" name="name" th:value="${form.name}" required maxlength="120">
+                        <small>1–120 个字符</small>
+                    </label>
+
+                    <!-- 所属分类：只能挂二级 -->
+                    <label class="field">
+                        <span>所属分类</span>
+                        <select name="categoryId" required>
+                            <option value="">请选择品类</option>
+                            <option th:each="opt : ${options}" th:value="${opt.id}"
+                                    th:text="${opt.label}"
+                                    th:selected="${opt.id == form.categoryId}">作品 / 品类</option>
+                        </select>
+                        <small>只能选择二级分类（作品 / 品类）</small>
+                    </label>
+
+                    <!-- 价格 -->
+                    <label class="field">
+                        <span>价格</span>
+                        <input type="text" name="price" th:value="${form.price}" required placeholder="例如 28.00">
+                        <small>大于 0，最多两位小数</small>
+                    </label>
+
+                    <!-- 初始库存：只在新增时可填 -->
+                    <label class="field" th:if="${!editing}">
+                        <span>初始库存</span>
+                        <input type="number" name="stock" th:value="${form.stock}" min="0" step="1">
+                        <small>非负整数；之后补货请用列表里的补货入口</small>
+                    </label>
+
+                    <!-- 库存：编辑只读，M07-07 的补货入口才能改 -->
+                    <label class="field" th:if="${editing}">
+                        <span>当前库存</span>
+                        <input type="text" th:value="${product != null ? product.stock : form.stock}" readonly>
+                        <small>库存只读，补货请用列表里的补货入口</small>
+                    </label>
+
+                    <!-- 排序 -->
+                    <label class="field">
+                        <span>排序</span>
+                        <input type="number" name="sortOrder" th:value="${form.sortOrder}" min="0" step="1">
+                        <small>非负整数，越小越靠前</small>
+                    </label>
+
+                    <!-- 封面路径 -->
+                    <label class="field">
+                        <span>封面路径</span>
+                        <input type="text" name="coverImage" th:value="${form.coverImage}" required maxlength="255"
+                               placeholder="images/products/STARLINE-C07/cover.svg">
+                        <small>站内相对路径，例如 images/products/…/cover.svg</small>
+                    </label>
+                </div>
+
+                <!-- 简介与描述占整行 -->
+                <div class="form-grid" style="grid-template-columns:1fr">
+                    <label class="field">
+                        <span>简介</span>
+                        <input type="text" name="summary" th:value="${form.summary}" maxlength="500">
+                        <small>可空，≤500 字，列表与详情页展示</small>
+                    </label>
+                    <label class="field">
+                        <span>描述</span>
+                        <textarea name="description" rows="5" th:text="${form.description}"></textarea>
+                        <small>可空纯文本，页面转义输出</small>
+                    </label>
+                </div>
+
+                <!-- 编辑时带回版本号；新增没有版本 -->
+                <input type="hidden" name="version" th:if="${form.version != null}" th:value="${form.version}">
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" th:text="${editing} ? '保存修改' : '新增商品'">保存</button>
+                    <a class="btn btn-ghost" th:href="@{/products}">返回列表</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>
