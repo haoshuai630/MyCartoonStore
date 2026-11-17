@@ -3,6 +3,7 @@ package org.csu.mycartoonstore.catalog.service; // 分类维护：两级树的�
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper; // 条件构造：同级同名要按父级分支。
 import com.baomidou.mybatisplus.core.toolkit.Wrappers; // 条件构造。
 import org.csu.mycartoonstore.catalog.dto.CategoryForm; // 表单。
+import org.csu.mycartoonstore.catalog.dto.CategoryGroup; // 作品 + 品类分组。
 import org.csu.mycartoonstore.catalog.dto.CategoryRow; // 列表行。
 import org.csu.mycartoonstore.catalog.dto.CategoryUsage; // 分类商品计数。
 import org.csu.mycartoonstore.catalog.entity.Category; // 分类实体。
@@ -39,6 +40,9 @@ public class CategoryAdminService {
     /** 二级分类编码的另一个后缀 */
     private static final String MERCH_SUFFIX = "-MERCH"; // 周边。
 
+    /** 作品搜索关键字上限：与名称列宽一致 */
+    private static final int KEYWORD_MAX = 50; // 超长直接 400。
+
     /** 一级层级值 */
     private static final int LEVEL_TOP = 1; // 作品。
 
@@ -54,35 +58,60 @@ public class CategoryAdminService {
     }
 
     /**
-     * 两级树：一级在前、其下二级紧随，带子分类数与商品数。
+     * 按作品分组的两级列表：每组是"一个作品 + 它的品类"，可按作品名或编码筛选。
      *
      * <p>两次查询完成：一次取全部分类，一次按分类分组取商品数；
-     * 页面不再逐行查库，也不怕分类数量增长。</p>
+     * 作品多了以后页面用折叠分组展示，搜索只筛作品，命中后默认展开（模板处理）。</p>
+     *
+     * @param rawKeyword 作品名或编码的包含匹配；空表示不过滤
      */
-    public List<CategoryRow> tree() {
+    public List<CategoryGroup> groups(String rawKeyword) {
+        String keyword = normalizeKeyword(rawKeyword); // 去空白、限长、空串按不过滤。
         List<Category> all = categoryMapper.selectList(Wrappers.<Category>lambdaQuery()
                 .orderByAsc(Category::getParentId) // 一级（null）排最前。
                 .orderByAsc(Category::getSortOrder) // 同级按排序。
                 .orderByAsc(Category::getId)); // 同序按 id 稳定。
         Map<Long, Long> productCounts = productCounts(); // 商品数索引。
         Map<Long, List<Category>> byParent = groupByParent(all); // 父 → 子。
-        Map<Long, String> names = new HashMap<>(); // id → 名称，供子行显示父名。
-        for (Category category : all) {
-            names.put(category.getId(), category.getName()); // 一次遍历建索引。
-        }
 
-        List<CategoryRow> rows = new ArrayList<>(all.size()); // 结果行。
+        List<CategoryGroup> groups = new ArrayList<>(); // 结果组。
         for (Category top : all) {
             if (top.getParentId() != null) {
-                continue; // 二级在后面跟着父级一起加。
+                continue; // 二级跟随父级输出。
             }
-            List<Category> children = byParent.getOrDefault(top.getId(), List.of()); // 该作品下的品类。
-            rows.add(toRow(top, null, LEVEL_TOP, children.size(), productCounts)); // 一级行。
-            for (Category child : children) {
-                rows.add(toRow(child, names.get(child.getParentId()), LEVEL_CHILD, 0, productCounts)); // 二级行紧随。
+            if (!matches(top, keyword)) {
+                continue; // 搜索只筛作品，不筛品类。
             }
+            List<CategoryRow> children = new ArrayList<>(); // 该作品的品类。
+            for (Category child : byParent.getOrDefault(top.getId(), List.of())) {
+                children.add(toRow(child, top.getName(), LEVEL_CHILD, 0, productCounts)); // 父名直接取当前作品。
+            }
+            CategoryRow work = toRow(top, null, LEVEL_TOP, children.size(), productCounts); // 一级行。
+            groups.add(new CategoryGroup(work, children)); // 成组返回，模板用 <details> 折叠。
         }
-        return rows; // 扁平化后的树：模板只需按 level 缩进。
+        return groups; // 已按作品排序。
+    }
+
+    /** 作品是否命中关键字：名称或编码包含即可，大小写不敏感。 */
+    private boolean matches(Category work, String keyword) {
+        if (keyword == null) {
+            return true; // 没有关键字：全部返回。
+        }
+        String lower = keyword.toLowerCase(); // 名称与编码都按小写比较。
+        return work.getName() != null && work.getName().toLowerCase().contains(lower) // 名称包含。
+                || work.getCode() != null && work.getCode().toLowerCase().contains(lower); // 编码包含。
+    }
+
+    /** 搜索关键字：去首尾空白；空等价于不过滤；超长 400。 */
+    private String normalizeKeyword(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null; // 不筛选。
+        }
+        String keyword = raw.trim(); // 去首尾空白。
+        if (keyword.length() > KEYWORD_MAX) {
+            throw BizException.badRequest("搜索关键字不能超过 " + KEYWORD_MAX + " 个字符"); // 400。
+        }
+        return keyword; // 通过校验。
     }
 
     /** 新增分类：一级只要编码名称，二级还要父级存在且编码后缀合法。 */

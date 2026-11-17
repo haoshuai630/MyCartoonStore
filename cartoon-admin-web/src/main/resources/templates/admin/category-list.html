@@ -9,76 +9,105 @@
 <main>
     <section class="console">
         <div class="wrap">
-            <!-- 标题区：入口与说明；一级是作品、二级是品类 -->
+            <!-- 标题区：说明按作品折叠，商品只能挂品类 -->
             <div class="console-head">
                 <div>
                     <span class="kicker">CATEGORIES</span>
                     <h1>分类维护</h1>
-                    <p class="lead">一级分类是作品，二级分类是品类（单行本 / 周边）。编码与父级创建后不可修改，
-                        有子分类或商品引用的分类不能删除。</p>
+                    <p class="lead">一级是作品、二级是品类（单行本 / 周边）。点作品行可展开它的品类；
+                        编码与父级创建后不可修改，有子分类或商品引用的分类不能删除。</p>
                 </div>
                 <div class="head-actions">
                     <a class="btn btn-primary" th:href="@{/categories/new}">新增作品（一级）</a>
                 </div>
             </div>
 
+            <!-- 作品搜索：作品名或编码包含匹配；作品多了用它快速定位 -->
+            <form class="filter-bar" method="get" th:action="@{/categories}">
+                <label class="field">
+                    <span>搜索作品</span>
+                    <input type="text" name="keyword" th:value="${keyword}" maxlength="50"
+                           placeholder="作品名或编码，包含匹配">
+                </label>
+                <button type="submit" class="btn">查询</button>
+                <a class="link-btn" th:href="@{/categories}">重置</a>
+                <span class="count" th:text="|共 ${workCount} 部作品 / ${categoryCount} 个品类|">共 0 部作品</span>
+            </form>
+
             <!-- 新增/编辑/删除成功后的一次性提示 -->
             <p class="alert" th:if="${message}" th:text="${message}">已保存</p>
 
-            <!-- 两级缩进树：一级行带「新增品类」入口，二级行缩进显示父分类 -->
-            <div class="panel" th:if="${!rows.isEmpty()}">
-                <table class="data-table">
-                    <thead>
-                    <tr>
-                        <th style="width:110px">层级</th>
-                        <th>名称</th>
-                        <th style="width:180px">编码</th>
-                        <th style="width:130px">父分类</th>
-                        <th style="width:70px" class="num">排序</th>
-                        <th style="width:90px" class="num">子分类</th>
-                        <th style="width:80px" class="num">商品</th>
-                        <th style="width:220px">操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="row : ${rows}" th:classappend="${row.level == 2} ? 'child-row'">
-                        <!-- 层级标签 -->
-                        <td>
-                            <span class="level-tag" th:classappend="${row.level == 1} ? 'top' : 'child'"
-                                  th:text="${row.level == 1} ? '作品' : '品类'">作品</span>
-                        </td>
-                        <!-- 名称：二级缩进 -->
-                        <td><b th:text="${row.name}">名称</b></td>
-                        <td><code th:text="${row.code}">CODE</code></td>
-                        <!-- 父分类：一级没有父级 -->
-                        <td th:text="${row.parentName} ?: '—'">—</td>
-                        <td class="num" th:text="${row.sortOrder}">0</td>
-                        <td class="num" th:text="${row.childCount}">0</td>
-                        <td class="num" th:text="${row.productCount}">0</td>
-                        <td class="row-actions">
-                            <a class="link-btn" th:href="@{/categories/{id}/edit(id=${row.id})}">编辑</a>
-                            <!-- 一级行给「新增品类」，二级行不再给 -->
-                            <a class="link-btn" th:if="${row.level == 1}"
-                               th:href="@{/categories/new(parentId=${row.id})}">新增品类</a>
-                            <!-- 有引用时按钮禁用，并在旁边说明原因 -->
-                            <form th:action="@{/categories/{id}/delete(id=${row.id})}" method="post"
-                                  onsubmit="return confirm('删除后不可恢复，确定删除该分类吗？')">
+            <!-- 按作品分组：<details> 默认收起；搜索时展开命中的作品 -->
+            <div class="work-list" th:if="${!groups.isEmpty()}">
+                <details class="work-group" th:each="g : ${groups}"
+                         th:classappend="${keyword != null and !keyword.isBlank()} ? ' searched'"
+                         th:open="${keyword != null and !keyword.isBlank()}">
+                    <summary>
+                        <span class="level-tag top">作品</span>
+                        <b th:text="${g.work.name}">星轨列车</b>
+                        <code th:text="${g.work.code}">STARLINE</code>
+                        <span class="count" th:text="|${g.childCount} 个品类 · ${g.work.productCount} 件商品|">0 个品类</span>
+                        <span class="row-actions">
+                            <a class="link-btn" th:href="@{/categories/{id}/edit(id=${g.work.id})}"
+                               onclick="event.stopPropagation()">编辑</a>
+                            <a class="link-btn" th:href="@{/categories/new(parentId=${g.work.id})}"
+                               onclick="event.stopPropagation()">新增品类</a>
+                            <form th:action="@{/categories/{id}/delete(id=${g.work.id})}" method="post"
+                                  onclick="event.stopPropagation()"
+                                  onsubmit="return confirm('删除后不可恢复，确定删除该作品吗？')">
                                 <button type="submit" class="link-btn danger"
-                                        th:disabled="${!row.deletable}"
-                                        th:title="${row.deleteHint}">删除</button>
+                                        th:disabled="${!g.work.deletable}"
+                                        th:title="${g.work.deleteHint}">删除</button>
                             </form>
-                            <small class="hint-inline" th:if="${!row.deletable}"
-                                   th:text="${row.deleteHint}">有引用</small>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                            <small class="hint-inline" th:if="${!g.work.deletable}"
+                                   th:text="${g.work.deleteHint}">有引用</small>
+                        </span>
+                    </summary>
+
+                    <!-- 展开后：该作品的品类；没有品类时给一句引导 -->
+                    <table class="data-table" th:if="${g.childCount > 0}">
+                        <thead>
+                        <tr>
+                            <th style="width:110px">层级</th>
+                            <th>品类名称</th>
+                            <th style="width:200px">编码</th>
+                            <th style="width:80px" class="num">排序</th>
+                            <th style="width:90px" class="num">商品</th>
+                            <th style="width:220px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="child : ${g.children}">
+                            <td><span class="level-tag child">品类</span></td>
+                            <td><b th:text="${child.name}">单行本</b></td>
+                            <td><code th:text="${child.code}">STARLINE-COMIC</code></td>
+                            <td class="num" th:text="${child.sortOrder}">0</td>
+                            <td class="num" th:text="${child.productCount}">0</td>
+                            <td class="row-actions">
+                                <a class="link-btn" th:href="@{/categories/{id}/edit(id=${child.id})}">编辑</a>
+                                <form th:action="@{/categories/{id}/delete(id=${child.id})}" method="post"
+                                      onsubmit="return confirm('删除后不可恢复，确定删除该分类吗？')">
+                                    <button type="submit" class="link-btn danger"
+                                            th:disabled="${!child.deletable}"
+                                            th:title="${child.deleteHint}">删除</button>
+                                </form>
+                                <small class="hint-inline" th:if="${!child.deletable}"
+                                       th:text="${child.deleteHint}">有引用</small>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p class="hint-inline group-empty" th:if="${g.childCount == 0}">
+                        这个作品还没有品类，点上面的「新增品类」添加单行本或周边。
+                    </p>
+                </details>
             </div>
 
-            <!-- 空状态：还没有任何分类 -->
-            <div class="empty" th:if="${rows.isEmpty()}">
-                <b>还没有分类</b>
-                <p>先新增一个作品（一级分类），再在它下面添加单行本或周边品类。</p>
+            <!-- 空状态：区分"还没有作品"与"搜索没结果" -->
+            <div class="empty" th:if="${groups.isEmpty()}">
+                <b th:text="${keyword != null and !keyword.isBlank()} ? '没有匹配的作品' : '还没有作品'">还没有作品</b>
+                <p th:text="${keyword != null and !keyword.isBlank()} ? '换个作品名或编码再试，或清空搜索。' : '先新增一个作品（一级分类），再在它下面添加单行本或周边品类。'">说明</p>
+                <a class="btn" th:if="${keyword != null and !keyword.isBlank()}" th:href="@{/categories}">清空搜索</a>
                 <a class="btn btn-primary" th:href="@{/categories/new}">新增作品</a>
             </div>
         </div>

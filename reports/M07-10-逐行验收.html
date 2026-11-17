@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M07-10 · 分类折叠与作品搜索（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M07-10 · 分类折叠与作品搜索（逐行验收）</h1>
+<p>一行源码一行记录，行号取自原文件。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">CategoryGroup.java</a><a href="#s2">CategoryAdminService.java</a><a href="#s3">AdminCategoryController.java</a><a href="#s4">CategoryAdminServiceTest.java</a><a href="#s5">CategoryAdminPageTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：分类维护改为按作品分组的可折叠列表（&lt;details&gt;，不引前端框架）、新增「搜索作品」（名称或编码包含匹配、大小写不敏感、空不筛选、超长 400）、搜索命中的作品默认展开、分组底部给作品计数、空状态区分'没有作品'与'没有匹配'。验证：mvn -pl cartoon-catalog,cartoon-admin-web -am test 全绿；全量 clean verify → 10 模块 SUCCESS、329 个用例（新增 5）。模板（category-list.html）与样式按 docs/10 §5 用汇报里的手工表说明。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>CategoryGroup.java<small>作品 + 品类分组 · 全文件 28 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/CategoryGroup.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">分类列表的一组：一个作品 + 它的品类。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">生成 getter。</td></tr>
+<tr class="gap"><td class="line">4</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">品类列表。</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">// M07-10：分类页改成"按作品折叠"后，模板需要成组的数据，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// 而不是一串靠 level 判断的扁平行。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>@Getter</pre></td><td class="explain">只读视图对象。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CategoryGroup {</pre></td><td class="explain">分类列表的一组：作品 + 它的品类。</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline">    /** 作品（一级分类）那一行 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CategoryRow work;</pre></td><td class="explain">名称、编码、排序、品类数、商品数。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 该作品下的品类（二级分类） */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> List&lt;CategoryRow&gt; children;</pre></td><td class="explain">展开后按排序展示。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">    /** 组装一组。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">public</span> CategoryGroup(CategoryRow work, List&lt;CategoryRow&gt; children) {</pre></td><td class="explain">构造器：注入 work、children</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>        this.work = work;</pre></td><td class="explain">一级行。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        this.children = children;</pre></td><td class="explain">二级行。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /** 品类数量：摘要行直接用 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">int</span> getChildCount() {</pre></td><td class="explain">品类数量：摘要行直接用</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        <span class="kw">return</span> children.size();</pre></td><td class="explain">与 work.childCount 一致，避免模板再算。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>CategoryAdminService.java<small>分组、搜索与关键字校验 · 本任务改动行 56 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/CategoryAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">     * 按作品分组的两级列表：每组是"一个作品 + 它的品类"，可按作品名或编码筛选。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">     * &lt;p&gt;两次查询完成：一次取全部分类，一次按分类分组取商品数；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre class="cmtline">     * 作品多了以后页面用折叠分组展示，搜索只筛作品，命中后默认展开（模板处理）。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">     * @param rawKeyword 作品名或编码的包含匹配；空表示不过滤</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    <span class="kw">public</span> List&lt;CategoryGroup&gt; groups(String rawKeyword) {</pre></td><td class="explain">按作品分组的两级列表：每组是"一个作品 + 它的品类"，可按作品名或编码筛选。 两次查询完成：一次取全部分类，一次按分类分组取商品数； 作品多了以后页面用折叠分组展示，搜索只筛作品，命中后默认展开（模板处理）。 @param rawKeyword 作品名或编码的包含匹配；空表示不过滤</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        String keyword = normalizeKeyword(rawKeyword);</pre></td><td class="explain">去空白、限长、空串按不过滤。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        List&lt;Category&gt; all = categoryMapper.selectList(Wrappers.&lt;Category&gt;lambdaQuery()</pre></td><td class="explain">建 id → 名称索引，供二级行显示父名。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                .orderByAsc(Category::getParentId)</pre></td><td class="explain">一级（null）排最前。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .orderByAsc(Category::getSortOrder)</pre></td><td class="explain">同级按排序。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                .orderByAsc(Category::getId));</pre></td><td class="explain">同序按 id 稳定。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        Map&lt;Long, Long&gt; productCounts = productCounts();</pre></td><td class="explain">商品数索引。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        Map&lt;Long, List&lt;Category&gt;&gt; byParent = groupByParent(all);</pre></td><td class="explain">只遍历一级：二级跟随父级一起输出。</td></tr>
+<tr class="gap"><td class="line">76</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        List&lt;CategoryGroup&gt; groups = <span class="kw">new</span> ArrayList&lt;&gt;();</pre></td><td class="explain">结果组。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        for (Category top : all) {</pre></td><td class="explain">只遍历一级：二级跟随父级输出。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>            if (top.getParentId() != null) {</pre></td><td class="explain">二级跳过，避免重复成组。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                continue;</pre></td><td class="explain">二级跟随父级输出。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>            }</pre></td><td class="explain">二级紧跟父级，模板按 level 缩进。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>            if (!matches(top, keyword)) {</pre></td><td class="explain">搜索只筛作品，品类不参与匹配。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                continue;</pre></td><td class="explain">搜索只筛作品，不筛品类。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>            List&lt;CategoryRow&gt; children = <span class="kw">new</span> ArrayList&lt;&gt;();</pre></td><td class="explain">该作品的品类。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>            for (Category child : byParent.getOrDefault(top.getId(), List.of())) {</pre></td><td class="explain">该作品的品类依次成行。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                children.add(toRow(child, top.getName(), LEVEL_CHILD, 0, productCounts));</pre></td><td class="explain">父名直接取当前作品。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>            CategoryRow work = toRow(top, null, LEVEL_TOP, children.size(), productCounts);</pre></td><td class="explain">一级行。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>            groups.add(<span class="kw">new</span> CategoryGroup(work, children));</pre></td><td class="explain">成组返回，模板用 &lt;details&gt; 折叠。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        <span class="kw">return</span> groups;</pre></td><td class="explain">已按作品排序。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre class="cmtline">    /** 作品是否命中关键字：名称或编码包含即可，大小写不敏感。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    <span class="kw">private</span> boolean matches(Category work, String keyword) {</pre></td><td class="explain">作品是否命中关键字：名称或编码包含即可，大小写不敏感。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        if (keyword == null) {</pre></td><td class="explain">null 直接透传，由 SQL 侧决定不拼 LIKE 条件</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>            <span class="kw">return</span> true;</pre></td><td class="explain">没有关键字：全部返回。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        String lower = keyword.toLowerCase();</pre></td><td class="explain">名称与编码都按小写比较。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        <span class="kw">return</span> work.getName() != null &amp;&amp; work.getName().toLowerCase().contains(lower)</pre></td><td class="explain">名称包含。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                || work.getCode() != null &amp;&amp; work.getCode().toLowerCase().contains(lower);</pre></td><td class="explain">编码包含。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre class="cmtline">    /** 搜索关键字：去首尾空白；空等价于不过滤；超长 400。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    <span class="kw">private</span> String normalizeKeyword(String raw) {</pre></td><td class="explain">搜索关键字：去首尾空白；空等价于不过滤；超长 400。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">不筛选。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        }</pre></td><td class="explain">并发下两个请求可能同时通过查重，唯一键兜底。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        String keyword = raw.trim();</pre></td><td class="explain">去首尾空白。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        if (keyword.length() &gt; KEYWORD_MAX) {</pre></td><td class="explain">关键字超长与名称列宽一致地拒绝。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>            throw BizException.badRequest("搜索关键字不能超过 " + KEYWORD_MAX + " 个字符");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        <span class="kw">return</span> keyword;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>AdminCategoryController.java<small>列表接收 keyword 并给计数 · 本任务改动行 17 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/AdminCategoryController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">     * 列表：按作品分组（可折叠），支持按作品名或编码搜索。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     * &lt;p&gt;折叠与展开交给浏览器的 {@code &lt;details&gt;}，不引前端框架；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">     * 搜索后模板会把命中的作品默认展开，省一次点击。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @GetMapping</pre></td><td class="explain">新增表单：parentId 决定是一级还是二级。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">public</span> String list(@RequestParam(required = false) String keyword, Model model) {</pre></td><td class="explain">列表：按作品分组（可折叠），支持按作品名或编码搜索。 折叠与展开交给浏览器的 {@code }，不引前端框架； 搜索后模板会把命中的作品默认展开，省一次点击。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        List&lt;CategoryGroup&gt; groups = categoryAdminService.groups(keyword);</pre></td><td class="explain">已按作品排序。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">int</span> categories = groups.stream().mapToInt(CategoryGroup::getChildCount).sum();</pre></td><td class="explain">当前结果里的品类总数。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        model.addAttribute("groups", groups);</pre></td><td class="explain">分组数据。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        model.addAttribute("keyword", keyword);</pre></td><td class="explain">回显关键字。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        model.addAttribute("workCount", groups.size());</pre></td><td class="explain">命中作品数。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        model.addAttribute("categoryCount", categories);</pre></td><td class="explain">命中的品类总数。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        model.addAttribute("active", "categories");</pre></td><td class="explain">导航高亮。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">return</span> "admin/category-list";</pre></td><td class="explain">列表模板。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>CategoryAdminServiceTest.java<small>分组与搜索用例 · 本任务改动行 40 行</small></h2>
+<p class="path">cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/service/CategoryAdminServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 列表与回显</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">267</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>    @Test</pre></td><td class="explain">分组：一个作品 + 它的品类，计数正确。</td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>    @DisplayName("列表：按作品分组，计数正确")</pre></td><td class="explain">用例：一级在前、二级紧随，计数正确。</td></tr>
+<tr tabindex="0" data-line="270"><td class="line">270</td><td class="code"><pre>    <span class="kw">void</span> groupsAssemble() {</pre></td><td class="explain">用例：按作品分组，计数正确。</td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre>        Category top = category(7L, "STARLINE", null, "星轨列车", 1);</pre></td><td class="explain">一级。</td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>        Category comic = category(8L, "STARLINE-COMIC", 7L, "单行本", 1);</pre></td><td class="explain">二级。</td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre>        Category badge = category(9L, "STARLINE-BADGE", 7L, "徽章", 2);</pre></td><td class="explain">二级。</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>        when(categoryMapper.selectList(any())).thenReturn(List.of(top, comic, badge));</pre></td><td class="explain">查询顺序即展示顺序。</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>        when(productMapper.countByCategory()).thenReturn(List.of(usage(8L, 6)));</pre></td><td class="explain">单行本下 6 件商品。</td></tr>
+<tr class="gap"><td class="line">276</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>        List&lt;CategoryGroup&gt; groups = service.groups(null);</pre></td><td class="explain">不过滤。</td></tr>
+<tr class="gap"><td class="line">278</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>        assertThat(groups).hasSize(1);</pre></td><td class="explain">一个作品一组。</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>        assertThat(groups.get(0).getWork().getName()).isEqualTo("星轨列车");</pre></td><td class="explain">作品名。</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>        assertThat(groups.get(0).getChildCount()).isEqualTo(2);</pre></td><td class="explain">两个品类。</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>        assertThat(groups.get(0).getWork().getProductCount()).isZero();</pre></td><td class="explain">商品挂在品类上。</td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre>        assertThat(groups.get(0).getChildren().get(0).getParentName()).isEqualTo("星轨列车");</pre></td><td class="explain">父名。</td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>        assertThat(groups.get(0).getChildren().get(0).getProductCount()).isEqualTo(6);</pre></td><td class="explain">商品数。</td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">286</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>    @Test</pre></td><td class="explain">搜索：按作品名与编码包含匹配，大小写不敏感。</td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>    @DisplayName("搜索：作品名/编码包含匹配")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre>    <span class="kw">void</span> groupsSearch() {</pre></td><td class="explain">用例：作品名/编码包含匹配，大小写不敏感。</td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>        Category starline = category(7L, "STARLINE", null, "星轨列车", 1);</pre></td><td class="explain">用例：删除按钮的禁用原因。</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>        Category mistport = category(8L, "MISTPORT", null, "雾港侦探", 2);</pre></td><td class="explain">不命中。</td></tr>
+<tr tabindex="0" data-line="292"><td class="line">292</td><td class="code"><pre>        when(categoryMapper.selectList(any())).thenReturn(List.of(starline, mistport));</pre></td><td class="explain">两个作品。</td></tr>
+<tr class="gap"><td class="line">293</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>        assertThat(service.groups("星轨")).hasSize(1);</pre></td><td class="explain">按名称。</td></tr>
+<tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>        assertThat(service.groups("starline")).hasSize(1);</pre></td><td class="explain">按编码，小写也命中。</td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>        assertThat(service.groups("不存在")).isEmpty();</pre></td><td class="explain">无命中。</td></tr>
+<tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">298</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="299"><td class="line">299</td><td class="code"><pre>    @Test</pre></td><td class="explain">关键字超长：400。</td></tr>
+<tr tabindex="0" data-line="300"><td class="line">300</td><td class="code"><pre>    @DisplayName("搜索：关键字超长 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre>    <span class="kw">void</span> groupsSearchTooLong() {</pre></td><td class="explain">用例：编辑表单回显当前值。</td></tr>
+<tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.groups("长".repeat(51)))</pre></td><td class="explain">调用 service.groups("长".repeat(51，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="303"><td class="line">303</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>                .hasMessageContaining("50");</pre></td><td class="explain">断言提示包含「50」</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>CategoryAdminPageTest.java<small>折叠、搜索、空状态用例 · 本任务改动行 40 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/CategoryAdminPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    @Test</pre></td><td class="explain">折叠：默认收起，不带 searched 标记。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @DisplayName("列表：作品默认折叠")</pre></td><td class="explain">用例：默认新增一级。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">void</span> listCollapsedByDefault() throws Exception {</pre></td><td class="explain">用例：作品默认折叠。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        seedWorkAndChild();</pre></td><td class="explain">一个作品 + 一个品类。</td></tr>
+<tr class="gap"><td class="line">55</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        mockMvc.perform(get("/categories").session(adminSession()))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">200。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                .andExpect(content().string(containsString("work-group")))</pre></td><td class="explain">有折叠分组。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                .andExpect(content().string(not(containsString("searched"))));</pre></td><td class="explain">没有搜索命中标记。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">61</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    @Test</pre></td><td class="explain">搜索：只显示命中的作品。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    @DisplayName("列表：按作品名搜索")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">void</span> listSearchByWorkName() throws Exception {</pre></td><td class="explain">用例：搜索只显示命中的作品并默认展开。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        seedWorkAndChild();</pre></td><td class="explain">PAGE / 页面作品。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        <span class="kw">long</span> otherTop = AdminFixture.createCategory(jdbc, "OTHER", null, "另一个作品", 2);</pre></td><td class="explain">干扰作品。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        AdminFixture.createCategory(jdbc, "OTHER-COMIC", otherTop, "单行本", 1);</pre></td><td class="explain">它的品类。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        mockMvc.perform(get("/categories").param("keyword", "页面").session(adminSession()))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                .andExpect(content().string(containsString("页面作品")))</pre></td><td class="explain">命中。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andExpect(content().string(not(containsString("另一个作品"))))</pre></td><td class="explain">用例：父级不是一级 → 404。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                .andExpect(content().string(containsString("searched")));</pre></td><td class="explain">搜索时默认展开。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">75</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    @Test</pre></td><td class="explain">搜索无结果：空状态。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @DisplayName("列表：搜索无结果 → 空状态")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    <span class="kw">void</span> listSearchEmpty() throws Exception {</pre></td><td class="explain">用例：搜索无结果 → 空状态。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        seedWorkAndChild();</pre></td><td class="explain">有数据。</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        mockMvc.perform(get("/categories").param("keyword", "不存在").session(adminSession()))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">用例：新增一级入库（AC-25）。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(content().string(containsString("没有匹配的作品")))</pre></td><td class="explain">空状态文案。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                .andExpect(content().string(containsString("清空搜索")));</pre></td><td class="explain">给出口。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre class="cmtline">    /** 造"页面作品 + 单行本" */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seedWorkAndChild() {</pre></td><td class="explain">造"页面作品 + 单行本"</td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre>        <span class="kw">long</span> top = AdminFixture.createCategory(jdbc, "PAGE", null, "页面作品", 1);</pre></td><td class="explain">一级。</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>        AdminFixture.createCategory(jdbc, "PAGE-COMIC", top, "单行本", 1);</pre></td><td class="explain">二级。</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-17 · M07-10 · 分类折叠与作品搜索 · 5 个文件、181 行（兜底 0 行）。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>
