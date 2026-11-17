@@ -1,6 +1,9 @@
 package org.csu.mycartoonstore.account.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.csu.mycartoonstore.account.dto.PasswordForm; // 新密码强度规则。
+import org.csu.mycartoonstore.account.dto.Profile; // 已校验的三项资料。
+import org.csu.mycartoonstore.account.dto.ProfileForm; // 资料字段校验与去空白。
 import org.csu.mycartoonstore.account.entity.StoreUser;
 import org.csu.mycartoonstore.account.mapper.StoreUserMapper;
 import org.csu.mycartoonstore.common.exception.BizException;
@@ -101,13 +104,14 @@ public class AccountService {
         if (password.length() < PASSWORD_MIN) {
             throw new BizException(ErrorCode.BAD_REQUEST, "密码至少 " + PASSWORD_MIN + " 位");
         }
+        String display = ProfileForm.optionalDisplayName(displayName); // 空则回退用户名；超长直接 400。
         if (userMapper.selectCount(Wrappers.<StoreUser>lambdaQuery().eq(StoreUser::getUsername, name)) > 0) {
             throw new BizException(ErrorCode.CONFLICT, "用户名已被占用");
         }
         StoreUser user = new StoreUser();
         user.setUsername(name);
         user.setPasswordHash(passwordEncoder.encode(password));
-        user.setDisplayName(displayName == null || displayName.isBlank() ? name : displayName.trim());
+        user.setDisplayName(display == null ? name : display); // 显示名允许不填，但不允许空串。
         user.setRole("CUSTOMER");
         user.setStatus("ENABLED");
         userMapper.insert(user);
@@ -139,5 +143,69 @@ public class AccountService {
     /** 按 id 查账号：登录后刷新会话里的展示信息时用 */
     public StoreUser findById(long id) {
         return userMapper.selectById(id);
+    }
+
+    /**
+     * 读本人资料：只按会话里的 id 取，不接收用户名或外部传入的 id。
+     *
+     * <p>账号不存在时 404——会话还在但账号已被删，按"没有这个人"处理，不渲染半个页面。</p>
+     */
+    public StoreUser profile(long userId) {
+        return requireUser(userId);
+    }
+
+    /**
+     * 保存本人资料：只写 display_name / email / phone 三列。
+     *
+     * <p>用定向 UPDATE 而不是整行回写：并发改密或管理端启停时不会互相覆盖；
+     * 用户名、角色、状态与密码不在 SET 列表里，因此本人无法通过表单改它们（FR-U-03）。</p>
+     *
+     * @return 写库后的账号，调用方用其中的显示名刷新页头
+     */
+    @Transactional
+    public StoreUser updateProfile(long userId, String rawDisplayName, String rawEmail, String rawPhone) {
+        StoreUser user = requireUser(userId); // 先确认账号仍存在。
+        Profile profile = ProfileForm.parse(rawDisplayName, rawEmail, rawPhone); // 去空白 + 列宽校验。
+        int rows = userMapper.updateProfile(userId, profile.getDisplayName(),
+                profile.getEmail(), profile.getPhone()); // 定向更新三列。
+        if (rows == 0) {
+            throw BizException.notFound("账号不存在"); // 查询之后被删的极端情况。
+        }
+        user.setDisplayName(profile.getDisplayName()); // 让返回值与库一致。
+        user.setEmail(profile.getEmail()); // 同上。
+        user.setPhone(profile.getPhone()); // 同上。
+        return user; // 调用方负责刷新会话里的显示名。
+    }
+
+    /**
+     * 修改本人密码：验证旧密码 → 校验新密码 → 只写新的 BCrypt 散列。
+     *
+     * <p>旧密码错、新密码不合规、新旧相同都返回 400 且不写库；会话由控制器在成功后销毁，
+     * 本方法不碰 Session（FR-U-04：其他浏览器已有会话继续有效）。</p>
+     */
+    @Transactional
+    public void changePassword(long userId, String rawOldPassword, String rawNewPassword) {
+        StoreUser user = requireUser(userId); // 账号必须仍存在。
+        String oldPassword = rawOldPassword == null ? "" : rawOldPassword; // 密码不去空白：空格也要原样比对。
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw BizException.badRequest("原密码不正确"); // 不区分"没填"与"填错"。
+        }
+        String newPassword = PasswordForm.requireNew(rawNewPassword); // 长度 / 字节 / 类别 / 空白。
+        if (newPassword.equals(oldPassword)) {
+            throw BizException.badRequest("新密码不能与原密码相同"); // 改了等于没改，直接拒绝。
+        }
+        int rows = userMapper.updatePassword(userId, passwordEncoder.encode(newPassword)); // 只写散列一列。
+        if (rows == 0) {
+            throw BizException.notFound("账号不存在"); // 查询之后被删的极端情况。
+        }
+    }
+
+    /** 按 id 取账号，不存在时 404：资料页与资料保存共用。 */
+    private StoreUser requireUser(long userId) {
+        StoreUser user = userMapper.selectById(userId);
+        if (user == null) {
+            throw BizException.notFound("账号不存在");
+        }
+        return user;
     }
 }

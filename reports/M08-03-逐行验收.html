@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M08-03 · 确认收货（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M08-03 · 确认收货（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">CompleteResult.java</a><a href="#s2">OrderCompletionService.java</a><a href="#s3">OrderCompletionServiceTest.java</a><a href="#s4">OrderController.java</a><a href="#s5">CompleteOrderTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：SHIPPED → COMPLETED 并写首次 completed_at、已完成幂等、其他状态 409、他人订单与不存在统一 404、订单详情的「确认收货」按钮与二次确认、POST /orders/{orderNo}/complete 的提示与跳转、5 个服务单测 + 5 个页面用例。验证：mvn -pl cartoon-order,cartoon-user-web -am test → order 36、user-web 148，全绿。模板 order-detail.html 的按钮改动按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>CompleteResult.java<small>确认收货两种结局 · 12 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/domain/CompleteResult.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.domain;</pre></td><td class="explain">确认收货动作的两种结局。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre class="cmtline">// M08-03：依据 docs/01 FR-O-05。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre class="cmtline">// 只区分"本次真的完成了"与"之前已经完成"；不可完成的状态由 Service 抛 409，不在这两个值里。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">public</span> enum CompleteResult {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">    /** 本次把 SHIPPED 迁到 COMPLETED */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>    COMPLETED,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">    /** 之前已经确认收货：保持首次完成时间，只提示"已处理" */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>    ALREADY_COMPLETED</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>OrderCompletionService.java<small>状态迁移、幂等与归属 · 58 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/service/OrderCompletionService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service;</pre></td><td class="explain">确认收货：SHIPPED → COMPLETED，保留首次完成时间。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">404/409。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.CompleteResult;</pre></td><td class="explain">两种结局。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.OrderStatus;</pre></td><td class="explain">状态枚举。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单主表。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">行锁与写回。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">业务服务。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.transaction.annotation.Transactional;</pre></td><td class="explain">同一事务。</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">完成时间来源，测试可固定。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">completed_at 类型。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">// M08-03：依据 docs/01 FR-O-05、docs/02 §7.5、docs/06 AC-34。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// 负责：把本人已发货的订单迁到 COMPLETED 并写首次 completed_at；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 不做：发货（M07-08）、库存与金额（确认收货都不碰）、页面渲染（OrderController）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 这是教学状态确认，不代表物流签收（docs/01 FR-O-05 的说明），因此不校验物流信息。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>@Service</pre></td><td class="explain">业务服务：用户端控制器只调它。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderCompletionService {</pre></td><td class="explain">OrderCompletionService：见类注释</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** 唯一可确认收货的起点 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String SHIPPED = OrderStatus.SHIPPED.name();</pre></td><td class="explain">已发货。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /** 已完成：重复提交不再改时间 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String COMPLETED = OrderStatus.COMPLETED.name();</pre></td><td class="explain">已完成。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">锁订单行与写回状态。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Clock clock;</pre></td><td class="explain">完成时间来源。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> OrderCompletionService(SalesOrderMapper orderMapper, Clock clock) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        this.orderMapper = orderMapper;</pre></td><td class="explain">保存订单 Mapper。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        this.clock = clock;</pre></td><td class="explain">保存统一时钟。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">     * 确认收货：先锁订单行，再按状态决定迁移、幂等或拒绝。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     * &lt;p&gt;并发下两次提交，第二个事务看到 COMPLETED 走幂等分支，不会把首次完成时间覆盖成更晚的时间；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">     * 归属不匹配与订单不存在统一 404，不泄露订单是否存在（AC-18 的同一口径）。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">锁行、判状态、写回同一事务。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">public</span> CompleteResult complete(<span class="kw">long</span> userId, String orderNo) {</pre></td><td class="explain">确认收货：先锁订单行，再按状态决定迁移、幂等或拒绝。 并发下两次提交，第二个事务看到 COMPLETED 走幂等分支，不会把首次完成时间覆盖成更晚的时间； 归属不匹配与订单不存在统一 404，不泄露订单是否存在（AC-18 的同一口径）。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        SalesOrder order = orderMapper.lockByOrderNo(orderNo);</pre></td><td class="explain">FOR UPDATE：同一订单串行。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        if (order == null || order.getUserId() != userId) {</pre></td><td class="explain">不存在与不是本人同一处理。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>            throw BizException.notFound("订单不存在");</pre></td><td class="explain">404。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        if (COMPLETED.equals(order.getStatus())) {</pre></td><td class="explain">已经确认过。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>            <span class="kw">return</span> CompleteResult.ALREADY_COMPLETED;</pre></td><td class="explain">提示已处理，保持首次时间。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        if (!SHIPPED.equals(order.getStatus())) {</pre></td><td class="explain">待支付 / 待发货 / 已取消都不能确认。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>            throw BizException.conflict("当前状态不可确认收货");</pre></td><td class="explain">409。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        order.setStatus(COMPLETED);</pre></td><td class="explain">迁移到已完成。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        order.setCompletedAt(LocalDateTime.now(clock));</pre></td><td class="explain">首次完成时间。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        orderMapper.updateById(order);</pre></td><td class="explain">只写非空字段：金额、支付与发货信息不动。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        <span class="kw">return</span> CompleteResult.COMPLETED;</pre></td><td class="explain">本次真的完成了。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>OrderCompletionServiceTest.java<small>5 个服务用例 · 116 行</small></h2>
+<p class="path">cartoon-order/src/test/java/org/csu/mycartoonstore/order/service/OrderCompletionServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service;</pre></td><td class="explain">确认收货：状态迁移、幂等、归属与错误码。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.CompleteResult;</pre></td><td class="explain">完成结局。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单实体。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">行锁与写回。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.extension.ExtendWith;</pre></td><td class="explain">Mockito 扩展。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.mockito.ArgumentCaptor;</pre></td><td class="explain">捕获写回对象。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.mockito.Mock;</pre></td><td class="explain">协作方。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.mockito.junit.jupiter.MockitoExtension;</pre></td><td class="explain">Mockito 生命周期。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">固定时钟。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.time.Instant;</pre></td><td class="explain">时间点。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">完成时间断言。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.time.ZoneOffset;</pre></td><td class="explain">东八区。</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">异常断言。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">任意写回对象。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.never;</pre></td><td class="explain">不该发生的调用。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verify;</pre></td><td class="explain">行为断言。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">打桩。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// M08-03：依据 docs/01 FR-O-05、docs/06 AC-34。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// 覆盖：SHIPPED → COMPLETED 并写首次时间、已完成幂等、其他状态 409、他人订单与不存在 404。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">// 不覆盖：页面按钮与提示（CompleteOrderTest）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>@ExtendWith(MockitoExtension.<span class="kw">class</span>)</pre></td><td class="explain">用 Mockito 驱动。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> OrderCompletionServiceTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 固定时间：断言 completed_at 精确到这个时刻 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Instant NOW = Instant.parse("2026-11-18T02:00:00Z");</pre></td><td class="explain">UTC 02:00 = 东八区 10:00。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /** 订单归属用户：与服务调用的 userId 一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> USER_ID = 7L;</pre></td><td class="explain">订单归属用户：与服务调用的 userId 一致</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Mock</pre></td><td class="explain">订单 Mapper。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">orderMapper（SalesOrderMapper）</td></tr>
+<tr class="gap"><td class="line">41</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">    /** 被测服务：时钟固定，完成时间可精确断言 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">private</span> OrderCompletionService service() {</pre></td><td class="explain">被测服务：时钟固定，完成时间可精确断言</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> OrderCompletionService(orderMapper, Clock.fixed(NOW, ZoneOffset.ofHours(8)));</pre></td><td class="explain">每次构造新实例。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">SHIPPED：迁移成功并写首次完成时间。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("已发货订单：完成并写 completed_at")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">void</span> completeShipped() {</pre></td><td class="explain">已发货：完成并写首次完成时间。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        SalesOrder order = order("CO-1", "SHIPPED");</pre></td><td class="explain">已发货订单。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        when(orderMapper.lockByOrderNo("CO-1")).thenReturn(order);</pre></td><td class="explain">行锁返回它。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        ArgumentCaptor&lt;SalesOrder&gt; saved = ArgumentCaptor.forClass(SalesOrder.<span class="kw">class</span>);</pre></td><td class="explain">捕获写回。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        CompleteResult result = service().complete(USER_ID, "CO-1");</pre></td><td class="explain">确认收货。</td></tr>
+<tr class="gap"><td class="line">55</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        assertThat(result).isEqualTo(CompleteResult.COMPLETED);</pre></td><td class="explain">本次真的完成了。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        verify(orderMapper).updateById(saved.capture());</pre></td><td class="explain">写回一次。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        assertThat(saved.getValue().getStatus()).isEqualTo("COMPLETED");</pre></td><td class="explain">状态迁移。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        assertThat(saved.getValue().getCompletedAt())</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                .isEqualTo(LocalDateTime.of(2026, 11, 18, 10, 0));</pre></td><td class="explain">东八区时间。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        assertThat(saved.getValue().getShippedAt()).isNotNull();</pre></td><td class="explain">发货时间保留。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">63</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    @Test</pre></td><td class="explain">已完成：幂等，不改时间。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @DisplayName("已完成订单：幂等，不重复写")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">void</span> completeAgainIsIdempotent() {</pre></td><td class="explain">已完成：幂等且不写库。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        when(orderMapper.lockByOrderNo("CO-2")).thenReturn(order("CO-2", "COMPLETED"));</pre></td><td class="explain">已经完成。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        assertThat(service().complete(USER_ID, "CO-2")).isEqualTo(CompleteResult.ALREADY_COMPLETED);</pre></td><td class="explain">提示已处理。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    @Test</pre></td><td class="explain">待发货：409。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    @DisplayName("待发货订单：409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    <span class="kw">void</span> completePaidRejected() {</pre></td><td class="explain">待发货：409 且不写库。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        when(orderMapper.lockByOrderNo("CO-3")).thenReturn(order("CO-3", "PAID"));</pre></td><td class="explain">还没发货。</td></tr>
+<tr class="gap"><td class="line">77</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().complete(USER_ID, "CO-3"))</pre></td><td class="explain">调用 service().complete(USER_ID, "CO-3"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                .hasMessage("当前状态不可确认收货");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">83</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    @Test</pre></td><td class="explain">他人订单：404，不泄露存在性。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    @DisplayName("他人订单：404，不泄露是否存在")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    <span class="kw">void</span> completeOtherUserRejected() {</pre></td><td class="explain">他人订单：404，不泄露存在性。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        when(orderMapper.lockByOrderNo("CO-4")).thenReturn(order("CO-4", "SHIPPED"));</pre></td><td class="explain">属于 USER_ID。</td></tr>
+<tr class="gap"><td class="line">88</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().complete(USER_ID + 1, "CO-4"))</pre></td><td class="explain">调用 service().complete(USER_ID + 1, "CO-4"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    @Test</pre></td><td class="explain">不存在：404。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    @DisplayName("订单不存在：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    <span class="kw">void</span> completeMissing() {</pre></td><td class="explain">订单不存在：404。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        when(orderMapper.lockByOrderNo("NOPE")).thenReturn(null);</pre></td><td class="explain">查不到。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().complete(USER_ID, "NOPE"))</pre></td><td class="explain">调用 service().complete(USER_ID, "NOPE"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">105</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre class="cmtline">    /** 造订单：归属固定、发货时间已存在，完成时间留空 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    <span class="kw">private</span> SalesOrder order(String orderNo, String status) {</pre></td><td class="explain">造订单：归属固定、发货时间已存在，完成时间留空</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        SalesOrder order = <span class="kw">new</span> SalesOrder();</pre></td><td class="explain">空实体。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        order.setId(1L);</pre></td><td class="explain">主键。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        order.setOrderNo(orderNo);</pre></td><td class="explain">单号。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        order.setUserId(USER_ID);</pre></td><td class="explain">归属。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        order.setStatus(status);</pre></td><td class="explain">状态。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        order.setShippedAt(LocalDateTime.of(2026, 11, 17, 9, 0));</pre></td><td class="explain">发货时间：确认收货不覆盖它。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        <span class="kw">return</span> order;</pre></td><td class="explain">交给用例。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>OrderController.java<small>新增确认收货路由 · 131 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/controller/OrderController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">订单列表与详情：本人订单的只读页面。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">取当前用户。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">未登录兜底 401。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.CompleteResult;</pre></td><td class="explain">确认收货两种结局。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.OrderStatus;</pre></td><td class="explain">状态标签。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.OrderPage;</pre></td><td class="explain">列表一页。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单主表。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderCompletionService;</pre></td><td class="explain">确认收货。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderListService;</pre></td><td class="explain">列表查询。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderQueryService;</pre></td><td class="explain">详情查询。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderService;</pre></td><td class="explain">取消订单。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.interceptor.LoginInterceptor;</pre></td><td class="explain">会话里 userId 的键。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">MVC 控制器。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">页面数据。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">只读页面。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PathVariable;</pre></td><td class="explain">订单号来自路径。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PostMapping;</pre></td><td class="explain">取消订单。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.RequestParam;</pre></td><td class="explain">状态、单号、页码。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.mvc.support.RedirectAttributes;</pre></td><td class="explain">取消后的一次性提示。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList;</pre></td><td class="explain">状态页签。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> java.util.LinkedHashMap;</pre></td><td class="explain">标签顺序固定。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">页签列表。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">import</span> java.util.Map;</pre></td><td class="explain">标签表。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// M05-03 建立最小详情；M05-04 补列表（状态页签、完整单号、分页、空状态）；M08-03 补确认收货。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">// 只做"看"与两种状态动作（取消、确认收货）：支付/发货在 M06 / M07。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>@Controller</pre></td><td class="explain">注册为控制器。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderController {</pre></td><td class="explain">OrderController：见类注释</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> OrderQueryService orderQueryService;</pre></td><td class="explain">详情查询。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> OrderListService orderListService;</pre></td><td class="explain">列表查询。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> OrderService orderService;</pre></td><td class="explain">取消订单。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> OrderCompletionService completionService;</pre></td><td class="explain">确认收货。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">public</span> OrderController(OrderQueryService orderQueryService, OrderListService orderListService,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                           OrderService orderService, OrderCompletionService completionService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        this.orderQueryService = orderQueryService;</pre></td><td class="explain">保存详情服务。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        this.orderListService = orderListService;</pre></td><td class="explain">保存列表服务。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        this.orderService = orderService;</pre></td><td class="explain">保存取消服务。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        this.completionService = completionService;</pre></td><td class="explain">保存确认收货服务。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">     * 我的订单：状态页签 + 完整单号搜索 + 分页，条件互相保留。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @GetMapping("/orders")</pre></td><td class="explain">受保护路径。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    <span class="kw">public</span> String list(@RequestParam(required = false) String status,</pre></td><td class="explain">状态码或 ALL。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                       @RequestParam(required = false) String orderNo,</pre></td><td class="explain">完整订单号。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                       @RequestParam(required = false) String page,</pre></td><td class="explain">页码。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                       HttpSession session, Model model) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">当前用户。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        OrderPage pageData = orderListService.list(userId, status, orderNo, page);</pre></td><td class="explain">非法参数在这里 400。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        model.addAttribute("pageData", pageData);</pre></td><td class="explain">卡片、分页与角标。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        model.addAttribute("tabs", statusTabs(pageData));</pre></td><td class="explain">六个页签（编码、标签、真实数量）。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        model.addAttribute("currentLabel",</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                "ALL".equals(pageData.getStatus()) ? "全部" : OrderStatus.labelOf(pageData.getStatus()));</pre></td><td class="explain">空状态文案用。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        <span class="kw">return</span> "orders";</pre></td><td class="explain">渲染列表页。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre class="cmtline">     * 订单详情：不存在与他人订单一律 404（同码同文案）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @GetMapping("/orders/{orderNo}")</pre></td><td class="explain">受保护路径。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable String orderNo, HttpSession session, Model model) {</pre></td><td class="explain">订单详情：不存在与他人订单一律 404（同码同文案）。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">当前用户。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        SalesOrder order = orderQueryService.detail(userId, orderNo);</pre></td><td class="explain">归属校验在服务层。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        model.addAttribute("order", order);</pre></td><td class="explain">订单头与收货快照。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        model.addAttribute("items", orderQueryService.items(order.getId()));</pre></td><td class="explain">明细快照。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        model.addAttribute("statusLabel", OrderStatus.labelOf(order.getStatus()));</pre></td><td class="explain">状态中文。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        <span class="kw">return</span> "order-detail";</pre></td><td class="explain">渲染详情页。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">75</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre class="cmtline">     * 取消待支付订单：幂等，重复取消不重复恢复库存。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @PostMapping("/orders/{orderNo}/cancel")</pre></td><td class="explain">写操作，POST。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    <span class="kw">public</span> String cancel(@PathVariable String orderNo, HttpSession session, RedirectAttributes redirect) {</pre></td><td class="explain">取消待支付订单：幂等，重复取消不重复恢复库存。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">当前用户。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        boolean cancelled = orderService.cancel(userId, orderNo);</pre></td><td class="explain">已取消过会返回 false。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        redirect.addFlashAttribute("message",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                cancelled ? "订单已取消，库存已恢复" : "订单已取消，无需重复操作");</pre></td><td class="explain">两种提示。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/orders/" + orderNo;</pre></td><td class="explain">回详情，刷新不会重复提交。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">87</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre class="cmtline">     * 确认收货：仅本人已发货订单可完成；重复提交提示已处理，不改首次完成时间。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    @PostMapping("/orders/{orderNo}/complete")</pre></td><td class="explain">写操作，POST。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">public</span> String complete(@PathVariable String orderNo, HttpSession session, RedirectAttributes redirect) {</pre></td><td class="explain">确认收货：仅本人已发货订单可完成；重复提交提示已处理，不改首次完成时间。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">当前用户。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        CompleteResult result = completionService.complete(userId, orderNo);</pre></td><td class="explain">归属与状态都在服务层。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        redirect.addFlashAttribute("message",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                result == CompleteResult.COMPLETED ? "已确认收货，订单完成" : "订单已完成，无需重复操作");</pre></td><td class="explain">两种提示。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/orders/" + orderNo;</pre></td><td class="explain">回详情，刷新不会重复提交。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre class="cmtline">    /** 页签：编码、中文、真实数量；在控制器算好，模板只负责显示。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>    <span class="kw">private</span> List&lt;Map&lt;String, Object&gt;&gt; statusTabs(OrderPage pageData) {</pre></td><td class="explain">页签：编码、中文、真实数量；在控制器算好，模板只负责显示。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        List&lt;Map&lt;String, Object&gt;&gt; tabs = <span class="kw">new</span> ArrayList&lt;&gt;(1 + OrderStatus.values().length);</pre></td><td class="explain">六个页签。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        for (String code : statusCodes()) {</pre></td><td class="explain">全部 + 五种状态。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>            Map&lt;String, Object&gt; tab = <span class="kw">new</span> LinkedHashMap&lt;&gt;();</pre></td><td class="explain">一个页签。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>            tab.put("code", code);</pre></td><td class="explain">查询参数。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>            tab.put("label", "ALL".equals(code) ? "全部" : OrderStatus.labelOf(code));</pre></td><td class="explain">中文标签。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>            tab.put("count", pageData.getStatusCounts().getOrDefault(code, 0L));</pre></td><td class="explain">真实数量。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>            tabs.add(tab);</pre></td><td class="explain">收集。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        <span class="kw">return</span> tabs;</pre></td><td class="explain">交给模板。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">112</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre class="cmtline">    /** 页签顺序：全部 + 五种状态。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>    <span class="kw">private</span> List&lt;String&gt; statusCodes() {</pre></td><td class="explain">页签顺序：全部 + 五种状态。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        List&lt;String&gt; codes = <span class="kw">new</span> ArrayList&lt;&gt;(1 + OrderStatus.values().length);</pre></td><td class="explain">预留 6 个位置。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        codes.add("ALL");</pre></td><td class="explain">第一个是全部。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        for (OrderStatus status : OrderStatus.values()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>            codes.add(status.name());</pre></td><td class="explain">依次加五种状态。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        <span class="kw">return</span> codes;</pre></td><td class="explain">固定顺序。</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">122</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre class="cmtline">    /** 当前登录用户 id：拦截器已保证有会话，这里兜底 401。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> currentUserId(HttpSession session) {</pre></td><td class="explain">当前登录用户 id：拦截器已保证有会话，这里兜底 401。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        Object userId = session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">取拦截器写入的 userId。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        if (userId instanceof Long id) {</pre></td><td class="explain">只认 Long：会话可能没有该属性或类型不对</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>            <span class="kw">return</span> id;</pre></td><td class="explain">正常路径。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        throw <span class="kw">new</span> BizException(ErrorCode.UNAUTHORIZED);</pre></td><td class="explain">异常路径：401。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>CompleteOrderTest.java<small>5 个页面与状态用例 · 158 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/CompleteOrderTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.web 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">测试基类：启动完整上下文并重建七张表</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.CartFixture;</pre></td><td class="explain">购物车测试夹具：建用户、建商品、直接放条目</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">自动配置 MockMvc，用于不起端口发请求</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">模拟 MVC 请求，直接调控制器并拿到渲染结果</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.sql.Timestamp;</pre></td><td class="explain">引入 Timestamp</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">引入 LocalDateTime</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">Hamcrest 匹配器：断言字符串包含某段文本</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.not;</pre></td><td class="explain">取反断言：确认页面里没有某个片段</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET 请求</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST 请求</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;</pre></td><td class="explain">静态导入 flash</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">断言重定向目标</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline"> * 确认收货页测试：仅 SHIPPED 可完成、首次时间、幂等、他人订单 404、按钮只在已发货出现。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre><span class="kw">class</span> CompleteOrderTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre class="cmtline">    /** 支付时间：造已支付订单时必须有，且不能早于创建时间 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> LocalDateTime PAID_AT = LocalDateTime.of(2026, 11, 16, 9, 0);</pre></td><td class="explain">支付时间：造已支付订单时必须有，且不能早于创建时间</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre class="cmtline">    /** 创建时间：必须早于支付时间，否则 ck_order_time_sequence 不通过 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> LocalDateTime CREATED_AT = PAID_AT.minusHours(1);</pre></td><td class="explain">创建时间：必须早于支付时间，否则 ck_order_time_sequence 不通过</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">    /** 发货时间：确认收货不能覆盖它 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> LocalDateTime SHIPPED_AT = LocalDateTime.of(2026, 11, 17, 9, 0);</pre></td><td class="explain">发货时间：确认收货不能覆盖它</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">mockMvc：MockMvc：不起端口直接请求页面</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">jdbc：JdbcTemplate：直接建/查测试数据</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @DisplayName("已发货订单确认收货：跳回详情、状态完成、写首次 completed_at")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    <span class="kw">void</span> shippedOrderCanBeCompleted() throws Exception {</pre></td><td class="explain">确认收货：状态完成、时间落库、发货时间不变。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "alice");</pre></td><td class="explain">建测试账号 alice，返回用户 id</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        insertOrder(userId, "CO-COMPLETE-1", "SHIPPED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        mockMvc.perform(post("/orders/CO-COMPLETE-1/complete").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                .andExpect(redirectedUrl("/orders/CO-COMPLETE-1"))</pre></td><td class="explain">断言重定向到 /orders/CO-COMPLETE-1</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .andExpect(flash().attribute("message", "已确认收货，订单完成"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">57</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        assertThat(statusOf("CO-COMPLETE-1")).isEqualTo("COMPLETED");</pre></td><td class="explain">断言statusOf("CO-COMPLETE-1")等于 "COMPLETED"</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        assertThat(completedAtOf("CO-COMPLETE-1")).isNotNull();</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThat(shippedAtOf("CO-COMPLETE-1")).isEqualTo(Timestamp.valueOf(SHIPPED_AT));</pre></td><td class="explain">断言shippedAtOf("CO-COMPLETE-1")等于 Timestamp.valueOf(SHIPPED_AT)</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    @DisplayName("重复确认收货：提示已处理，完成时间不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    <span class="kw">void</span> repeatIsIdempotent() throws Exception {</pre></td><td class="explain">重复提交：提示已处理，完成时间不变。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "alice");</pre></td><td class="explain">建测试账号 alice，返回用户 id</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        insertOrder(userId, "CO-COMPLETE-2", "SHIPPED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        mockMvc.perform(post("/orders/CO-COMPLETE-2/complete").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                .andExpect(status().is3xxRedirection());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        Timestamp first = completedAtOf("CO-COMPLETE-2");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(post("/orders/CO-COMPLETE-2/complete").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .andExpect(flash().attribute("message", "订单已完成，无需重复操作"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">76</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        assertThat(completedAtOf("CO-COMPLETE-2")).isEqualTo(first);</pre></td><td class="explain">断言completedAtOf("CO-COMPLETE-2")等于 first</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">79</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    @DisplayName("待支付订单不能确认收货：409，状态不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    <span class="kw">void</span> pendingCannotBeCompleted() throws Exception {</pre></td><td class="explain">待支付：409 且状态不变。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "alice");</pre></td><td class="explain">建测试账号 alice，返回用户 id</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        insertOrder(userId, "CO-COMPLETE-3", "PENDING_PAYMENT");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">85</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        mockMvc.perform(post("/orders/CO-COMPLETE-3/complete").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                .andExpect(status().isConflict())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                .andExpect(content().string(containsString("当前状态不可确认收货")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        assertThat(statusOf("CO-COMPLETE-3")).isEqualTo("PENDING_PAYMENT");</pre></td><td class="explain">断言statusOf("CO-COMPLETE-3")等于 "PENDING_PAYMENT"</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">92</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    @DisplayName("他人订单：404，且状态不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    <span class="kw">void</span> otherUsersOrderCannotBeCompleted() throws Exception {</pre></td><td class="explain">他人订单：404 且状态不变。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        <span class="kw">long</span> owner = CartFixture.createUser(jdbc, "bob");</pre></td><td class="explain">建测试账号 bob，返回用户 id</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        <span class="kw">long</span> other = CartFixture.createUser(jdbc, "alice");</pre></td><td class="explain">建测试账号 alice，返回用户 id</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        insertOrder(owner, "CO-COMPLETE-4", "SHIPPED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        mockMvc.perform(post("/orders/CO-COMPLETE-4/complete").session(CartFixture.session(other)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr class="gap"><td class="line">102</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>        assertThat(statusOf("CO-COMPLETE-4")).isEqualTo("SHIPPED");</pre></td><td class="explain">断言statusOf("CO-COMPLETE-4")等于 "SHIPPED"</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">105</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    @DisplayName("详情页：已发货有「确认收货」，待发货没有")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    <span class="kw">void</span> buttonOnlyOnShippedOrder() throws Exception {</pre></td><td class="explain">「确认收货」只出现在已发货详情页。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "alice");</pre></td><td class="explain">建测试账号 alice，返回用户 id</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        insertOrder(userId, "CO-COMPLETE-5", "SHIPPED");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        insertOrder(userId, "CO-COMPLETE-6", "PAID");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">112</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        mockMvc.perform(get("/orders/CO-COMPLETE-5").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                .andExpect(content().string(containsString("&gt;确认收货&lt;/button&gt;")));</pre></td><td class="explain">按钮本体，不是注释。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        mockMvc.perform(get("/orders/CO-COMPLETE-6").session(CartFixture.session(userId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                .andExpect(content().string(not(containsString("&gt;确认收货&lt;/button&gt;"))));</pre></td><td class="explain">待发货没有按钮。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">120</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre class="cmtline">    /** 造订单：待支付只填必填列；已支付/已发货补齐支付三件套，已发货再补 shipped_at。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> insertOrder(<span class="kw">long</span> userId, String orderNo, String status) {</pre></td><td class="explain">造订单：待支付只填必填列；已支付/已发货补齐支付三件套，已发货再补 shipped_at。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>        if ("PENDING_PAYMENT".equals(status)) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>            jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>                            + "receiver_phone, receiver_address) VALUES (?,?,?,?,?,?,?)",</pre></td><td class="explain">列清单续行。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>                    orderNo, userId, status, <span class="kw">new</span> BigDecimal("28.00"), "收货人", "13900000000", "地址");</pre></td><td class="explain">续行：必填列的值；待支付没有支付与发货时间。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">本条路径不再继续（只加模型或只跳过徽标）</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        if ("PAID".equals(status)) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>            jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                            + "receiver_phone, receiver_address, created_at, payment_method, payment_no, paid_at) "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                            + "VALUES (?,?,?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>                    orderNo, userId, status, <span class="kw">new</span> BigDecimal("28.00"), "收货人", "13900000000", "地址",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>                    Timestamp.valueOf(CREATED_AT), "MOCK", "PAY" + orderNo, Timestamp.valueOf(PAID_AT));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">本条路径不再继续（只加模型或只跳过徽标）</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order (order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>                        + "receiver_phone, receiver_address, created_at, payment_method, payment_no, paid_at, shipped_at) "</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>                orderNo, userId, status, <span class="kw">new</span> BigDecimal("28.00"), "收货人", "13900000000", "地址",</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                Timestamp.valueOf(CREATED_AT), "MOCK", "PAY" + orderNo,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                Timestamp.valueOf(PAID_AT), Timestamp.valueOf(SHIPPED_AT));</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">144</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    <span class="kw">private</span> String statusOf(String orderNo) {</pre></td><td class="explain">读状态：断言迁移与未迁移。</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT status FROM sales_order WHERE order_no = ?", String.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">148</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">private</span> Timestamp completedAtOf(String orderNo) {</pre></td><td class="explain">读完成时间：幂等断言用。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT completed_at FROM sales_order WHERE order_no = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>                Timestamp.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">153</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    <span class="kw">private</span> Timestamp shippedAtOf(String orderNo) {</pre></td><td class="explain">读发货时间：确认收货不改它。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT shipped_at FROM sales_order WHERE order_no = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>                Timestamp.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-18 · M08-03 · 确认收货 · 5 个文件、475 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

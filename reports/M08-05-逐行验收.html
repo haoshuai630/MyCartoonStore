@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M08-05 · 管理端相册维护（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M08-05 · 管理端相册维护（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">ImageForm.java</a><a href="#s2">ProductImageAdminService.java</a><a href="#s3">ProductImageAdminServiceTest.java</a><a href="#s4">AdminImageController.java</a><a href="#s5">ImageAdminPageTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：路径必填且只收站内路径、说明 ≤120、排序 0–999999、图片必须属于该商品、按 sort_order/id 升序、新增/编辑/删除只维护记录（不改封面、不动商品版本、不删文件）、商品列表行内「相册」入口、10 个服务单测 + 7 个页面用例。验证：mvn -pl cartoon-catalog,cartoon-admin-web -am test → catalog 74、admin-web 70，全绿。模板 image-list.html、product-list.html 与 admin.css 按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>ImageForm.java<small>路径/说明/排序校验 · 56 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/dto/ImageForm.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.dto;</pre></td><td class="explain">相册表单：路径、说明与排序的校验与归一。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">校验失败转 400，文案带字段名。</td></tr>
+<tr class="gap"><td class="line">4</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">// M08-05：依据 docs/01 FR-A-07（相册维护）与 docs/03 §2.4 的列宽（255 / 120）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">// 负责：去空白、长度校验、站点内路径判断与排序解析，产出可直接写库的三项；</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">// 不做：图片文件是否存在（只维护记录）、商品/图片归属判断（在 Service）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">public</span> record ImageForm(String imagePath, String altText, <span class="kw">int</span> sortOrder) {</pre></td><td class="explain">校验后的相册字段：路径、可空说明、非负排序。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">    /** 路径上限，与 image_path VARCHAR(255) 一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> PATH_MAX = 255;</pre></td><td class="explain">路径上限，与 image_path VARCHAR(255) 一致</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">    /** 说明上限，与 alt_text VARCHAR(120) 一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> ALT_MAX = 120;</pre></td><td class="explain">说明上限，与 alt_text VARCHAR(120) 一致</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 排序上限：教学场景足够，避免误填把 INT 撑爆 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> SORT_MAX = 999_999;</pre></td><td class="explain">排序上限：教学场景足够，避免误填把 INT 撑爆</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">     * 解析并校验表单：路径必填且必须是站内路径，说明可空，排序可空（默认 0）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> ImageForm parse(String rawPath, String rawAlt, String rawSort) {</pre></td><td class="explain">解析并校验表单：路径必填且必须是站内路径，说明可空，排序可空（默认 0）。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        String path = rawPath == null ? "" : rawPath.strip();</pre></td><td class="explain">null 当空串，只在这里判一次。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        if (path.isEmpty()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            throw BizException.badRequest("图片路径不能为空");</pre></td><td class="explain">路径是唯一必填项。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        if (path.length() &gt; PATH_MAX) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            throw BizException.badRequest("图片路径不能超过 " + PATH_MAX + " 个字符");</pre></td><td class="explain">超长拒绝而不是截断。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        if (path.contains("://") || path.startsWith("//")) {</pre></td><td class="explain">") || path.startsWith("//")) {</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>            throw BizException.badRequest("图片路径只接受站内路径");</pre></td><td class="explain">外链留到 docs/12 的图片接入。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        String alt = rawAlt == null ? "" : rawAlt.strip();</pre></td><td class="explain">说明可空。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        if (alt.length() &gt; ALT_MAX) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            throw BizException.badRequest("图片说明不能超过 " + ALT_MAX + " 个字符");</pre></td><td class="explain">与列宽一致。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> ImageForm(path, alt.isEmpty() ? null : alt, parseSort(rawSort));</pre></td><td class="explain">空说明存 null。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">    /** 排序：空按 0，必须是 0–999999 的整数。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">int</span> parseSort(String raw) {</pre></td><td class="explain">排序：空按 0，必须是 0–999999 的整数。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>            <span class="kw">return</span> 0;</pre></td><td class="explain">不填就排最前。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        <span class="kw">int</span> value;</pre></td><td class="explain">先声明，try 里再赋值</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            value = Integer.parseInt(raw.trim());</pre></td><td class="explain">只接受整数。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            throw BizException.badRequest("排序必须是非负整数");</pre></td><td class="explain">小数/文字都拒绝。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        if (value &lt; 0 || value &gt; SORT_MAX) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>            throw BizException.badRequest("排序必须在 0–" + SORT_MAX + " 之间");</pre></td><td class="explain">负数与溢出直接拒。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        <span class="kw">return</span> value;</pre></td><td class="explain">合法排序。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>ProductImageAdminService.java<small>列表、新增、编辑、删除 · 91 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductImageAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.service;</pre></td><td class="explain">后台相册维护：按商品列出、新增、编辑、删除图片记录。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.toolkit.Wrappers;</pre></td><td class="explain">条件与排序。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.dto.ImageForm;</pre></td><td class="explain">表单校验。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品：存在性与页面展示。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.ProductImage;</pre></td><td class="explain">相册记录。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductImageMapper;</pre></td><td class="explain">相册读写。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品存在性。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">404。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">业务服务。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.transaction.annotation.Transactional;</pre></td><td class="explain">写操作同一事务。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">列表。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// M08-05：依据 docs/01 FR-A-07、docs/04 §3.5、docs/05 §4.9。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 负责：按商品查看相册（sort_order、id 升序）、新增、编辑、删除记录。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 不做：上传/删除文件、改 product.cover_image、动商品 version（相册与商品资料是两个写面）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">// 删除只删记录：详情页在无相册时回退封面，因此删空相册是安全操作。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>@Service</pre></td><td class="explain">业务服务：后台控制器只调它。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> ProductImageAdminService {</pre></td><td class="explain">ProductImageAdminService：见类注释</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductMapper productMapper;</pre></td><td class="explain">商品存在性与页面展示。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductImageMapper imageMapper;</pre></td><td class="explain">相册读写。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">public</span> ProductImageAdminService(ProductMapper productMapper, ProductImageMapper imageMapper) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        this.productMapper = productMapper;</pre></td><td class="explain">保存商品 Mapper。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        this.imageMapper = imageMapper;</pre></td><td class="explain">保存相册 Mapper。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">    /** 商品：不存在时 404，页面与所有写操作都先过这一关。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">public</span> Product product(<span class="kw">long</span> productId) {</pre></td><td class="explain">商品：不存在时 404，页面与所有写操作都先过这一关。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        Product product = productMapper.selectById(productId);</pre></td><td class="explain">主键查询。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        if (product == null) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>            throw BizException.notFound("商品不存在");</pre></td><td class="explain">404。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">存在的商品。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 某商品的相册：按 sort_order、id 升序，与详情页取图顺序一致。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">public</span> List&lt;ProductImage&gt; images(<span class="kw">long</span> productId) {</pre></td><td class="explain">某商品的相册：按 sort_order、id 升序，与详情页取图顺序一致。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        product(productId);</pre></td><td class="explain">先确认商品存在。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        <span class="kw">return</span> imageMapper.selectList(Wrappers.&lt;ProductImage&gt;lambdaQuery()</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .eq(ProductImage::getProductId, productId)</pre></td><td class="explain">只取该商品。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .orderByAsc(ProductImage::getSortOrder)</pre></td><td class="explain">排序值小的在前。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                .orderByAsc(ProductImage::getId));</pre></td><td class="explain">同排序按 id 稳定。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">47</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre class="cmtline">    /** 新增一张相册图：校验在 ImageForm，落库只写四条业务列。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">事务注解：注册包含查重与插入，要么都成功要么都回滚。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    <span class="kw">public</span> ProductImage add(<span class="kw">long</span> productId, String rawPath, String rawAlt, String rawSort) {</pre></td><td class="explain">新增一张相册图：校验在 ImageForm，落库只写四条业务列。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        product(productId);</pre></td><td class="explain">商品必须存在。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        ImageForm form = ImageForm.parse(rawPath, rawAlt, rawSort);</pre></td><td class="explain">去空白 + 校验。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        ProductImage image = <span class="kw">new</span> ProductImage();</pre></td><td class="explain">新记录。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        image.setProductId(productId);</pre></td><td class="explain">归属商品。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        image.setImagePath(form.imagePath());</pre></td><td class="explain">站内路径。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        image.setAltText(form.altText());</pre></td><td class="explain">可空。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        image.setSortOrder(form.sortOrder());</pre></td><td class="explain">默认 0。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        imageMapper.insert(image);</pre></td><td class="explain">自增 id 回填。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        <span class="kw">return</span> image;</pre></td><td class="explain">交给控制器做提示。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">61</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre class="cmtline">    /** 编辑一张相册图：只改路径、说明与排序，不改所属商品。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">事务注解：注册包含查重与插入，要么都成功要么都回滚。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">public</span> ProductImage update(<span class="kw">long</span> productId, <span class="kw">long</span> imageId, String rawPath, String rawAlt, String rawSort) {</pre></td><td class="explain">编辑一张相册图：只改路径、说明与排序，不改所属商品。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        product(productId);</pre></td><td class="explain">商品必须存在。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        ProductImage image = requireImage(productId, imageId);</pre></td><td class="explain">图片必须属于该商品。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        ImageForm form = ImageForm.parse(rawPath, rawAlt, rawSort);</pre></td><td class="explain">同一套校验。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        image.setImagePath(form.imagePath());</pre></td><td class="explain">换路径。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        image.setAltText(form.altText());</pre></td><td class="explain">换说明。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        image.setSortOrder(form.sortOrder());</pre></td><td class="explain">换排序。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        imageMapper.updateById(image);</pre></td><td class="explain">product_id 不在改动之列。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        <span class="kw">return</span> image;</pre></td><td class="explain">最新值。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">74</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre class="cmtline">    /** 删除一张相册图：只删记录，不删文件、不改封面。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">事务注解：注册包含查重与插入，要么都成功要么都回滚。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> delete(<span class="kw">long</span> productId, <span class="kw">long</span> imageId) {</pre></td><td class="explain">删除一张相册图：只删记录，不删文件、不改封面。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        product(productId);</pre></td><td class="explain">商品必须存在。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        requireImage(productId, imageId);</pre></td><td class="explain">越权/不存在同一处理。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        imageMapper.deleteById(imageId);</pre></td><td class="explain">只删这一条。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">82</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre class="cmtline">    /** 取图片并校验归属：不存在或不属于该商品一律 404，不泄露是否存在。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    <span class="kw">private</span> ProductImage requireImage(<span class="kw">long</span> productId, <span class="kw">long</span> imageId) {</pre></td><td class="explain">取图片并校验归属：不存在或不属于该商品一律 404，不泄露是否存在。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        ProductImage image = imageMapper.selectById(imageId);</pre></td><td class="explain">主键查询。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        if (image == null || image.getProductId() != productId) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>            throw BizException.notFound("图片不存在");</pre></td><td class="explain">404。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">return</span> image;</pre></td><td class="explain">属于该商品的图片。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>ProductImageAdminServiceTest.java<small>10 个服务用例 · 179 行</small></h2>
+<p class="path">cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/service/ProductImageAdminServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.catalog.service;</pre></td><td class="explain">后台相册维护：校验、归属与只删记录。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.Product;</pre></td><td class="explain">商品实体</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.entity.ProductImage;</pre></td><td class="explain">商品相册实体</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductImageMapper;</pre></td><td class="explain">相册数据访问</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.mapper.ProductMapper;</pre></td><td class="explain">商品数据访问</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常，携带错误码与可直接展示的文案</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码枚举，用来区分 400 与 404</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.extension.ExtendWith;</pre></td><td class="explain">引入 ExtendWith</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.mockito.ArgumentCaptor;</pre></td><td class="explain">引入 ArgumentCaptor</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.mockito.Mock;</pre></td><td class="explain">引入 Mock</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.mockito.junit.jupiter.MockitoExtension;</pre></td><td class="explain">引入 MockitoExtension</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">AssertJ 断言：期望抛出异常</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">Mockito：匹配任意参数</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.anyLong;</pre></td><td class="explain">静态导入 anyLong</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.never;</pre></td><td class="explain">静态导入 never</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verify;</pre></td><td class="explain">静态导入 verify</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">Mockito：设定假实现的返回值</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">// M08-05：依据 docs/01 FR-A-07、docs/06 的相册规则。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">// 覆盖：新增/编辑的字段校验、商品与图片归属 404、删除只删记录。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// 不覆盖：页面渲染与封面不变（ImageAdminPageTest 走真实库）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>@ExtendWith(MockitoExtension.<span class="kw">class</span>)</pre></td><td class="explain">用 Mockito 驱动。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">class</span> ProductImageAdminServiceTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Mock</pre></td><td class="explain">商品 Mapper：只用于存在性。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> ProductMapper productMapper;</pre></td><td class="explain">productMapper：商品数据访问（只读当前状态与库存）</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Mock</pre></td><td class="explain">相册 Mapper。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> ProductImageMapper imageMapper;</pre></td><td class="explain">imageMapper（ProductImageMapper）</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /** 被测服务 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> ProductImageAdminService service() {</pre></td><td class="explain">被测服务</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> ProductImageAdminService(productMapper, imageMapper);</pre></td><td class="explain">每次构造新实例。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @Test</pre></td><td class="explain">新增：写入四条业务列，排序默认 0。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @DisplayName("新增：只写商品、路径、说明、排序")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">void</span> addWritesFields() {</pre></td><td class="explain">新增：只写商品、路径、说明、排序。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        ArgumentCaptor&lt;ProductImage&gt; saved = ArgumentCaptor.forClass(ProductImage.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        service().add(5L, "  images/products/S-1/1.svg  ", "  封面图  ", "3");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">48</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        verify(imageMapper).insert(saved.capture());</pre></td><td class="explain">确认调用插入（新增条目）</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        assertThat(saved.getValue().getProductId()).isEqualTo(5L);</pre></td><td class="explain">断言saved.getValue().getProductId()等于 5L</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        assertThat(saved.getValue().getImagePath()).isEqualTo("images/products/S-1/1.svg");</pre></td><td class="explain">断言saved.getValue().getImagePath()等于 "images/products/S-1/1.svg"</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        assertThat(saved.getValue().getAltText()).isEqualTo("封面图");</pre></td><td class="explain">断言saved.getValue().getAltText()等于 "封面图"</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        assertThat(saved.getValue().getSortOrder()).isEqualTo(3);</pre></td><td class="explain">断言saved.getValue().getSortOrder()等于 3</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">55</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @Test</pre></td><td class="explain">路径必填。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    @DisplayName("新增：路径空白 → 400，不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">void</span> addBlankPath() {</pre></td><td class="explain">路径空白：400 且不写库。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().add(5L, "  ", null, null))</pre></td><td class="explain">调用 service().add(5L, "  ", null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                .hasMessage("图片路径不能为空");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        verify(imageMapper, never()).insert(any(ProductImage.<span class="kw">class</span>));</pre></td><td class="explain">确认没有调用插入（新增条目）</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">66</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    @Test</pre></td><td class="explain">外链留到 docs/12。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    @DisplayName("新增：外链路径 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    <span class="kw">void</span> addExternalPath() {</pre></td><td class="explain">外链：400，外链留到 docs/12。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">71</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().add(5L, "https://example.com/a.jpg", null, null))</pre></td><td class="explain">调用 service().add(5L, "https://example.com/a.jpg", null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                .hasMessage("图片路径只接受站内路径");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">76</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @Test</pre></td><td class="explain">说明超长。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @DisplayName("新增：说明超过 120 字 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    <span class="kw">void</span> addTooLongAlt() {</pre></td><td class="explain">说明超 120：400。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">81</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().add(5L, "images/a.svg", "说".repeat(121), null))</pre></td><td class="explain">调用 service().add(5L, "images/a.svg", "说".repeat(121), null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                .hasMessageContaining("不能超过 120");</pre></td><td class="explain">断言提示包含「不能超过 120」</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">86</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    @Test</pre></td><td class="explain">排序非法。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    @DisplayName("新增：排序为负 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>    <span class="kw">void</span> addNegativeSort() {</pre></td><td class="explain">排序为负：400。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">91</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().add(5L, "images/a.svg", null, "-1"))</pre></td><td class="explain">调用 service().add(5L, "images/a.svg", null, "-1"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                .hasMessageContaining("0–999999");</pre></td><td class="explain">断言提示包含「0–999999」</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">96</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    @Test</pre></td><td class="explain">商品不存在。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    @DisplayName("新增：商品不存在 → 404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>    <span class="kw">void</span> addMissingProduct() {</pre></td><td class="explain">商品不存在：404。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        when(productMapper.selectById(99L)).thenReturn(null);</pre></td><td class="explain">准备商品：不存在（null）</td></tr>
+<tr class="gap"><td class="line">101</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().add(99L, "images/a.svg", null, null))</pre></td><td class="explain">调用 service().add(99L, "images/a.svg", null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        verify(imageMapper, never()).insert(any(ProductImage.<span class="kw">class</span>));</pre></td><td class="explain">确认没有调用插入（新增条目）</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">108</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    @Test</pre></td><td class="explain">编辑：只改三列。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    @DisplayName("编辑：路径、说明、排序都按表单更新")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    <span class="kw">void</span> updateChangesFields() {</pre></td><td class="explain">编辑：路径、说明、排序按表单更新。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        when(imageMapper.selectById(7L)).thenReturn(image(7L, 5L, "images/old.svg"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">114</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        ProductImage updated = service().update(5L, 7L, "images/new.svg", "新说明", "9");</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">116</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        assertThat(updated.getImagePath()).isEqualTo("images/new.svg");</pre></td><td class="explain">断言updated.getImagePath()等于 "images/new.svg"</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        assertThat(updated.getAltText()).isEqualTo("新说明");</pre></td><td class="explain">断言updated.getAltText()等于 "新说明"</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        assertThat(updated.getSortOrder()).isEqualTo(9);</pre></td><td class="explain">断言updated.getSortOrder()等于 9</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        verify(imageMapper).updateById(updated);</pre></td><td class="explain">确认调用 updateById</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">122</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    @Test</pre></td><td class="explain">图片不属于该商品：404，不写库。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    @DisplayName("编辑：图片不属于该商品 → 404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    <span class="kw">void</span> updateNotBelonging() {</pre></td><td class="explain">图片不属于该商品：404。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        when(imageMapper.selectById(7L)).thenReturn(image(7L, 6L, "images/old.svg"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">128</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().update(5L, 7L, "images/new.svg", null, null))</pre></td><td class="explain">调用 service().update(5L, 7L, "images/new.svg", null, null，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        verify(imageMapper, never()).updateById(any(ProductImage.<span class="kw">class</span>));</pre></td><td class="explain">确认没有调用 updateById</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">135</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    @Test</pre></td><td class="explain">删除：只删这条记录。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    @DisplayName("删除：只删记录")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    <span class="kw">void</span> deleteRemovesRecord() {</pre></td><td class="explain">删除：只删记录。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        when(imageMapper.selectById(7L)).thenReturn(image(7L, 5L, "images/a.svg"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">141</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        service().delete(5L, 7L);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">143</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>        verify(imageMapper).deleteById(7L);</pre></td><td class="explain">确认调用 deleteById</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">146</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    @Test</pre></td><td class="explain">删除越权/不存在：404。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    @DisplayName("删除：图片不属于该商品 → 404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">void</span> deleteNotBelonging() {</pre></td><td class="explain">删除越权：404 且不删。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        when(imageMapper.selectById(7L)).thenReturn(image(7L, 6L, "images/a.svg"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">152</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service().delete(5L, 7L))</pre></td><td class="explain">调用 service().delete(5L, 7L，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>        verify(imageMapper, never()).deleteById(anyLong());</pre></td><td class="explain">确认没有调用 deleteById</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">159</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre class="cmtline">    /** 造商品：只用 id 与名称，页面测试不在这里。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>    <span class="kw">private</span> Product product(<span class="kw">long</span> id) {</pre></td><td class="explain">夹具：按参数造一个商品（价格、库存、状态）</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>        Product product = <span class="kw">new</span> Product();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        product.setId(id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>        product.setName("商品" + id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        product.setSku("S-" + id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        <span class="kw">return</span> product;</pre></td><td class="explain">返回查到的商品</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">168</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre class="cmtline">    /** 造相册记录：归属由用例指定，用于越权判断。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>    <span class="kw">private</span> ProductImage image(<span class="kw">long</span> id, <span class="kw">long</span> productId, String path) {</pre></td><td class="explain">造相册记录：归属由用例指定，用于越权判断。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>        ProductImage image = <span class="kw">new</span> ProductImage();</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        image.setId(id);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        image.setProductId(productId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        image.setImagePath(path);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>        image.setAltText("说明");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>        image.setSortOrder(1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>        <span class="kw">return</span> image;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>AdminImageController.java<small>相册页与四个动作 · 91 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/AdminImageController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.controller;</pre></td><td class="explain">相册维护：按商品查看、新增、编辑、删除图片记录。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletResponse;</pre></td><td class="explain">校验失败时给出正确状态码。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.ProductImageAdminService;</pre></td><td class="explain">业务规则。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">校验失败回列表。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">MVC 控制器。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">传模板。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">列表。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PathVariable;</pre></td><td class="explain">商品与图片 id。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PostMapping;</pre></td><td class="explain">新增/编辑/删除。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.RequestMapping;</pre></td><td class="explain">路由前缀。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.RequestParam;</pre></td><td class="explain">表单字段。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.mvc.support.RedirectAttributes;</pre></td><td class="explain">一次性提示。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// M08-05：依据 docs/01 FR-A-07、docs/04 §3.5、docs/05 §4.9。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 只做参数绑定、页面选择与跳转；路径/说明/排序校验与归属判断都在 ProductImageAdminService。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 删除只删记录：不删文件、不改商品封面；失败回列表并保留输入（与 M07 后台表单同一口径）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>@Controller</pre></td><td class="explain">返回模板名。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>@RequestMapping("/products/{productId}/images")</pre></td><td class="explain">挂在商品下的相册路由。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminImageController {</pre></td><td class="explain">AdminImageController：见类注释</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> ProductImageAdminService imageAdminService;</pre></td><td class="explain">业务服务。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">public</span> AdminImageController(ProductImageAdminService imageAdminService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        this.imageAdminService = imageAdminService;</pre></td><td class="explain">保存服务。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 相册列表：商品信息 + 按 sort_order、id 升序的图片 + 新增表单。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    @GetMapping</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">public</span> String list(@PathVariable <span class="kw">long</span> productId, Model model) {</pre></td><td class="explain">相册列表：商品信息 + 按 sort_order、id 升序的图片 + 新增表单。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        model.addAttribute("product", imageAdminService.product(productId));</pre></td><td class="explain">商品不存在时 404。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        model.addAttribute("images", imageAdminService.images(productId));</pre></td><td class="explain">相册行。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        model.addAttribute("active", "products");</pre></td><td class="explain">导航高亮。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        <span class="kw">return</span> "admin/image-list";</pre></td><td class="explain">列表模板。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">    /** 新增：成功后回列表并提示；失败回列表并保留输入。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @PostMapping</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">public</span> String add(@PathVariable <span class="kw">long</span> productId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                      @RequestParam String imagePath,</pre></td><td class="explain">站内路径。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                      @RequestParam(required = false) String altText,</pre></td><td class="explain">可空。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                      @RequestParam(required = false) String sortOrder,</pre></td><td class="explain">可空，默认 0。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                      Model model, HttpServletResponse response, RedirectAttributes redirect) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>            imageAdminService.add(productId, imagePath, altText, sortOrder);</pre></td><td class="explain">校验与写库。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            redirect.addFlashAttribute("message", "已新增一张相册图");</pre></td><td class="explain">一次性提示。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            <span class="kw">return</span> "redirect:/products/" + productId + "/images";</pre></td><td class="explain">PRG。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        } catch (BizException e) {</pre></td><td class="explain">路径/说明/排序不合法。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            <span class="kw">return</span> backToList(productId, imagePath, altText, sortOrder, e, response, model);</pre></td><td class="explain">回列表。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">    /** 编辑：只改路径、说明与排序。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    @PostMapping("/{imageId}")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    <span class="kw">public</span> String update(@PathVariable <span class="kw">long</span> productId, @PathVariable <span class="kw">long</span> imageId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                         @RequestParam String imagePath,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                         @RequestParam(required = false) String altText,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                         @RequestParam(required = false) String sortOrder,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                         Model model, HttpServletResponse response, RedirectAttributes redirect) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>            imageAdminService.update(productId, imageId, imagePath, altText, sortOrder);</pre></td><td class="explain">归属 + 校验 + 写库。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>            redirect.addFlashAttribute("message", "已保存相册图");</pre></td><td class="explain">一次性提示。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>            <span class="kw">return</span> "redirect:/products/" + productId + "/images";</pre></td><td class="explain">PRG。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        } catch (BizException e) {</pre></td><td class="explain">图片不属于该商品或字段非法。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>            <span class="kw">return</span> backToList(productId, imagePath, altText, sortOrder, e, response, model);</pre></td><td class="explain">回列表。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre class="cmtline">    /** 删除：只删记录，不删文件、不改封面。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    @PostMapping("/{imageId}/delete")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    <span class="kw">public</span> String delete(@PathVariable <span class="kw">long</span> productId, @PathVariable <span class="kw">long</span> imageId,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                         RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        imageAdminService.delete(productId, imageId);</pre></td><td class="explain">不存在/不属于该商品 → 404。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        redirect.addFlashAttribute("message", "已删除相册图（文件保留）");</pre></td><td class="explain">说明只删记录。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/products/" + productId + "/images";</pre></td><td class="explain">PRG。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">77</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre class="cmtline">    /** 校验失败：回列表，保留输入与商品上下文，HTTP 状态取业务异常。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    <span class="kw">private</span> String backToList(<span class="kw">long</span> productId, String imagePath, String altText, String sortOrder,</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                              BizException e, HttpServletResponse response, Model model) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        response.setStatus(e.code().status());</pre></td><td class="explain">400 或 404。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        model.addAttribute("product", imageAdminService.product(productId));</pre></td><td class="explain">商品信息不能丢。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        model.addAttribute("images", imageAdminService.images(productId));</pre></td><td class="explain">列表照常渲染。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        model.addAttribute("error", e.getMessage());</pre></td><td class="explain">红字提示。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        model.addAttribute("formPath", imagePath);</pre></td><td class="explain">保留刚填的路径。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        model.addAttribute("formAlt", altText);</pre></td><td class="explain">保留说明。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        model.addAttribute("formSort", sortOrder);</pre></td><td class="explain">保留排序。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        model.addAttribute("active", "products");</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        <span class="kw">return</span> "admin/image-list";</pre></td><td class="explain">同一个模板。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>ImageAdminPageTest.java<small>7 个页面用例 · 162 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/ImageAdminPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin;</pre></td><td class="explain">包声明：本文件属于 org.csu.mycartoonstore.admin 包。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminFixture;</pre></td><td class="explain">引入 AdminFixture</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminIntegrationTest;</pre></td><td class="explain">引入 AdminIntegrationTest</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">JUnit 5 注解，给用例起可读名字</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 注解，标记可执行用例</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">Spring 注解，按类型注入依赖</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">自动配置 MockMvc，用于不起端口发请求</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">Spring 的 JDBC 模板，直接执行 SQL 造数据</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">模拟 MVC 请求，直接调控制器并拿到渲染结果</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">AssertJ 断言入口，用流式写法断言结果</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">Hamcrest 匹配器：断言字符串包含某段文本</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET 请求</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST 请求</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言响应体内容</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;</pre></td><td class="explain">静态导入 flash</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">断言重定向目标</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;</pre></td><td class="explain">断言重定向地址匹配模式</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline"> * 相册维护页测试：列表、新增、编辑、删除、校验与"不改封面/不动版本"。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">开启 MockMvc，不占端口就能请求页面</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">class</span> ImageAdminPageTest <span class="kw">extends</span> AdminIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">mockMvc：MockMvc：不起端口直接请求页面</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 按类型注入</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">jdbc：JdbcTemplate：直接建/查测试数据</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @DisplayName("未登录访问相册页：302 到管理端登录页")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">void</span> imagesRequireLogin() throws Exception {</pre></td><td class="explain">未登录：302 到管理端登录页。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        mockMvc.perform(get("/products/" + productId + "/images"))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Fproducts*"));</pre></td><td class="explain">断言重定向到 /login?redirect=*%2Fproducts*</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">44</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @DisplayName("相册页渲染商品信息与已有图片")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">void</span> listRenders() throws Exception {</pre></td><td class="explain">渲染商品信息与已有图片。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        insertImage(productId, "images/products/IMGPROD/1.svg", "图一", 1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">51</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        mockMvc.perform(get("/products/" + productId + "/images").session(AdminFixture.session(adminId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andExpect(content().string(containsString("相册维护")))</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                .andExpect(content().string(containsString("IMGPROD")))</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .andExpect(content().string(containsString("images/products/IMGPROD/1.svg")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">58</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    @DisplayName("新增图片：回列表并写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    <span class="kw">void</span> addViaPage() throws Exception {</pre></td><td class="explain">新增：回列表并落库。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">64</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        mockMvc.perform(post("/products/" + productId + "/images").session(AdminFixture.session(adminId))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                        .param("imagePath", "images/products/IMGPROD/2.svg")</pre></td><td class="explain">表单参数 imagePath="images/products/IMGPROD/2.svg"</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                        .param("altText", "新图")</pre></td><td class="explain">表单参数 altText="新图"</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                        .param("sortOrder", "4"))</pre></td><td class="explain">表单参数 sortOrder="4"</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                .andExpect(redirectedUrl("/products/" + productId + "/images"))</pre></td><td class="explain">断言重定向到 /products/</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                .andExpect(flash().attribute("message", "已新增一张相册图"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM product_image WHERE product_id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                Integer.<span class="kw">class</span>, productId)).isEqualTo(1);</pre></td><td class="explain">续行：断言新增了一条记录。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT sort_order FROM product_image WHERE product_id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                Integer.<span class="kw">class</span>, productId)).isEqualTo(4);</pre></td><td class="explain">续行：断言排序已写入。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @DisplayName("编辑图片：只改路径、说明与排序")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> editViaPage() throws Exception {</pre></td><td class="explain">编辑：回列表且库中三列更新。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        <span class="kw">long</span> imageId = insertImage(productId, "images/products/IMGPROD/1.svg", "旧说明", 1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">85</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        mockMvc.perform(post("/products/" + productId + "/images/" + imageId)</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                        .session(AdminFixture.session(adminId))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                        .param("imagePath", "images/products/IMGPROD/9.svg")</pre></td><td class="explain">表单参数 imagePath="images/products/IMGPROD/9.svg"</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                        .param("altText", "新说明")</pre></td><td class="explain">表单参数 altText="新说明"</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                        .param("sortOrder", "9"))</pre></td><td class="explain">表单参数 sortOrder="9"</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                .andExpect(flash().attribute("message", "已保存相册图"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">93</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT image_path FROM product_image WHERE id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                String.<span class="kw">class</span>, imageId)).isEqualTo("images/products/IMGPROD/9.svg");</pre></td><td class="explain">续行：断言路径已更新。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT alt_text FROM product_image WHERE id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                String.<span class="kw">class</span>, imageId)).isEqualTo("新说明");</pre></td><td class="explain">续行：断言说明已更新。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT sort_order FROM product_image WHERE id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                Integer.<span class="kw">class</span>, imageId)).isEqualTo(9);</pre></td><td class="explain">续行：断言排序已更新。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">101</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    @DisplayName("删除图片：只删记录，封面与商品版本不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>    <span class="kw">void</span> deleteViaPage() throws Exception {</pre></td><td class="explain">删除：只删记录，封面与版本不变。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        <span class="kw">long</span> imageId = insertImage(productId, "images/products/IMGPROD/1.svg", "图一", 1);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        String coverBefore = coverOf(productId);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">long</span> versionBefore = versionOf(productId);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">110</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>        mockMvc.perform(post("/products/" + productId + "/images/" + imageId + "/delete")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>                        .session(AdminFixture.session(adminId)))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>                .andExpect(flash().attribute("message", "已删除相册图（文件保留）"));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">115</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM product_image WHERE id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>                Integer.<span class="kw">class</span>, imageId)).isZero();</pre></td><td class="explain">续行：断言记录已删。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        assertThat(coverOf(productId)).isEqualTo(coverBefore);</pre></td><td class="explain">封面不变。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        assertThat(versionOf(productId)).isEqualTo(versionBefore);</pre></td><td class="explain">相册不写商品版本。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">121</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    @DisplayName("外链路径：400、回列表并提示，不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    <span class="kw">void</span> externalPathRejected() throws Exception {</pre></td><td class="explain">外链：400、回列表提示且不写库。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">127</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        mockMvc.perform(post("/products/" + productId + "/images").session(AdminFixture.session(adminId))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                        .param("imagePath", "https://example.com/a.jpg"))</pre></td><td class="explain">表单参数 imagePath="https://example.com/a.jpg"</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                .andExpect(status().isBadRequest())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                .andExpect(content().string(containsString("图片路径只接受站内路径")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">132</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM product_image WHERE product_id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>                Integer.<span class="kw">class</span>, productId)).isZero();</pre></td><td class="explain">续行：断言没有新增记录。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">136</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    @DisplayName("商品不存在：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>    <span class="kw">void</span> unknownProduct() throws Exception {</pre></td><td class="explain">商品不存在：404。</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "rootadmin");</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">141</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>        mockMvc.perform(get("/products/9999/images").session(AdminFixture.session(adminId)))</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                .andExpect(status().isNotFound());</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">145</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre class="cmtline">    /** 插一张相册图，返回 id */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> insertImage(<span class="kw">long</span> productId, String path, String alt, <span class="kw">int</span> sort) {</pre></td><td class="explain">插一张相册图，返回 id</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        jdbc.update("INSERT INTO product_image (product_id, image_path, alt_text, sort_order) VALUES (?,?,?,?)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>                productId, path, alt, sort);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product_image WHERE product_id = ? AND image_path = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>                Long.<span class="kw">class</span>, productId, path);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">153</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    <span class="kw">private</span> String coverOf(<span class="kw">long</span> productId) {</pre></td><td class="explain">读封面：断言相册不影响它。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT cover_image FROM product WHERE id = ?", String.<span class="kw">class</span>, productId);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">157</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> versionOf(<span class="kw">long</span> productId) {</pre></td><td class="explain">读版本：断言相册不写商品版本。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>        Long version = jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.<span class="kw">class</span>, productId);</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>        <span class="kw">return</span> version == null ? 0 : version;</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-18 · M08-05 · 管理端相册维护 · 5 个文件、579 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

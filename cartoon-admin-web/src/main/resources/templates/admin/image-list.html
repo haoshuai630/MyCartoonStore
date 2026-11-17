@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('相册维护')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 标题区：说明只维护记录，不改封面、不删文件 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">IMAGES</span>
+                    <h1>相册维护</h1>
+                    <p class="lead">
+                        商品：<b th:text="${product.name}">商品名</b>
+                        <code th:text="${product.sku}">SKU</code>
+                        · 只维护相册记录：不改封面、不删文件；删空后详情页回退到封面。
+                    </p>
+                </div>
+                <div class="head-actions">
+                    <a class="btn" th:href="@{/products}">返回商品列表</a>
+                </div>
+            </div>
+
+            <p class="alert" th:if="${message}" th:text="${message}">已保存</p>
+            <p class="alert" th:if="${error}" th:text="${error}" style="border-color:var(--red);color:var(--red);background:#fff5f3">错误</p>
+
+            <!-- 新增：路径必填，说明可空，排序默认 0 -->
+            <form class="filter-bar" method="post" th:action="@{/products/{id}/images(id=${product.id})}">
+                <label class="field">
+                    <span>图片路径（站内）</span>
+                    <input type="text" name="imagePath" th:value="${formPath}" maxlength="255"
+                           placeholder="images/products/SKU/1.svg">
+                </label>
+                <label class="field">
+                    <span>说明（可空）</span>
+                    <input type="text" name="altText" th:value="${formAlt}" maxlength="120">
+                </label>
+                <label class="field" style="max-width:120px">
+                    <span>排序</span>
+                    <input type="number" name="sortOrder" th:value="${formSort}" min="0" max="999999" placeholder="0">
+                </label>
+                <button type="submit" class="btn btn-primary">新增图片</button>
+            </form>
+
+            <!-- 列表：每行可改路径/说明/排序，删除走单独表单 -->
+            <div class="image-list" th:if="${!images.isEmpty()}">
+                <div class="image-row" th:each="row : ${images}">
+                    <img th:src="@{${row.imagePath}}" th:alt="${row.altText}" alt="相册图">
+                    <form class="image-edit" method="post"
+                          th:action="@{/products/{p}/images/{i}(p=${product.id}, i=${row.id})}">
+                        <label class="field">
+                            <span>图片路径</span>
+                            <input type="text" name="imagePath" th:value="${row.imagePath}" maxlength="255">
+                        </label>
+                        <label class="field">
+                            <span>说明</span>
+                            <input type="text" name="altText" th:value="${row.altText}" maxlength="120">
+                        </label>
+                        <label class="field" style="max-width:110px">
+                            <span>排序</span>
+                            <input type="number" name="sortOrder" th:value="${row.sortOrder}" min="0" max="999999">
+                        </label>
+                        <button type="submit" class="btn">保存</button>
+                    </form>
+                    <!-- 删除只删记录：文件与封面不受影响 -->
+                    <form class="image-delete" method="post"
+                          th:action="@{/products/{p}/images/{i}/delete(p=${product.id}, i=${row.id})}"
+                          onsubmit="return confirm('只删除这条相册记录，图片文件与商品封面不受影响。确定删除吗？')">
+                        <button type="submit" class="btn btn-danger">删除</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 空状态：明确说详情页会回退封面 -->
+            <div class="empty" th:if="${images.isEmpty()}">
+                <b>该商品还没有相册图</b>
+                <p>不加相册时，详情页只显示封面；新增后按排序值从小到大展示。</p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

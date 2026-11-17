@@ -94,7 +94,7 @@ h1, h2, h3 { margin: 0; font-weight: 900; letter-spacing: .02em; }
 .identity b { display: block; font-size: 22px; font-weight: 900; margin: 4px 0 10px; }
 .identity form { margin: 0; }
 
-.entry-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 28px; }
+.entry-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; margin-top: 28px; }
 .entry-card {
     border: 3px solid var(--ink);
     background: #fff;
@@ -231,3 +231,12 @@ h1, h2, h3 { margin: 0; font-weight: 900; letter-spacing: .02em; }
 .work-group[open] summary { border-bottom: 3px solid var(--ink); background: var(--paper-2); }
 .work-group .data-table th:first-child, .work-group .data-table td:first-child { padding-left: 16px; }
 .group-empty { padding: 14px 18px; margin: 0; }
+
+/* ---------- 相册维护（M08-05） ---------- */
+.image-list { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; }
+.image-row { display: flex; gap: 16px; align-items: flex-end; border: 3px solid var(--ink); background: #fff; box-shadow: 5px 5px 0 var(--ink); padding: 16px; }
+.image-row > img { width: 96px; height: 96px; object-fit: cover; border: 2px solid var(--ink); background: var(--paper-2); flex: none; }
+.image-edit { display: flex; gap: 12px; align-items: flex-end; flex: 1; }
+.image-edit .field { flex: 1; min-width: 0; }
+.image-delete { flex: none; }
+@media (max-width: 980px) { .image-row { flex-wrap: wrap; } .image-edit { flex-wrap: wrap; } }

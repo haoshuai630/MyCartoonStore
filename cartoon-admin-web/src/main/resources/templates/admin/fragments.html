@@ -34,6 +34,8 @@
             <a th:href="@{/categories}" th:classappend="${active == 'categories'} ? 'on'">分类维护</a>
             <a th:href="@{/products}" th:classappend="${active == 'products'} ? 'on'">商品维护</a>
             <a th:href="@{/orders}" th:classappend="${active == 'orders'} ? 'on'">订单处理</a>
+            <!-- M08-04：顾客管理（启停）；管理员账号不在此页 -->
+            <a th:href="@{/users}" th:classappend="${active == 'users'} ? 'on'">顾客管理</a>
         </nav>
         <span class="who" th:if="${session.displayName != null}"
               th:text="|当前管理员：${session.displayName}|">当前管理员</span>

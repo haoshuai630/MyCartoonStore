@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('顾客管理')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 标题区：说明只列顾客，管理员不在此页 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">CUSTOMERS</span>
+                    <h1>顾客管理</h1>
+                    <p class="lead">只列出用户端注册的顾客。管理员账号不在此页，也不能在这里启停；
+                        禁用后该账号的下一次受保护请求立即被拒。</p>
+                </div>
+            </div>
+
+            <!-- 一次性提示：启停成功或重复操作 -->
+            <p class="alert" th:if="${message}" th:text="${message}">已处理</p>
+
+            <!-- 筛选：用户名包含 + 状态；提交后整页刷新 -->
+            <form class="filter-bar" method="get" th:action="@{/users}">
+                <label class="field">
+                    <span>用户名</span>
+                    <input type="text" name="keyword" th:value="${keyword}" maxlength="50"
+                           placeholder="按用户名包含搜索">
+                </label>
+                <label class="field">
+                    <span>状态</span>
+                    <select name="status">
+                        <option value="ALL" th:selected="${status == 'ALL'}">全部</option>
+                        <option value="ENABLED" th:selected="${status == 'ENABLED'}">启用</option>
+                        <option value="DISABLED" th:selected="${status == 'DISABLED'}">禁用</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn">查询</button>
+                <a class="link-btn" th:href="@{/users}">重置</a>
+            </form>
+
+            <!-- 列表：id 升序；状态徽章 + 启停按钮 -->
+            <div class="panel" th:if="${!page.empty}">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="width:60px" class="num">ID</th>
+                        <th style="width:180px">用户名</th>
+                        <th>显示名</th>
+                        <th style="width:110px">状态</th>
+                        <th style="width:190px">注册时间</th>
+                        <th style="width:100px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${page.items}">
+                        <td class="num" th:text="${row.id}">1</td>
+                        <td><code th:text="${row.username}">alice</code></td>
+                        <td th:text="${row.displayName}">显示名</td>
+                        <td>
+                            <span class="status-tag" th:classappend="${row.status == 'ENABLED'} ? 'on' : 'off'"
+                                  th:text="${row.status == 'ENABLED'} ? '启用' : '禁用'">状态</span>
+                        </td>
+                        <td th:text="${row.createdAt == null ? '—' :
+                                #temporals.format(row.createdAt, 'yyyy-MM-dd HH:mm')}">时间</td>
+                        <td class="row-actions">
+                            <!-- 启停：二次确认；重复设置同一状态由服务端提示"当前已是" -->
+                            <form class="inline-form" th:action="@{/users/{id}/status(id=${row.id})}" method="post"
+                                  th:onsubmit="${row.status == 'ENABLED'} ?
+                                      'return confirm(\'禁用后该账号将立即无法登录，确定禁用吗？\')' : 'return true'">
+                                <input type="hidden" name="status"
+                                       th:value="${row.status == 'ENABLED'} ? 'DISABLED' : 'ENABLED'">
+                                <button type="submit" class="link-btn"
+                                        th:text="${row.status == 'ENABLED'} ? '禁用' : '启用'">禁用</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- 翻页：保留筛选条件 -->
+                <div class="pager">
+                    <a th:if="${page.hasPrevious}"
+                       th:href="@{/users(keyword=${keyword}, status=${status}, page=${page.page - 1})}">上一页</a>
+                    <span th:if="${!page.hasPrevious}" class="disabled">上一页</span>
+                    <span th:text="|第 ${page.page} / ${page.totalPages} 页，共 ${page.total} 人|">第 1 / 1 页</span>
+                    <a th:if="${page.hasNext}"
+                       th:href="@{/users(keyword=${keyword}, status=${status}, page=${page.page + 1})}">下一页</a>
+                    <span th:if="${!page.hasNext}" class="disabled">下一页</span>
+                </div>
+            </div>
+
+            <!-- 空状态：区分"没有顾客"与"筛选没结果" -->
+            <div class="empty" th:if="${page.empty}">
+                <b th:text="${keyword != null and !keyword.isBlank()} ? '没有匹配的顾客' : '还没有顾客'">还没有顾客</b>
+                <p th:text="${keyword != null and !keyword.isBlank()} ? '换个用户名或清空筛选再试。' :
+                        '顾客在用户端注册后会出现在这里；本页不创建账号。'">说明</p>
+                <a class="btn" th:href="@{/users}">清空筛选</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

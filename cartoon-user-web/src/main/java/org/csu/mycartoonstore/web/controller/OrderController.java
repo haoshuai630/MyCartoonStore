@@ -3,9 +3,11 @@ package org.csu.mycartoonstore.web.controller; // 订单列表与详情：本人
 import jakarta.servlet.http.HttpSession; // 取当前用户。
 import org.csu.mycartoonstore.common.exception.BizException; // 未登录兜底 401。
 import org.csu.mycartoonstore.common.exception.ErrorCode; // 错误码。
+import org.csu.mycartoonstore.order.domain.CompleteResult; // 确认收货两种结局。
 import org.csu.mycartoonstore.order.domain.OrderStatus; // 状态标签。
 import org.csu.mycartoonstore.order.dto.OrderPage; // 列表一页。
 import org.csu.mycartoonstore.order.entity.SalesOrder; // 订单主表。
+import org.csu.mycartoonstore.order.service.OrderCompletionService; // 确认收货。
 import org.csu.mycartoonstore.order.service.OrderListService; // 列表查询。
 import org.csu.mycartoonstore.order.service.OrderQueryService; // 详情查询。
 import org.csu.mycartoonstore.order.service.OrderService; // 取消订单。
@@ -23,20 +25,22 @@ import java.util.LinkedHashMap; // 标签顺序固定。
 import java.util.List; // 页签列表。
 import java.util.Map; // 标签表。
 
-// M05-03 建立最小详情；M05-04 补列表（状态页签、完整单号、分页、空状态）。
-// 只做"看"：支付/取消/发货等写操作在 M05-05、M06、M07。
+// M05-03 建立最小详情；M05-04 补列表（状态页签、完整单号、分页、空状态）；M08-03 补确认收货。
+// 只做"看"与两种状态动作（取消、确认收货）：支付/发货在 M06 / M07。
 @Controller // 注册为控制器。
 public class OrderController {
 
     private final OrderQueryService orderQueryService; // 详情查询。
     private final OrderListService orderListService; // 列表查询。
     private final OrderService orderService; // 取消订单。
+    private final OrderCompletionService completionService; // 确认收货。
 
     public OrderController(OrderQueryService orderQueryService, OrderListService orderListService,
-                           OrderService orderService) { // 构造器注入。
+                           OrderService orderService, OrderCompletionService completionService) { // 构造器注入。
         this.orderQueryService = orderQueryService; // 保存详情服务。
         this.orderListService = orderListService; // 保存列表服务。
         this.orderService = orderService; // 保存取消服务。
+        this.completionService = completionService; // 保存确认收货服务。
     }
 
     /**
@@ -78,6 +82,18 @@ public class OrderController {
         boolean cancelled = orderService.cancel(userId, orderNo); // 已取消过会返回 false。
         redirect.addFlashAttribute("message",
                 cancelled ? "订单已取消，库存已恢复" : "订单已取消，无需重复操作"); // 两种提示。
+        return "redirect:/orders/" + orderNo; // 回详情，刷新不会重复提交。
+    }
+
+    /**
+     * 确认收货：仅本人已发货订单可完成；重复提交提示已处理，不改首次完成时间。
+     */
+    @PostMapping("/orders/{orderNo}/complete") // 写操作，POST。
+    public String complete(@PathVariable String orderNo, HttpSession session, RedirectAttributes redirect) {
+        long userId = currentUserId(session); // 当前用户。
+        CompleteResult result = completionService.complete(userId, orderNo); // 归属与状态都在服务层。
+        redirect.addFlashAttribute("message",
+                result == CompleteResult.COMPLETED ? "已确认收货，订单完成" : "订单已完成，无需重复操作"); // 两种提示。
         return "redirect:/orders/" + orderNo; // 回详情，刷新不会重复提交。
     }
 

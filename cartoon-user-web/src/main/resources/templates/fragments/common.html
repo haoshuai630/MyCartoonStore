@@ -21,6 +21,9 @@
             </span>
             <span th:unless="${session.userId == null}">
                 <b th:text="${session.displayName}">用户</b>
+                <span class="dot">/</span>
+                <!-- M08-01：资料入口放在身份区，不动顶部五栏导航 -->
+                <a th:href="@{/profile}">个人资料</a>
                 <form th:action="@{/logout}" method="post" class="logout-form">
                     <button type="submit" class="link-btn">退出</button>
                 </form>

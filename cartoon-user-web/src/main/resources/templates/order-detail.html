@@ -104,6 +104,14 @@
                         <button type="submit" class="btn btn-danger">取消订单</button>
                     </form>
                     <p class="hint" th:if="${order.status == 'PENDING_PAYMENT'}">取消后库存会恢复，购物车不会自动回填。</p>
+
+                    <!-- 已发货才能确认收货；确认后订单完成，时间线出现「完成」节点 -->
+                    <form th:if="${order.status == 'SHIPPED'}"
+                          th:action="@{/orders/{no}/complete(no=${order.orderNo})}" method="post" class="order-action"
+                          onsubmit="return confirm('确认已收到商品？确认后订单将标记为已完成。')">
+                        <button type="submit" class="btn btn-primary">确认收货</button>
+                    </form>
+                    <p class="hint" th:if="${order.status == 'SHIPPED'}">这是教学状态确认，不代表物流签收。</p>
                 </div>
             </div>
         </div>
