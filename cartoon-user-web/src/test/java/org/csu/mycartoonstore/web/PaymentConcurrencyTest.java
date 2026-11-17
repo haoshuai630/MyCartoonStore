@@ -21,7 +21,8 @@ import java.util.concurrent.Future; // 取结果。
 import java.util.concurrent.TimeUnit; // 超时。
 
 import static org.assertj.core.api.Assertions.assertThat; // 值断言。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 
 // M06-03：依据 docs/06 AC-24 与 docs/02 §8.1「支付与取消只锁订单行」。
 // 覆盖：支付与取消并发只有一种迁移成功；并发重复支付只有一次写入，凭证不重复生成。
@@ -134,7 +135,7 @@ class PaymentConcurrencyTest extends AbstractIntegrationTest {
 
     /** 模拟支付成功，返回状态码。 */
     private int pay(String orderNo, long userId) throws Exception {
-        MvcResult result = mockMvc.perform(post("/payment/{no}/success", orderNo)
+        MvcResult result = mockMvc.perform(post("/payment/{no}/success", orderNo).with(csrf())
                         .session(CartFixture.session(userId))) // 每次新会话，但同一用户。
                 .andReturn(); // 取响应。
         return result.getResponse().getStatus(); // 状态码。
@@ -142,7 +143,7 @@ class PaymentConcurrencyTest extends AbstractIntegrationTest {
 
     /** 取消订单，返回状态码。 */
     private int cancel(String orderNo, long userId) throws Exception {
-        MvcResult result = mockMvc.perform(post("/orders/{no}/cancel", orderNo)
+        MvcResult result = mockMvc.perform(post("/orders/{no}/cancel", orderNo).with(csrf())
                         .session(CartFixture.session(userId))) // 每次新会话，但同一用户。
                 .andReturn(); // 取响应。
         return result.getResponse().getStatus(); // 状态码。

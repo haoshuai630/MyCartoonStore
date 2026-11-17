@@ -14,7 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
 import static org.hamcrest.Matchers.not; // 反向断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 断言页面内容。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 断言 302 目标。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码断言。
@@ -89,7 +90,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
     void createProduct() throws Exception {
         long leaf = seedLeaf(); // 二级分类。
 
-        mockMvc.perform(post("/products") // 提交新增。
+        mockMvc.perform(post("/products").with(csrf()) // 提交新增。
                         .param("sku", "NEW-C01") // SKU。
                         .param("name", "新商品") // 名称。
                         .param("categoryId", String.valueOf(leaf)) // 二级分类。
@@ -114,7 +115,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
     void createBadSku() throws Exception {
         long leaf = seedLeaf(); // 二级分类。
 
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/products").with(csrf())
                         .param("sku", "lower-case") // 不合法。
                         .param("name", "新商品")
                         .param("categoryId", String.valueOf(leaf))
@@ -132,7 +133,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
     void createBadPrice() throws Exception {
         long leaf = seedLeaf(); // 二级分类。
 
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/products").with(csrf())
                         .param("sku", "P-1")
                         .param("name", "新商品")
                         .param("categoryId", String.valueOf(leaf))
@@ -148,7 +149,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
     void createTopCategory() throws Exception {
         long top = AdminFixture.createCategory(jdbc, "TOP", null, "作品", 1); // 一级。
 
-        mockMvc.perform(post("/products")
+        mockMvc.perform(post("/products").with(csrf())
                         .param("sku", "T-1")
                         .param("name", "新商品")
                         .param("categoryId", String.valueOf(top)) // 一级。
@@ -178,7 +179,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         long leaf = seedLeaf(); // 二级分类。
         long productId = AdminFixture.createProductIn(jdbc, "EDIT-2", leaf, "28.00", 4, "ON_SALE"); // 版本 0。
 
-        mockMvc.perform(post("/products/{id}", productId) // 提交编辑。
+        mockMvc.perform(post("/products/{id}", productId).with(csrf()) // 提交编辑。
                         .param("sku", "HACKED") // 服务端忽略。
                         .param("name", "新名字") // 新名称。
                         .param("categoryId", String.valueOf(leaf)) // 分类。
@@ -207,7 +208,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         long productId = AdminFixture.createProductIn(jdbc, "EDIT-3", leaf, "28.00", 4, "ON_SALE"); // 版本 0。
         jdbc.update("UPDATE product SET version = 3 WHERE id = ?", productId); // 别人已经改过两次。
 
-        mockMvc.perform(post("/products/{id}", productId)
+        mockMvc.perform(post("/products/{id}", productId).with(csrf())
                         .param("name", "旧页面改的名字")
                         .param("categoryId", String.valueOf(leaf))
                         .param("price", "99.00")
@@ -229,7 +230,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         long leaf = seedLeaf(); // 二级分类。
         long productId = AdminFixture.createProductIn(jdbc, "ST-1", leaf, "28.00", 4, "DRAFT"); // 下架商品，版本 0。
 
-        mockMvc.perform(post("/products/{id}/status", productId) // 点「上架」。
+        mockMvc.perform(post("/products/{id}/status", productId).with(csrf()) // 点「上架」。
                         .param("status", "ON_SALE") // 目标状态。
                         .param("version", "0") // 隐藏域带回的版本。
                         .session(adminSession()))
@@ -249,7 +250,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         long productId = AdminFixture.createProductIn(jdbc, "ST-2", leaf, "28.00", 4, "DRAFT"); // 下架商品。
         jdbc.update("UPDATE product SET version = 3 WHERE id = ?", productId); // 别人已经改过。
 
-        mockMvc.perform(post("/products/{id}/status", productId)
+        mockMvc.perform(post("/products/{id}/status", productId).with(csrf())
                         .param("status", "ON_SALE")
                         .param("version", "0") // 旧页面手里的版本。
                         .session(adminSession()))
@@ -265,7 +266,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         long leaf = seedLeaf(); // 二级分类。
         long productId = AdminFixture.createProductIn(jdbc, "RS-1", leaf, "28.00", 4, "ON_SALE"); // 库存 4。
 
-        mockMvc.perform(post("/products/{id}/restock", productId) // 补 3 件。
+        mockMvc.perform(post("/products/{id}/restock", productId).with(csrf()) // 补 3 件。
                         .param("quantity", "3")
                         .session(adminSession()))
                 .andExpect(status().is3xxRedirection()) // PRG。
@@ -282,7 +283,7 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         long leaf = seedLeaf(); // 二级分类。
         long productId = AdminFixture.createProductIn(jdbc, "RS-2", leaf, "28.00", 4, "ON_SALE"); // 库存 4。
 
-        mockMvc.perform(post("/products/{id}/restock", productId)
+        mockMvc.perform(post("/products/{id}/restock", productId).with(csrf())
                         .param("quantity", "0") // 不允许 0。
                         .session(adminSession()))
                 .andExpect(status().isBadRequest()); // 400 错误页。

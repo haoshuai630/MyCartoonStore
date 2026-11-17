@@ -17,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
 import static org.hamcrest.Matchers.not; // 反向断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 内容断言。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 断言重定向。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern; // 断言登录回跳。
@@ -119,7 +120,7 @@ class PaymentPageTest extends AbstractIntegrationTest {
         seedOrder(userId, "CO202611171500000005", "PENDING_PAYMENT", productId); // 待支付订单。
         MockHttpSession session = CartFixture.session(userId); // 同一个会话：一次性提示存在会话里。
 
-        mockMvc.perform(post("/payment/{no}/failure", "CO202611171500000005")
+        mockMvc.perform(post("/payment/{no}/failure", "CO202611171500000005").with(csrf())
                         .session(session)) // 点"模拟支付失败"。
                 .andExpect(status().is3xxRedirection()) // PRG。
                 .andExpect(redirectedUrl("/payment/CO202611171500000005")); // 回支付页。

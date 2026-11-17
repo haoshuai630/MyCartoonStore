@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -86,7 +87,7 @@ class AdminUserPageTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
         long aliceId = AdminFixture.createCustomer(jdbc, "alice");
 
-        mockMvc.perform(post("/users/" + aliceId + "/status").param("status", "DISABLED")
+        mockMvc.perform(post("/users/" + aliceId + "/status").with(csrf()).param("status", "DISABLED")
                         .session(AdminFixture.session(adminId)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/users"))
@@ -101,7 +102,7 @@ class AdminUserPageTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
         long aliceId = AdminFixture.createUser(jdbc, "alice", "CUSTOMER", "DISABLED");
 
-        mockMvc.perform(post("/users/" + aliceId + "/status").param("status", "DISABLED")
+        mockMvc.perform(post("/users/" + aliceId + "/status").with(csrf()).param("status", "DISABLED")
                         .session(AdminFixture.session(adminId)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("message", "该账号当前已是禁用状态"));
@@ -115,7 +116,7 @@ class AdminUserPageTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
         long bobId = AdminFixture.createUser(jdbc, "bob", "CUSTOMER", "DISABLED");
 
-        mockMvc.perform(post("/users/" + bobId + "/status").param("status", "ENABLED")
+        mockMvc.perform(post("/users/" + bobId + "/status").with(csrf()).param("status", "ENABLED")
                         .session(AdminFixture.session(adminId)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("message", "已启用该账号"));
@@ -128,7 +129,7 @@ class AdminUserPageTest extends AdminIntegrationTest {
     void cannotToggleAdmin() throws Exception {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
 
-        mockMvc.perform(post("/users/" + adminId + "/status").param("status", "DISABLED")
+        mockMvc.perform(post("/users/" + adminId + "/status").with(csrf()).param("status", "DISABLED")
                         .session(AdminFixture.session(adminId)))
                 .andExpect(status().isNotFound());
 
@@ -141,7 +142,7 @@ class AdminUserPageTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
         long aliceId = AdminFixture.createCustomer(jdbc, "alice");
 
-        mockMvc.perform(post("/users/" + aliceId + "/status").param("status", "BANNED")
+        mockMvc.perform(post("/users/" + aliceId + "/status").with(csrf()).param("status", "BANNED")
                         .session(AdminFixture.session(adminId)))
                 .andExpect(status().isBadRequest());
     }

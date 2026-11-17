@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M09-03 · 测试夹具与 AC-31 用例（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M09-03 · 测试夹具与 AC-31 用例（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">CsrfTestSupport.java</a><a href="#s2">CsrfProtectionTest.java</a><a href="#s3">CsrfProtectionTest.java</a><a href="#s4">XssEscapingTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：CsrfTestSupport（会话令牌 + 参数）、20 个测试文件 108 处 POST 补 .with(csrf())、两端 CsrfProtectionTest（9 + 6 例）、XssEscapingTest（3 例）、AdminLoginTest 的「顾客不能登录」改断言登录态。验证：mvn test → 438 用例，10 模块 SUCCESS，0 失败 0 跳过。108 处机械改动与既有测试文件的改动按规则说明，不逐行渲染。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>CsrfTestSupport.java<small>测试侧令牌后置处理器 · 28 行</small></h2>
+<p class="path">cartoon-test-support/src/main/java/org/csu/mycartoonstore/testsupport/CsrfTestSupport.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.testsupport;</pre></td><td class="explain">测试侧：给 MockMvc 的写请求补上 CSRF 令牌。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">令牌要写进请求上的会话。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfToken;</pre></td><td class="explain">会话键与参数名跟生产代码共用同一来源。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.request.RequestPostProcessor;</pre></td><td class="explain">MockMvc 的请求后置处理接口。</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">// M09-03：依据 docs/02 §6.3、docs/06 AC-31。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// 负责：让测试里的写请求同时带上会话令牌与表单参数，过滤器才判定通过。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 不做：绕过校验（令牌仍要与会话一致）、页面渲染断言（由各页面用例覆盖）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">public</span> <span class="kw">final</span> <span class="kw">class</span> CsrfTestSupport {</pre></td><td class="explain">CsrfTestSupport：见类注释</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline">    /** 固定令牌：测试不需要随机性，固定值让断言和失败信息都更好读。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String TOKEN = "test-csrf-token";</pre></td><td class="explain">只在本进程的测试会话里使用。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 工具类不实例化：全部是静态方法。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> CsrfTestSupport() {</pre></td><td class="explain">私有构造器。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 给请求补上会话令牌与 `_csrf` 参数：`.with(csrf())`。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> RequestPostProcessor csrf() {</pre></td><td class="explain">测试里一处调用即补全会话与参数。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        <span class="kw">return</span> request -&gt; {</pre></td><td class="explain">后置处理在 MockMvc 组装完路径、参数、会话之后执行。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            HttpSession session = request.getSession();</pre></td><td class="explain">复用 .session(...) 传入的会话，没有就建一个。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>            session.setAttribute(CsrfToken.SESSION_KEY, TOKEN);</pre></td><td class="explain">与生产代码同一个会话键。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>            request.addParameter(CsrfToken.PARAM_NAME, TOKEN);</pre></td><td class="explain">与模板隐藏域同一个参数名。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            <span class="kw">return</span> request;</pre></td><td class="explain">返回同一个请求，链式调用继续。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        };</pre></td><td class="explain">数组字面量结束：DROP_ORDER 到此定义完毕。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>CsrfProtectionTest.java<small>用户端 9 个页面级用例 · 161 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/CsrfProtectionTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">CSRF 页面级用例：页面带令牌、写请求无令牌被拒。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.RequestDispatcher;</pre></td><td class="explain">伪造错误分发里的状态码。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfToken;</pre></td><td class="explain">断言会话令牌与参数名。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">真实 MySQL + 每例重建表。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.CartFixture;</pre></td><td class="explain">造商品与购物车条目。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入依赖。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.http.MediaType;</pre></td><td class="explain">明确要 HTML，错误控制器才不会回 JSON。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">造数据、核对未写库。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">手工会话。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">造可登录的密码。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MvcResult;</pre></td><td class="explain">取响应与会话。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">页面内容断言。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">响应体断言。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">跳转断言。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">状态码断言。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// M09-03：依据 docs/02 §6.3、docs/04 §1、docs/06 AC-31。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// 覆盖：页面隐藏域、同一会话令牌稳定、无令牌/错令牌 403、带令牌原行为、退出也要令牌、游客写请求 403 而非 302。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// 不覆盖：过滤器内部的分支（M09-01 单测）、静态资源的会话行为（同上）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口，走真实 Spring MVC + 过滤器链。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre><span class="kw">class</span> CsrfProtectionTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造数据与核对未写库。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> PasswordEncoder passwordEncoder;</pre></td><td class="explain">造真实 BCrypt 密码。</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @Test</pre></td><td class="explain">登录页是第一个会用到令牌的页面。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @DisplayName("登录页渲染 CSRF 隐藏域，值与会话一致")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">void</span> loginPageCarriesToken() throws Exception {</pre></td><td class="explain">登录页：隐藏域与会话值一致。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        MvcResult result = mockMvc.perform(get("/login"))</pre></td><td class="explain">游客打开登录页。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">公开页。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                .andExpect(content().string(containsString("name=\"_csrf\"")))</pre></td><td class="explain">表单里有隐藏域。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">取回会话与响应体。</td></tr>
+<tr class="gap"><td class="line">48</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        Object token = result.getRequest().getSession(false).getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">过滤器签发的值。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        assertThat(token).isNotNull();</pre></td><td class="explain">读请求必须签发令牌。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        assertThat(result.getResponse().getContentAsString()).contains(token.toString());</pre></td><td class="explain">页面上的值就是会话里的值。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    @Test</pre></td><td class="explain">同一浏览器开两个页面：令牌不能变，否则前一个页面失效。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    @DisplayName("同一会话多次访问：令牌保持不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    <span class="kw">void</span> tokenStableAcrossPages() throws Exception {</pre></td><td class="explain">同一会话两个页面：令牌不变。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        MockHttpSession session = <span class="kw">new</span> MockHttpSession();</pre></td><td class="explain">同一个浏览器的会话。</td></tr>
+<tr class="gap"><td class="line">58</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        MvcResult first = mockMvc.perform(get("/login").session(session)).andReturn();</pre></td><td class="explain">第一个页面。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        Object token = session.getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">第一次签发的值。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        MvcResult second = mockMvc.perform(get("/register").session(session)).andReturn();</pre></td><td class="explain">第二个页面。</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(token).isNotNull();</pre></td><td class="explain">第一次就有值。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThat(second.getRequest().getSession(false).getAttribute(CsrfToken.SESSION_KEY)).isEqualTo(token);</pre></td><td class="explain">没被覆盖。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        assertThat(first.getResponse().getContentAsString()).contains(token.toString());</pre></td><td class="explain">第一个页面也带的是它。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">67</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    @Test</pre></td><td class="explain">外部站点伪造的表单不会带令牌。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    @DisplayName("无令牌的登录 POST：403，且不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    <span class="kw">void</span> postWithoutTokenIsForbidden() throws Exception {</pre></td><td class="explain">无令牌 POST：403。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        seedUser("csrf_none", "Cartoon123!");</pre></td><td class="explain">账号存在，确认拒绝发生在业务之前。</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        mockMvc.perform(post("/login")</pre></td><td class="explain">没有会话、没有令牌。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                        .param("username", "csrf_none")</pre></td><td class="explain">表单参数 username="csrf_none"</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                        .param("password", "Cartoon123!"))</pre></td><td class="explain">表单参数 password="Cartoon123!"</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                .andExpect(status().isForbidden());</pre></td><td class="explain">403，而不是 302 或 200。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    @Test</pre></td><td class="explain">猜一个值、或者拿别的会话的值来试。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    @DisplayName("错令牌的登录 POST：403")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">void</span> postWithWrongTokenIsForbidden() throws Exception {</pre></td><td class="explain">错令牌：403。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        seedUser("csrf_wrong", "Cartoon123!");</pre></td><td class="explain">账号存在。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        MockHttpSession session = <span class="kw">new</span> MockHttpSession();</pre></td><td class="explain">先拿到合法令牌的会话。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        mockMvc.perform(get("/login").session(session)).andReturn();</pre></td><td class="explain">滤镜签发令牌。</td></tr>
+<tr class="gap"><td class="line">85</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        mockMvc.perform(post("/login")</pre></td><td class="explain">带着会话，但参数是伪造的。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                        .with(request -&gt; {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                            request.addParameter(CsrfToken.PARAM_NAME, "forged-token");</pre></td><td class="explain">故意写错。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                            <span class="kw">return</span> request;</pre></td><td class="explain">不加 .with(csrf())，避免被覆盖。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                        })</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                        .session(session)</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                        .param("username", "csrf_wrong")</pre></td><td class="explain">表单参数 username="csrf_wrong"</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                        .param("password", "Cartoon123!"))</pre></td><td class="explain">表单参数 password="Cartoon123!"</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                .andExpect(status().isForbidden());</pre></td><td class="explain">拒。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">96</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    @Test</pre></td><td class="explain">正常路径：令牌正确时行为与 M03 验收时一致。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>    @DisplayName("带令牌的登录 POST：照旧 302 /main")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>    <span class="kw">void</span> postWithTokenPasses() throws Exception {</pre></td><td class="explain">正确令牌：登录照旧 302。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        seedUser("csrf_ok", "Cartoon123!");</pre></td><td class="explain">启用的顾客。</td></tr>
+<tr class="gap"><td class="line">101</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        mockMvc.perform(post("/login")</pre></td><td class="explain">正常表单。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                        .with(org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf())</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                        .param("username", "csrf_ok")</pre></td><td class="explain">表单参数 username="csrf_ok"</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                        .param("password", "Cartoon123!"))</pre></td><td class="explain">表单参数 password="Cartoon123!"</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">登录成功。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>                .andExpect(redirectedUrl("/main"));</pre></td><td class="explain">默认回首页。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">109</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    @Test</pre></td><td class="explain">退出也是一次写操作，不能让跨站链接把用户登出。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    @DisplayName("无令牌的退出 POST：403，会话仍有效")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>    <span class="kw">void</span> logoutWithoutTokenIsForbidden() throws Exception {</pre></td><td class="explain">退出也要令牌：跨站不能把人登出。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        MockHttpSession session = CartFixture.session(1L);</pre></td><td class="explain">已登录会话。</td></tr>
+<tr class="gap"><td class="line">114</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        mockMvc.perform(post("/logout").session(session))</pre></td><td class="explain">没有令牌。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>                .andExpect(status().isForbidden());</pre></td><td class="explain">拒。</td></tr>
+<tr class="gap"><td class="line">117</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        assertThat(session.getAttribute("userId")).isEqualTo(1L);</pre></td><td class="explain">会话没被销毁。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">120</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>    @Test</pre></td><td class="explain">未登录 + 无令牌：先 403，不是 302 登录页（docs/04 §1 口径）。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    @DisplayName("游客无令牌写受保护路径：403 而非 302")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    <span class="kw">void</span> guestPostIsForbiddenNotRedirect() throws Exception {</pre></td><td class="explain">游客无令牌：403 而非 302。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>        mockMvc.perform(post("/cart/items")</pre></td><td class="explain">游客直接提交加车。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>                        .param("productId", "1")</pre></td><td class="explain">表单参数 productId="1"</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>                        .param("quantity", "1"))</pre></td><td class="explain">表单参数 quantity="1"</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>                .andExpect(status().isForbidden());</pre></td><td class="explain">来源不可信，先拒；302 才算失败。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">129</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    @Test</pre></td><td class="explain">MockMvc 不做容器错误分发，这里直接让错误控制器渲染 403 视图。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    @DisplayName("403 页面：提示刷新后重试")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>    <span class="kw">void</span> forbiddenPageRenders() throws Exception {</pre></td><td class="explain">403 页面文案：错误控制器 + HTML 协商。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        mockMvc.perform(get("/error")</pre></td><td class="explain">Spring Boot 的错误控制器。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>                        .accept(MediaType.TEXT_HTML)</pre></td><td class="explain">浏览器要的是页面而不是 JSON。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 403))</pre></td><td class="explain">伪造错误分发里的状态码。</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>                .andExpect(content().string(containsString("请求未被接受")))</pre></td><td class="explain">页面标题。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>                .andExpect(content().string(containsString("刷新后重试")));</pre></td><td class="explain">引导语。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">139</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>    @Test</pre></td><td class="explain">每个带写表单的页面都要有隐藏域：这里抽两个高频页。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>    @DisplayName("商品页与购物车页的写表单都带隐藏域")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>    <span class="kw">void</span> formPagesCarryToken() throws Exception {</pre></td><td class="explain">商品页与购物车页的写表单都带令牌。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "csrf_forms");</pre></td><td class="explain">需要一个已登录用户看购物车。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "CSRF-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">上架商品。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, productId, 1);</pre></td><td class="explain">车里放一件，购物车页才渲染改量表单。</td></tr>
+<tr class="gap"><td class="line">146</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>        mockMvc.perform(get("/product/" + productId))</pre></td><td class="explain">详情页的「加入购物车」表单。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>                .andExpect(content().string(containsString("name=\"_csrf\"")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr class="gap"><td class="line">150</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        mockMvc.perform(get("/cart").session(CartFixture.session(userId)))</pre></td><td class="explain">购物车页的改量与移除表单。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>                .andExpect(content().string(containsString("name=\"_csrf\"")));</pre></td><td class="explain">断言响应内容</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">155</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre class="cmtline">    /** 造一个可用密码的启用顾客：登录用例要用真实散列。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seedUser(String username, String rawPassword) {</pre></td><td class="explain">造一个可用密码的启用顾客：登录用例要用真实散列。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) VALUES (?,?,?,?,?)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>                username, passwordEncoder.encode(rawPassword), "测试用户", "CUSTOMER", "ENABLED");</pre></td><td class="explain">与生产一致的角色与状态。</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>CsrfProtectionTest.java<small>管理端 6 个页面级用例 · 115 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/CsrfProtectionTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin;</pre></td><td class="explain">管理端 CSRF 页面级用例：后台写表单同样要令牌。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.RequestDispatcher;</pre></td><td class="explain">伪造错误分发里的状态码。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminFixture;</pre></td><td class="explain">造管理员与商品。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminIntegrationTest;</pre></td><td class="explain">真实 MySQL + 每例重建表。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfToken;</pre></td><td class="explain">断言会话令牌。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.testsupport.CsrfTestSupport;</pre></td><td class="explain">给正常路径补令牌。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入依赖。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.http.MediaType;</pre></td><td class="explain">明确要 HTML，错误控制器才不会回 JSON。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">核对未写库。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">手工会话。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MvcResult;</pre></td><td class="explain">取响应与会话。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">页面内容断言。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">响应体断言。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">跳转断言。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">状态码断言。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// M09-03：依据 docs/02 §6.3、docs/04 §1/§3、docs/06 AC-31。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// 覆盖：后台登录页与列表页的隐藏域、无令牌 403、带令牌正常新增、退出也要令牌。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// 不覆盖：分类/商品等业务规则（M07 已验收），这里只验"来源校验是否生效"。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre><span class="kw">class</span> CsrfProtectionTest <span class="kw">extends</span> AdminIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">核对未写库。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @Test</pre></td><td class="explain">后台登录页也要发令牌。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @DisplayName("后台登录页渲染隐藏域，值与会话一致")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">void</span> loginPageCarriesToken() throws Exception {</pre></td><td class="explain">后台登录页：隐藏域与会话值一致。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        MvcResult result = mockMvc.perform(get("/login"))</pre></td><td class="explain">游客打开后台登录页。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">公开页。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(content().string(containsString("name=\"_csrf\"")))</pre></td><td class="explain">表单里有隐藏域。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">取回会话与响应体。</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        Object token = result.getRequest().getSession(false).getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">过滤器签发的值。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        assertThat(token).isNotNull();</pre></td><td class="explain">读请求必须签发。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        assertThat(result.getResponse().getContentAsString()).contains(token.toString());</pre></td><td class="explain">页面值与会话值一致。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">50</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    @Test</pre></td><td class="explain">跨站伪造的"新增分类"不应生效。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @DisplayName("无令牌新增分类：403，且不写库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">void</span> createCategoryWithoutTokenIsForbidden() throws Exception {</pre></td><td class="explain">无令牌新增分类：403 且不写库。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "csrf_admin");</pre></td><td class="explain">已登录管理员。</td></tr>
+<tr class="gap"><td class="line">55</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        mockMvc.perform(post("/categories")</pre></td><td class="explain">没有令牌。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                        .session(AdminFixture.session(adminId))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                        .param("code", "CSRFWORK")</pre></td><td class="explain">表单参数 code="CSRFWORK"</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                        .param("name", "伪造分类"))</pre></td><td class="explain">表单参数 name="伪造分类"</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                .andExpect(status().isForbidden());</pre></td><td class="explain">拒；MockMvc 不做容器错误分发，页面文案见下一个用例。</td></tr>
+<tr class="gap"><td class="line">61</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM category WHERE code = 'CSRFWORK'", Integer.<span class="kw">class</span>);</pre></td><td class="explain">是否写库。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(count).isZero();</pre></td><td class="explain">一条都不该有。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @Test</pre></td><td class="explain">MockMvc 不做容器错误分发，这里直接让错误控制器渲染 403 视图。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    @DisplayName("后台 403 页面：提示刷新后重试")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    <span class="kw">void</span> forbiddenPageRenders() throws Exception {</pre></td><td class="explain">后台 403 页面文案。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        mockMvc.perform(get("/error")</pre></td><td class="explain">Spring Boot 的错误控制器。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                        .accept(MediaType.TEXT_HTML)</pre></td><td class="explain">浏览器要的是页面而不是 JSON。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                        .requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 403))</pre></td><td class="explain">伪造错误分发里的状态码。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                .andExpect(content().string(containsString("操作被拒绝")))</pre></td><td class="explain">页面标题。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                .andExpect(content().string(containsString("刷新后重试")));</pre></td><td class="explain">引导语。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">75</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    @Test</pre></td><td class="explain">正常路径：带令牌的新增照旧成功。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @DisplayName("带令牌新增分类：照旧 302 回列表并落库")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    <span class="kw">void</span> createCategoryWithTokenPasses() throws Exception {</pre></td><td class="explain">正确令牌：新增照旧落库。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "csrf_admin_ok");</pre></td><td class="explain">已登录管理员。</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        mockMvc.perform(post("/categories")</pre></td><td class="explain">正常表单。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                        .with(CsrfTestSupport.csrf())</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        .session(AdminFixture.session(adminId))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                        .param("code", "OKWORK")</pre></td><td class="explain">表单参数 code="OKWORK"</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                        .param("name", "正常分类")</pre></td><td class="explain">表单参数 name="正常分类"</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                        .param("sortOrder", "1"))</pre></td><td class="explain">表单参数 sortOrder="1"</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">PRG。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>                .andExpect(redirectedUrl("/categories"));</pre></td><td class="explain">回列表。</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM category WHERE code = 'OKWORK'", Integer.<span class="kw">class</span>);</pre></td><td class="explain">是否写库。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        assertThat(count).isEqualTo(1);</pre></td><td class="explain">正好一条。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">93</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    @Test</pre></td><td class="explain">列表页的删除/启停表单也要带令牌。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    @DisplayName("分类列表页的删除表单带隐藏域")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    <span class="kw">void</span> listPageCarriesToken() throws Exception {</pre></td><td class="explain">列表页删除表单带令牌。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "csrf_admin_list");</pre></td><td class="explain">已登录管理员。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        AdminFixture.createCategory(jdbc, "LISTWORK", null, "作品", 1);</pre></td><td class="explain">一条一级分类，列表才渲染删除表单。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        mockMvc.perform(get("/categories").session(AdminFixture.session(adminId)))</pre></td><td class="explain">打开列表。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                .andExpect(content().string(containsString("name=\"_csrf\"")));</pre></td><td class="explain">删除表单里有隐藏域。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    @Test</pre></td><td class="explain">退出同样是一次写操作。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    @DisplayName("无令牌的退出 POST：403，会话仍有效")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>    <span class="kw">void</span> logoutWithoutTokenIsForbidden() throws Exception {</pre></td><td class="explain">后台退出也要令牌。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        MockHttpSession session = AdminFixture.session(1L);</pre></td><td class="explain">已登录会话。</td></tr>
+<tr class="gap"><td class="line">109</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        mockMvc.perform(post("/logout").session(session))</pre></td><td class="explain">没有令牌。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>                .andExpect(status().isForbidden());</pre></td><td class="explain">拒。</td></tr>
+<tr class="gap"><td class="line">112</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        assertThat(session.getAttribute("userId")).isEqualTo(1L);</pre></td><td class="explain">会话没被销毁。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>XssEscapingTest.java<small>3 个转义用例 · 69 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/XssEscapingTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">XSS 转义用例：库里的脚本不能原样出现在页面上。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">真实 MySQL + 每例重建表。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.CartFixture;</pre></td><td class="explain">造商品。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入依赖。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">直接写库造"恶意内容"。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">正向断言。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.not;</pre></td><td class="explain">反向断言。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">响应体断言。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">状态码断言。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">// M09-03：依据 docs/06 AC-31「商品名/简介输入脚本 → 文本转义」。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">// 覆盖：详情页与列表页对商品名、简介、描述的输出转义；搜索关键字回显转义。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">// 不覆盖：后台表单回显（同样是 th:text，由页面用例覆盖）；富文本（本项目没有）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">class</span> XssEscapingTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /** 恶意片段：只要页面上出现未转义的它，用例就红。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String SCRIPT = "&lt;script&gt;alert(1)&lt;/script&gt;";</pre></td><td class="explain">最典型的脚本注入载荷。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 转义后的样子：浏览器会当成文字显示。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String ESCAPED = "&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;";</pre></td><td class="explain">Thymeleaf th:text 的输出。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造数据。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @Test</pre></td><td class="explain">详情页把商品名、简介、描述都当文本输出。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @DisplayName("详情页：商品名与简介里的脚本被转义")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">void</span> productPageEscapesScript() throws Exception {</pre></td><td class="explain">详情页：名称与简介被转义。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "XSS-C01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">上架商品。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        jdbc.update("UPDATE product SET name = ?, summary = ?, description = ? WHERE id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                "名称" + SCRIPT, "简介" + SCRIPT, "描述" + SCRIPT, productId);</pre></td><td class="explain">模拟后台录入恶意内容。</td></tr>
+<tr class="gap"><td class="line">42</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        mockMvc.perform(get("/product/" + productId))</pre></td><td class="explain">游客看详情。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">页面正常渲染。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                .andExpect(content().string(containsString(ESCAPED)))</pre></td><td class="explain">输出的是转义文本。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                .andExpect(content().string(not(containsString(SCRIPT))));</pre></td><td class="explain">没有原样脚本。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">48</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @Test</pre></td><td class="explain">列表页同样输出名称与简介。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    @DisplayName("列表页：商品名里的脚本被转义")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    <span class="kw">void</span> categoryPageEscapesScript() throws Exception {</pre></td><td class="explain">列表页：名称被转义。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "XSS-C02", "28.00", 10, "ON_SALE");</pre></td><td class="explain">上架商品，列表可见。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        jdbc.update("UPDATE product SET name = ? WHERE id = ?", "名称" + SCRIPT, productId);</pre></td><td class="explain">只改名。</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        mockMvc.perform(get("/category").param("keyword", "名称"))</pre></td><td class="explain">关键字命中这一条。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                .andExpect(content().string(containsString(ESCAPED)))</pre></td><td class="explain">商品名被转义。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                .andExpect(content().string(not(containsString(SCRIPT))));</pre></td><td class="explain">没有原样脚本。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    @Test</pre></td><td class="explain">搜索框回显关键字：不能把用户输入当 HTML。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    @DisplayName("列表页：搜索关键字回显被转义")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    <span class="kw">void</span> keywordEchoEscapesScript() throws Exception {</pre></td><td class="explain">关键字回显：输入框里不能出现可执行标签。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        mockMvc.perform(get("/category").param("keyword", SCRIPT))</pre></td><td class="explain">直接拿脚本当关键字。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">断言 HTTP 状态码</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .andExpect(content().string(not(containsString(SCRIPT))))</pre></td><td class="explain">输入框里不能有可执行标签。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andExpect(content().string(containsString("&amp;lt;script&amp;gt;")));</pre></td><td class="explain">至少以转义形式出现。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-18 · M09-03 · 测试夹具与 AC-31 用例 · 4 个文件、373 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

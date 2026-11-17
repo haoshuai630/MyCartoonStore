@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,7 +48,7 @@ class LoginPageTest extends AbstractIntegrationTest {
         seedUser("alice", "Cartoon123!", "ENABLED");
         MockHttpSession session = new MockHttpSession();
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .session(session))
@@ -63,7 +64,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginWrongPassword() throws Exception {
         seedUser("alice", "Cartoon123!", "ENABLED");
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "alice")
                         .param("password", "bad-pass"))
                 .andExpect(status().isOk())
@@ -75,7 +76,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginDisabled() throws Exception {
         seedUser("carol", "Cartoon123!", "DISABLED");
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "carol")
                         .param("password", "Cartoon123!"))
                 .andExpect(status().isOk())
@@ -88,7 +89,7 @@ class LoginPageTest extends AbstractIntegrationTest {
         seedUser("admin", "Cartoon123!", "ENABLED", "ADMIN");
         MockHttpSession session = new MockHttpSession();
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "admin")
                         .param("password", "Cartoon123!")
                         .session(session))
@@ -103,7 +104,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginHonoursRedirect() throws Exception {
         seedUser("alice", "Cartoon123!", "ENABLED");
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .param("redirect", "/cart"))
@@ -116,7 +117,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginRejectsExternalRedirect() throws Exception {
         seedUser("alice", "Cartoon123!", "ENABLED");
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .param("redirect", "//evil.example.com"))
@@ -130,7 +131,7 @@ class LoginPageTest extends AbstractIntegrationTest {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("userId", 1L);
 
-        mockMvc.perform(post("/logout").session(session))
+        mockMvc.perform(post("/logout").with(csrf()).session(session))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/main"));
 

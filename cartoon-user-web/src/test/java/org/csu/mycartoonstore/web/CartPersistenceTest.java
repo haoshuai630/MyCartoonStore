@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,14 +46,14 @@ class CartPersistenceTest extends AbstractIntegrationTest {
         MockHttpSession first = CartFixture.session(userId);
 
         // 浏览器 A：加 2 件
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(productId))
                         .param("quantity", "2")
                         .session(first))
                 .andExpect(redirectedUrl("/cart"));
 
         // 退出：只销毁会话，不执行任何购物车 SQL
-        mockMvc.perform(post("/logout").session(first))
+        mockMvc.perform(post("/logout").with(csrf()).session(first))
                 .andExpect(redirectedUrl("/main"));
 
         // 新会话 = 重新登录 / 换浏览器：会话里仍是同一个 user_id
@@ -88,12 +89,12 @@ class CartPersistenceTest extends AbstractIntegrationTest {
                 .andExpect(content().string(not(containsString("商品AC09-C02"))));
 
         // 写：改数量与移除都被拒绝；统一 404，连"条目存在"都不告诉对方
-        mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
+        mockMvc.perform(post("/cart/items/{id}/quantity", itemId).with(csrf())
                         .param("quantity", "5")
                         .param("version", "0")
                         .session(intruderSession))
                 .andExpect(status().isNotFound());
-        mockMvc.perform(post("/cart/items/{id}/remove", itemId)
+        mockMvc.perform(post("/cart/items/{id}/remove", itemId).with(csrf())
                         .param("version", "0")
                         .session(intruderSession))
                 .andExpect(status().isNotFound());

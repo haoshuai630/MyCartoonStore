@@ -15,7 +15,8 @@ import org.springframework.test.web.servlet.MvcResult; // 取登录后的会话�
 import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 断言页面内容。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 断言 302 目标。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码断言。
@@ -59,7 +60,7 @@ class AdminLoginTest extends AdminIntegrationTest {
     @DisplayName("管理员登录成功：302 控制台，会话写入 id 与显示名")
     void loginSucceeds() throws Exception {
         long adminId = seed("ad_ok", "Cartoon123!", "ADMIN", "ENABLED"); // 密码可用的启用管理员。
-        MvcResult result = mockMvc.perform(post("/login") // 提交登录表单。
+        MvcResult result = mockMvc.perform(post("/login").with(csrf()) // 提交登录表单。
                         .param("username", "ad_ok") // 用户名。
                         .param("password", "Cartoon123!")) // 正确密码。
                 .andExpect(status().is3xxRedirection()) // POST/Redirect/GET。
@@ -73,18 +74,20 @@ class AdminLoginTest extends AdminIntegrationTest {
     }
 
     @Test // 顾客不能进后台（AC-05）。
-    @DisplayName("顾客登录管理端：统一文案，不写会话（AC-05）")
+    @DisplayName("顾客登录管理端：统一文案，不写登录态（AC-05）")
     void customerCannotLogIn() throws Exception {
         seed("ad_cust", "Cartoon123!", "CUSTOMER", "ENABLED"); // 启用的普通顾客。
 
-        MvcResult result = mockMvc.perform(post("/login") // 顾客尝试登录后台。
+        MvcResult result = mockMvc.perform(post("/login").with(csrf()) // 顾客尝试登录后台。
                         .param("username", "ad_cust") // 用顾客账号登录后台。
                         .param("password", "Cartoon123!")) // 密码是对的，只差角色。
                 .andExpect(status().isOk()) // 停在登录页，不是 302。
                 .andExpect(content().string(containsString("账号或密码错误，或账号不可用"))) // 不透露"角色不符"。
                 .andReturn();
 
-        assertThat(result.getRequest().getSession(false)).isNull(); // 失败不建会话，避免留下半登录态。
+        // M09-02 起 CSRF 令牌需要一个会话，所以这里只断言"没有写入登录态"。
+        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false); // 可能为 null，也可能只有令牌。
+        assertThat(session == null || session.getAttribute("userId") == null).isTrue(); // 不留下半登录态。
     }
 
     @Test // 停用管理员不能登录。
@@ -92,7 +95,7 @@ class AdminLoginTest extends AdminIntegrationTest {
     void disabledAdminCannotLogIn() throws Exception {
         seed("ad_off", "Cartoon123!", "ADMIN", "DISABLED"); // 账号被停用。
 
-        mockMvc.perform(post("/login") // 停用账号尝试登录。
+        mockMvc.perform(post("/login").with(csrf()) // 停用账号尝试登录。
                         .param("username", "ad_off") // 停用的管理员账号。
                         .param("password", "Cartoon123!")) // 密码是对的，只差状态。
                 .andExpect(status().isOk()) // 停在登录页。
@@ -104,7 +107,7 @@ class AdminLoginTest extends AdminIntegrationTest {
     void wrongPassword() throws Exception {
         seed("ad_pwd", "Cartoon123!", "ADMIN", "ENABLED"); // 启用的管理员，密码故意输错。
 
-        mockMvc.perform(post("/login")
+        mockMvc.perform(post("/login").with(csrf())
                         .param("username", "ad_pwd") // 存在的管理员。
                         .param("password", "bad-pass")) // 故意输错密码。
                 .andExpect(status().isOk()) // 停在登录页。
@@ -164,7 +167,7 @@ class AdminLoginTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "ad_out"); // 启用的管理员。
         MockHttpSession session = AdminFixture.session(adminId); // 登录态。
 
-        mockMvc.perform(post("/logout").session(session)) // 提交退出。
+        mockMvc.perform(post("/logout").with(csrf()).session(session)) // 提交退出。
                 .andExpect(status().is3xxRedirection()) // 302。
                 .andExpect(redirectedUrl("/login")); // 回登录页。
 

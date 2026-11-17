@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,7 +41,7 @@ class RegisterPageTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("注册成功：跳登录页，库里是 BCrypt 散列")
     void registerSucceeds() throws Exception {
-        mockMvc.perform(post("/register")
+        mockMvc.perform(post("/register").with(csrf())
                         .param("username", "newbie")
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123")
@@ -60,7 +61,7 @@ class RegisterPageTest extends AbstractIntegrationTest {
         jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "
                 + "VALUES ('alice', '$2a$10$0123456789012345678901234567890123456789012345678901', '爱丽丝', 'CUSTOMER', 'ENABLED')");
 
-        mockMvc.perform(post("/register")
+        mockMvc.perform(post("/register").with(csrf())
                         .param("username", "alice")
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123"))
@@ -71,7 +72,7 @@ class RegisterPageTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("两次密码不一致：不写入数据库")
     void registerPasswordMismatch() throws Exception {
-        mockMvc.perform(post("/register")
+        mockMvc.perform(post("/register").with(csrf())
                         .param("username", "mismatch")
                         .param("password", "Password123")
                         .param("confirmPassword", "Password456"))
