@@ -182,6 +182,19 @@ public class CategoryAdminService {
                 .orderByAsc(Category::getId));
     }
 
+    /**
+     * 取一个一级分类：新增二级或页面展示父名时用。
+     *
+     * <p>不是一级（或不存在）返回 null，由调用方决定 404 还是当作"没有父级"。</p>
+     */
+    public Category topCategory(Long id) {
+        if (id == null) {
+            return null; // 一级分类没有父级。
+        }
+        Category category = categoryMapper.selectById(id); // 主键查询。
+        return category != null && category.getParentId() == null ? category : null; // 只认一级。
+    }
+
     // ---------------------------------------------------------------- 校验
 
     /** 取分类或 404：编辑与删除前的统一入口。 */

@@ -167,3 +167,22 @@ h1, h2, h3 { margin: 0; font-weight: 900; letter-spacing: .02em; }
     .form-grid { grid-template-columns: 1fr; }
     .console-head h1 { font-size: 30px; }
 }
+
+/* ---------- 分类维护（M07-04 起复用） ---------- */
+.head-actions { display: flex; gap: 10px; align-items: center; }
+.crumb { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+.crumb a:hover { color: var(--red); }
+.crumb b { color: var(--ink); }
+.level-tag { display: inline-block; border: 2px solid var(--ink); padding: 1px 8px; font-size: 11px; font-weight: 900; }
+.level-tag.top { background: var(--yellow); }
+.level-tag.child { background: #fff; }
+.child-row td:first-child { padding-left: 26px; }
+.child-row td:nth-child(2) b { font-weight: 700; color: #4a4237; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.row-actions form { margin: 0; }
+.row-actions .link-btn { font-size: 12px; font-weight: 800; }
+.link-btn.danger { color: var(--red); }
+.link-btn[disabled] { color: #b8ad99; cursor: not-allowed; text-decoration: none; }
+.hint-inline { color: var(--muted); font-size: 11px; }
+.empty { border: 3px dashed var(--ink); background: #fff; padding: 40px; text-align: center; margin-top: 24px; }
+.empty p { color: var(--muted); font-size: 13px; margin: 8px 0 18px; }

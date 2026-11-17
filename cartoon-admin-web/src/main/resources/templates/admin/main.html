@@ -27,12 +27,12 @@
 
             <!-- 三个业务入口：接入前显示为"待接入"，不放到点了会 404 的链接 -->
             <div class="entry-grid">
-                <div class="entry-card pending">
+                <a class="entry-card" th:href="@{/categories}">
                     <span class="kicker">CATEGORIES</span>
                     <h2>分类维护</h2>
                     <p>两级分类：作品（一级）与单行本 / 周边（二级），含引用校验与删除保护。</p>
-                    <span class="badge">待接入（M07-04）</span>
-                </div>
+                    <span class="badge">进入</span>
+                </a>
                 <div class="entry-card pending">
                     <span class="kicker">PRODUCTS</span>
                     <h2>商品维护</h2>

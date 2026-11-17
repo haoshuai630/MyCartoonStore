@@ -49,6 +49,13 @@ public final class AdminFixture {
         return stock == null ? 0 : stock; // 空值按 0，断言时不必再判空。
     }
 
+    /** 建一个分类：parentId 为空即一级；返回 id */
+    public static long createCategory(JdbcTemplate jdbc, String code, Long parentId, String name, int sortOrder) {
+        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,?)",
+                code, parentId, name, sortOrder); // parent_key 是生成列，不用写。
+        return jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.class, code); // 用例要用 id。
+    }
+
     /** 建"作品 + 单行本 + 商品"，返回商品 id；sku 同时用作分类 code 前缀保证唯一 */
     public static long createProduct(JdbcTemplate jdbc, String sku, String price, int stock, String status) {
         String workCode = sku.replaceAll("[^A-Za-z0-9]", "").toUpperCase(); // 分类编码只允许大写。
