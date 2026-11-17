@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M06-01 · 支付服务与凭证（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M06-01 · 支付服务与凭证（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">PaymentService.java</a><a href="#s2">PaymentNoGenerator.java</a><a href="#s3">PaymentResult.java</a><a href="#s4">PaymentServiceTest.java</a><a href="#s5">PaymentNoGeneratorTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：模拟支付成功/失败两个入口、订单行锁与归属 404、已支付幂等、已取消/已发货 409、PAY + 时间戳 + 4 位随机的凭证生成与查重重试。验证：mvn -pl cartoon-payment -am test → Tests run: 13, Failures: 0, Errors: 0。支付页、路由与入口在 M06-02；库存不变的断言由 M06-03 的集成用例从真实入口验证。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>PaymentService.java<small>支付成功/失败的状态迁移与幂等 · 100 行</small></h2>
+<p class="path">cartoon-payment/src/main/java/org/csu/mycartoonstore/payment/service/PaymentService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.payment.service;</pre></td><td class="explain">模拟支付：把待支付订单迁到 PAID 并写入凭证，失败只提示不写库。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">越权 404、状态冲突 409。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单主表：状态与支付三件套都在这里。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">锁订单行、写回支付信息。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.payment.domain.PaymentResult;</pre></td><td class="explain">三种结局：成功、已支付、失败。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">业务服务，Controller 只调它。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.transaction.annotation.Transactional;</pre></td><td class="explain">状态迁移与凭证写入同一事务。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">支付时间来源，测试可固定。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">paid_at 的类型。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">// M06-01：依据 docs/01 FR-P-01、docs/02 §7.4、docs/06 AC-20 与 AC-24。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">// 只负责"把一笔待支付订单标记为已支付（或明确失败）"：锁订单行、校验归属与状态、写三件套。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// 不扣库存、不删购物车、不改明细：库存在下单时已经扣过，再扣一次就是事故。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 不做页面与跳转（M06-02 的 Controller 负责）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>@Service</pre></td><td class="explain">业务服务：Controller 只调它，不直接碰 Mapper。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> PaymentService {</pre></td><td class="explain">支付成功/失败的状态迁移与幂等；不碰库存、明细与购物车。</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 唯一可被支付的起点：只有待支付能变成已支付。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String PENDING_PAYMENT = "PENDING_PAYMENT";</pre></td><td class="explain">唯一可被支付的起点：只有待支付能变成已支付。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">    /** 已支付：重复支付走幂等分支，保留首次凭证与时间。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String PAID = "PAID";</pre></td><td class="explain">已支付：重复支付走幂等分支，保留首次凭证与时间。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">    /** 已取消：明确不可支付。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String CANCELLED = "CANCELLED";</pre></td><td class="explain">已取消：明确不可支付。</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">    /** 支付方式：教学模拟，固定值，数据库 CHECK 也只接受这个值。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String MOCK = "MOCK";</pre></td><td class="explain">支付方式：教学模拟，固定值，数据库 CHECK 也只接受这个值。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">锁订单行与写回支付三件套。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> PaymentNoGenerator paymentNoGenerator;</pre></td><td class="explain">生成唯一凭证号。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Clock clock;</pre></td><td class="explain">paid_at 的时间来源。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">public</span> PaymentService(SalesOrderMapper orderMapper,</pre></td><td class="explain">构造器注入：订单 Mapper、凭证生成器、时钟。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                          PaymentNoGenerator paymentNoGenerator,</pre></td><td class="explain">参数续行：凭证号生成器。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                          Clock clock) {</pre></td><td class="explain">参数续行：时钟，测试可固定。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>        this.orderMapper = orderMapper;</pre></td><td class="explain">保存订单 Mapper。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        this.paymentNoGenerator = paymentNoGenerator;</pre></td><td class="explain">保存凭证生成器。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        this.clock = clock;</pre></td><td class="explain">保存时钟。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre class="cmtline">     * 模拟支付成功：待支付 → PAID，写入 MOCK、凭证号与首次支付时间。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">     * &lt;p&gt;先锁订单行再判状态：并发支付同一单时，第二个事务看到 PAID 走幂等分支，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre class="cmtline">     * 不会重新生成凭证；已取消或已发货则一律 409。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre class="cmtline">     * @return {@link PaymentResult#PAID} 本次迁移成功；{@link PaymentResult#ALREADY_PAID} 之前已支付</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">锁行、判状态、写三件套必须同一事务，否则锁一释放状态就可能变。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">public</span> PaymentResult paySuccess(<span class="kw">long</span> userId, String orderNo) {</pre></td><td class="explain">支付成功：待支付 → PAID 并写三件套；已支付走幂等分支。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        SalesOrder order = lockOwned(orderNo, userId);</pre></td><td class="explain">先锁订单行，再校验归属与状态。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        if (PAID.equals(order.getStatus())) {</pre></td><td class="explain">重复提交：不重新生成凭证、不改支付时间。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>            <span class="kw">return</span> PaymentResult.ALREADY_PAID;</pre></td><td class="explain">已付过：交给页面跳详情，凭证保持原样。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        if (!PENDING_PAYMENT.equals(order.getStatus())) {</pre></td><td class="explain">已取消 / 已发货 / 已完成都不能支付。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>            throw BizException.conflict("当前状态不可支付");</pre></td><td class="explain">只剩这三种会走到这里。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">61</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        order.setStatus(PAID);</pre></td><td class="explain">支付成功即"待发货"，发货留给 M07。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        order.setPaymentMethod(MOCK);</pre></td><td class="explain">教学模拟，固定 MOCK。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        order.setPaymentNo(paymentNoGenerator.next());</pre></td><td class="explain">服务端生成，页面不参与。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        order.setPaidAt(LocalDateTime.now(clock));</pre></td><td class="explain">首次支付时间，取统一时钟。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        orderMapper.updateById(order);</pre></td><td class="explain">三件套同一 UPDATE 写入，CHECK 不会看到半套。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        <span class="kw">return</span> PaymentResult.PAID;</pre></td><td class="explain">本次真的支付成功。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">69</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre class="cmtline">     * 模拟支付失败：不写库、不生成凭证，只校验这次操作是否允许。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre class="cmtline">     * &lt;p&gt;失败是页面上的一次显式动作：订单保持待支付，用户可以重试或取消。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre class="cmtline">     * 对已支付的订单再点失败不改变任何字段，返回"已支付"让页面改跳详情。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre class="cmtline">     * @return {@link PaymentResult#FAILED} 仍是待支付；{@link PaymentResult#ALREADY_PAID} 已经付过</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">只读也要拿行锁：与支付/取消串行，避免读到中间态。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    <span class="kw">public</span> PaymentResult payFailure(<span class="kw">long</span> userId, String orderNo) {</pre></td><td class="explain">支付失败：只校验归属与状态，任何分支都不写库。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        SalesOrder order = lockOwned(orderNo, userId);</pre></td><td class="explain">先锁订单行，再校验归属与状态。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        if (CANCELLED.equals(order.getStatus())) {</pre></td><td class="explain">取消后连"失败"都不该被接受。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>            throw BizException.conflict("当前状态不可支付");</pre></td><td class="explain">已取消：失败动作也不再受理。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        if (!PENDING_PAYMENT.equals(order.getStatus())) {</pre></td><td class="explain">PAID / SHIPPED / COMPLETED：已经付过。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>            <span class="kw">return</span> PaymentResult.ALREADY_PAID;</pre></td><td class="explain">已经付过：失败动作改为跳详情。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        <span class="kw">return</span> PaymentResult.FAILED;</pre></td><td class="explain">待支付：什么都不写，页面提示可重试。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre class="cmtline">     * 锁订单行并校验归属：不存在与不是本人都给 404，不泄露订单是否存在。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    <span class="kw">private</span> SalesOrder lockOwned(String orderNo, <span class="kw">long</span> userId) {</pre></td><td class="explain">锁订单行并校验归属：不存在与不是本人都给 404，不泄露订单是否存在。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        SalesOrder order = orderMapper.lockByOrderNo(orderNo);</pre></td><td class="explain">FOR UPDATE：同一订单的支付/取消串行。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        if (order == null || order.getUserId() != userId) {</pre></td><td class="explain">他人订单与不存在同码同文案。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>            throw BizException.notFound("订单不存在");</pre></td><td class="explain">抛 404：订单不存在</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        <span class="kw">return</span> order;</pre></td><td class="explain">返回已锁定的本人订单。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>PaymentNoGenerator.java<small>凭证号生成与查重重试 · 55 行</small></h2>
+<p class="path">cartoon-payment/src/main/java/org/csu/mycartoonstore/payment/service/PaymentNoGenerator.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.payment.service;</pre></td><td class="explain">支付凭证生成：PAY + 时间戳 + 4 位随机，查重后交付。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">连续撞号时给 500 可重试文案。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">INTERNAL 错误码。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">按 payment_no 查重。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Component;</pre></td><td class="explain">注册为组件，注入给支付服务。</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">时间戳取统一时钟，测试可固定。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">生成 yyyyMMddHHmmss。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.time.format.DateTimeFormatter;</pre></td><td class="explain">固定 14 位时间格式。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.ThreadLocalRandom;</pre></td><td class="explain">4 位随机数，不用共享 Random 实例。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">// M06-01：依据 docs/01 FR-P-01 第 3 条与 docs/03 §2.6 的 payment_no 注释。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">// 只负责"生成一个库里当前不存在的凭证号"；写库由 PaymentService 在同一事务里完成。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// 不保证跨进程唯一：数据库 uk_order_payment_no 是最后防线，撞上时事务回滚重来。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>@Component</pre></td><td class="explain">交给 Spring 管理，支付服务构造器自动注入。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> PaymentNoGenerator {</pre></td><td class="explain">凭证号生成：PAY + 时间戳 + 4 位随机，生成前查重。</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 凭证前缀：与订单号的 CO 区分，人工核对时一眼能看出是支付凭证。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String PREFIX = "PAY";</pre></td><td class="explain">凭证前缀：与订单号的 CO 区分，人工核对时一眼能看出是支付凭证。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 时间戳格式：到秒，共 14 位，总长 3 + 14 + 4 = 21，落在 VARCHAR(40) 内。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");</pre></td><td class="explain">时间戳格式：到秒，共 14 位，总长 3 + 14 + 4 = 21，落在 VARCHAR(40) 内。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 最多重试 3 次：4 位随机撞车概率极低，连续 3 次命中视为异常而不是继续死循环。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> MAX_RETRY = 3;</pre></td><td class="explain">最多重试 3 次：4 位随机撞车概率极低，连续 3 次命中视为异常而不是继续死循环。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 随机数上界：10000 取 0000～9999，正好补足 4 位。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> RANDOM_BOUND = 10_000;</pre></td><td class="explain">随机数上界：10000 取 0000～9999，正好补足 4 位。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">查重用：只读 count，不写库。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Clock clock;</pre></td><td class="explain">时间来源，测试可固定。</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">public</span> PaymentNoGenerator(SalesOrderMapper orderMapper, Clock clock) {</pre></td><td class="explain">构造器注入两个协作方。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        this.orderMapper = orderMapper;</pre></td><td class="explain">保存订单 Mapper。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        this.clock = clock;</pre></td><td class="explain">保存时钟。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">     * 生成一个当前库中不存在的支付凭证号。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">     * &lt;p&gt;先查重再返回，不依赖"插入失败再重试"：查到 0 条才算数，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">     * 生成与写入之间仍可能被别人抢先，唯一键会兜住这种极端情况。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">public</span> String next() {</pre></td><td class="explain">生成一个库里不存在的凭证号：查到 0 条才算数，最多试 3 次。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        for (<span class="kw">int</span> i = 0; i &lt; MAX_RETRY; i++) {</pre></td><td class="explain">最多试 3 次。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            String candidate = PREFIX + TS.format(LocalDateTime.now(clock))</pre></td><td class="explain">拼凭证号：PAY + 14 位时间戳。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                    + String.format("%04d", ThreadLocalRandom.current().nextInt(RANDOM_BOUND));</pre></td><td class="explain">续行：4 位随机数字，补足到秒级时间戳之后。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>            if (orderMapper.countByPaymentNo(candidate) == 0) {</pre></td><td class="explain">库里没有才用。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                <span class="kw">return</span> candidate;</pre></td><td class="explain">拿到就返回，调用方负责写入。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        throw <span class="kw">new</span> BizException(ErrorCode.INTERNAL, "支付凭证生成失败，请稍后重试");</pre></td><td class="explain">3 次都撞：交给上层 500。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>PaymentResult.java<small>三种支付结局 · 13 行</small></h2>
+<p class="path">cartoon-payment/src/main/java/org/csu/mycartoonstore/payment/domain/PaymentResult.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.payment.domain;</pre></td><td class="explain">支付结果：区分"本次成功""之前已付""本次失败"三种结局。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre class="cmtline">// M06-01：依据 docs/01 FR-P-01 第 3～5 条。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre class="cmtline">// 只描述一次支付动作的结果，不携带金额与凭证：页面要展示的值一律从订单表读真实数据。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">// 不定义"支付中"这类状态：模拟支付是同步完成的，没有异步回调。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">public</span> enum PaymentResult {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>    PAID,</pre></td><td class="explain">本次真的把订单从待支付迁到了已支付。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    ALREADY_PAID,</pre></td><td class="explain">之前已经付过：凭证与支付时间保持首次的值，本次不再写库。</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>    FAILED</pre></td><td class="explain">模拟失败：只回支付页提示可重试，数据库没有任何变化。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>PaymentServiceTest.java<small>10 个状态迁移用例 · 225 行</small></h2>
+<p class="path">cartoon-payment/src/test/java/org/csu/mycartoonstore/payment/service/PaymentServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.payment.service;</pre></td><td class="explain">验证支付状态迁移与幂等分支，不碰数据库。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">断言越权与状态冲突。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">断言 404 / 409。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">被测服务操作的订单实体。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">锁订单行与写回，这里用 Mock。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.payment.domain.PaymentResult;</pre></td><td class="explain">三种结局。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">每个用例前重建 Mock。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名进入测试报告。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 用例入口。</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">订单总额。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">固定时钟让 paid_at 可断言。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> java.time.Instant;</pre></td><td class="explain">固定时刻。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">构造 created_at / 已支付时间。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.time.ZoneOffset;</pre></td><td class="explain">东八区：与页面、数据库一致。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">异常断言。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.any;</pre></td><td class="explain">updateById 入参匹配。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock;</pre></td><td class="explain">造 Mock。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.never;</pre></td><td class="explain">断言"没有写库"。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verify;</pre></td><td class="explain">断言调用。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verifyNoInteractions;</pre></td><td class="explain">断言没碰凭证生成器。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verifyNoMoreInteractions;</pre></td><td class="explain">断言只锁行与写回。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">设定返回值。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// M06-01：依据 docs/01 FR-P-01、docs/02 §7.4、docs/06 AC-20。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">// 覆盖：待支付成功写三件套、已支付幂等、已取消/已发货 409、他人/不存在 404、失败不写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">// 不覆盖页面、路由与库存断言：前者 M06-02，后者由 M06-03 的集成用例从真实入口验证。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> PaymentServiceTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> USER = 7L;</pre></td><td class="explain">订单归属人。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">long</span> OTHER_USER = 8L;</pre></td><td class="explain">另一个人，用来验证越权。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String ORDER_NO = "CO202611171200000001";</pre></td><td class="explain">固定订单号。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Instant NOW = Instant.parse("2026-11-17T04:00:00Z");</pre></td><td class="explain">UTC 04:00 = 东八区 12:00。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> LocalDateTime PAID_AT = LocalDateTime.of(2026, 11, 17, 12, 0);</pre></td><td class="explain">断言用的支付时间。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">订单 Mapper Mock。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">private</span> PaymentNoGenerator paymentNoGenerator;</pre></td><td class="explain">凭证生成器 Mock。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">private</span> PaymentService service;</pre></td><td class="explain">被测对象。</td></tr>
+<tr class="gap"><td class="line">42</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前重建，避免桩与调用记录互相污染。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    <span class="kw">void</span> setUp() {</pre></td><td class="explain">每个用例前重建 Mock 与服务。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        orderMapper = mock(SalesOrderMapper.<span class="kw">class</span>);</pre></td><td class="explain">假 Mapper：只回放锁行结果。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        paymentNoGenerator = mock(PaymentNoGenerator.<span class="kw">class</span>);</pre></td><td class="explain">假生成器：凭证号由用例指定。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        service = <span class="kw">new</span> PaymentService(orderMapper, paymentNoGenerator,</pre></td><td class="explain">被测对象：三个协作方都由用例控制。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                Clock.fixed(NOW, ZoneOffset.ofHours(8)));</pre></td><td class="explain">续行：时钟固定，paid_at 才能精确断言。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">50</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre class="cmtline">    /** 待支付 → PAID：写 MOCK、凭证与时间，且只更新订单这一行。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    @DisplayName("待支付支付成功：PAID、MOCK、凭证与时间都有值")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">void</span> paySuccessMovesPendingToPaid() {</pre></td><td class="explain">待支付 → PAID：写 MOCK、凭证与时间，且只更新订单这一行。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "PENDING_PAYMENT");</pre></td><td class="explain">待支付的本人订单。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        when(paymentNoGenerator.next()).thenReturn("PAY202611171200000001");</pre></td><td class="explain">凭证号固定，便于断言。</td></tr>
+<tr class="gap"><td class="line">58</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        PaymentResult result = service.paySuccess(USER, ORDER_NO);</pre></td><td class="explain">被测动作。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">        // 断言：状态、方式、凭证、时间四件套全部落位。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        assertThat(result).isEqualTo(PaymentResult.PAID);</pre></td><td class="explain">本次真的支付成功。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        assertThat(order.getStatus()).isEqualTo("PAID");</pre></td><td class="explain">进入待发货。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThat(order.getPaymentMethod()).isEqualTo("MOCK");</pre></td><td class="explain">教学模拟。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        assertThat(order.getPaymentNo()).isEqualTo("PAY202611171200000001");</pre></td><td class="explain">服务端生成的凭证。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        assertThat(order.getPaidAt()).isEqualTo(PAID_AT);</pre></td><td class="explain">取注入时钟。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        verify(orderMapper).lockByOrderNo(ORDER_NO);</pre></td><td class="explain">先锁行。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        verify(orderMapper).updateById(order);</pre></td><td class="explain">只写订单这一次。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        verifyNoMoreInteractions(orderMapper);</pre></td><td class="explain">没有多余的库存/明细访问，支付不碰别处。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">71</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre class="cmtline">    /** 已支付再支付：幂等，不重新生成凭证，也不改写首次时间。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    @DisplayName("已支付再支付：凭证与时间保持首次的值")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    <span class="kw">void</span> paySuccessOnPaidKeepsFirstPaymentInfo() {</pre></td><td class="explain">已支付再支付：幂等，不重新生成凭证，也不改写首次时间。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "PAID");</pre></td><td class="explain">已支付：凭证与时间都是首次的。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        order.setPaymentNo("PAY202611170900000123");</pre></td><td class="explain">首次凭证号。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        order.setPaidAt(LocalDateTime.of(2026, 11, 17, 9, 0));</pre></td><td class="explain">首次支付时间。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        PaymentResult result = service.paySuccess(USER, ORDER_NO);</pre></td><td class="explain">被测动作：重复提交。</td></tr>
+<tr class="gap"><td class="line">82</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre class="cmtline">        // 断言：返回"之前已支付"，首次凭证与时间一字未改，且完全没有写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        assertThat(result).isEqualTo(PaymentResult.ALREADY_PAID);</pre></td><td class="explain">幂等分支。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        assertThat(order.getPaymentNo()).isEqualTo("PAY202611170900000123");</pre></td><td class="explain">凭证没被换掉。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        assertThat(order.getPaidAt()).isEqualTo(LocalDateTime.of(2026, 11, 17, 9, 0));</pre></td><td class="explain">时间没被改写。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">幂等分支不产生 UPDATE。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        verifyNoInteractions(paymentNoGenerator);</pre></td><td class="explain">也不会生成新凭证。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">90</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre class="cmtline">    /** 已取消订单不可支付：409，状态不变。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    @DisplayName("已取消订单支付：409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    <span class="kw">void</span> paySuccessOnCancelledIsConflict() {</pre></td><td class="explain">已取消订单不可支付：409，状态不变。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "CANCELLED");</pre></td><td class="explain">已取消。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">97</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre class="cmtline">        // 断言：409 与"不可支付"文案；没有写库、没有生成凭证。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.paySuccess(USER, ORDER_NO))</pre></td><td class="explain">已取消：拒绝支付。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>, e -&gt; {</pre></td><td class="explain">断言异常类型并继续检查错误码与文案。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT);</pre></td><td class="explain">状态冲突。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("不可支付");</pre></td><td class="explain">文案说明原因。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                });</pre></td><td class="explain">断言代码块结束</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        verifyNoInteractions(paymentNoGenerator);</pre></td><td class="explain">不生成凭证。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">107</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre class="cmtline">    /** 已发货订单不可支付：正常流程不会出现，防御性拒绝。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    @DisplayName("已发货订单支付：409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>    <span class="kw">void</span> paySuccessOnShippedIsConflict() {</pre></td><td class="explain">已发货订单不可支付：正常流程不会出现，防御性拒绝。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "SHIPPED");</pre></td><td class="explain">已发货：正常流程不会出现。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">114</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre class="cmtline">        // 断言：409，不写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.paySuccess(USER, ORDER_NO))</pre></td><td class="explain">已发货：同样拒绝。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT));</pre></td><td class="explain">续行：只断言错误码</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">121</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre class="cmtline">    /** 他人订单：404，与不存在同码同文案。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    @DisplayName("他人订单支付：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    <span class="kw">void</span> paySuccessOnOtherUsersOrderIsNotFound() {</pre></td><td class="explain">他人订单：404，与不存在同码同文案。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        SalesOrder order = orderOf(OTHER_USER, "PENDING_PAYMENT");</pre></td><td class="explain">属于别人的待支付订单。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">128</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre class="cmtline">        // 断言：404，不写库、不生成凭证。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.paySuccess(USER, ORDER_NO))</pre></td><td class="explain">越权：服务层必须拒绝。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));</pre></td><td class="explain">续行：只断言 404</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>        verifyNoInteractions(paymentNoGenerator);</pre></td><td class="explain">不生成凭证。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">136</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre class="cmtline">    /** 不存在的订单：404。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>    @DisplayName("不存在的订单支付：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>    <span class="kw">void</span> paySuccessOnMissingOrderIsNotFound() {</pre></td><td class="explain">不存在的订单：404。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(null);</pre></td><td class="explain">查不到任何订单。</td></tr>
+<tr class="gap"><td class="line">142</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre class="cmtline">        // 断言：404，不写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.paySuccess(USER, ORDER_NO))</pre></td><td class="explain">不存在：统一 404。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));</pre></td><td class="explain">续行：只断言 404</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">149</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre class="cmtline">    /** 支付失败：订单仍是待支付，三件套保持为空。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>    @DisplayName("支付失败：不写库，凭证仍为空")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>    <span class="kw">void</span> payFailureKeepsPendingUnchanged() {</pre></td><td class="explain">支付失败：订单仍是待支付，三件套保持为空。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "PENDING_PAYMENT");</pre></td><td class="explain">待支付、三件套为空。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">156</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>        PaymentResult result = service.payFailure(USER, ORDER_NO);</pre></td><td class="explain">被测动作：显式模拟失败。</td></tr>
+<tr class="gap"><td class="line">158</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre class="cmtline">        // 断言：结果 FAILED，状态与三件套都没有变化，也没有生成凭证。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>        assertThat(result).isEqualTo(PaymentResult.FAILED);</pre></td><td class="explain">本次失败。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>        assertThat(order.getStatus()).isEqualTo("PENDING_PAYMENT");</pre></td><td class="explain">仍是待支付。</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>        assertThat(order.getPaymentNo()).isNull();</pre></td><td class="explain">没有凭证。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        assertThat(order.getPaidAt()).isNull();</pre></td><td class="explain">没有支付时间。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">失败分支绝不能写库。</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        verifyNoInteractions(paymentNoGenerator);</pre></td><td class="explain">失败不生成凭证。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">167</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre class="cmtline">    /** 已支付订单再点失败：不改任何字段，返回"已支付"让页面改跳详情。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>    @DisplayName("已支付订单点失败：无变化")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>    <span class="kw">void</span> payFailureOnPaidIsNoOp() {</pre></td><td class="explain">已支付订单再点失败：不改任何字段，返回"已支付"让页面改跳详情。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "PAID");</pre></td><td class="explain">已支付：只关心凭证不被改写。</td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>        order.setPaymentNo("PAY202611170900000123");</pre></td><td class="explain">首次凭证号。</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">175</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>        PaymentResult result = service.payFailure(USER, ORDER_NO);</pre></td><td class="explain">被测动作。</td></tr>
+<tr class="gap"><td class="line">177</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre class="cmtline">        // 断言：返回 ALREADY_PAID，凭证不变，不写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre>        assertThat(result).isEqualTo(PaymentResult.ALREADY_PAID);</pre></td><td class="explain">已经付过。</td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>        assertThat(order.getPaymentNo()).isEqualTo("PAY202611170900000123");</pre></td><td class="explain">凭证保持原样。</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">183</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre class="cmtline">    /** 已取消订单点失败：409，状态不变。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>    @DisplayName("已取消订单点失败：409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>    <span class="kw">void</span> payFailureOnCancelledIsConflict() {</pre></td><td class="explain">已取消订单点失败：409，状态不变。</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>        SalesOrder order = orderOf(USER, "CANCELLED");</pre></td><td class="explain">已取消。</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">190</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre class="cmtline">        // 断言：409，不写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.payFailure(USER, ORDER_NO))</pre></td><td class="explain">已取消：失败动作也拒绝。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.CONFLICT));</pre></td><td class="explain">续行：只断言错误码</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">197</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre class="cmtline">    /** 他人订单点失败：404。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>    @DisplayName("他人订单点失败：404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>    <span class="kw">void</span> payFailureOnOtherUsersOrderIsNotFound() {</pre></td><td class="explain">他人订单点失败：404。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        SalesOrder order = orderOf(OTHER_USER, "PENDING_PAYMENT");</pre></td><td class="explain">属于别人：越权必须 404。</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>        when(orderMapper.lockByOrderNo(ORDER_NO)).thenReturn(order);</pre></td><td class="explain">锁行拿到这笔单。</td></tr>
+<tr class="gap"><td class="line">204</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre class="cmtline">        // 断言：404，不写库。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.payFailure(USER, ORDER_NO))</pre></td><td class="explain">越权：失败动作也拒绝。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>,</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>                        e -&gt; assertThat(e.code()).isEqualTo(ErrorCode.NOT_FOUND));</pre></td><td class="explain">续行：只断言 404</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>        verify(orderMapper, never()).updateById(any(SalesOrder.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">211</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 夹具</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">213</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre class="cmtline">    /** 造一笔订单：只填状态与归属，支付三件套默认全空。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>    <span class="kw">private</span> SalesOrder orderOf(<span class="kw">long</span> userId, String status) {</pre></td><td class="explain">造一笔订单：只填状态与归属，支付三件套默认全空。</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>        SalesOrder order = <span class="kw">new</span> SalesOrder();</pre></td><td class="explain">未落库的订单对象。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        order.setId(1L);</pre></td><td class="explain">固定主键。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        order.setOrderNo(ORDER_NO);</pre></td><td class="explain">固定订单号。</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        order.setUserId(userId);</pre></td><td class="explain">归属人。</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>        order.setStatus(status);</pre></td><td class="explain">当前状态。</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>        order.setTotalAmount(<span class="kw">new</span> BigDecimal("56.00"));</pre></td><td class="explain">两件 ¥28.00。</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>        order.setCreatedAt(LocalDateTime.of(2026, 11, 17, 11, 0));</pre></td><td class="explain">支付时间必须晚于创建时间。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>        <span class="kw">return</span> order;</pre></td><td class="explain">交给用例。</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>PaymentNoGeneratorTest.java<small>3 个凭证生成用例 · 83 行</small></h2>
+<p class="path">cartoon-payment/src/test/java/org/csu/mycartoonstore/payment/service/PaymentNoGeneratorTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.payment.service;</pre></td><td class="explain">验证凭证号格式与查重重试，不碰数据库。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">三次撞号后的异常。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">断言 500。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">查重用的 Mapper，这里用 Mock。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">每个用例前重建 Mock。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名进入测试报告。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 用例入口。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.time.Clock;</pre></td><td class="explain">固定时钟让时间戳可断言。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.time.Instant;</pre></td><td class="explain">固定时刻。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.time.ZoneOffset;</pre></td><td class="explain">东八区：与页面、数据库时区一致。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThatThrownBy;</pre></td><td class="explain">异常断言。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.ArgumentMatchers.anyString;</pre></td><td class="explain">查重入参不确定，按任意字符串匹配。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.mock;</pre></td><td class="explain">造 Mapper Mock。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.times;</pre></td><td class="explain">断言调用次数。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.verify;</pre></td><td class="explain">断言调用。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.mockito.Mockito.when;</pre></td><td class="explain">设定查重结果。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">// M06-01：依据 docs/01 FR-P-01 第 3 条与 docs/03 §2.6 的 payment_no 规则。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">// 覆盖：PAY 前缀 + 14 位时间戳 + 4 位随机、时间取自注入的时钟、撞号重试、三次失败给 500。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">// 不覆盖写库与状态迁移（PaymentServiceTest）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">class</span> PaymentNoGeneratorTest {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Instant NOW = Instant.parse("2026-11-17T04:34:56Z");</pre></td><td class="explain">UTC 04:34:56 = 东八区 12:34:56。</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">查重 Mock。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    <span class="kw">private</span> PaymentNoGenerator generator;</pre></td><td class="explain">被测对象。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前重置，避免桩状态互相污染。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">void</span> setUp() {</pre></td><td class="explain">每个用例前重建 Mock 与服务。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        orderMapper = mock(SalesOrderMapper.<span class="kw">class</span>);</pre></td><td class="explain">假 Mapper：只关心 countByPaymentNo。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        generator = <span class="kw">new</span> PaymentNoGenerator(orderMapper, Clock.fixed(NOW, ZoneOffset.ofHours(8)));</pre></td><td class="explain">时钟固定在 12:34:56。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">    /** 正常生成：前缀、时间戳、长度都对，且查重只查一次。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @DisplayName("凭证号：PAY + 时间戳 + 4 位随机，共 21 位")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">void</span> nextBuildsPayNoFromClock() {</pre></td><td class="explain">正常生成：前缀、时间戳、长度都对，且查重只查一次。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">        // 库里没有同号：第一次查重就能用。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        when(orderMapper.countByPaymentNo(anyString())).thenReturn(0);</pre></td><td class="explain">准备返回值：返回 0</td></tr>
+<tr class="gap"><td class="line">44</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        String paymentNo = generator.next();</pre></td><td class="explain">被测动作：生成凭证号。</td></tr>
+<tr class="gap"><td class="line">46</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">        // 断言：时间戳来自注入时钟，后 4 位是随机数字，总长 21。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        assertThat(paymentNo).startsWith("PAY20261117123456");</pre></td><td class="explain">前缀 + 14 位时间戳。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        assertThat(paymentNo).hasSize(21);</pre></td><td class="explain">3 + 14 + 4。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        assertThat(paymentNo).matches("PAY\\d{18}");</pre></td><td class="explain">时间戳与随机数都是纯数字。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        verify(orderMapper, times(1)).countByPaymentNo(anyString());</pre></td><td class="explain">只有一次查重。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /** 撞号：第一次命中已有凭证，换一个随机数重试，第二次成功。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @DisplayName("撞号：换随机数重试，第二次成功")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">void</span> nextRetriesWhenCandidateTaken() {</pre></td><td class="explain">撞号：第一次命中已有凭证，换一个随机数重试，第二次成功。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre class="cmtline">        // 第一次查重命中（返回 1），第二次为空。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        when(orderMapper.countByPaymentNo(anyString())).thenReturn(1, 0);</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        String paymentNo = generator.next();</pre></td><td class="explain">被测动作：应内部重试一次。</td></tr>
+<tr class="gap"><td class="line">62</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">        // 断言：重试后仍拿到合法号，且查重被调用了两次。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        assertThat(paymentNo).startsWith("PAY20261117123456");</pre></td><td class="explain">时间戳不变，随机数重摇。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        verify(orderMapper, times(2)).countByPaymentNo(anyString());</pre></td><td class="explain">一次撞号、一次成功。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">67</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre class="cmtline">    /** 连续 3 次都撞号：不再死循环，给 500 让上层提示稍后重试。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    @DisplayName("连续三次撞号：500，提示稍后重试")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    <span class="kw">void</span> nextGivesUpAfterThreeCollisions() {</pre></td><td class="explain">连续 3 次都撞号：不再死循环，给 500 让上层提示稍后重试。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre class="cmtline">        // 无论查哪个号都命中：模拟极端撞号。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        when(orderMapper.countByPaymentNo(anyString())).thenReturn(1);</pre></td><td class="explain">准备返回值：返回 1</td></tr>
+<tr class="gap"><td class="line">74</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre class="cmtline">        // 断言：抛业务异常，错误码 INTERNAL，文案指向可重试。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        assertThatThrownBy(() -&gt; generator.next())</pre></td><td class="explain">连续撞号：必须抛错而不是死循环。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                .isInstanceOfSatisfying(BizException.<span class="kw">class</span>, e -&gt; {</pre></td><td class="explain">断言异常类型，并继续检查错误码</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                    assertThat(e.code()).isEqualTo(ErrorCode.INTERNAL);</pre></td><td class="explain">生成失败属于系统侧。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    assertThat(e.getMessage()).contains("支付凭证生成失败");</pre></td><td class="explain">文案可直接展示。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                });</pre></td><td class="explain">断言代码块结束</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        verify(orderMapper, times(3)).countByPaymentNo(anyString());</pre></td><td class="explain">最多只试 3 次。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-17 · M06-01 · 支付服务与凭证 · 5 个文件、476 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>
