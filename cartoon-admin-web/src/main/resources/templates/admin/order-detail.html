@@ -38,6 +38,12 @@
                         <input th:replace="~{admin/csrf :: hidden}">
                         <button type="submit" class="btn btn-primary">发货</button>
                     </form>
+                    <!-- M10-03：只有已取消的订单可以删除，明细一并删除且不可恢复 -->
+                    <form th:if="${order.status == 'CANCELLED'}" th:action="@{/orders/{no}/delete(no=${order.orderNo})}"
+                          method="post" onsubmit="return confirm('删除后订单与明细都不可恢复，确定删除吗？')">
+                        <input th:replace="~{admin/csrf :: hidden}">
+                        <button type="submit" class="btn btn-ghost">删除订单</button>
+                    </form>
                     <a class="btn btn-ghost" th:href="@{/orders}">返回列表</a>
                 </div>
             </div>
@@ -88,6 +94,20 @@
                         <li><span>详细地址</span><b th:text="${order.receiverAddress}">某市某区</b></li>
                     </ul>
 
+                    <!-- M10-03：待支付与待发货可改收货信息；发货后随货发出，不再允许修改 -->
+                    <form th:if="${order.status == 'PENDING_PAYMENT' or order.status == 'PAID'}"
+                          th:action="@{/orders/{no}/receiver(no=${order.orderNo})}" method="post"
+                          style="margin-top:12px">
+                        <input th:replace="~{admin/csrf :: hidden}">
+                        <label class="field"><span>收货人</span>
+                            <input name="receiverName" th:value="${order.receiverName}" maxlength="50" required></label>
+                        <label class="field"><span>联系电话</span>
+                            <input name="receiverPhone" th:value="${order.receiverPhone}" maxlength="30" required></label>
+                        <label class="field"><span>详细地址</span>
+                            <input name="receiverAddress" th:value="${order.receiverAddress}" maxlength="255" required></label>
+                        <button type="submit" class="btn">保存收货信息</button>
+                    </form>
+
                     <h2 style="margin-top:18px">支付与时间</h2>
                     <ul class="kv">
                         <li><span>支付方式</span><b th:text="${order.paymentMethod} ?: '未支付'">未支付</b></li>
@@ -107,7 +127,7 @@
                             <b th:text="${#temporals.format(order.completedAt, 'yyyy-MM-dd HH:mm')}">—</b>
                         </li>
                     </ul>
-                    <p class="hint-inline">金额、明细、凭证与状态都不可在后台编辑。</p>
+                    <p class="hint-inline">金额、明细、凭证与状态都不可在后台编辑；收货信息只在待支付与待发货时可改。</p>
                 </div>
             </div>
         </div>

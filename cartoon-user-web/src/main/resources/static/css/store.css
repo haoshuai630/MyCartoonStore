@@ -316,6 +316,7 @@ button{font-family:inherit}
 .auth-form label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:800;letter-spacing:.1em}
 .auth-form input{border:2px solid var(--ink);padding:10px 12px;font-size:15px;background:#fff}
 .auth-form .btn{align-self:flex-start;margin-top:6px}
+.captcha-img{width:120px;height:40px;border:2px solid var(--ink);cursor:pointer;align-self:flex-start}
 .auth-error{border:2px solid var(--red);color:var(--red);background:#fff5f3;padding:10px 14px;font-weight:700;margin:0 0 16px}
 .auth-switch{margin:18px 0 0;font-size:14px;color:#4a4237}
 

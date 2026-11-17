@@ -79,4 +79,24 @@ public class AdminOrderController {
                 result == ShipResult.SHIPPED ? "已发货" : "该订单已处理，无需重复发货"); // 区分首次与重复。
         return "redirect:/orders/" + orderNo; // 回详情看数据库真实状态。
     }
+
+    /** 修改收货信息：仅待支付与待发货；校验失败由服务层抛 400。 */
+    @PostMapping("/{orderNo}/receiver")
+    public String updateReceiver(@PathVariable String orderNo,
+                                 @RequestParam String receiverName, // 1–50。
+                                 @RequestParam String receiverPhone, // 1–30。
+                                 @RequestParam String receiverAddress, // 1–255。
+                                 RedirectAttributes redirect) {
+        orderAdminService.updateReceiver(orderNo, receiverName, receiverPhone, receiverAddress); // 规则在服务层。
+        redirect.addFlashAttribute("message", "已更新收货信息"); // 一次性提示。
+        return "redirect:/orders/" + orderNo; // 回详情。
+    }
+
+    /** 删除订单：仅已取消；成功后回列表。 */
+    @PostMapping("/{orderNo}/delete")
+    public String delete(@PathVariable String orderNo, RedirectAttributes redirect) {
+        orderAdminService.delete(orderNo); // 非已取消抛 409。
+        redirect.addFlashAttribute("message", "已删除订单 " + orderNo + "（明细一并删除）");
+        return "redirect:/orders"; // 回列表（删除后详情已经不存在）。
+    }
 }

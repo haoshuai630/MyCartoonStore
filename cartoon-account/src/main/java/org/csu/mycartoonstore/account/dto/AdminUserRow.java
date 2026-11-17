@@ -20,6 +20,12 @@ public class AdminUserRow {
     /** 显示名：顾客可自行修改 */
     private String displayName;
 
+    /** 邮箱：M10-02 起可在后台编辑，可空 */
+    private String email;
+
+    /** 电话：M10-02 起可在后台编辑，可空 */
+    private String phone;
+
     /** ENABLED / DISABLED */
     private String status;
 

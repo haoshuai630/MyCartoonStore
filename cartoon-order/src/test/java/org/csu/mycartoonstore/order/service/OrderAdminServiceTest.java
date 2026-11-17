@@ -18,6 +18,9 @@ import java.util.List; // 列表。
 import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.assertj.core.api.Assertions.assertThatThrownBy; // 异常断言。
 import static org.mockito.ArgumentMatchers.any; // 任意参数。
+import static org.mockito.ArgumentMatchers.anyLong; // 任意 id。
+import static org.mockito.Mockito.never; // 不该发生的调用。
+import static org.mockito.Mockito.verify; // 行为断言。
 import static org.mockito.Mockito.when; // 打桩。
 
 // M07-08：依据 docs/04 §3.4、docs/06 AC-29。
@@ -64,6 +67,84 @@ class OrderAdminServiceTest {
         assertThatThrownBy(() -> service.list(null, "N".repeat(41), null, null))
                 .isInstanceOf(BizException.class)
                 .hasMessageContaining("过长");
+    }
+
+    @Test // 删除商品前查引用（M10-01）。
+    @DisplayName("商品引用计数：按 product_id 数明细")
+    void countItemsByProduct() {
+        when(itemMapper.selectCount(any())).thenReturn(2L); // 两条明细引用该商品。
+
+        assertThat(service.countItemsByProduct(7L)).isEqualTo(2L); // 原样返回条数。
+    }
+
+    // ---------------------------------------------------------------- 修改与删除（M10-03）
+
+    @Test // 待支付订单可改收货三列。
+    @DisplayName("改收货信息：待支付可改，只写三列")
+    void updateReceiverWritesThreeColumns() {
+        when(orderMapper.findByOrderNo("CO1")).thenReturn(order("CO1", 5L, "PENDING_PAYMENT")); // 待支付。
+        when(orderMapper.updateReceiver(5L, "李四", "13900000000", "新地址 2 号")).thenReturn(1); // 写成功。
+
+        service.updateReceiver("CO1", " 李四 ", "13900000000", " 新地址 2 号 "); // 去空白后写入。
+
+        verify(orderMapper).updateReceiver(5L, "李四", "13900000000", "新地址 2 号"); // 三列定向更新。
+    }
+
+    @Test // 已发货：409，不写库。
+    @DisplayName("改收货信息：已发货 → 409")
+    void updateReceiverShippedRejected() {
+        when(orderMapper.findByOrderNo("CO2")).thenReturn(order("CO2", 6L, "SHIPPED")); // 已发货。
+
+        assertThatThrownBy(() -> service.updateReceiver("CO2", "李四", "139", "地址"))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.CONFLICT);
+        verify(orderMapper, never()).updateReceiver(anyLong(), any(), any(), any()); // 不写库。
+    }
+
+    @Test // 收货人为空：400。
+    @DisplayName("改收货信息：收货人为空 → 400")
+    void updateReceiverBlankName() {
+        when(orderMapper.findByOrderNo("CO3")).thenReturn(order("CO3", 7L, "PAID")); // 待发货。
+
+        assertThatThrownBy(() -> service.updateReceiver("CO3", "   ", "139", "地址"))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.BAD_REQUEST);
+    }
+
+    @Test // 删除：已取消订单，先删明细再删主表。
+    @DisplayName("删除订单：已取消 → 明细与主表都删")
+    void deleteCancelledOrder() {
+        when(orderMapper.findByOrderNo("CO4")).thenReturn(order("CO4", 8L, "CANCELLED")); // 已取消。
+        when(itemMapper.delete(any())).thenReturn(2); // 两条明细。
+        when(orderMapper.deleteById(8L)).thenReturn(1); // 主表一条。
+
+        service.delete("CO4"); // 执行删除。
+
+        verify(itemMapper).delete(any()); // 先删明细。
+        verify(orderMapper).deleteById(8L); // 再删主表。
+    }
+
+    @Test // 非已取消：409，不删任何东西。
+    @DisplayName("删除订单：待支付 → 409")
+    void deletePendingRejected() {
+        when(orderMapper.findByOrderNo("CO5")).thenReturn(order("CO5", 9L, "PENDING_PAYMENT")); // 待支付。
+
+        assertThatThrownBy(() -> service.delete("CO5"))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.CONFLICT);
+        verify(orderMapper, never()).deleteById(any(java.io.Serializable.class)); // 不误删。
+    }
+
+    /** 造一张订单：只填状态判断要用的字段。 */
+    private SalesOrder order(String orderNo, long id, String status) {
+        SalesOrder order = new SalesOrder();
+        order.setId(id);
+        order.setOrderNo(orderNo);
+        order.setStatus(status);
+        return order;
     }
 
     @Test // 详情不存在：404。

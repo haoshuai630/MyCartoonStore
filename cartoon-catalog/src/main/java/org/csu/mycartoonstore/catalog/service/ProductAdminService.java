@@ -7,7 +7,9 @@ import org.csu.mycartoonstore.catalog.dto.CategoryOption; // 分类下拉项。
 import org.csu.mycartoonstore.catalog.dto.ProductForm; // 表单。
 import org.csu.mycartoonstore.catalog.entity.Category; // 分类实体。
 import org.csu.mycartoonstore.catalog.entity.Product; // 商品实体。
+import org.csu.mycartoonstore.catalog.entity.ProductImage; // 删除商品时按 product_id 清相册。
 import org.csu.mycartoonstore.catalog.mapper.CategoryMapper; // 分类查询。
+import org.csu.mycartoonstore.catalog.mapper.ProductImageMapper; // 相册删除。
 import org.csu.mycartoonstore.catalog.mapper.ProductMapper; // 商品读写。
 import org.csu.mycartoonstore.common.exception.BizException; // 400/404/409。
 import org.csu.mycartoonstore.common.page.PageQuery; // 分页归一。
@@ -71,10 +73,13 @@ public class ProductAdminService {
 
     private final ProductMapper productMapper; // 商品读写。
     private final CategoryMapper categoryMapper; // 分类存在性与下拉。
+    private final ProductImageMapper productImageMapper; // 删除商品时一并清相册。
 
-    public ProductAdminService(ProductMapper productMapper, CategoryMapper categoryMapper) { // 构造器注入。
+    public ProductAdminService(ProductMapper productMapper, CategoryMapper categoryMapper,
+                               ProductImageMapper productImageMapper) { // 构造器注入。
         this.productMapper = productMapper; // 保存商品 Mapper。
         this.categoryMapper = categoryMapper; // 保存分类 Mapper。
+        this.productImageMapper = productImageMapper; // 保存相册 Mapper。
     }
 
     /**
@@ -223,6 +228,21 @@ public class ProductAdminService {
         }
         Product updated = productMapper.selectById(id); // 回读最新库存。
         return updated == null ? 0 : updated.getStock(); // 理论上不会为空。
+    }
+
+    /**
+     * 删除商品：先清相册再删商品，同一事务。
+     *
+     * <p>只做"没有订单引用"的删除——订单明细的外键指向商品，历史订单不能悬空，
+     * 因此调用方必须先确认引用情况（M10-01 的接口在后台控制器里编排）。
+     * 购物车条目也引用商品，调用方要先清理；这里不越界去动别的模块的表。</p>
+     */
+    @Transactional // 相册与商品同成同败。
+    public void delete(long id) {
+        detail(id); // 不存在 404，先于任何删除。
+        productImageMapper.delete(Wrappers.<ProductImage>lambdaQuery()
+                .eq(ProductImage::getProductId, id)); // 相册先删，否则外键挡住。
+        productMapper.deleteById(id); // 主表记录最后删。
     }
 
     /** 编辑页回填：价格转成两位小数字符串，库存不放进表单（编辑页库存只读）。 */

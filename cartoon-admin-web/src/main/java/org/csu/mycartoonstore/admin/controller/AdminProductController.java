@@ -1,12 +1,14 @@
 package org.csu.mycartoonstore.admin.controller; // 商品维护页面：列表、新增、编辑。
 
 import jakarta.servlet.http.HttpServletResponse; // 表单校验失败时给出正确状态码。
+import org.csu.mycartoonstore.cart.service.CartService; // 删除商品前清理购物车条目。
 import org.csu.mycartoonstore.catalog.dto.AdminProductRow; // 列表行。
 import org.csu.mycartoonstore.catalog.dto.ProductForm; // 表单对象。
 import org.csu.mycartoonstore.catalog.entity.Product; // 编辑页要显示库存与状态。
 import org.csu.mycartoonstore.catalog.service.ProductAdminService; // 业务规则都在这里。
 import org.csu.mycartoonstore.common.exception.BizException; // 校验失败回表单。
 import org.csu.mycartoonstore.common.page.PageResult; // 分页结果。
+import org.csu.mycartoonstore.order.service.OrderAdminService; // 删除前查订单引用。
 import org.springframework.stereotype.Controller; // MVC 控制器。
 import org.springframework.ui.Model; // 传模板。
 import org.springframework.web.bind.annotation.GetMapping; // 列表与表单页。
@@ -24,10 +26,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes; // 一次
 @RequestMapping("/products") // 商品路由前缀。
 public class AdminProductController {
 
-    private final ProductAdminService productAdminService; // 业务服务。
+    private final ProductAdminService productAdminService; // 商品业务服务。
+    private final OrderAdminService orderAdminService; // 删除前查订单引用。
+    private final CartService cartService; // 删除前清购物车条目。
 
-    public AdminProductController(ProductAdminService productAdminService) { // 构造器注入。
-        this.productAdminService = productAdminService; // 保存服务。
+    public AdminProductController(ProductAdminService productAdminService, // 构造器注入。
+                                  OrderAdminService orderAdminService,
+                                  CartService cartService) {
+        this.productAdminService = productAdminService; // 保存商品服务。
+        this.orderAdminService = orderAdminService; // 保存订单服务。
+        this.cartService = cartService; // 保存购物车服务。
     }
 
     /** 列表：含下架商品，按分类 / 名称 / 状态筛选并分页。 */
@@ -107,6 +115,26 @@ public class AdminProductController {
         productAdminService.changeStatus(id, status, version); // 版本一致才迁移。
         redirect.addFlashAttribute("message", "ON_SALE".equals(status) ? "已上架该商品" : "已下架该商品"); // 一次性提示。
         return "redirect:/products"; // 回列表。
+    }
+
+    /**
+     * 删除商品：有订单引用就拒绝，否则先清购物车、再删相册与商品。
+     *
+     * <p>三件事的顺序不能换：订单引用是硬约束（历史订单要留快照），
+     * 购物车条目与相册都是外键引用，不先清就会挡住删除。</p>
+     */
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable long id, RedirectAttributes redirect) {
+        long referenced = orderAdminService.countItemsByProduct(id); // 历史订单是否引用。
+        if (referenced > 0) { // 有引用：只能下架。
+            throw BizException.conflict("该商品已有订单引用，不能删除；如需停售请使用下架"); // 409，不动数据。
+        }
+        int cleared = cartService.clearProduct(id); // 清掉所有用户车里的这条商品。
+        productAdminService.delete(id); // 删相册与商品（同事务）。
+        redirect.addFlashAttribute("message", cleared > 0
+                ? "已删除商品，并清理 " + cleared + " 条购物车条目"
+                : "已删除商品"); // 一次性提示。
+        return "redirect:/products"; // PRG。
     }
 
     /** 增量补货：成功后回列表并提示最新库存。 */

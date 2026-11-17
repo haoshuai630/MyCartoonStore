@@ -19,8 +19,13 @@
                 </div>
             </div>
 
-            <!-- 一次性提示：启停成功或重复操作 -->
+            <!-- 一次性提示：启停、资料保存、密码重置 -->
             <p class="alert" th:if="${message}" th:text="${message}">已处理</p>
+            <p class="alert" th:if="${error}" th:text="${error}">操作失败</p>
+            <!-- 临时密码只在这一次显示：不进 URL、不进日志 -->
+            <p class="alert" th:if="${tempPassword}">
+                临时密码：<b th:text="${tempPassword}">TempPass123</b>（仅显示这一次，请立即转达顾客并提醒修改）
+            </p>
 
             <!-- 筛选：用户名包含 + 状态；提交后整页刷新 -->
             <form class="filter-bar" method="get" th:action="@{/users}">
@@ -51,7 +56,7 @@
                         <th>显示名</th>
                         <th style="width:110px">状态</th>
                         <th style="width:190px">注册时间</th>
-                        <th style="width:100px">操作</th>
+                        <th style="width:430px">操作</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -66,6 +71,25 @@
                         <td th:text="${row.createdAt == null ? '—' :
                                 #temporals.format(row.createdAt, 'yyyy-MM-dd HH:mm')}">时间</td>
                         <td class="row-actions">
+                            <!-- M10-02：资料编辑（显示名必填、邮箱电话可空），保存后回列表 -->
+                            <form class="inline-form profile-form" th:action="@{/users/{id}/profile(id=${row.id})}"
+                                  method="post">
+                                <input th:replace="~{admin/csrf :: hidden}">
+                                <input name="displayName" th:value="${row.displayName}" maxlength="50"
+                                       required placeholder="显示名" class="qty-input">
+                                <input name="email" th:value="${row.email}" maxlength="100"
+                                       placeholder="邮箱" class="qty-input">
+                                <input name="phone" th:value="${row.phone}" maxlength="30"
+                                       placeholder="电话" class="qty-input">
+                                <button type="submit" class="link-btn">保存资料</button>
+                            </form>
+                            <!-- M10-02：重置为一次性临时密码，旧密码立即失效 -->
+                            <form class="inline-form" th:action="@{/users/{id}/password-reset(id=${row.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('重置后旧密码立即失效，临时密码只显示一次。确定重置吗？')">
+                                <input th:replace="~{admin/csrf :: hidden}">
+                                <button type="submit" class="link-btn">重置密码</button>
+                            </form>
                             <!-- 启停：二次确认；重复设置同一状态由服务端提示"当前已是" -->
                             <form class="inline-form" th:action="@{/users/{id}/status(id=${row.id})}" method="post"
                                   th:onsubmit="${row.status == 'ENABLED'} ?
