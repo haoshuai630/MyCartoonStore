@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('订单详情')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 面包屑：订单处理 / 订单号 -->
+            <nav class="crumb">
+                <a th:href="@{/orders}">订单处理</a>
+                <span>/</span>
+                <b th:text="${order.orderNo}">CO...</b>
+            </nav>
+
+            <!-- 发货结果提示 -->
+            <p class="alert" th:if="${message}" th:text="${message}">已发货</p>
+
+            <!-- 头部：状态、订单号、创建时间、所属用户 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">ORDER</span>
+                    <h1 th:text="${order.orderNo}">CO...</h1>
+                    <p class="lead">
+                        <span class="status-tag" th:classappend="${order.status == 'PAID'} ? 'on' : ''"
+                              th:text="${order.statusLabel}">状态</span>
+                        <span th:text="|创建于 ${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}|">创建时间</span>
+                        <span th:text="${userName != null} ? '所属用户：' + ${userName} : '所属用户：（账号不存在）'">所属用户</span>
+                    </p>
+                </div>
+                <div class="head-actions">
+                    <!-- 仅已支付订单可发货；重复发货由服务端提示已处理 -->
+                    <form th:if="${order.status == 'PAID'}" th:action="@{/orders/{no}/ship(no=${order.orderNo})}"
+                          method="post" onsubmit="return confirm('确认对该订单发货吗？发货后状态变为已发货。')">
+                        <button type="submit" class="btn btn-primary">发货</button>
+                    </form>
+                    <a class="btn btn-ghost" th:href="@{/orders}">返回列表</a>
+                </div>
+            </div>
+
+            <div class="order-admin-grid">
+                <!-- 明细快照：名称、SKU、单价、数量、行金额都取订单快照 -->
+                <div class="panel">
+                    <h2>商品明细</h2>
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>商品</th>
+                            <th style="width:150px">SKU（快照）</th>
+                            <th style="width:100px" class="num">单价</th>
+                            <th style="width:70px" class="num">数量</th>
+                            <th style="width:110px" class="num">行金额</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${items}">
+                            <td>
+                                <div class="order-item">
+                                    <img th:src="@{${item.coverImageSnapshot}}" alt="">
+                                    <b th:text="${item.productNameSnapshot}">商品</b>
+                                </div>
+                            </td>
+                            <td><code th:text="${item.skuSnapshot}">SKU</code></td>
+                            <td class="num" th:text="'¥' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}">¥0.00</td>
+                            <td class="num" th:text="${item.quantity}">1</td>
+                            <td class="num" th:text="'¥' + ${#numbers.formatDecimal(item.lineAmount, 1, 2)}">¥0.00</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- 金额：只读，不能改 -->
+                    <div class="total-row">
+                        <span>订单总额</span>
+                        <b th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</b>
+                    </div>
+                </div>
+
+                <!-- 收货快照与支付信息 -->
+                <div class="panel">
+                    <h2>收货信息（快照）</h2>
+                    <ul class="kv">
+                        <li><span>收货人</span><b th:text="${order.receiverName}">张三</b></li>
+                        <li><span>联系电话</span><b th:text="${order.receiverPhone}">13800000000</b></li>
+                        <li><span>详细地址</span><b th:text="${order.receiverAddress}">某市某区</b></li>
+                    </ul>
+
+                    <h2 style="margin-top:18px">支付与时间</h2>
+                    <ul class="kv">
+                        <li><span>支付方式</span><b th:text="${order.paymentMethod} ?: '未支付'">未支付</b></li>
+                        <li><span>支付凭证</span><b th:text="${order.paymentNo} ?: '—'">—</b></li>
+                        <li><span>支付时间</span>
+                            <b th:text="${order.paidAt != null} ? ${#temporals.format(order.paidAt, 'yyyy-MM-dd HH:mm')} : '—'">—</b>
+                        </li>
+                        <li><span>发货时间</span>
+                            <b th:text="${order.shippedAt != null} ? ${#temporals.format(order.shippedAt, 'yyyy-MM-dd HH:mm')} : '—'">—</b>
+                        </li>
+                        <li th:if="${order.cancelledAt != null}">
+                            <span>取消时间</span>
+                            <b th:text="${#temporals.format(order.cancelledAt, 'yyyy-MM-dd HH:mm')}">—</b>
+                        </li>
+                        <li th:if="${order.completedAt != null}">
+                            <span>完成时间</span>
+                            <b th:text="${#temporals.format(order.completedAt, 'yyyy-MM-dd HH:mm')}">—</b>
+                        </li>
+                    </ul>
+                    <p class="hint-inline">金额、明细、凭证与状态都不可在后台编辑。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('分类维护')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 标题区：入口与说明；一级是作品、二级是品类 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">CATEGORIES</span>
+                    <h1>分类维护</h1>
+                    <p class="lead">一级分类是作品，二级分类是品类（单行本 / 周边）。编码与父级创建后不可修改，
+                        有子分类或商品引用的分类不能删除。</p>
+                </div>
+                <div class="head-actions">
+                    <a class="btn btn-primary" th:href="@{/categories/new}">新增作品（一级）</a>
+                </div>
+            </div>
+
+            <!-- 新增/编辑/删除成功后的一次性提示 -->
+            <p class="alert" th:if="${message}" th:text="${message}">已保存</p>
+
+            <!-- 两级缩进树：一级行带「新增品类」入口，二级行缩进显示父分类 -->
+            <div class="panel" th:if="${!rows.isEmpty()}">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="width:110px">层级</th>
+                        <th>名称</th>
+                        <th style="width:180px">编码</th>
+                        <th style="width:130px">父分类</th>
+                        <th style="width:70px" class="num">排序</th>
+                        <th style="width:90px" class="num">子分类</th>
+                        <th style="width:80px" class="num">商品</th>
+                        <th style="width:220px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="row : ${rows}" th:classappend="${row.level == 2} ? 'child-row'">
+                        <!-- 层级标签 -->
+                        <td>
+                            <span class="level-tag" th:classappend="${row.level == 1} ? 'top' : 'child'"
+                                  th:text="${row.level == 1} ? '作品' : '品类'">作品</span>
+                        </td>
+                        <!-- 名称：二级缩进 -->
+                        <td><b th:text="${row.name}">名称</b></td>
+                        <td><code th:text="${row.code}">CODE</code></td>
+                        <!-- 父分类：一级没有父级 -->
+                        <td th:text="${row.parentName} ?: '—'">—</td>
+                        <td class="num" th:text="${row.sortOrder}">0</td>
+                        <td class="num" th:text="${row.childCount}">0</td>
+                        <td class="num" th:text="${row.productCount}">0</td>
+                        <td class="row-actions">
+                            <a class="link-btn" th:href="@{/categories/{id}/edit(id=${row.id})}">编辑</a>
+                            <!-- 一级行给「新增品类」，二级行不再给 -->
+                            <a class="link-btn" th:if="${row.level == 1}"
+                               th:href="@{/categories/new(parentId=${row.id})}">新增品类</a>
+                            <!-- 有引用时按钮禁用，并在旁边说明原因 -->
+                            <form th:action="@{/categories/{id}/delete(id=${row.id})}" method="post"
+                                  onsubmit="return confirm('删除后不可恢复，确定删除该分类吗？')">
+                                <button type="submit" class="link-btn danger"
+                                        th:disabled="${!row.deletable}"
+                                        th:title="${row.deleteHint}">删除</button>
+                            </form>
+                            <small class="hint-inline" th:if="${!row.deletable}"
+                                   th:text="${row.deleteHint}">有引用</small>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 空状态：还没有任何分类 -->
+            <div class="empty" th:if="${rows.isEmpty()}">
+                <b>还没有分类</b>
+                <p>先新增一个作品（一级分类），再在它下面添加单行本或周边品类。</p>
+                <a class="btn btn-primary" th:href="@{/categories/new}">新增作品</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

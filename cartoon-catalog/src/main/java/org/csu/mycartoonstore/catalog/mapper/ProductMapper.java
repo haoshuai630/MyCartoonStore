@@ -3,7 +3,11 @@ package org.csu.mycartoonstore.catalog.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.csu.mycartoonstore.catalog.dto.AdminProductQuery;
+import org.csu.mycartoonstore.catalog.dto.AdminProductRow;
+import org.csu.mycartoonstore.catalog.dto.CategoryUsage;
 import org.csu.mycartoonstore.catalog.dto.ProductQuery;
 import org.csu.mycartoonstore.catalog.entity.Product;
 
@@ -43,4 +47,51 @@ public interface ProductMapper extends BaseMapper<Product> {
     /** 取消订单时恢复库存并递增版本：与 deductStock 成对，保证每次取消只加一次 */
     @Update("UPDATE product SET stock = stock + #{qty}, version = version + 1 WHERE id = #{id}")
     int restoreStock(@Param("id") Long id, @Param("qty") int qty);
+
+    /**
+     * 每个分类下的商品数（含下架）。
+     *
+     * <p>后台分类列表与删除校验共用：一次分组查询代替逐行 COUNT，
+     * 删除时"有商品引用就不许删"也靠它判断。</p>
+     */
+    @Select("SELECT category_id AS categoryId, COUNT(*) AS productCount FROM product GROUP BY category_id")
+    List<CategoryUsage> countByCategory();
+
+    /** 后台列表：含下架商品，可筛状态与分类；按 id 倒序（最近录入在前） */
+    List<AdminProductRow> selectAdminPage(@Param("q") AdminProductQuery query);
+
+    /** 与后台列表同条件的总数 */
+    long countAdminPage(@Param("q") AdminProductQuery query);
+
+    /**
+     * 保存商品资料：版本一致才写入，同时 version + 1。
+     *
+     * @return 影响行数；0 表示版本已变（或商品被删），调用方转 409
+     */
+    @Update("""
+            UPDATE product SET name = #{p.name}, category_id = #{p.categoryId}, price = #{p.price},
+                   summary = #{p.summary}, description = #{p.description}, cover_image = #{p.coverImage},
+                   sort_order = #{p.sortOrder}, version = version + 1
+             WHERE id = #{p.id} AND version = #{p.version}
+            """)
+    int updateProfile(@Param("p") Product product);
+
+    /**
+     * 上下架：版本一致才写，同时 version + 1。
+     *
+     * @return 影响行数；0 表示版本已变（或商品被删），调用方转 409
+     */
+    @Update("UPDATE product SET status = #{status}, version = version + 1 "
+            + "WHERE id = #{id} AND version = #{version}")
+    int updateStatus(@Param("id") Long id, @Param("status") String status, @Param("version") long version);
+
+    /**
+     * 增量补货：在数据库最新库存上原子累加，溢出时不更新。
+     *
+     * <p>不提供"设为指定库存"：条件里用 stock <= INT_MAX - qty 挡住溢出，
+     * 影响 0 行可能是商品不存在，也可能是库存已到上限，由调用方区分。</p>
+     */
+    @Update("UPDATE product SET stock = stock + #{qty}, version = version + 1 "
+            + "WHERE id = #{id} AND stock <= 2147483647 - #{qty}")
+    int restock(@Param("id") Long id, @Param("qty") int qty);
 }

@@ -35,44 +35,86 @@ class AccountServiceTest {
     }
 
     @Test
-    @DisplayName("用户名密码正确且状态正常：返回用户")
-    void authenticateOk() {
-        when(userMapper.selectOne(any())).thenReturn(user("alice", "Cartoon123!", "ENABLED"));
+    @DisplayName("用户端：启用 CUSTOMER 密码正确 → 登录成功")
+    void customerLoginOk() {
+        when(userMapper.selectOne(any())).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
 
-        StoreUser result = service.authenticate("alice", "Cartoon123!");
+        StoreUser result = service.authenticateCustomer("alice", "Cartoon123!");
 
         assertThat(result.getUsername()).isEqualTo("alice");
     }
 
     @Test
-    @DisplayName("密码错误：401，文案不透露账号是否存在")
-    void wrongPassword() {
-        when(userMapper.selectOne(any())).thenReturn(user("alice", "Cartoon123!", "ENABLED"));
+    @DisplayName("用户端：密码错误 → 401，统一文案")
+    void customerWrongPassword() {
+        when(userMapper.selectOne(any())).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
 
-        assertThatThrownBy(() -> service.authenticate("alice", "wrong-pass"))
-                .isInstanceOf(BizException.class)
-                .hasMessage("用户名或密码不正确");
-    }
-
-    @Test
-    @DisplayName("账号不存在：同样返回 401，与密码错误同文案")
-    void unknownUser() {
-        when(userMapper.selectOne(any())).thenReturn(null);
-
-        assertThatThrownBy(() -> service.authenticate("nobody", "whatever"))
+        assertThatThrownBy(() -> service.authenticateCustomer("alice", "wrong-pass"))
                 .isInstanceOf(BizException.class)
                 .extracting(e -> ((BizException) e).code())
                 .isEqualTo(ErrorCode.UNAUTHORIZED);
     }
 
     @Test
-    @DisplayName("禁用账号：403，提示联系店长")
-    void disabledUser() {
-        when(userMapper.selectOne(any())).thenReturn(user("carol", "Cartoon123!", "DISABLED"));
+    @DisplayName("用户端：账号不存在 → 与密码错误同码同文案")
+    void customerUnknownUser() {
+        when(userMapper.selectOne(any())).thenReturn(null);
 
-        assertThatThrownBy(() -> service.authenticate("carol", "Cartoon123!"))
+        assertThatThrownBy(() -> service.authenticateCustomer("nobody", "whatever"))
                 .isInstanceOf(BizException.class)
-                .hasMessageContaining("已停用");
+                .hasMessage("账号或密码错误，或账号不可用");
+    }
+
+    @Test
+    @DisplayName("用户端：禁用账号 → 与密码错误同码同文案，不透露已停用")
+    void customerDisabledRejected() {
+        when(userMapper.selectOne(any())).thenReturn(user("carol", "Cartoon123!", "CUSTOMER", "DISABLED"));
+
+        assertThatThrownBy(() -> service.authenticateCustomer("carol", "Cartoon123!"))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.UNAUTHORIZED);
+    }
+
+    @Test
+    @DisplayName("用户端：管理员不能登录（AC-05）")
+    void adminCannotLogInAsCustomer() {
+        when(userMapper.selectOne(any())).thenReturn(user("admin", "Cartoon123!", "ADMIN", "ENABLED"));
+
+        assertThatThrownBy(() -> service.authenticateCustomer("admin", "Cartoon123!"))
+                .isInstanceOf(BizException.class)
+                .hasMessage("账号或密码错误，或账号不可用");
+    }
+
+    @Test
+    @DisplayName("管理端：启用 ADMIN 密码正确 → 登录成功")
+    void adminLoginOk() {
+        when(userMapper.selectOne(any())).thenReturn(user("admin", "Cartoon123!", "ADMIN", "ENABLED"));
+
+        StoreUser result = service.authenticateAdmin("admin", "Cartoon123!");
+
+        assertThat(result.getRole()).isEqualTo("ADMIN");
+    }
+
+    @Test
+    @DisplayName("管理端：CUSTOMER 不能登录（FR-A-01）")
+    void customerCannotLogInAsAdmin() {
+        when(userMapper.selectOne(any())).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
+
+        assertThatThrownBy(() -> service.authenticateAdmin("alice", "Cartoon123!"))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.UNAUTHORIZED);
+    }
+
+    @Test
+    @DisplayName("管理端：禁用 ADMIN → 401，统一文案")
+    void disabledAdminRejected() {
+        when(userMapper.selectOne(any())).thenReturn(user("admin", "Cartoon123!", "ADMIN", "DISABLED"));
+
+        assertThatThrownBy(() -> service.authenticateAdmin("admin", "Cartoon123!"))
+                .isInstanceOf(BizException.class)
+                .hasMessage("账号或密码错误，或账号不可用");
     }
 
     @Test
@@ -117,14 +159,14 @@ class AccountServiceTest {
                 .hasMessageContaining("至少");
     }
 
-    /** 造一个用户：密码用真实 BCrypt 编码，保证 matches 能通过 */
-    private StoreUser user(String username, String rawPassword, String status) {
+    /** 造一个用户：密码用真实 BCrypt 编码，保证 matches 能通过；角色与状态由用例指定 */
+    private StoreUser user(String username, String rawPassword, String role, String status) {
         StoreUser u = new StoreUser();
         u.setId(1L);
         u.setUsername(username);
         u.setPasswordHash(encoder.encode(rawPassword));
         u.setDisplayName(username);
-        u.setRole("CUSTOMER");
+        u.setRole(role);
         u.setStatus(status);
         return u;
     }

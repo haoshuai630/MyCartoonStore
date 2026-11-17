@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('控制台')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 身份区：只显示当前管理员，不显示任何统计数字 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">DASHBOARD</span>
+                    <h1>控制台</h1>
+                    <p class="lead">在这里维护作品与商品、处理全站订单。页面不展示统计数字，一切以列表页的真实查询为准。</p>
+                </div>
+                <div class="identity">
+                    <span>当前管理员</span>
+                    <b th:text="${adminName}">admin</b>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-ghost">退出登录</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 三个业务入口：分类、商品、订单 -->
+            <div class="entry-grid">
+                <a class="entry-card" th:href="@{/categories}">
+                    <span class="kicker">CATEGORIES</span>
+                    <h2>分类维护</h2>
+                    <p>两级分类：作品（一级）与单行本 / 周边（二级），含引用校验与删除保护。</p>
+                    <span class="badge">进入</span>
+                </a>
+                <a class="entry-card" th:href="@{/products}">
+                    <span class="kicker">PRODUCTS</span>
+                    <h2>商品维护</h2>
+                    <p>查询与新增商品、编辑资料与价格、上下架、增量补货（含版本冲突检测）。</p>
+                    <span class="badge">进入</span>
+                </a>
+                <a class="entry-card" th:href="@{/orders}">
+                    <span class="kicker">ORDERS</span>
+                    <h2>订单处理</h2>
+                    <p>全站查单与详情，只对已支付订单发货，保留首次发货时间。</p>
+                    <span class="badge">进入</span>
+                </a>
+            </div>
+
+            <p class="console-note">三个入口都已接入；页面不展示统计数字，数据以各列表页的查询结果为准。</p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

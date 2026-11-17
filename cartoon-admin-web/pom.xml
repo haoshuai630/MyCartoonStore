@@ -74,6 +74,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Boot 4 把 MockMvc 的测试自动配置拆到了独立模块，与用户端保持一致 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.csu.mycartoonstore</groupId>
             <artifactId>cartoon-test-support</artifactId>

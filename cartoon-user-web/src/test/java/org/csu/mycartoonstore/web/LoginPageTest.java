@@ -67,11 +67,11 @@ class LoginPageTest extends AbstractIntegrationTest {
                         .param("username", "alice")
                         .param("password", "bad-pass"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("用户名或密码不正确")));
+                .andExpect(content().string(containsString("账号或密码错误，或账号不可用")));
     }
 
     @Test
-    @DisplayName("禁用账号：提示已停用")
+    @DisplayName("禁用账号：与密码错误同文案，不透露账号状态")
     void loginDisabled() throws Exception {
         seedUser("carol", "Cartoon123!", "DISABLED");
 
@@ -79,7 +79,23 @@ class LoginPageTest extends AbstractIntegrationTest {
                         .param("username", "carol")
                         .param("password", "Cartoon123!"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("已停用")));
+                .andExpect(content().string(containsString("账号或密码错误，或账号不可用")));
+    }
+
+    @Test
+    @DisplayName("管理员不能登录用户端：同文案，且不写会话（AC-05）")
+    void adminCannotLogIn() throws Exception {
+        seedUser("admin", "Cartoon123!", "ENABLED", "ADMIN");
+        MockHttpSession session = new MockHttpSession();
+
+        mockMvc.perform(post("/login")
+                        .param("username", "admin")
+                        .param("password", "Cartoon123!")
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("账号或密码错误，或账号不可用")));
+
+        assertThat(session.getAttribute("userId")).isNull();
     }
 
     @Test
@@ -121,9 +137,14 @@ class LoginPageTest extends AbstractIntegrationTest {
         assertThat(session.isInvalid()).isTrue();
     }
 
-    /** 造一个用户，密码用真实 BCrypt 编码 */
+    /** 造一个用户，密码用真实 BCrypt 编码；角色缺省为普通顾客 */
     private void seedUser(String username, String rawPassword, String status) {
+        seedUser(username, rawPassword, status, "CUSTOMER");
+    }
+
+    /** 造一个指定角色的用户：管理端/用户端互斥的用例要用 */
+    private void seedUser(String username, String rawPassword, String status, String role) {
         jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) VALUES (?,?,?,?,?)",
-                username, passwordEncoder.encode(rawPassword), "爱丽丝", "CUSTOMER", status);
+                username, passwordEncoder.encode(rawPassword), "爱丽丝", role, status);
     }
 }

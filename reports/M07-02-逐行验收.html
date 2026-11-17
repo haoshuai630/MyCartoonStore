@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M07-02 · 管理端登录与控制台（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M07-02 · 管理端登录与控制台（逐行验收）</h1>
+<p>一行源码一行记录，行号取自原文件。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">AdminAuthInterceptor.java</a><a href="#s2">AdminWebConfig.java</a><a href="#s3">AdminAuthController.java</a><a href="#s4">AdminHomeController.java</a><a href="#s5">AdminExceptionHandler.java</a><a href="#s6">admin/fragments.html</a><a href="#s7">admin/login.html</a><a href="#s8">admin/main.html</a><a href="#s9">error/error.html</a><a href="#s10">AdminLoginTest.java</a><a href="#s11">AdminFixture.java</a><a href="#s12">AdminIntegrationTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：管理端身份拦截器（每请求重读 ADMIN + ENABLED，路径全站覆盖 + 白名单）、登录/退出（只接受启用 ADMIN、登录后换会话 ID、失败统一文案）、控制台（当前管理员 + 三个待接入入口）、管理端样式与错误页、管理端测试基座与 12 个用例。验证：mvn -pl cartoon-admin-web -am test → Tests run: 12, Failures: 0；手工冒烟：/admin/login 200、未登录 /admin/ → 302 登录页、admin 登录后 200 并显示控制台、顾客与停用账号登录 → 200 同一句失败文案且不建会话、/admin/css/admin.css 免登录 200。admin.css 属于样式，不逐行对照（按 docs/10 §5 的'配置与样式按配置项说明'），pom.xml 只新增 spring-boot-webmvc-test 一个测试依赖，也不单独成节。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>AdminAuthInterceptor.java<small>每请求重读 ADMIN + ENABLED · 全文件 75 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/interceptor/AdminAuthInterceptor.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.interceptor;</pre></td><td class="explain">管理端拦截：只放行启用 ADMIN，其余一律回登录页。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletRequest;</pre></td><td class="explain">取会话与原始地址。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletResponse;</pre></td><td class="explain">发 302。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">管理端登录态存在会话里。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">重查账号角色与状态。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.service.AccountService;</pre></td><td class="explain">按 id 读库，停用即时生效。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.HandlerInterceptor;</pre></td><td class="explain">拦截器接口。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.net.URLEncoder;</pre></td><td class="explain">回跳地址要编码。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.nio.charset.StandardCharsets;</pre></td><td class="explain">编码用 UTF-8。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">// M07-02：依据 docs/01 FR-A-01、docs/02 §6.1、docs/04 §3.1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">// 管理端每个受保护请求都按 id 重读 store_user：只认 role=ADMIN 且 status=ENABLED。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// 只做"能不能进后台"这一层判断；分类/商品/订单的业务规则在各 Service。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 不做 CSRF（M09）、不记录操作审计（本期不做）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminAuthInterceptor implements HandlerInterceptor {</pre></td><td class="explain">管理端拦截器：只放行启用 ADMIN，其余回登录页。</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">    /** 会话里表示管理端登录态的键，与 AdminAuthController 写入的一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String USER_ID = "userId";</pre></td><td class="explain">会话里表示管理端登录态的键，与 AdminAuthController 写入的一致</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 会话里显示用的管理员名字 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String DISPLAY_NAME = "displayName";</pre></td><td class="explain">会话里显示用的管理员名字</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /** 管理端只承认管理员角色 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String ROLE_ADMIN = "ADMIN";</pre></td><td class="explain">与 AccountService 的角色口径一致。</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">    /** 停用账号即使会话还在也不再放行 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> String STATUS_ENABLED = "ENABLED";</pre></td><td class="explain">与数据库 status 列取值一致。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> AccountService accountService;</pre></td><td class="explain">每个受保护请求重读一次账号。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">public</span> AdminAuthInterceptor(AccountService accountService) {</pre></td><td class="explain">由 AdminWebConfig 注入。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        this.accountService = accountService;</pre></td><td class="explain">只用到 findById。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    @Override</pre></td><td class="explain">实现接口方法，由 MVC 在控制器前调用。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    <span class="kw">public</span> boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)</pre></td><td class="explain">处理前检查会话，返回 false 表示中断。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            throws Exception {</pre></td><td class="explain">声明抛出异常，调用方或测试框架负责处理。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">不新建会话：游客不该拿到管理端 Session。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        Object userId = session == null ? null : session.getAttribute(USER_ID);</pre></td><td class="explain">会话里的身份。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        if (userId instanceof Long id &amp;&amp; allowed(id)) {</pre></td><td class="explain">身份存在且账号仍是启用管理员。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>            <span class="kw">return</span> true;</pre></td><td class="explain">放行。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        if (session != null) {</pre></td><td class="explain">有会话但身份不合格：作废它。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>            session.invalidate();</pre></td><td class="explain">账号停用/被删/换成顾客：作废这份旧会话。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        String target = URLEncoder.encode(insidePath(request), StandardCharsets.UTF_8);</pre></td><td class="explain">记住要回来的后台地址。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        response.sendRedirect(request.getContextPath() + "/login?redirect=" + target);</pre></td><td class="explain">302 到管理端登录页。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">return</span> false;</pre></td><td class="explain">中断本次请求。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">    /** 账号是否仍可进后台：存在、是 ADMIN、状态 ENABLED。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">private</span> boolean allowed(<span class="kw">long</span> userId) {</pre></td><td class="explain">账号是否仍可进后台：存在、是 ADMIN、状态 ENABLED。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        StoreUser user = accountService.findById(userId);</pre></td><td class="explain">每次请求都读库，停用即时生效。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        <span class="kw">return</span> user != null</pre></td><td class="explain">账号被删也按未登录处理。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                &amp;&amp; ROLE_ADMIN.equals(user.getRole())</pre></td><td class="explain">顾客不能进后台。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                &amp;&amp; STATUS_ENABLED.equals(user.getStatus());</pre></td><td class="explain">停用账号立刻失去登录态。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre class="cmtline">     * 取出 context-path 之后的站内路径。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">     * &lt;p&gt;重定向目标要交给 Spring 再拼一次 context-path，所以这里必须去掉 /admin 前缀，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre class="cmtline">     * 否则登录后会变成 /admin/admin/xxx。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">private</span> String insidePath(HttpServletRequest request) {</pre></td><td class="explain">取出 context-path 之后的站内路径。 重定向目标要交给 Spring 再拼一次 context-path，所以这里必须去掉 /admin 前缀， 否则登录后会变成 /admin/admin/xxx。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        String uri = request.getRequestURI();</pre></td><td class="explain">含 context-path，例如 /admin/categories。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        String contextPath = request.getContextPath();</pre></td><td class="explain">本应用固定 /admin。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        String path = uri.startsWith(contextPath) ? uri.substring(contextPath.length()) : uri;</pre></td><td class="explain">去掉前缀。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        if (path.isBlank()) {</pre></td><td class="explain">访问 /admin 本身时按根路径处理。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>            path = "/";</pre></td><td class="explain">访问 /admin 本身时回控制台。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        <span class="kw">return</span> request.getQueryString() == null ? path : path + "?" + request.getQueryString();</pre></td><td class="explain">查询串一并带上。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>AdminWebConfig.java<small>全站拦截 + 登录/静态白名单 · 全文件 28 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/config/AdminWebConfig.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.config;</pre></td><td class="explain">管理端 Web 配置：注册身份拦截器。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.service.AccountService;</pre></td><td class="explain">拦截器要按 id 重查账号。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.interceptor.AdminAuthInterceptor;</pre></td><td class="explain">只放行启用 ADMIN。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">标记配置类。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.config.annotation.InterceptorRegistry;</pre></td><td class="explain">拦截器注册表。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.servlet.config.annotation.WebMvcConfigurer;</pre></td><td class="explain">MVC 扩展点。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M07-02：管理端第一次引入拦截器。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 与用户端不同，这里采用"全站拦截 + 白名单"：后台页面只会增加、不会减少，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 新加一个管理页忘了登记就等于默认受保护，比逐个列出更安全。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：不写业务逻辑。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminWebConfig implements WebMvcConfigurer {</pre></td><td class="explain">管理端拦截器注册：全站受保护，登录与静态资源放行。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> AccountService accountService;</pre></td><td class="explain">拦截器需要它按 id 读账号。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> AdminWebConfig(AccountService accountService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        this.accountService = accountService;</pre></td><td class="explain">保存账号服务。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    @Override</pre></td><td class="explain">覆盖 MVC 扩展点：注册拦截器。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> addInterceptors(InterceptorRegistry registry) {</pre></td><td class="explain">注册拦截器，由 Spring 调用。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        registry.addInterceptor(<span class="kw">new</span> AdminAuthInterceptor(accountService))</pre></td><td class="explain">每个后台请求都重查身份。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                .addPathPatterns("/**")</pre></td><td class="explain">默认全部受保护。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                .excludePathPatterns("/login", "/logout", "/health",</pre></td><td class="explain">登录与探活不需要登录态。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                        "/css/**", "/images/**", "/js/**", "/favicon.ico", "/error");</pre></td><td class="explain">静态资源与错误页放行。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>AdminAuthController.java<small>登录、退出与会话 ID 轮换 · 全文件 84 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/AdminAuthController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.controller;</pre></td><td class="explain">管理端登录与退出。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletRequest;</pre></td><td class="explain">重建会话要用请求而不是 session 参数。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">旧会话要作废。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.entity.StoreUser;</pre></td><td class="explain">登录成功后只取 id 与显示名。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.account.service.AccountService;</pre></td><td class="explain">管理端登录校验。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.interceptor.AdminAuthInterceptor;</pre></td><td class="explain">会话键常量与拦截器保持一致。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">登录失败转表单提示。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">MVC 控制器。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">失败时回填用户名与提示。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">打开登录页。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PostMapping;</pre></td><td class="explain">提交登录、退出。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.RequestParam;</pre></td><td class="explain">接收登录表单的三个字段。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// M07-02：依据 docs/01 FR-A-01、docs/02 §6.2、docs/04 §3.1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 只做"管理员登录/退出"：角色与状态由 AccountService.authenticateAdmin 判断。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 不做验证码、记住登录、找回密码（docs/01 §1.3 明确不做）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>@Controller</pre></td><td class="explain">返回模板名，不走 REST。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminAuthController {</pre></td><td class="explain">管理端登录与退出；角色判断交给 AccountService。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> AccountService accountService;</pre></td><td class="explain">只调用两个登出入口里的管理端那个。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> AdminAuthController(AccountService accountService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        this.accountService = accountService;</pre></td><td class="explain">保存账号服务。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 打开登录页：已登录的管理员直接进控制台。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    @GetMapping("/login")</pre></td><td class="explain">打开登录页。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">public</span> String page(HttpServletRequest request) {</pre></td><td class="explain">打开登录页：已登录的管理员直接进控制台。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">不新建会话。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        if (session != null &amp;&amp; session.getAttribute(AdminAuthInterceptor.USER_ID) != null) {</pre></td><td class="explain">已经有登录态。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            <span class="kw">return</span> "redirect:/";</pre></td><td class="explain">拦截器会再核一次身份，不合格自然回登录页。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        <span class="kw">return</span> "admin/login";</pre></td><td class="explain">首次访问：渲染登录表单。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">36</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     * 提交登录：校验通过后换会话 ID 再写身份。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">     * &lt;p&gt;登录成功先 {@code changeSessionId()}，让登录前的会话 ID 立即作废，防止会话固定攻击</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">     * （docs/02 §6.2 的"重建会话"在 Servlet 3.1+ 的等价做法）。失败统一回表单，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">     * 文案由 AccountService 给出，不区分账号不存在、密码错、角色不符与已停用。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    @PostMapping("/login")</pre></td><td class="explain">提交登录。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    <span class="kw">public</span> String login(@RequestParam String username,</pre></td><td class="explain">表单用户名。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                        @RequestParam String password,</pre></td><td class="explain">表单密码，不回显、不记日志。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                        @RequestParam(required = false) String redirect,</pre></td><td class="explain">被拦时记下的后台地址。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                        HttpServletRequest request,</pre></td><td class="explain">用来换会话 ID。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                        Model model) {</pre></td><td class="explain">失败时回填。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        StoreUser admin;</pre></td><td class="explain">登录成功后的管理员；失败时直接回表单，不会走到这里。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        try {</pre></td><td class="explain">登录失败抛 BizException，在这里转成表单提示。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>            admin = accountService.authenticateAdmin(username, password);</pre></td><td class="explain">只接受启用 ADMIN。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        } catch (BizException e) {</pre></td><td class="explain">登录失败：回表单。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>            model.addAttribute("error", e.getMessage());</pre></td><td class="explain">统一文案。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>            model.addAttribute("username", username);</pre></td><td class="explain">用户名可回显。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>            <span class="kw">return</span> "admin/login";</pre></td><td class="explain">停在登录页。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        HttpSession session = request.getSession(true);</pre></td><td class="explain">登录前没有会话就在这里建一个。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        request.changeSessionId();</pre></td><td class="explain">换掉会话 ID：旧的登录前 ID 作废。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        session.setAttribute(AdminAuthInterceptor.USER_ID, admin.getId());</pre></td><td class="explain">会话只存 id。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        session.setAttribute(AdminAuthInterceptor.DISPLAY_NAME, admin.getDisplayName());</pre></td><td class="explain">显示名只用于页头。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        <span class="kw">return</span> "redirect:" + safeRedirect(redirect);</pre></td><td class="explain">回被拦的后台页，默认控制台。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">64</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre class="cmtline">    /** 退出：销毁管理端会话后回登录页。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    @PostMapping("/logout")</pre></td><td class="explain">登出：POST 避免被预取或误触。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">public</span> String logout(HttpServletRequest request) {</pre></td><td class="explain">退出：销毁管理端会话后回登录页。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">没有会话就不用作废。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        if (session != null) {</pre></td><td class="explain">没有会话时不必作废。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            session.invalidate();</pre></td><td class="explain">只清管理端会话，用户端会话不受影响。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/login";</pre></td><td class="explain">回登录页。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">74</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre class="cmtline">    /** 只接受站内相对路径；外部地址与畸形值一律回控制台。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    <span class="kw">private</span> String safeRedirect(String redirect) {</pre></td><td class="explain">只接受站内相对路径；外部地址与畸形值一律回控制台。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        if (redirect == null || redirect.isBlank()</pre></td><td class="explain">没带地址。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                || !redirect.startsWith("/")</pre></td><td class="explain">必须是站内绝对路径。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                || redirect.startsWith("//")) {</pre></td><td class="explain">协议相对地址会跳到外站。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>            <span class="kw">return</span> "/";</pre></td><td class="explain">默认回控制台。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        <span class="kw">return</span> redirect;</pre></td><td class="explain">保留原地址与查询串。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>AdminHomeController.java<small>控制台：身份与入口 · 全文件 21 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/AdminHomeController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.controller;</pre></td><td class="explain">管理端控制台：身份 + 导航入口。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">取当前管理员的显示名。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.interceptor.AdminAuthInterceptor;</pre></td><td class="explain">会话键常量。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">MVC 控制器。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">传给模板。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">只读页面。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M07-02：依据 docs/01 FR-A-01、docs/05 §2.2 / §4.9。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 控制台只回答"当前是谁、能去哪"，不显示任何统计数字（docs/05 §4.9 明确要求）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 三个业务入口随后续任务接入：分类 M07-04、商品 M07-06、订单 M07-08。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Controller</pre></td><td class="explain">返回模板名。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminHomeController {</pre></td><td class="explain">控制台：只给身份与入口，不显示统计数字。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 控制台：/admin 与 /admin/ 都落到这里 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @GetMapping({"", "/"})</pre></td><td class="explain">/admin 与 /admin/ 都落到控制台。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> String home(HttpSession session, Model model) {</pre></td><td class="explain">拦截器保证走到这里时已是启用管理员。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        model.addAttribute("adminName", session.getAttribute(AdminAuthInterceptor.DISPLAY_NAME));</pre></td><td class="explain">页头显示名。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        <span class="kw">return</span> "admin/main";</pre></td><td class="explain">控制台模板。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>AdminExceptionHandler.java<small>业务异常转管理端错误页 · 全文件 22 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/AdminExceptionHandler.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.controller;</pre></td><td class="explain">管理端统一异常页。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletResponse;</pre></td><td class="explain">设置 HTTP 状态码。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">业务异常带状态与文案。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">把文案交给模板。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ControllerAdvice;</pre></td><td class="explain">全局生效。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ExceptionHandler;</pre></td><td class="explain">只接业务异常。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M07-02：管理端第一份错误页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 只翻译 BizException（400/404/409 等业务失败）；技术异常仍走 Spring 默认错误页，不泄露堆栈。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@ControllerAdvice</pre></td><td class="explain">对管理端所有 Controller 生效。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> AdminExceptionHandler {</pre></td><td class="explain">管理端业务异常统一转错误页；技术异常不在这里处理。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">    /** 业务失败：状态码取异常的 code，页面显示可读文案。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    @ExceptionHandler(BizException.<span class="kw">class</span>)</pre></td><td class="explain">指定这个方法处理哪类异常</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">public</span> String handleBiz(BizException e, Model model, HttpServletResponse response) {</pre></td><td class="explain">异常处理方法：设置状态码并返回错误页</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>        response.setStatus(e.code().status());</pre></td><td class="explain">400 / 404 / 409 等。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        model.addAttribute("message", e.getMessage());</pre></td><td class="explain">用户可读文案。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        model.addAttribute("status", e.code().status());</pre></td><td class="explain">模板里显示状态码。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>        <span class="kw">return</span> "error/error";</pre></td><td class="explain">管理端错误页。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s6">
+<h2>admin/fragments.html<small>管理端公共片段：head / topbar / header / footer · 全文件 49 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/resources/templates/admin/fragments.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档声明。</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">lang=zh-CN + Thymeleaf 命名空间。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:fragment="head(title)"&gt;</pre></td><td class="explain">公共 head：标题后缀与后台样式表。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>    &lt;meta charset="UTF-8"&gt;</pre></td><td class="explain">统一 UTF-8，中文不乱码。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre>    &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</pre></td><td class="explain">1366 宽下验收，缩放交给浏览器。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>    &lt;<span class="kw">title</span> th:text="${title} + ' | 漫屿管理端'"&gt;漫屿管理端&lt;/<span class="kw">title</span>&gt;</pre></td><td class="explain">标题统一加「 | 漫屿管理端」后缀。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>    &lt;<span class="kw">link</span> rel="stylesheet" th:href="@{/css/admin.css}"&gt;</pre></td><td class="explain">后台只引 admin.css，不引用户端样式。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;head&gt; 容器</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">公共片段集中在一个文件，各页按需 replace。</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">&lt;!-- 顶部条：说明这是管理端，并给出当前管理员与退出 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>&lt;<span class="kw">div</span> class="admin-topbar" th:fragment="topbar"&gt;</pre></td><td class="explain">顶部条：声明这是管理端与演示数据。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度与页头对齐。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>        &lt;<span class="kw">span</span>&gt;漫屿 MANGA ISLE &lt;<span class="kw">b</span> class="tag"&gt;管理端&lt;/<span class="kw">b</span>&gt; 教学演示站点，商品与订单均为虚构数据&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">明确写「教学演示站点，商品与订单均为虚构数据」。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">        &lt;!-- 模板里直接取会话中的显示名：拦截器已经校验过身份 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>        &lt;<span class="kw">span</span> th:if="${session.displayName != null}"&gt;</pre></td><td class="explain">没有登录态时不渲染退出按钮。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;<span class="kw">b</span> th:text="${session.displayName}"&gt;管理员&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">显示当前管理员，只读。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>            &lt;<span class="kw">form</span> th:action="@{/logout}" method="post" class="logout-form"&gt;</pre></td><td class="explain">退出必须走 POST，避免被链接预取。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;<span class="kw">button</span> type="submit" class="link-btn"&gt;退出&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">样式做成链接，行为是提交表单。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        &lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;span&gt; 容器</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">&lt;!-- 页头：品牌 + 后台导航；后续任务往 nav 里加入口 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>&lt;<span class="kw">header</span> class="admin-header" th:fragment="header"&gt;</pre></td><td class="explain">页头：品牌 + 后台导航。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap header-main"&gt;</pre></td><td class="explain">页头也用同一内容宽度。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        &lt;<span class="kw">a</span> class="brand" th:href="@{/}"&gt;</pre></td><td class="explain">点品牌回控制台。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>            &lt;<span class="kw">span</span> class="mark"&gt;漫&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">品牌方框字，与用户端一致。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            &lt;<span class="kw">span</span>&gt;&lt;<span class="kw">b</span>&gt;漫屿&lt;/<span class="kw">b</span>&gt;&lt;<span class="kw">small</span>&gt;ADMIN CONSOLE&lt;/<span class="kw">small</span>&gt;&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">中文名 + 英文小字。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        &lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;a&gt; 容器</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        &lt;<span class="kw">nav</span> class="admin-nav"&gt;</pre></td><td class="explain">后台导航；入口随后续任务增加。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            &lt;<span class="kw">a</span> th:href="@{/}" th:classappend="${active == 'home'} ? 'on'"&gt;控制台&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">只有一个入口时也高亮当前页。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;nav&gt; 容器</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        &lt;<span class="kw">span</span> class="who" th:if="${session.displayName != null}"</pre></td><td class="explain">页头右侧显示当前管理员。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>              th:text="|当前管理员：${session.displayName}|"&gt;当前管理员&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">显示名来自会话，不额外查库。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>&lt;/<span class="kw">header</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;header&gt; 容器</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">&lt;!-- 页脚 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>&lt;<span class="kw">footer</span> class="admin-footer" th:fragment="footer"&gt;</pre></td><td class="explain">页脚：品牌与演示声明。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">页脚同一宽度。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        &lt;<span class="kw">b</span>&gt;漫屿 MANGA ISLE&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">页脚品牌名。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        &lt;<span class="kw">span</span>&gt;管理端 · 教学演示，不涉及真实资金与物流&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">写明不涉及真实资金与物流。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;footer&gt; 容器</td></tr>
+<tr class="gap"><td class="line">47</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s7">
+<h2>admin/login.html<small>登录页：只接受管理员 + 统一失败文案 · 全文件 37 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/resources/templates/admin/login.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档声明。</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">lang=zh-CN + Thymeleaf 命名空间。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{admin/fragments :: head('管理员登录')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">复用公共 head，标题「管理员登录」。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span> class="login-body"&gt;</pre></td><td class="explain">登录页单独的背景与居中布局。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">&lt;!-- 管理端登录：与用户端同构，但文案明确"管理员入口" --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>&lt;<span class="kw">main</span> class="login-wrap"&gt;</pre></td><td class="explain">整页居中，页脚贴底。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="login-card"&gt;</pre></td><td class="explain">登录卡片：硬阴影 + 粗描边。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>        &lt;<span class="kw">span</span> class="kicker"&gt;MANGA ISLE / ADMIN&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文小标题，与用户端同一套视觉。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">h1</span>&gt;管理员登录&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">页面标题写「管理员登录」，与用户端区分。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">p</span> class="lead"&gt;这里是店铺管理后台，只接受管理员账号。顾客请到用户端登录。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">一句话说明这是后台、顾客请去用户端。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">        &lt;!-- 登录失败时的一次性提示：文案统一为"账号或密码错误，或账号不可用" --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>        &lt;<span class="kw">p</span> class="form-error" th:if="${error}" th:text="${error}"&gt;账号或密码错误，或账号不可用&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">失败提示：文案由 AccountService 统一给出。</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>        &lt;<span class="kw">form</span> th:action="@{/login}" method="post" class="login-form"&gt;</pre></td><td class="explain">POST 到 /login；页面不传角色，角色由服务端判断。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;label&gt;</pre></td><td class="explain">用户名标签。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;<span class="kw">span</span>&gt;管理员账号&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">标签文案用「管理员账号」。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">                &lt;!-- 失败时回显用户名，但密码永远不回显 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="text" name="username" th:value="${username}" required autofocus autocomplete="username"&gt;</pre></td><td class="explain">失败时回显用户名；浏览器可记住。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>            &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>            &lt;label&gt;</pre></td><td class="explain">密码标签。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                &lt;<span class="kw">span</span>&gt;密码&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">密码不回显。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="password" name="password" required autocomplete="current-password"&gt;</pre></td><td class="explain">密码不回显、不记日志。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            &lt;/label&gt;</pre></td><td class="explain">结构闭合：结束 &lt;label&gt; 容器</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>            &lt;<span class="kw">button</span> type="submit" class="btn btn-primary"&gt;登录后台&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">提交登录。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器</td></tr>
+<tr class="gap"><td class="line">28</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        &lt;<span class="kw">p</span> class="hint"&gt;教学账号：&lt;<span class="kw">b</span>&gt;admin&lt;/<span class="kw">b</span>&gt; / &lt;<span class="kw">b</span>&gt;Cartoon123!&lt;/<span class="kw">b</span>&gt;&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">教学账号写在页面上，方便验收。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        &lt;<span class="kw">p</span> class="hint"&gt;顾客不能从这里登录；管理员也不能在用户端下单。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">写明两端身份互斥。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{admin/fragments :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">页脚复用公共片段。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s8">
+<h2>admin/main.html<small>控制台：身份卡 + 三个待接入入口 · 全文件 58 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/resources/templates/admin/main.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档声明。</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">lang=zh-CN + Thymeleaf 命名空间。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{admin/fragments :: head('控制台')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">控制台标题。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">控制台用公共页头。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{admin/fragments :: topbar}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">顶部条：当前管理员与退出。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>&lt;<span class="kw">header</span> th:replace="~{admin/fragments :: header}"&gt;&lt;/<span class="kw">header</span>&gt;</pre></td><td class="explain">页头：品牌与导航。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">主内容区。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="console"&gt;</pre></td><td class="explain">控制台整块。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">内容宽度。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline">            &lt;!-- 身份区：只显示当前管理员，不显示任何统计数字 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="console-head"&gt;</pre></td><td class="explain">标题区与身份卡左右排布。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">左侧：标题与说明。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="kicker"&gt;DASHBOARD&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文小标题。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                    &lt;<span class="kw">h1</span>&gt;控制台&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">页面标题。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="lead"&gt;在这里维护作品与商品、处理全站订单。页面不展示统计数字，一切以列表页的真实查询为准。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明不展示统计数字，数据以列表为准。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="identity"&gt;</pre></td><td class="explain">身份卡：只显示当前管理员。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>                    &lt;<span class="kw">span</span>&gt;当前管理员&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">字段名。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:text="${adminName}"&gt;admin&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">显示名来自会话。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                    &lt;<span class="kw">form</span> th:action="@{/logout}" method="post"&gt;</pre></td><td class="explain">身份卡里也给一个退出入口。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                        &lt;<span class="kw">button</span> type="submit" class="btn btn-ghost"&gt;退出登录&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">退出后回登录页。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                    &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">            &lt;!-- 三个业务入口：接入前显示为"待接入"，不放到点了会 404 的链接 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="entry-grid"&gt;</pre></td><td class="explain">三个业务入口。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="entry-card pending"&gt;</pre></td><td class="explain">分类入口：未接入，显示为待接入。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="kicker"&gt;CATEGORIES&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文小标题。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;分类维护&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">入口名。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                    &lt;<span class="kw">p</span>&gt;两级分类：作品（一级）与单行本 / 周边（二级），含引用校验与删除保护。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">一句话说明这个入口能做什么。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="badge"&gt;待接入（M07-04）&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">标明接入任务，避免点了打不开。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="entry-card pending"&gt;</pre></td><td class="explain">商品入口：未接入。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="kicker"&gt;PRODUCTS&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文小标题。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;商品维护&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">入口名。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                    &lt;<span class="kw">p</span>&gt;查询与新增商品、编辑资料与价格、上下架、增量补货（含版本冲突检测）。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明包含版本冲突检测。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="badge"&gt;待接入（M07-06）&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">标明接入任务。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="entry-card pending"&gt;</pre></td><td class="explain">订单入口：未接入。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="kicker"&gt;ORDERS&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文小标题。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;订单处理&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">入口名。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                    &lt;<span class="kw">p</span>&gt;全站查单与详情，只对已支付订单发货，保留首次发货时间。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">说明只对已支付订单发货。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="badge"&gt;待接入（M07-08）&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">标明接入任务。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">49</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>            &lt;<span class="kw">p</span> class="console-note"&gt;三个入口随后续任务接入；接入前保持"待接入"状态，避免出现点了打不开的按钮。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">解释为什么是待接入状态。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{admin/fragments :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">页脚复用公共片段。</td></tr>
+<tr class="gap"><td class="line">56</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s9">
+<h2>error/error.html<small>管理端错误页 · 全文件 22 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/resources/templates/error/error.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">HTML5 文档声明。</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">lang=zh-CN + Thymeleaf 命名空间。</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{admin/fragments :: head('操作未完成')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">错误页标题。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">错误页也用公共页头。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{admin/fragments :: topbar}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">顶部条。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre>&lt;<span class="kw">header</span> th:replace="~{admin/fragments :: header}"&gt;&lt;/<span class="kw">header</span>&gt;</pre></td><td class="explain">页头。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">主内容区。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">    &lt;!-- 业务失败：状态码取 BizException 的 code，文案由 Service 给出 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>    &lt;<span class="kw">div</span> class="error-box"&gt;</pre></td><td class="explain">错误盒子：状态码 + 文案 + 返回入口。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>        &lt;<span class="kw">span</span> class="kicker"&gt;ERROR&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">英文小标题。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>        &lt;<span class="kw">h1</span> th:text="${status} ?: '操作未完成'"&gt;操作未完成&lt;/<span class="kw">h1</span>&gt;</pre></td><td class="explain">显示 HTTP 状态码；没有就写「操作未完成」。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>        &lt;<span class="kw">p</span> class="error-message" th:text="${message} ?: '请返回后重试'"&gt;请返回后重试&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">业务异常的可读文案。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>        &lt;<span class="kw">a</span> class="btn" th:href="@{/}"&gt;返回控制台&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">错误页永远给一个出口。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{admin/fragments :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">页脚复用公共片段。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s10">
+<h2>AdminLoginTest.java<small>12 个登录/拦截/控制台用例 · 全文件 186 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/AdminLoginTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin;</pre></td><td class="explain">管理端登录、控制台与身份拦截。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminFixture;</pre></td><td class="explain">造账号与会话。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminIntegrationTest;</pre></td><td class="explain">真实 MySQL + 每例重建表。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入 MockMvc / JdbcTemplate。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">造账号、改状态。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">手工会话。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.security.crypto.password.PasswordEncoder;</pre></td><td class="explain">真实 BCrypt 散列。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MvcResult;</pre></td><td class="explain">取登录后的会话。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">页面内容断言。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">断言页面内容。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;</pre></td><td class="explain">断言 302 目标。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">状态码断言。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">// M07-02：依据 docs/01 FR-A-01、docs/06 AC-05/AC-07、docs/04 §3.1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">// 覆盖：登录页渲染、管理员登录成功、顾客/停用/错密码被拒、控制台需要登录、顾客会话进不来、</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">//       登录后被停用立即失效、退出清会话、静态资源放行。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// 不覆盖：分类/商品/订单页面（M07-04/06/08）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre><span class="kw">class</span> AdminLoginTest <span class="kw">extends</span> AdminIntegrationTest {</pre></td><td class="explain">管理端登录与拦截的集成用例。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造账号、改状态。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> PasswordEncoder passwordEncoder;</pre></td><td class="explain">造真实可登录的密码。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Test</pre></td><td class="explain">登录页是公开页：不带会话也要能打开。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @DisplayName("登录页可匿名访问，页面上写明这是管理员入口")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">void</span> loginPageRenders() throws Exception {</pre></td><td class="explain">用例：登录页可匿名访问，并写明这是管理员入口。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        mockMvc.perform(get("/login"))</pre></td><td class="explain">未登录访问后台登录页。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">200：公开页不跳转。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                .andExpect(content().string(containsString("管理员登录")))</pre></td><td class="explain">标题与用户端区分。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                .andExpect(content().string(containsString("只接受管理员账号")));</pre></td><td class="explain">文案说明身份边界。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">47</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    @Test</pre></td><td class="explain">已登录后再打开登录页：不该重复登录。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    @DisplayName("已登录管理员访问登录页：跳控制台")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    <span class="kw">void</span> loggedInAdminGoesToConsole() throws Exception {</pre></td><td class="explain">用例：已登录管理员访问登录页，直接去控制台。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "ad_login");</pre></td><td class="explain">库里真实的启用管理员。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        mockMvc.perform(get("/login").session(AdminFixture.session(adminId)))</pre></td><td class="explain">带着登录态访问登录页。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">302 而不是渲染表单。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                .andExpect(redirectedUrl("/"));</pre></td><td class="explain">直接回控制台。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">57</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    @Test</pre></td><td class="explain">正确的管理员账号：登录成功并写入会话。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>    @DisplayName("管理员登录成功：302 控制台，会话写入 id 与显示名")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    <span class="kw">void</span> loginSucceeds() throws Exception {</pre></td><td class="explain">用例：管理员登录成功，会话写入 id 与显示名。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        <span class="kw">long</span> adminId = seed("ad_ok", "Cartoon123!", "ADMIN", "ENABLED");</pre></td><td class="explain">密码可用的启用管理员。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        MvcResult result = mockMvc.perform(post("/login")</pre></td><td class="explain">提交登录表单。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                        .param("username", "ad_ok")</pre></td><td class="explain">用户名。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                        .param("password", "Cartoon123!"))</pre></td><td class="explain">正确密码。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">POST/Redirect/GET。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .andExpect(redirectedUrl("/"))</pre></td><td class="explain">默认回控制台。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">取回结果，以便检查登录后的会话。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        MockHttpSession session = (MockHttpSession) result.getRequest().getSession(false);</pre></td><td class="explain">登录后请求上的会话。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>        assertThat(session).isNotNull();</pre></td><td class="explain">一定建了会话。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        assertThat(session.getAttribute("userId")).isEqualTo(adminId);</pre></td><td class="explain">会话只存 id。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        assertThat(session.getAttribute("displayName")).isNotNull();</pre></td><td class="explain">页头要显示名。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">74</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    @Test</pre></td><td class="explain">顾客不能进后台（AC-05）。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    @DisplayName("顾客登录管理端：统一文案，不写会话（AC-05）")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    <span class="kw">void</span> customerCannotLogIn() throws Exception {</pre></td><td class="explain">用例：顾客登录管理端被拒，且不建会话（AC-05）。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        seed("ad_cust", "Cartoon123!", "CUSTOMER", "ENABLED");</pre></td><td class="explain">启用的普通顾客。</td></tr>
+<tr class="gap"><td class="line">79</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        MvcResult result = mockMvc.perform(post("/login")</pre></td><td class="explain">顾客尝试登录后台。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                        .param("username", "ad_cust")</pre></td><td class="explain">用顾客账号登录后台。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                        .param("password", "Cartoon123!"))</pre></td><td class="explain">密码是对的，只差角色。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">停在登录页，不是 302。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                .andExpect(content().string(containsString("账号或密码错误，或账号不可用")))</pre></td><td class="explain">不透露"角色不符"。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">取回结果，以便检查登录后的会话。</td></tr>
+<tr class="gap"><td class="line">86</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        assertThat(result.getRequest().getSession(false)).isNull();</pre></td><td class="explain">失败不建会话，避免留下半登录态。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    @Test</pre></td><td class="explain">停用管理员不能登录。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    @DisplayName("停用管理员登录：同文案")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">void</span> disabledAdminCannotLogIn() throws Exception {</pre></td><td class="explain">用例：停用管理员登录被拒，文案与密码错一致。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        seed("ad_off", "Cartoon123!", "ADMIN", "DISABLED");</pre></td><td class="explain">账号被停用。</td></tr>
+<tr class="gap"><td class="line">94</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        mockMvc.perform(post("/login")</pre></td><td class="explain">停用账号尝试登录。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>                        .param("username", "ad_off")</pre></td><td class="explain">停用的管理员账号。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>                        .param("password", "Cartoon123!"))</pre></td><td class="explain">密码是对的，只差状态。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">停在登录页。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>                .andExpect(content().string(containsString("账号或密码错误，或账号不可用")));</pre></td><td class="explain">与密码错同文案，不暴露状态。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">101</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    @Test</pre></td><td class="explain">密码错：不透露账号是否存在。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    @DisplayName("密码错误：同文案")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>    <span class="kw">void</span> wrongPassword() throws Exception {</pre></td><td class="explain">用例：密码错不透露账号是否存在。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>        seed("ad_pwd", "Cartoon123!", "ADMIN", "ENABLED");</pre></td><td class="explain">准备：启用的管理员 ad_pwd。</td></tr>
+<tr class="gap"><td class="line">106</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        mockMvc.perform(post("/login")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>                        .param("username", "ad_pwd")</pre></td><td class="explain">存在的管理员。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>                        .param("password", "bad-pass"))</pre></td><td class="explain">故意输错密码。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">停在登录页。</td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre>                .andExpect(content().string(containsString("账号或密码错误，或账号不可用")));</pre></td><td class="explain">同一句文案。</td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">113</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>    @Test</pre></td><td class="explain">未登录访问后台：跳登录页并记住地址。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    @DisplayName("未登录访问控制台：302 登录页并带回跳地址")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>    <span class="kw">void</span> consoleRequiresLogin() throws Exception {</pre></td><td class="explain">用例：未登录访问控制台，跳登录页并记住地址。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        mockMvc.perform(get("/"))</pre></td><td class="explain">后台首页，没有会话。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">被拦截器拦下。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>                .andExpect(redirectedUrl("/login?redirect=%2F"));</pre></td><td class="explain">回跳地址编码后带上。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">121</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>    @Test</pre></td><td class="explain">登录后的控制台：显示当前管理员与三个待接入入口。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    @DisplayName("管理员访问控制台：显示身份，无统计数字")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>    <span class="kw">void</span> consoleRendersForAdmin() throws Exception {</pre></td><td class="explain">用例：控制台显示当前管理员与待接入入口。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "ad_home");</pre></td><td class="explain">启用的管理员。</td></tr>
+<tr class="gap"><td class="line">126</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        mockMvc.perform(get("/").session(AdminFixture.session(adminId)))</pre></td><td class="explain">带登录态。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">200。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                .andExpect(content().string(containsString("控制台")))</pre></td><td class="explain">页面标题。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                .andExpect(content().string(containsString("测试管理员")))</pre></td><td class="explain">当前管理员显示名。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>                .andExpect(content().string(containsString("分类维护")))</pre></td><td class="explain">入口占位存在。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>                .andExpect(content().string(containsString("待接入")));</pre></td><td class="explain">未接入的入口要标明，不放假链接。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">134</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>    @Test</pre></td><td class="explain">顾客拿到管理端会话也不能用（AC-05）。</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    @DisplayName("顾客会话访问控制台：被拒（AC-05）")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    <span class="kw">void</span> customerSessionRejected() throws Exception {</pre></td><td class="explain">用例：顾客会话进不了后台，旧会话被作废（AC-05）。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        <span class="kw">long</span> customerId = AdminFixture.createCustomer(jdbc, "ad_cust_s");</pre></td><td class="explain">顾客账号。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        MockHttpSession session = AdminFixture.session(customerId);</pre></td><td class="explain">冒充后台会话。</td></tr>
+<tr class="gap"><td class="line">140</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>        mockMvc.perform(get("/").session(session))</pre></td><td class="explain">想进后台。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">被拦。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                .andExpect(redirectedUrl("/login?redirect=%2F"));</pre></td><td class="explain">回登录页。</td></tr>
+<tr class="gap"><td class="line">144</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>        assertThat(session.isInvalid()).isTrue();</pre></td><td class="explain">旧会话被作废，不能继续尝试。</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">147</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    @Test</pre></td><td class="explain">登录后被停用：下一个请求就失效（AC-07）。</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    @DisplayName("登录后被停用：受保护请求被拒（AC-07）")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    <span class="kw">void</span> disabledAfterLoginRejected() throws Exception {</pre></td><td class="explain">用例：登录后被停用，下一个请求即被拒（AC-07）。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "ad_later");</pre></td><td class="explain">先启用。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        MockHttpSession session = AdminFixture.session(adminId);</pre></td><td class="explain">拿到登录态。</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        jdbc.update("UPDATE store_user SET status = 'DISABLED' WHERE id = ?", adminId);</pre></td><td class="explain">管理员把账号停用。</td></tr>
+<tr class="gap"><td class="line">154</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        mockMvc.perform(get("/").session(session))</pre></td><td class="explain">再访问后台。</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">被拦。</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>                .andExpect(redirectedUrl("/login?redirect=%2F"));</pre></td><td class="explain">回登录页。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">159</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>    @Test</pre></td><td class="explain">退出：销毁会话。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>    @DisplayName("退出：会话被销毁并回登录页")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>    <span class="kw">void</span> logoutClearsSession() throws Exception {</pre></td><td class="explain">用例：退出销毁管理端会话。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>        <span class="kw">long</span> adminId = AdminFixture.createAdmin(jdbc, "ad_out");</pre></td><td class="explain">启用的管理员。</td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>        MockHttpSession session = AdminFixture.session(adminId);</pre></td><td class="explain">登录态。</td></tr>
+<tr class="gap"><td class="line">165</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        mockMvc.perform(post("/logout").session(session))</pre></td><td class="explain">提交退出。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">302。</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>                .andExpect(redirectedUrl("/login"));</pre></td><td class="explain">回登录页。</td></tr>
+<tr class="gap"><td class="line">169</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        assertThat(session.isInvalid()).isTrue();</pre></td><td class="explain">会话作废，旧 ID 不能用。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">172</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="173"><td class="line">173</td><td class="code"><pre>    @Test</pre></td><td class="explain">静态资源不需要登录。</td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>    @DisplayName("样式表可匿名访问")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>    <span class="kw">void</span> cssIsOpen() throws Exception {</pre></td><td class="explain">用例：静态资源不需要登录。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>        mockMvc.perform(get("/css/admin.css"))</pre></td><td class="explain">后台样式表。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>                .andExpect(status().isOk());</pre></td><td class="explain">不被拦截器拦。</td></tr>
+<tr tabindex="0" data-line="178"><td class="line">178</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">179</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre class="cmtline">    /** 造一个密码可用的账号：密码用真实 BCrypt，角色与状态由用例指定 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> seed(String username, String rawPassword, String role, String status) {</pre></td><td class="explain">造一个密码可用的账号：密码用真实 BCrypt，角色与状态由用例指定</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) VALUES (?,?,?,?,?)",</pre></td><td class="explain">直接写库准备账号。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>                username, passwordEncoder.encode(rawPassword), "测试管理员", role, status);</pre></td><td class="explain">续行：真实 BCrypt 散列 + 用例指定的角色与状态。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM store_user WHERE username = ?", Long.<span class="kw">class</span>, username);</pre></td><td class="explain">返回 id 给会话用。</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s11">
+<h2>AdminFixture.java<small>管理端夹具：账号、会话、商品 · 全文件 68 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/support/AdminFixture.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.support;</pre></td><td class="explain">管理端测试夹具：造账号、造商品、造订单、造会话。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">直接写库准备数据。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">手工会话。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">价格与金额。</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// M07-02：管理端用例的准备数据都从这里来。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 账号：管理端只认 ADMIN，所以单独提供 createAdmin；顾客账号用于"顾客不能进后台"。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 商品与库存：M07-06/07 的版本冲突、补货并发要造"下单后"的状态。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">final</span> <span class="kw">class</span> AdminFixture {</pre></td><td class="explain">管理端用例的准备数据：账号、会话、商品、库存。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    <span class="kw">private</span> AdminFixture() {</pre></td><td class="explain">工具类不实例化。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">15</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">    /** 建一个启用的管理员，返回 id */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">long</span> createAdmin(JdbcTemplate jdbc, String username) {</pre></td><td class="explain">建一个启用的管理员，返回 id</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        <span class="kw">return</span> createUser(jdbc, username, "ADMIN", "ENABLED");</pre></td><td class="explain">管理端登录只认这个角色。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** 建一个启用的普通顾客，返回 id；用于"顾客不能进后台" */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">long</span> createCustomer(JdbcTemplate jdbc, String username) {</pre></td><td class="explain">建一个启用的普通顾客，返回 id；用于"顾客不能进后台"</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        <span class="kw">return</span> createUser(jdbc, username, "CUSTOMER", "ENABLED");</pre></td><td class="explain">顾客：启用状态，用于'顾客不能进后台'。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">    /** 建指定角色与状态的账号，返回 id */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">long</span> createUser(JdbcTemplate jdbc, String username, String role, String status) {</pre></td><td class="explain">建指定角色与状态的账号，返回 id</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                + "VALUES (?,?,?,?,?)", username, "$2a$10$test", "测试账号", role, status);</pre></td><td class="explain">散列不参与登录用例。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM store_user WHERE username = ?", Long.<span class="kw">class</span>, username);</pre></td><td class="explain">会话要用 id。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre class="cmtline">    /** 已登录会话：拦截器只认 userId，显示名用于页头 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> MockHttpSession session(<span class="kw">long</span> userId) {</pre></td><td class="explain">已登录会话：拦截器只认 userId，显示名用于页头</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        MockHttpSession session = <span class="kw">new</span> MockHttpSession();</pre></td><td class="explain">准备：手工会话，只放拦截器认的键。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        session.setAttribute("userId", userId);</pre></td><td class="explain">与 AdminAuthInterceptor.USER_ID 一致。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        session.setAttribute("displayName", "测试管理员");</pre></td><td class="explain">页头显示。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">return</span> session;</pre></td><td class="explain">交给请求构造器。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">    /** 把商品改成指定库存与版本：模拟"用户下单后"的状态 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">void</span> setStock(JdbcTemplate jdbc, <span class="kw">long</span> productId, <span class="kw">int</span> stock, <span class="kw">long</span> version) {</pre></td><td class="explain">把商品改成指定库存与版本：模拟"用户下单后"的状态</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        jdbc.update("UPDATE product SET stock = ?, version = ? WHERE id = ?", stock, version, productId);</pre></td><td class="explain">两条都要写，版本冲突靠它。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">    /** 读商品库存，核对并发结果 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">int</span> stockOf(JdbcTemplate jdbc, <span class="kw">long</span> productId) {</pre></td><td class="explain">读商品库存，核对并发结果</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        Integer stock = jdbc.queryForObject("SELECT stock FROM product WHERE id = ?", Integer.<span class="kw">class</span>, productId);</pre></td><td class="explain">单值查询。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        <span class="kw">return</span> stock == null ? 0 : stock;</pre></td><td class="explain">空值按 0，断言时不必再判空。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">51</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre class="cmtline">    /** 建"作品 + 单行本 + 商品"，返回商品 id；sku 同时用作分类 code 前缀保证唯一 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">long</span> createProduct(JdbcTemplate jdbc, String sku, String price, <span class="kw">int</span> stock, String status) {</pre></td><td class="explain">建"作品 + 单行本 + 商品"，返回商品 id；sku 同时用作分类 code 前缀保证唯一</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        String workCode = sku.replaceAll("[^A-Za-z0-9]", "").toUpperCase();</pre></td><td class="explain">分类编码只允许大写。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?, NULL, ?, 1)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                workCode, "作品" + workCode);</pre></td><td class="explain">一级分类：作品名带编码，便于识别。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        <span class="kw">long</span> workId = jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>, workCode);</pre></td><td class="explain">取一级 id。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        jdbc.update("INSERT INTO category (code, parent_id, name, sort_order) VALUES (?,?,?,1)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                workCode + "-COMIC", workId, "单行本");</pre></td><td class="explain">二级分类必须是 -COMIC 结尾，商品只能挂二级。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        <span class="kw">long</span> categoryId = jdbc.queryForObject("SELECT id FROM category WHERE code = ?", Long.<span class="kw">class</span>,</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                workCode + "-COMIC");</pre></td><td class="explain">取回二级分类 id。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        jdbc.update("INSERT INTO product (sku, category_id, name, summary, description, cover_image, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                        + "price, stock, status, sort_order) VALUES (?,?,?,?,?,?,?,?,?,1)",</pre></td><td class="explain">商品列清单：价格、库存、状态由用例给，排序固定 1。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                sku, categoryId, "商品" + sku, "一句话简介", "商品说明",</pre></td><td class="explain">值：SKU、分类、名称与文案。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                "images/products/" + sku + "/cover.svg", <span class="kw">new</span> BigDecimal(price), stock, status);</pre></td><td class="explain">封面路径按 SKU 拼；价格用 BigDecimal。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject("SELECT id FROM product WHERE sku = ?", Long.<span class="kw">class</span>, sku);</pre></td><td class="explain">用例要用商品 id。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s12">
+<h2>AdminIntegrationTest.java<small>管理端集成测试基座 · 全文件 26 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/support/AdminIntegrationTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.support;</pre></td><td class="explain">管理端测试基类：完整后台上下文 + 每个用例前重建表。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.testsupport.TestSchema;</pre></td><td class="explain">建表脚本的执行器。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">每个用例前执行。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入数据源。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.test.context.SpringBootTest;</pre></td><td class="explain">启动完整上下文。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.context.ActiveProfiles;</pre></td><td class="explain">用 test 配置。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> javax.sql.DataSource;</pre></td><td class="explain">重建表要用。</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// M07-02：管理端第一份集成测试基座。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline">// 与用户端同构，但单独放在 admin 模块：不把已验收的 175 个用例基线绑在一起改。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre class="cmtline">// 是否上移到 cartoon-test-support 留到 M09 统一评估。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>@SpringBootTest</pre></td><td class="explain">启动 CartoonAdminApplication。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>@ActiveProfiles("test")</pre></td><td class="explain">连 MyCartoonStore_test。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">public</span> abstract <span class="kw">class</span> AdminIntegrationTest {</pre></td><td class="explain">管理端集成测试基座：真实 MySQL + 每例重建表。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    protected DataSource dataSource;</pre></td><td class="explain">测试库连接池。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** 每个用例前重建七张表，避免用例之间互相污染。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前执行，用来重置数据</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">void</span> resetSchema() {</pre></td><td class="explain">每个用例前重建七张表，避免用例之间互相污染。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        TestSchema.reset(dataSource);</pre></td><td class="explain">删表 + 建表。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-17 · M07-02 · 管理端登录与控制台 · 12 个文件、676 行（兜底 0 行）。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

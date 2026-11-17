@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
+import org.csu.mycartoonstore.order.domain.OrderStatus; // 状态标签映射。
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -67,4 +68,9 @@ public class SalesOrder {
 
     /** updated_at */
     private LocalDateTime updatedAt;
+
+    /** 状态中文标签：模板直接展示，不在页面里写映射 */
+    public String getStatusLabel() {
+        return OrderStatus.labelOf(status); // 五种状态的统一文案。
+    }
 }

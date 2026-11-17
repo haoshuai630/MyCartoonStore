@@ -75,7 +75,7 @@ public class AuthController {
                         HttpSession session,
                         Model model) {
         try {
-            StoreUser user = accountService.authenticate(username, password);
+            StoreUser user = accountService.authenticateCustomer(username, password); // 只接受启用的 CUSTOMER。
             session.setAttribute("userId", user.getId());
             session.setAttribute("displayName", user.getDisplayName());
             return "redirect:" + safeRedirect(redirect);

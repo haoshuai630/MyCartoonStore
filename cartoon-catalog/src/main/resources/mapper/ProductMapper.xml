@@ -60,6 +60,38 @@
         LIMIT #{limit}
     </select>
 
+    <!-- 后台列表条件：含下架；分类给一级时取子树，给二级时精确 -->
+    <sql id="adminWhere">
+        FROM product p
+        JOIN category c ON c.id = p.category_id
+        <where>
+            <if test="q.categoryId != null">
+                AND (c.id = #{q.categoryId} OR c.parent_id = #{q.categoryId})
+            </if>
+            <if test="q.status != null and q.status != 'ALL'">
+                AND p.status = #{q.status}
+            </if>
+            <if test="q.keyword != null and q.keyword != ''">
+                AND p.name LIKE CONCAT('%', #{q.keyword}, '%')
+            </if>
+        </where>
+    </sql>
+
+    <!-- 后台列表：最近录入在前，排序不接受页面参数 -->
+    <select id="selectAdminPage" resultType="org.csu.mycartoonstore.catalog.dto.AdminProductRow">
+        SELECT p.id AS id, p.sku AS sku, p.name AS name, c.name AS categoryName,
+               p.price AS price, p.stock AS stock, p.status AS status,
+               p.sort_order AS sortOrder, p.version AS version
+        <include refid="adminWhere"/>
+        ORDER BY p.id DESC
+        LIMIT #{q.limit} OFFSET #{q.offset}
+    </select>
+
+    <select id="countAdminPage" resultType="long">
+        SELECT COUNT(*)
+        <include refid="adminWhere"/>
+    </select>
+
     <!-- 下单锁商品：按 id 升序，所有事务用同一顺序，避免死锁 -->
     <select id="lockByIds" resultType="org.csu.mycartoonstore.catalog.entity.Product">
         SELECT *

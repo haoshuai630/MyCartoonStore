@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head(${editing} ? '编辑分类' : '新增分类')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 面包屑：分类维护 / 新增或编辑 -->
+            <nav class="crumb">
+                <a th:href="@{/categories}">分类维护</a>
+                <span>/</span>
+                <b th:text="${editing} ? '编辑分类' : (${parentName} != null ? '新增品类' : '新增作品')">新增</b>
+            </nav>
+
+            <!-- 校验失败的红字：文案来自服务层 -->
+            <p class="alert error" th:if="${error}" th:text="${error}">编码已存在</p>
+
+            <!-- 新建与编辑共用一个表单；编辑时编码与父级不可改 -->
+            <form class="panel" method="post"
+                  th:action="${editing} ? @{/categories/{id}(id=${form.id})} : @{/categories}">
+                <h2 th:text="${editing} ? '编辑分类' : (${parentName} != null ? '新增品类' : '新增作品')">新增作品</h2>
+
+                <div class="form-grid">
+                    <!-- 父级：新增二级时只读展示，一级不显示 -->
+                    <label class="field" th:if="${parentName != null}">
+                        <span>所属作品</span>
+                        <input type="text" th:value="${parentName}" readonly>
+                        <small>父级创建后不可修改</small>
+                    </label>
+
+                    <!-- 编码：新增必填，编辑只读 -->
+                    <label class="field">
+                        <span>编码</span>
+                        <input type="text" name="code" th:value="${form.code}"
+                               th:readonly="${editing}" maxlength="32"
+                               th:placeholder="${parentName} != null ? '例如 STARLINE-COMIC' : '例如 STARLINE'">
+                        <small th:if="${!editing}">1–32 位大写字母、数字与连字符；二级必须以 -COMIC 或 -MERCH 结尾</small>
+                        <small th:if="${editing}">编码创建后不可修改</small>
+                    </label>
+
+                    <!-- 名称：1–50，同级唯一 -->
+                    <label class="field">
+                        <span>名称</span>
+                        <input type="text" name="name" th:value="${form.name}" required maxlength="50">
+                        <small>1–50 个字符，同级不能重名</small>
+                    </label>
+
+                    <!-- 排序：非负，越小越靠前 -->
+                    <label class="field">
+                        <span>排序</span>
+                        <input type="number" name="sortOrder" th:value="${form.sortOrder}" min="0" step="1">
+                        <small>非负整数，越小越靠前；缺省 0</small>
+                    </label>
+                </div>
+
+                <!-- 新增二级时把父级 id 一起提交；编辑时父级不可变，仍然带上以免丢失上下文 -->
+                <input type="hidden" name="parentId" th:if="${form.parentId != null}" th:value="${form.parentId}">
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" th:text="${editing} ? '保存修改' : '新增分类'">保存</button>
+                    <a class="btn btn-ghost" th:href="@{/categories}">返回列表</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

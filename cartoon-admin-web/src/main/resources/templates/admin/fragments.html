@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' | 漫屿管理端'">漫屿管理端</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<!-- 顶部条：说明这是管理端，并给出当前管理员与退出 -->
+<div class="admin-topbar" th:fragment="topbar">
+    <div class="wrap">
+        <span>漫屿 MANGA ISLE <b class="tag">管理端</b> 教学演示站点，商品与订单均为虚构数据</span>
+        <!-- 模板里直接取会话中的显示名：拦截器已经校验过身份 -->
+        <span th:if="${session.displayName != null}">
+            <b th:text="${session.displayName}">管理员</b>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="link-btn">退出</button>
+            </form>
+        </span>
+    </div>
+</div>
+
+<!-- 页头：品牌 + 后台导航；后续任务往 nav 里加入口 -->
+<header class="admin-header" th:fragment="header">
+    <div class="wrap header-main">
+        <a class="brand" th:href="@{/}">
+            <span class="mark">漫</span>
+            <span><b>漫屿</b><small>ADMIN CONSOLE</small></span>
+        </a>
+        <nav class="admin-nav">
+            <a th:href="@{/}" th:classappend="${active == 'home'} ? 'on'">控制台</a>
+            <a th:href="@{/categories}" th:classappend="${active == 'categories'} ? 'on'">分类维护</a>
+            <a th:href="@{/products}" th:classappend="${active == 'products'} ? 'on'">商品维护</a>
+            <a th:href="@{/orders}" th:classappend="${active == 'orders'} ? 'on'">订单处理</a>
+        </nav>
+        <span class="who" th:if="${session.displayName != null}"
+              th:text="|当前管理员：${session.displayName}|">当前管理员</span>
+    </div>
+</header>
+
+<!-- 页脚 -->
+<footer class="admin-footer" th:fragment="footer">
+    <div class="wrap">
+        <b>漫屿 MANGA ISLE</b>
+        <span>管理端 · 教学演示，不涉及真实资金与物流</span>
+    </div>
+</footer>
+
+</body>
+</html>
