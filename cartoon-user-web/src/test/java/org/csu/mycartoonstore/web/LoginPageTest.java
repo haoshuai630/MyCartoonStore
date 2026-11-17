@@ -1,6 +1,9 @@
 package org.csu.mycartoonstore.web;
 
 import org.csu.mycartoonstore.common.security.CsrfToken; // 断言令牌在换会话 ID 后仍在。
+import org.csu.mycartoonstore.web.captcha.CaptchaService; // 会话里的验证码键。
+import static org.csu.mycartoonstore.web.support.CaptchaFixture.captcha;
+import org.csu.mycartoonstore.web.support.CaptchaFixture; // 固定验证码。
 import org.csu.mycartoonstore.web.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,7 +52,7 @@ class LoginPageTest extends AbstractIntegrationTest {
         seedUser("alice", "Cartoon123!", "ENABLED");
         MockHttpSession session = new MockHttpSession();
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .session(session))
@@ -65,7 +68,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginWrongPassword() throws Exception {
         seedUser("alice", "Cartoon123!", "ENABLED");
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "alice")
                         .param("password", "bad-pass"))
                 .andExpect(status().isOk())
@@ -77,7 +80,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginDisabled() throws Exception {
         seedUser("carol", "Cartoon123!", "DISABLED");
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "carol")
                         .param("password", "Cartoon123!"))
                 .andExpect(status().isOk())
@@ -90,7 +93,7 @@ class LoginPageTest extends AbstractIntegrationTest {
         seedUser("admin", "Cartoon123!", "ENABLED", "ADMIN");
         MockHttpSession session = new MockHttpSession();
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "admin")
                         .param("password", "Cartoon123!")
                         .session(session))
@@ -105,7 +108,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginHonoursRedirect() throws Exception {
         seedUser("alice", "Cartoon123!", "ENABLED");
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .param("redirect", "/cart"))
@@ -118,7 +121,7 @@ class LoginPageTest extends AbstractIntegrationTest {
     void loginRejectsExternalRedirect() throws Exception {
         seedUser("alice", "Cartoon123!", "ENABLED");
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .param("redirect", "//evil.example.com"))
@@ -134,7 +137,7 @@ class LoginPageTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/login").session(session)).andReturn(); // 过滤器先签发令牌。
         String before = session.getId(); // 登录前的 ID。
 
-        mockMvc.perform(post("/login").with(csrf())
+        mockMvc.perform(post("/login").with(csrf()).with(captcha())
                         .param("username", "alice")
                         .param("password", "Cartoon123!")
                         .session(session))
@@ -154,9 +157,11 @@ class LoginPageTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/login").session(session)).andReturn(); // 拿到页面上的令牌。
         String token = (String) session.getAttribute(CsrfToken.SESSION_KEY);
 
+        session.setAttribute(CaptchaService.SESSION_KEY, CaptchaFixture.CODE); // M10-04：会话里放一个验证码。
         mockMvc.perform(post("/login") // 用真实令牌登录，而不是测试夹具的固定值。
                         .session(session)
                         .param(CsrfToken.PARAM_NAME, token)
+                        .param("captcha", CaptchaFixture.CODE) // M10-04：表单带上同一个验证码。
                         .param("username", "alice")
                         .param("password", "Cartoon123!"))
                 .andExpect(redirectedUrl("/main"));

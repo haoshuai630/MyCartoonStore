@@ -101,6 +101,7 @@ class CsrfProtectionTest extends AbstractIntegrationTest {
 
         mockMvc.perform(post("/login") // 正常表单。
                         .with(org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf())
+                        .with(org.csu.mycartoonstore.web.support.CaptchaFixture.captcha()) // M10-04：登录要验证码。
                         .param("username", "csrf_ok")
                         .param("password", "Cartoon123!"))
                 .andExpect(status().is3xxRedirection()) // 登录成功。

@@ -3,6 +3,7 @@ package org.csu.mycartoonstore.web.controller;
 import org.csu.mycartoonstore.account.entity.StoreUser;
 import org.csu.mycartoonstore.account.service.AccountService;
 import org.csu.mycartoonstore.common.exception.BizException;
+import org.csu.mycartoonstore.web.captcha.CaptchaService; // 验证码会话键与参数名。
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +23,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private final AccountService accountService;
+    private final CaptchaService captchaService; // 验证码会话键与参数名的来源。
 
-    public AuthController(AccountService accountService) {
+    public AuthController(AccountService accountService, CaptchaService captchaService) {
         this.accountService = accountService;
+        this.captchaService = captchaService;
     }
 
     /** 打开注册页：带一个空表单 */
@@ -43,8 +46,13 @@ public class AuthController {
                            @RequestParam String password,
                            @RequestParam String confirmPassword,
                            @RequestParam(required = false) String displayName,
+                           @RequestParam(required = false) String captcha,
+                           HttpSession session,
                            Model model,
                            RedirectAttributes redirect) {
+        if (!verifyCaptcha(session, captcha)) { // M10-04：验证码一次性，先于其他校验。
+            return backToForm(model, username, displayName, "验证码不正确，请重新输入");
+        }
         if (!password.equals(confirmPassword)) {
             return backToForm(model, username, displayName, "两次输入的密码不一致");
         }
@@ -75,8 +83,15 @@ public class AuthController {
     public String login(@RequestParam String username,
                         @RequestParam String password,
                         @RequestParam(required = false) String redirect,
+                        @RequestParam(required = false) String captcha,
                         HttpServletRequest request,
                         Model model) {
+        HttpSession loginSession = request.getSession(true); // 验证码要读会话。
+        if (!verifyCaptcha(loginSession, captcha)) { // 验证码错误：回表单，不区分账号是否存在。
+            model.addAttribute("error", "验证码不正确，请重新输入");
+            model.addAttribute("username", username);
+            return "auth/login";
+        }
         try {
             StoreUser user = accountService.authenticateCustomer(username, password); // 只接受启用的 CUSTOMER。
             HttpSession session = request.getSession(true); // CSRF 令牌已经建过会话；直接 POST 时在这里补建。
@@ -89,6 +104,18 @@ public class AuthController {
             model.addAttribute("username", username);
             return "auth/login";
         }
+    }
+
+    /**
+     * 校验并作废验证码：会话里的值与输入忽略大小写比较，读一次就删。
+     *
+     * <p>一次性可以防止同一张图被反复利用；页面刷新会重新请求 {@code /captcha} 拿新码。</p>
+     */
+    private boolean verifyCaptcha(HttpSession session, String input) {
+        Object expected = session.getAttribute(CaptchaService.SESSION_KEY); // 会话里的值。
+        session.removeAttribute(CaptchaService.SESSION_KEY); // 无论对错都作废。
+        return expected != null && input != null // 缺一即失败。
+                && expected.toString().equalsIgnoreCase(input.strip()); // 忽略大小写与首尾空白。
     }
 
     /** 登出：只清会话，不删其他状态 */

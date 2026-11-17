@@ -32,6 +32,13 @@
                     <span>确认密码</span>
                     <input type="password" name="confirmPassword" required minlength="8" autocomplete="new-password">
                 </label>
+                <!-- M10-04：注册同样要验证码，与登录共用 /captcha -->
+                <label>
+                    <span>验证码</span>
+                    <input name="captcha" maxlength="4" required autocomplete="off" placeholder="4 位字符">
+                </label>
+                <img class="captcha-img" th:src="@{/captcha}" alt="验证码"
+                     onclick="this.src='/captcha?t=' + Date.now()" title="看不清？点击换一张">
                 <button class="btn btn-primary" type="submit">注册</button>
             </form>
 

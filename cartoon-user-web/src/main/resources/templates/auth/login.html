@@ -25,6 +25,13 @@
                     <span>密码</span>
                     <input type="password" name="password" required autocomplete="current-password">
                 </label>
+                <!-- M10-04：图形验证码，点击图片换一张；服务端一次性校验 -->
+                <label>
+                    <span>验证码</span>
+                    <input name="captcha" maxlength="4" required autocomplete="off" placeholder="4 位字符">
+                </label>
+                <img class="captcha-img" th:src="@{/captcha}" alt="验证码"
+                     onclick="this.src='/captcha?t=' + Date.now()" title="看不清？点击换一张">
                 <button class="btn btn-primary" type="submit">登录</button>
             </form>
 

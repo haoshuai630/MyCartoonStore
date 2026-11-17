@@ -1,5 +1,6 @@
 package org.csu.mycartoonstore.web;
 
+import static org.csu.mycartoonstore.web.support.CaptchaFixture.captcha;
 import org.csu.mycartoonstore.web.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class RegisterPageTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("注册成功：跳登录页，库里是 BCrypt 散列")
     void registerSucceeds() throws Exception {
-        mockMvc.perform(post("/register").with(csrf())
+        mockMvc.perform(post("/register").with(csrf()).with(captcha())
                         .param("username", "newbie")
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123")
@@ -61,7 +62,7 @@ class RegisterPageTest extends AbstractIntegrationTest {
         jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "
                 + "VALUES ('alice', '$2a$10$0123456789012345678901234567890123456789012345678901', '爱丽丝', 'CUSTOMER', 'ENABLED')");
 
-        mockMvc.perform(post("/register").with(csrf())
+        mockMvc.perform(post("/register").with(csrf()).with(captcha())
                         .param("username", "alice")
                         .param("password", "Password123")
                         .param("confirmPassword", "Password123"))
@@ -72,7 +73,7 @@ class RegisterPageTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("两次密码不一致：不写入数据库")
     void registerPasswordMismatch() throws Exception {
-        mockMvc.perform(post("/register").with(csrf())
+        mockMvc.perform(post("/register").with(csrf()).with(captcha())
                         .param("username", "mismatch")
                         .param("password", "Password123")
                         .param("confirmPassword", "Password456"))
