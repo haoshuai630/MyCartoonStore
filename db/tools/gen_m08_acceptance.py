@@ -43,6 +43,25 @@ TASKS = {
             (WEB_TEST + "ProfilePageTest.java", "ProfilePageTest.java", "8 个页面与快照用例", "java"),
         ],
     },
+    "02": {
+        "title": "M08-02 · 修改密码",
+        "out": "M08-02-逐行验收.html",
+        "date": "2026-11-18",
+        "note": "内容：新密码规则（8–32 字符、UTF-8 ≤72 字节、至少两类字符、无空白、不得与旧密码相同）、"
+                "旧密码 BCrypt 比对与定向写散列、两次输入一致、成功后销毁当前会话并回登录页、"
+                "/password 纳入登录拦截、资料页的「修改密码」入口、7 个账号单测 + 7 个页面用例。"
+                "验证：mvn -pl cartoon-account,cartoon-user-web -am test → account 25、user-web 143，全绿。"
+                "模板 password.html 与 profile.html 的入口改动按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。",
+        "files": [
+            (ACC + "dto/PasswordForm.java", "PasswordForm.java", "新密码强度与两次一致", "java"),
+            (ACC + "mapper/StoreUserMapper.java", "StoreUserMapper.java", "只写 password_hash 的定向 SQL", "java"),
+            (ACC + "service/AccountService.java", "AccountService.java", "旧密码比对、规则校验与写散列", "java"),
+            (WEB + "controller/PasswordController.java", "PasswordController.java", "改密页与成功后销毁会话", "java"),
+            (WEB + "config/WebConfig.java", "WebConfig.java", "把 /password 纳入受保护路径", "java"),
+            (ACC_TEST + "service/AccountServiceTest.java", "AccountServiceTest.java", "7 个改密用例", "java"),
+            (WEB_TEST + "PasswordPageTest.java", "PasswordPageTest.java", "7 个页面与会话用例", "java"),
+        ],
+    },
 }
 
 # 只有"没有行尾注释、规则解释器也认不出"的行才需要登记。
@@ -146,6 +165,37 @@ NOTES: dict[tuple[str, str], str] = {
         "受保护字段：提交 username/role/status 也不落库。",
     (WEB_TEST + "ProfilePageTest.java", "void profileKeepsOrderSnapshot() throws Exception {"):
         "历史订单快照：改资料后收货信息不变。",
+    # ---- M08-02：PasswordForm / 改密用例 ----
+    (ACC + "dto/PasswordForm.java", "} else if (Character.isDigit(codePoint)) {"):
+        "数字：第二类字符。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordOk() {"):
+        "成功路径：只写新散列，新密码可校验。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordWrongOld() {"):
+        "旧密码错：400 且不写库。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordSameAsOld() {"):
+        "新旧相同：400。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordTooShort() {"):
+        "长度不足：400。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordOneClass() {"):
+        "只有一类字符：400。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordWhitespace() {"):
+        "含空白：400。",
+    (ACC_TEST + "service/AccountServiceTest.java", "void changePasswordUnknownUser() {"):
+        "账号不存在：404。",
+    (WEB_TEST + "PasswordPageTest.java", "void passwordRequiresLogin() throws Exception {"):
+        "未登录：302 到登录页并带回跳地址。",
+    (WEB_TEST + "PasswordPageTest.java", "void passwordRenders() throws Exception {"):
+        "改密页渲染三个密码框与规则说明。",
+    (WEB_TEST + "PasswordPageTest.java", "void wrongOldPasswordRejected() throws Exception {"):
+        "旧密码错：回表单且散列不变。",
+    (WEB_TEST + "PasswordPageTest.java", "void weakPasswordRejected() throws Exception {"):
+        "纯字母：提示需要两类字符。",
+    (WEB_TEST + "PasswordPageTest.java", "void mismatchRejected() throws Exception {"):
+        "两次不一致：回表单且散列不变。",
+    (WEB_TEST + "PasswordPageTest.java", "void changeSucceeds() throws Exception {"):
+        "成功：跳登录、当前会话失效、新散列可校验。",
+    (WEB_TEST + "PasswordPageTest.java", "void otherSessionStaysLoggedIn() throws Exception {"):
+        "其他浏览器的会话不受影响。",
 }
 
 # 规则解释器产出的兜底句：正常应为 0 行，用它做自检。

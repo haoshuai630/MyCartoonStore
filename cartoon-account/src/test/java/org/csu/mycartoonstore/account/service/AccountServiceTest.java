@@ -7,6 +7,7 @@ import org.csu.mycartoonstore.common.exception.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -14,13 +15,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 账号服务测试：密码校验、状态判断、注册与资料校验。
+ * 账号服务测试：密码校验、状态判断、注册、资料与改密校验。
  *
  * <p>用手写 Mock 代替 inline mock maker，规避 JDK 27 下的自附加问题；
  * 密码编码器用真实的 BCrypt，保证散列与校验确实能对上。</p>
@@ -227,6 +230,85 @@ class AccountServiceTest {
         when(userMapper.selectById(99L)).thenReturn(null);
 
         assertThatThrownBy(() -> service.updateProfile(99L, "新名字", null, null))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("改密：旧密码正确 → 只写新的 BCrypt 散列")
+    void changePasswordOk() {
+        StoreUser existing = user("alice", "Cartoon123!", "CUSTOMER", "ENABLED");
+        when(userMapper.selectById(1L)).thenReturn(existing);
+        when(userMapper.updatePassword(eq(1L), anyString())).thenReturn(1);
+        ArgumentCaptor<String> written = ArgumentCaptor.forClass(String.class);
+
+        service.changePassword(1L, "Cartoon123!", "NewPass123");
+
+        verify(userMapper).updatePassword(eq(1L), written.capture());
+        assertThat(written.getValue()).startsWith("$2");
+        assertThat(encoder.matches("NewPass123", written.getValue())).isTrue();
+        assertThat(written.getValue()).isNotEqualTo(existing.getPasswordHash());
+    }
+
+    @Test
+    @DisplayName("改密：旧密码不正确 → 400，不写库")
+    void changePasswordWrongOld() {
+        when(userMapper.selectById(1L)).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
+
+        assertThatThrownBy(() -> service.changePassword(1L, "wrong-old", "NewPass123"))
+                .isInstanceOf(BizException.class)
+                .hasMessage("原密码不正确");
+        verify(userMapper, never()).updatePassword(anyLong(), anyString());
+    }
+
+    @Test
+    @DisplayName("改密：新密码与原密码相同 → 400")
+    void changePasswordSameAsOld() {
+        when(userMapper.selectById(1L)).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
+
+        assertThatThrownBy(() -> service.changePassword(1L, "Cartoon123!", "Cartoon123!"))
+                .isInstanceOf(BizException.class)
+                .hasMessage("新密码不能与原密码相同");
+        verify(userMapper, never()).updatePassword(anyLong(), anyString());
+    }
+
+    @Test
+    @DisplayName("改密：新密码太短 → 400")
+    void changePasswordTooShort() {
+        when(userMapper.selectById(1L)).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
+
+        assertThatThrownBy(() -> service.changePassword(1L, "Cartoon123!", "Ab1!"))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("8–32");
+    }
+
+    @Test
+    @DisplayName("改密：只有一类字符 → 400")
+    void changePasswordOneClass() {
+        when(userMapper.selectById(1L)).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
+
+        assertThatThrownBy(() -> service.changePassword(1L, "Cartoon123!", "abcdefgh"))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("两类");
+    }
+
+    @Test
+    @DisplayName("改密：含空白 → 400")
+    void changePasswordWhitespace() {
+        when(userMapper.selectById(1L)).thenReturn(user("alice", "Cartoon123!", "CUSTOMER", "ENABLED"));
+
+        assertThatThrownBy(() -> service.changePassword(1L, "Cartoon123!", "New Pass123"))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("空白");
+    }
+
+    @Test
+    @DisplayName("改密：账号不存在 → 404")
+    void changePasswordUnknownUser() {
+        when(userMapper.selectById(99L)).thenReturn(null);
+
+        assertThatThrownBy(() -> service.changePassword(99L, "Cartoon123!", "NewPass123"))
                 .isInstanceOf(BizException.class)
                 .extracting(e -> ((BizException) e).code())
                 .isEqualTo(ErrorCode.NOT_FOUND);

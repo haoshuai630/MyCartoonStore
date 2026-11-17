@@ -32,4 +32,12 @@ public interface StoreUserMapper extends BaseMapper<StoreUser> {
                       @Param("displayName") String displayName,
                       @Param("email") String email,
                       @Param("phone") String phone);
+
+    /**
+     * 改密：只写 password_hash 一列。
+     *
+     * <p>定向 UPDATE 让改密与资料保存、管理端启停互不覆盖；散列由 Service 生成。</p>
+     */
+    @Update("UPDATE store_user SET password_hash = #{passwordHash} WHERE id = #{id}")
+    int updatePassword(@Param("id") long id, @Param("passwordHash") String passwordHash);
 }

@@ -28,7 +28,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new LoginInterceptor(accountService)) // 每次请求重查账号，禁用即时生效。
                 .addPathPatterns("/cart", "/cart/**", "/checkout", "/checkout/**",
                         "/orders", "/orders/**", "/payment", "/payment/**",
-                        "/profile", "/profile/**"); // 受保护路径集中列在这里；M06-02 新增 /payment。
+                        "/profile", "/profile/**", "/password", "/password/**"); // 受保护路径集中列在这里；M08-02 新增 /password。
         // 徽标：所有页面都要显示，所以不限定路径。
         registry.addInterceptor(new CartBadgeInterceptor(cartService));
     }

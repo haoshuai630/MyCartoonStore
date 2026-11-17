@@ -1,6 +1,7 @@
 package org.csu.mycartoonstore.account.service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.csu.mycartoonstore.account.dto.PasswordForm; // 新密码强度规则。
 import org.csu.mycartoonstore.account.dto.Profile; // 已校验的三项资料。
 import org.csu.mycartoonstore.account.dto.ProfileForm; // 资料字段校验与去空白。
 import org.csu.mycartoonstore.account.entity.StoreUser;
@@ -174,6 +175,29 @@ public class AccountService {
         user.setEmail(profile.getEmail()); // 同上。
         user.setPhone(profile.getPhone()); // 同上。
         return user; // 调用方负责刷新会话里的显示名。
+    }
+
+    /**
+     * 修改本人密码：验证旧密码 → 校验新密码 → 只写新的 BCrypt 散列。
+     *
+     * <p>旧密码错、新密码不合规、新旧相同都返回 400 且不写库；会话由控制器在成功后销毁，
+     * 本方法不碰 Session（FR-U-04：其他浏览器已有会话继续有效）。</p>
+     */
+    @Transactional
+    public void changePassword(long userId, String rawOldPassword, String rawNewPassword) {
+        StoreUser user = requireUser(userId); // 账号必须仍存在。
+        String oldPassword = rawOldPassword == null ? "" : rawOldPassword; // 密码不去空白：空格也要原样比对。
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw BizException.badRequest("原密码不正确"); // 不区分"没填"与"填错"。
+        }
+        String newPassword = PasswordForm.requireNew(rawNewPassword); // 长度 / 字节 / 类别 / 空白。
+        if (newPassword.equals(oldPassword)) {
+            throw BizException.badRequest("新密码不能与原密码相同"); // 改了等于没改，直接拒绝。
+        }
+        int rows = userMapper.updatePassword(userId, passwordEncoder.encode(newPassword)); // 只写散列一列。
+        if (rows == 0) {
+            throw BizException.notFound("账号不存在"); // 查询之后被删的极端情况。
+        }
     }
 
     /** 按 id 取账号，不存在时 404：资料页与资料保存共用。 */
