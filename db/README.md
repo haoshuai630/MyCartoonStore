@@ -5,7 +5,7 @@
 | 文件 | 内容 | 什么时候用 |
 |---|---|---|
 | `01-schema.sql` | 七张表结构，**不含任何数据** | 只想建表、数据自己造 |
-| `02-schema-with-demo.sql` | 表结构 + 教学种子数据（4 账号 / 60 分类 / 95 商品 / 100 相册 / 10 购物车 / 10 订单 / 20 明细） | 直接跑起来看完整效果 |
+| `02-schema-with-demo.sql` | 表结构 + 教学种子数据（4 账号 / 60 分类 / 95 商品 / 160 相册 / 10 购物车 / 10 订单 / 20 明细） | 直接跑起来看完整效果 |
 
 **不要按编号依次执行**。两个文件都自带 `CREATE DATABASE` 与建表语句，在同一个库里跑第二遍会因表已存在而报错。空库执行其中**一个**即可。
 
@@ -36,9 +36,9 @@ mysql -u root -p --default-character-set=utf8mb4 < db/01-schema.sql
 USE MyCartoonStore;
 SELECT
   (SELECT COUNT(*) FROM store_user)        AS users,      -- 4
-  (SELECT COUNT(*) FROM category)          AS categories, -- 15
-  (SELECT COUNT(*) FROM product)           AS products,   -- 60
-  (SELECT COUNT(*) FROM product_image)     AS images,     -- 100
+  (SELECT COUNT(*) FROM category)          AS categories, -- 60（5 部作品 + 55 品类）
+  (SELECT COUNT(*) FROM product)           AS products,   -- 95（90 上架 + 5 下架）
+  (SELECT COUNT(*) FROM product_image)     AS images,     -- 160
   (SELECT COUNT(*) FROM cart_item)         AS carts,      -- 10
   (SELECT COUNT(*) FROM sales_order)       AS orders,     -- 10
   (SELECT COUNT(*) FROM sales_order_item)  AS items;      -- 20
@@ -48,8 +48,11 @@ SELECT
 
 ```
 users  categories  products  images  carts  orders  items
-4      15          60        100     10     10      20
+4      60          95        160     10     10      20
 ```
+
+> 这些数值以**刚执行完脚本**为准。跑过手工验收或注册后，用户、订单、明细会增长，属正常现象；
+> 需要回到基线就按 §4 重建库。
 
 ### 3.2 执行 `01` 之后（仅结构）
 
@@ -63,10 +66,10 @@ WHERE table_schema = 'MyCartoonStore';   -- 7
 ### 3.3 关键样例核对（执行 `02` 之后）
 
 ```sql
--- 上架 54 / 下架 6
+-- 上架 90 / 下架 5（每部作品的第 6 卷为 DRAFT）
 SELECT status, COUNT(*) FROM product GROUP BY status;
 
--- 上架但售罄：3 件；库存只剩 1：2 件
+-- 上架但售罄：11 件；库存恰好 1：1 件（STARLINE-C02），故 stock <= 1 共 12 行
 SELECT sku, stock FROM product WHERE status='ON_SALE' AND stock <= 1 ORDER BY sku;
 
 -- 订单五状态各 2 张
@@ -81,7 +84,7 @@ JOIN (SELECT order_id, SUM(line_amount) s FROM sales_order_item GROUP BY order_i
   ON i.order_id = o.id
 WHERE o.total_amount <> i.s;
 
--- 无相册商品 20 个（详情页回退封面）
+-- 无相册商品 31 个（详情页回退封面）
 SELECT COUNT(*) FROM product p
 WHERE NOT EXISTS (SELECT 1 FROM product_image i WHERE i.product_id = p.id);
 ```
