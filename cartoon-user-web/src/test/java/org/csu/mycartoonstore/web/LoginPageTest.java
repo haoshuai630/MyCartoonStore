@@ -1,5 +1,6 @@
 package org.csu.mycartoonstore.web;
 
+import org.csu.mycartoonstore.common.security.CsrfToken; // 断言令牌在换会话 ID 后仍在。
 import org.csu.mycartoonstore.web.support.AbstractIntegrationTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -123,6 +124,50 @@ class LoginPageTest extends AbstractIntegrationTest {
                         .param("redirect", "//evil.example.com"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/main"));
+    }
+
+    @Test
+    @DisplayName("登录成功后会话 ID 变化（防会话固定）")
+    void loginRotatesSessionId() throws Exception {
+        seedUser("alice", "Cartoon123!", "ENABLED");
+        MockHttpSession session = new MockHttpSession(); // 登录前的会话。
+        mockMvc.perform(get("/login").session(session)).andReturn(); // 过滤器先签发令牌。
+        String before = session.getId(); // 登录前的 ID。
+
+        mockMvc.perform(post("/login").with(csrf())
+                        .param("username", "alice")
+                        .param("password", "Cartoon123!")
+                        .session(session))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/main"));
+
+        assertThat(session.getId()).isNotEqualTo(before); // 登录后换了 ID，旧 ID 作废。
+        assertThat(session.getAttribute("userId")).isNotNull(); // 身份照常写入。
+        assertThat(session.getAttribute(CsrfToken.SESSION_KEY)).isNotNull(); // 令牌随会话迁移，没被清掉。
+    }
+
+    @Test
+    @DisplayName("换会话 ID 后，登录前签发的令牌仍可用于退出")
+    void csrfTokenSurvivesSessionRotation() throws Exception {
+        seedUser("alice", "Cartoon123!", "ENABLED");
+        MockHttpSession session = new MockHttpSession();
+        mockMvc.perform(get("/login").session(session)).andReturn(); // 拿到页面上的令牌。
+        String token = (String) session.getAttribute(CsrfToken.SESSION_KEY);
+
+        mockMvc.perform(post("/login") // 用真实令牌登录，而不是测试夹具的固定值。
+                        .session(session)
+                        .param(CsrfToken.PARAM_NAME, token)
+                        .param("username", "alice")
+                        .param("password", "Cartoon123!"))
+                .andExpect(redirectedUrl("/main"));
+
+        mockMvc.perform(post("/logout") // 登录后仍用同一个令牌退出。
+                        .session(session)
+                        .param(CsrfToken.PARAM_NAME, token))
+                .andExpect(status().is3xxRedirection()) // 没有被判 403。
+                .andExpect(redirectedUrl("/main"));
+
+        assertThat(session.isInvalid()).isTrue(); // 退出确实销毁了会话。
     }
 
     @Test

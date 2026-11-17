@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -63,20 +64,24 @@ public class AuthController {
     }
 
     /**
-     * 提交登录：校验通过后把 userId 与显示名写进 Session。
+     * 提交登录：校验通过后换会话 ID 再写身份。
      *
-     * <p>登录后回到 redirect 指定的站内路径；只接受以 / 开头的地址，
-     * 避免被构造成跳转到站外的开放重定向。</p>
+     * <p>登录成功先 {@code changeSessionId()}，让登录前的会话 ID 立即作废，防止会话固定攻击
+     * （docs/02 §6.2 的"重建会话"在 Servlet 3.1+ 的等价做法，与管理端 M07-02 同构）。
+     * 只换 ID 不换会话，所以 CSRF 令牌与回跳参数都不用重新搬运。
+     * 失败统一回表单，文案由 AccountService 给出，不区分账号不存在、密码错与已停用。</p>
      */
     @PostMapping("/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
                         @RequestParam(required = false) String redirect,
-                        HttpSession session,
+                        HttpServletRequest request,
                         Model model) {
         try {
             StoreUser user = accountService.authenticateCustomer(username, password); // 只接受启用的 CUSTOMER。
-            session.setAttribute("userId", user.getId());
+            HttpSession session = request.getSession(true); // CSRF 令牌已经建过会话；直接 POST 时在这里补建。
+            request.changeSessionId(); // 换掉登录前的会话 ID：旧 ID 作废，防会话固定。
+            session.setAttribute("userId", user.getId()); // 换 ID 不影响属性，令牌仍在会话里。
             session.setAttribute("displayName", user.getDisplayName());
             return "redirect:" + safeRedirect(redirect);
         } catch (BizException e) {

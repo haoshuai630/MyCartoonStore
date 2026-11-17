@@ -126,6 +126,17 @@ NOTES = {
         "列表页：名称被转义。",
     (WEB_TEST + "XssEscapingTest.java", "void keywordEchoEscapesScript() throws Exception {"):
         "关键字回显：输入框里不能出现可执行标签。",
+    # ---- M09-04：登录换会话 ID ----
+    (WEB_CTRL + "AuthController.java", "public String login(@RequestParam String username,"):
+        "登录入口：校验通过后先换会话 ID，再写身份。",
+    (WEB_TEST + "LoginPageTest.java", "void loginRotatesSessionId() throws Exception {"):
+        "登录前后会话 ID 不同，身份与令牌都在。",
+    (WEB_TEST + "LoginPageTest.java", "void csrfTokenSurvivesSessionRotation() throws Exception {"):
+        "换 ID 后登录前签发的令牌仍可用于退出。",
+    (WEB_TEST + "LoginPageTest.java", "void adminCannotLogIn() throws Exception {"):
+        "管理员登录用户端：同文案且不写登录态（AC-05）。",
+    (WEB_TEST + "LoginPageTest.java", 'username, passwordEncoder.encode(rawPassword), "爱丽丝", role, status);'):
+        "续行：密码存 BCrypt 散列，显示名固定，角色与状态由调用方给。",
 }
 
 g8.NOTES.update(NOTES)  # 复用 M08 渲染器的说明优先级：手写 > 行尾注释 > 规则解释器。
@@ -176,6 +187,20 @@ TASKS = {
             (WEB_TEST + "CsrfProtectionTest.java", "CsrfProtectionTest.java", "用户端 9 个页面级用例", "java"),
             (ADMIN_TEST + "CsrfProtectionTest.java", "CsrfProtectionTest.java", "管理端 6 个页面级用例", "java"),
             (WEB_TEST + "XssEscapingTest.java", "XssEscapingTest.java", "3 个转义用例", "java"),
+        ],
+    },
+    "04": {
+        "title": "M09-04 · 用户端登录重建会话",
+        "out": "M09-04-逐行验收.html",
+        "date": "2026-11-18",
+        "note": "内容：AuthController.login 改为先 getSession(true) 再 changeSessionId() 后写身份，与管理端同构；"
+                "新增 2 条用例（登录前后会话 ID 不同且令牌仍在、换 ID 后登录前令牌仍可用于退出）；"
+                "docs/02 §6.2 的实现状态改为两端一致。"
+                "验证：mvn -pl cartoon-user-web -am test → 162 用例，全绿。"
+                "LoginPageTest 的其它既有用例与模板改动不重复渲染。",
+        "files": [
+            (WEB_CTRL + "AuthController.java", "AuthController.java", "登录时轮换会话 ID", "java"),
+            (WEB_TEST + "LoginPageTest.java", "LoginPageTest.java", "新增 2 个会话用例", "java"),
         ],
     },
 }
