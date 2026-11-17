@@ -22,6 +22,8 @@ ACC = "cartoon-account/src/main/java/org/csu/mycartoonstore/account/"
 ACC_TEST = "cartoon-account/src/test/java/org/csu/mycartoonstore/account/"
 ORDER = "cartoon-order/src/main/java/org/csu/mycartoonstore/order/"
 ORDER_TEST = "cartoon-order/src/test/java/org/csu/mycartoonstore/order/"
+ADMIN = "cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/"
+ADMIN_TEST = "cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/"
 WEB = "cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/"
 WEB_TEST = "cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/"
 
@@ -79,6 +81,23 @@ TASKS = {
             (ORDER_TEST + "service/OrderCompletionServiceTest.java", "OrderCompletionServiceTest.java", "5 个服务用例", "java"),
             (WEB + "controller/OrderController.java", "OrderController.java", "新增确认收货路由", "java"),
             (WEB_TEST + "CompleteOrderTest.java", "CompleteOrderTest.java", "5 个页面与状态用例", "java"),
+        ],
+    },
+    "04": {
+        "title": "M08-04 · 管理端顾客列表与启停",
+        "out": "M08-04-逐行验收.html",
+        "date": "2026-11-18",
+        "note": "内容：只列 CUSTOMER（管理员按 id 也 404）、用户名包含匹配（转义 LIKE 通配符）与状态筛选、"
+                "id 升序分页、启用/禁用与重复操作提示、控制台第 4 卡与导航、11 个服务单测 + 10 个页面用例。"
+                "验证：mvn -pl cartoon-account,cartoon-admin-web -am test → account 36、admin-web 63，全绿。"
+                "模板 user-list.html、fragments.html、main.html 与 admin.css 按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。",
+        "files": [
+            (ACC + "dto/AdminUserRow.java", "AdminUserRow.java", "列表五列", "java"),
+            (ACC + "service/AccountAdminService.java", "AccountAdminService.java", "筛选、分页与启停", "java"),
+            (ACC + "mapper/StoreUserMapper.java", "StoreUserMapper.java", "只写 status 的定向 SQL", "java"),
+            (ACC_TEST + "service/AccountAdminServiceTest.java", "AccountAdminServiceTest.java", "11 个服务用例", "java"),
+            (ADMIN + "controller/AdminUserController.java", "AdminUserController.java", "列表与启停路由", "java"),
+            (ADMIN_TEST + "AdminUserPageTest.java", "AdminUserPageTest.java", "10 个页面用例", "java"),
         ],
     },
 }
@@ -245,6 +264,49 @@ NOTES: dict[tuple[str, str], str] = {
         "读完成时间：幂等断言用。",
     (WEB_TEST + "CompleteOrderTest.java", "private Timestamp shippedAtOf(String orderNo) {"):
         "读发货时间：确认收货不改它。",
+    # ---- M08-04：顾客列表与启停 ----
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void listMapsRows() {"):
+        "列表：映射五列并保持 id 升序。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void listPaginates() {"):
+        "分页：第 2 页取剩下的 5 行。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void listBeyondLastPage() {"):
+        "越界页：空结果而不是报错。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void listKeywordTooLong() {"):
+        "关键字超长：400。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void listInvalidStatus() {"):
+        "筛选状态非法：400。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void listInvalidPage() {"):
+        "页码非法：400。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void changeStatusDisables() {"):
+        "禁用：只写状态列。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void changeStatusRepeat() {"):
+        "重复禁用：幂等且不写库。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void changeStatusAdminRejected() {"):
+        "管理员不能被启停：404。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void changeStatusMissing() {"):
+        "账号不存在：404。",
+    (ACC_TEST + "service/AccountAdminServiceTest.java", "void changeStatusInvalid() {"):
+        "写入状态非法：400。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void usersRequireLogin() throws Exception {"):
+        "未登录：302 到管理端登录页。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void listsCustomersOnly() throws Exception {"):
+        "只列顾客：管理员账号不出现。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void filtersByKeyword() throws Exception {"):
+        "关键字筛选：只显示命中项。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void filtersByStatus() throws Exception {"):
+        "状态筛选：只看禁用。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void disablesCustomer() throws Exception {"):
+        "禁用：回列表并落库。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void repeatDisableIsIdempotent() throws Exception {"):
+        "重复禁用：提示当前状态。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void enablesCustomer() throws Exception {"):
+        "重新启用：状态恢复。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void cannotToggleAdmin() throws Exception {"):
+        "管理员不能被启停：404 且不写库。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void invalidStatusRejected() throws Exception {"):
+        "启停状态非法：400。",
+    (ADMIN_TEST + "AdminUserPageTest.java", "void invalidFilterRejected() throws Exception {"):
+        "筛选状态非法：400。",
 }
 
 # 规则解释器产出的兜底句：正常应为 0 行，用它做自检。

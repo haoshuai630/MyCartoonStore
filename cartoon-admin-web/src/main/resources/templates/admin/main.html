@@ -25,7 +25,7 @@
                 </div>
             </div>
 
-            <!-- 三个业务入口：分类、商品、订单 -->
+            <!-- 四个业务入口：分类、商品、订单、顾客 -->
             <div class="entry-grid">
                 <a class="entry-card" th:href="@{/categories}">
                     <span class="kicker">CATEGORIES</span>
@@ -45,9 +45,16 @@
                     <p>全站查单与详情，只对已支付订单发货，保留首次发货时间。</p>
                     <span class="badge">进入</span>
                 </a>
+                <!-- M08-04：顾客管理；只列 CUSTOMER，管理员不在其中 -->
+                <a class="entry-card" th:href="@{/users}">
+                    <span class="kicker">CUSTOMERS</span>
+                    <h2>顾客管理</h2>
+                    <p>查询顾客并按启用 / 禁用筛选；禁用后该账号的下一次请求立即被拒。</p>
+                    <span class="badge">进入</span>
+                </a>
             </div>
 
-            <p class="console-note">三个入口都已接入；页面不展示统计数字，数据以各列表页的查询结果为准。</p>
+            <p class="console-note">四个入口都已接入；页面不展示统计数字，数据以各列表页的查询结果为准。</p>
         </div>
     </section>
 </main>

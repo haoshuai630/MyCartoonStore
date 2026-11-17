@@ -40,4 +40,12 @@ public interface StoreUserMapper extends BaseMapper<StoreUser> {
      */
     @Update("UPDATE store_user SET password_hash = #{passwordHash} WHERE id = #{id}")
     int updatePassword(@Param("id") long id, @Param("passwordHash") String passwordHash);
+
+    /**
+     * 启停：只写 status 一列。
+     *
+     * <p>定向 UPDATE 不覆盖资料与密码；角色判断在 Service，SQL 只按 id 写。</p>
+     */
+    @Update("UPDATE store_user SET status = #{status} WHERE id = #{id}")
+    int updateStatus(@Param("id") long id, @Param("status") String status);
 }
