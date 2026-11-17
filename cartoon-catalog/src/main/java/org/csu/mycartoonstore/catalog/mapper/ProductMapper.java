@@ -3,7 +3,9 @@ package org.csu.mycartoonstore.catalog.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.csu.mycartoonstore.catalog.dto.CategoryUsage;
 import org.csu.mycartoonstore.catalog.dto.ProductQuery;
 import org.csu.mycartoonstore.catalog.entity.Product;
 
@@ -43,4 +45,13 @@ public interface ProductMapper extends BaseMapper<Product> {
     /** 取消订单时恢复库存并递增版本：与 deductStock 成对，保证每次取消只加一次 */
     @Update("UPDATE product SET stock = stock + #{qty}, version = version + 1 WHERE id = #{id}")
     int restoreStock(@Param("id") Long id, @Param("qty") int qty);
+
+    /**
+     * 每个分类下的商品数（含下架）。
+     *
+     * <p>后台分类列表与删除校验共用：一次分组查询代替逐行 COUNT，
+     * 删除时"有商品引用就不许删"也靠它判断。</p>
+     */
+    @Select("SELECT category_id AS categoryId, COUNT(*) AS productCount FROM product GROUP BY category_id")
+    List<CategoryUsage> countByCategory();
 }
