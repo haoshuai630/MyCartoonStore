@@ -20,6 +20,8 @@ ROOT = g5.ROOT
 
 ACC = "cartoon-account/src/main/java/org/csu/mycartoonstore/account/"
 ACC_TEST = "cartoon-account/src/test/java/org/csu/mycartoonstore/account/"
+CAT = "cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/"
+CAT_TEST = "cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/"
 ORDER = "cartoon-order/src/main/java/org/csu/mycartoonstore/order/"
 ORDER_TEST = "cartoon-order/src/test/java/org/csu/mycartoonstore/order/"
 ADMIN = "cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/"
@@ -98,6 +100,23 @@ TASKS = {
             (ACC_TEST + "service/AccountAdminServiceTest.java", "AccountAdminServiceTest.java", "11 个服务用例", "java"),
             (ADMIN + "controller/AdminUserController.java", "AdminUserController.java", "列表与启停路由", "java"),
             (ADMIN_TEST + "AdminUserPageTest.java", "AdminUserPageTest.java", "10 个页面用例", "java"),
+        ],
+    },
+    "05": {
+        "title": "M08-05 · 管理端相册维护",
+        "out": "M08-05-逐行验收.html",
+        "date": "2026-11-18",
+        "note": "内容：路径必填且只收站内路径、说明 ≤120、排序 0–999999、图片必须属于该商品、"
+                "按 sort_order/id 升序、新增/编辑/删除只维护记录（不改封面、不动商品版本、不删文件）、"
+                "商品列表行内「相册」入口、10 个服务单测 + 7 个页面用例。"
+                "验证：mvn -pl cartoon-catalog,cartoon-admin-web -am test → catalog 74、admin-web 70，全绿。"
+                "模板 image-list.html、product-list.html 与 admin.css 按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。",
+        "files": [
+            (CAT + "dto/ImageForm.java", "ImageForm.java", "路径/说明/排序校验", "java"),
+            (CAT + "service/ProductImageAdminService.java", "ProductImageAdminService.java", "列表、新增、编辑、删除", "java"),
+            (CAT_TEST + "service/ProductImageAdminServiceTest.java", "ProductImageAdminServiceTest.java", "10 个服务用例", "java"),
+            (ADMIN + "controller/AdminImageController.java", "AdminImageController.java", "相册页与四个动作", "java"),
+            (ADMIN_TEST + "ImageAdminPageTest.java", "ImageAdminPageTest.java", "7 个页面用例", "java"),
         ],
     },
 }
@@ -307,6 +326,61 @@ NOTES: dict[tuple[str, str], str] = {
         "启停状态非法：400。",
     (ADMIN_TEST + "AdminUserPageTest.java", "void invalidFilterRejected() throws Exception {"):
         "筛选状态非法：400。",
+    # ---- M08-05：相册维护 ----
+    (CAT + "dto/ImageForm.java", "public record ImageForm(String imagePath, String altText, int sortOrder) {"):
+        "校验后的相册字段：路径、可空说明、非负排序。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void addWritesFields() {"):
+        "新增：只写商品、路径、说明、排序。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void addBlankPath() {"):
+        "路径空白：400 且不写库。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void addExternalPath() {"):
+        "外链：400，外链留到 docs/12。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void addTooLongAlt() {"):
+        "说明超 120：400。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void addNegativeSort() {"):
+        "排序为负：400。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void addMissingProduct() {"):
+        "商品不存在：404。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void updateChangesFields() {"):
+        "编辑：路径、说明、排序按表单更新。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void updateNotBelonging() {"):
+        "图片不属于该商品：404。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void deleteRemovesRecord() {"):
+        "删除：只删记录。",
+    (CAT_TEST + "service/ProductImageAdminServiceTest.java", "void deleteNotBelonging() {"):
+        "删除越权：404 且不删。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void imagesRequireLogin() throws Exception {"):
+        "未登录：302 到管理端登录页。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void listRenders() throws Exception {"):
+        "渲染商品信息与已有图片。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void addViaPage() throws Exception {"):
+        "新增：回列表并落库。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "Integer.class, productId)).isEqualTo(1);"):
+        "续行：断言新增了一条记录。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "Integer.class, productId)).isEqualTo(4);"):
+        "续行：断言排序已写入。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void editViaPage() throws Exception {"):
+        "编辑：回列表且库中三列更新。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", 'String.class, imageId)).isEqualTo("images/products/IMGPROD/9.svg");'):
+        "续行：断言路径已更新。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", 'String.class, imageId)).isEqualTo("新说明");'):
+        "续行：断言说明已更新。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "Integer.class, imageId)).isEqualTo(9);"):
+        "续行：断言排序已更新。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void deleteViaPage() throws Exception {"):
+        "删除：只删记录，封面与版本不变。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "Integer.class, imageId)).isZero();"):
+        "续行：断言记录已删。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void externalPathRejected() throws Exception {"):
+        "外链：400、回列表提示且不写库。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "Integer.class, productId)).isZero();"):
+        "续行：断言没有新增记录。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "void unknownProduct() throws Exception {"):
+        "商品不存在：404。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "private String coverOf(long productId) {"):
+        "读封面：断言相册不影响它。",
+    (ADMIN_TEST + "ImageAdminPageTest.java", "private long versionOf(long productId) {"):
+        "读版本：断言相册不写商品版本。",
 }
 
 # 规则解释器产出的兜底句：正常应为 0 行，用它做自检。

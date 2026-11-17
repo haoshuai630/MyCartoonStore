@@ -82,6 +82,8 @@
                         <td class="num" th:text="${row.sortOrder}">0</td>
                         <td class="row-actions">
                             <a class="link-btn" th:href="@{/products/{id}/edit(id=${row.id})}">编辑</a>
+                            <!-- M08-05：进入该商品的相册维护，只维护记录，不改封面 -->
+                            <a class="link-btn" th:href="@{/products/{id}/images(id=${row.id})}">相册</a>
                             <!-- 上下架：提交当前版本，版本冲突由服务端给 409 -->
                             <form class="inline-form" th:action="@{/products/{id}/status(id=${row.id})}" method="post">
                                 <input type="hidden" name="version" th:value="${row.version}">
