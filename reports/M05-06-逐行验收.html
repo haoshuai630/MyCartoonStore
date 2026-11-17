@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M05-06 · 并发验证与收尾（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M05-06 · 并发验证与收尾（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">ConcurrentOrderTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：同一车并发提交只成交一单、同一订单并发取消只恢复一次库存。验证：mvn -pl cartoon-user-web -am test → Tests run: 105, Failures: 0；mvn clean verify → 10 模块 SUCCESS，175 用例。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>ConcurrentOrderTest.java<small>2 个并发用例：下单与取消 · 152 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/ConcurrentOrderTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">并发验证：同一辆车只成交一次；同一订单只恢复一次库存。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">真实 MySQL + 重建表。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.CartFixture;</pre></td><td class="explain">建用户/商品/车条目。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入 MockMvc。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">造数据与核对。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpSession;</pre></td><td class="explain">两个独立会话。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MvcResult;</pre></td><td class="explain">取响应状态。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">两个任务的结果。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.Callable;</pre></td><td class="explain">并发任务。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.CountDownLatch;</pre></td><td class="explain">同时起跑。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.ExecutorService;</pre></td><td class="explain">线程池。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.Executors;</pre></td><td class="explain">固定大小线程池。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.Future;</pre></td><td class="explain">取结果。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.TimeUnit;</pre></td><td class="explain">超时。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;</pre></td><td class="explain">构造 POST。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// M05-06：依据 docs/06 AC-17（同一车并发提交只成交一次）与 AC-21（取消只恢复一次）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// 用两个独立会话同时发请求，验证行锁 + 快照比对 + 幂等分支在真实事务下的表现。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">// 不覆盖：支付并发（M06）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre><span class="kw">class</span> ConcurrentOrderTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">集成测试：真实 MySQL + MockMvc</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口，多线程共用一个实例。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造数据与核对。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 同一辆车两个会话同时提交：只成交一单，另一单 409。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @DisplayName("同一车并发提交：只成交一单")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    <span class="kw">void</span> concurrentPlaceOrderCreatesOnlyOneOrder() throws Exception {</pre></td><td class="explain">同一辆车两个会话同时提交：只成交一单，另一单 409。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cc_place");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "CC-P01", "28.00", 10, "ON_SALE");</pre></td><td class="explain">库存 10。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        CartFixture.addCartItem(jdbc, userId, productId, 2);</pre></td><td class="explain">车里 2 件。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        MockHttpSession sessionA = confirm(userId);</pre></td><td class="explain">会话 A 的确认快照。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        MockHttpSession sessionB = confirm(userId);</pre></td><td class="explain">会话 B 的确认快照（同一辆车）。</td></tr>
+<tr class="gap"><td class="line">48</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        List&lt;Integer&gt; statuses = runTogether(</pre></td><td class="explain">两个线程同时提交。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                () -&gt; place(sessionA),</pre></td><td class="explain">提交 A。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                () -&gt; place(sessionB));</pre></td><td class="explain">提交 B。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        assertThat(statuses).containsExactlyInAnyOrder(302, 409);</pre></td><td class="explain">一个成功、一个冲突。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        assertThat(count("SELECT COUNT(*) FROM sales_order WHERE user_id = ?", userId)).isEqualTo(1);</pre></td><td class="explain">只一单。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        assertThat(count("SELECT stock FROM product WHERE id = ?", productId)).isEqualTo(8);</pre></td><td class="explain">只扣一次。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        assertThat(CartFixture.countItems(jdbc, userId)).isZero();</pre></td><td class="explain">车已清空。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">58</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre class="cmtline">    /** 同一订单两个会话同时取消：库存只恢复一次。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>    @DisplayName("同一订单并发取消：只恢复一次库存")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    <span class="kw">void</span> concurrentCancelRestoresStockOnce() throws Exception {</pre></td><td class="explain">同一订单两个会话同时取消：库存只恢复一次。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">long</span> userId = CartFixture.createUser(jdbc, "cc_cancel");</pre></td><td class="explain">建账号。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        <span class="kw">long</span> productId = CartFixture.createProduct(jdbc, "CC-P02", "28.00", 8, "ON_SALE");</pre></td><td class="explain">模拟已扣到 8。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        seedPendingOrder(userId, "CO202611171000000071", productId, 2);</pre></td><td class="explain">待支付订单，库存已扣。</td></tr>
+<tr class="gap"><td class="line">66</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        List&lt;Integer&gt; statuses = runTogether(</pre></td><td class="explain">两个线程同时取消。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                () -&gt; cancel("CO202611171000000071", userId),</pre></td><td class="explain">取消 A。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                () -&gt; cancel("CO202611171000000071", userId));</pre></td><td class="explain">取消 B。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        assertThat(statuses).containsOnly(302);</pre></td><td class="explain">两次都成功重定向（第二次幂等）。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>        assertThat(count("SELECT stock FROM product WHERE id = ?", productId)).isEqualTo(10);</pre></td><td class="explain">只加一次。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThat(count("SELECT version FROM product WHERE id = ?", productId)).isEqualTo(1);</pre></td><td class="explain">版本只 +1。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        assertThat(value("SELECT status FROM sales_order WHERE order_no = ?", String.<span class="kw">class</span>,</pre></td><td class="explain">断言订单已取消</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                "CO202611171000000071")).isEqualTo("CANCELLED");</pre></td><td class="explain">状态已取消。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">77</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 并发夹具</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">79</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre class="cmtline">    /** 让两个任务在同一刻起跑，收集各自的 HTTP 状态码。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>    <span class="kw">private</span> List&lt;Integer&gt; runTogether(Callable&lt;Integer&gt; first, Callable&lt;Integer&gt; second) throws Exception {</pre></td><td class="explain">让两个任务在同一刻起跑，收集各自的 HTTP 状态码。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        ExecutorService pool = Executors.newFixedThreadPool(2);</pre></td><td class="explain">两个线程。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            CountDownLatch ready = <span class="kw">new</span> CountDownLatch(2);</pre></td><td class="explain">两个任务都准备好。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>            CountDownLatch start = <span class="kw">new</span> CountDownLatch(1);</pre></td><td class="explain">同时放行。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>            Future&lt;Integer&gt; a = pool.submit(wrapped(first, ready, start));</pre></td><td class="explain">任务 A。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>            Future&lt;Integer&gt; b = pool.submit(wrapped(second, ready, start));</pre></td><td class="explain">任务 B。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>            ready.await(5, TimeUnit.SECONDS);</pre></td><td class="explain">等两个都就绪。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>            start.countDown();</pre></td><td class="explain">发令。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>            <span class="kw">return</span> List.of(a.get(15, TimeUnit.SECONDS), b.get(15, TimeUnit.SECONDS));</pre></td><td class="explain">收集状态码。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        } finally {</pre></td><td class="explain">无论如何都收回线程池</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>            pool.shutdownNow();</pre></td><td class="explain">无论如何都收线程池。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">95</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre class="cmtline">    /** 把任务包成"先就绪、再等发令、最后执行"，保证两个请求同时起跑。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>    <span class="kw">private</span> Callable&lt;Integer&gt; wrapped(Callable&lt;Integer&gt; task, CountDownLatch ready, CountDownLatch start) {</pre></td><td class="explain">把任务包成"先就绪、再等发令、最后执行"，保证两个请求同时起跑。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        <span class="kw">return</span> () -&gt; {</pre></td><td class="explain">包装后的任务。</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>            ready.countDown();</pre></td><td class="explain">报告就绪。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>            start.await(5, TimeUnit.SECONDS);</pre></td><td class="explain">等发令。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>            <span class="kw">return</span> task.call();</pre></td><td class="explain">真正发请求。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>        };</pre></td><td class="explain">数组字面量结束：DROP_ORDER 到此定义完毕。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">104</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre class="cmtline">    /** 打开确认页，拿到带快照的会话。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    <span class="kw">private</span> MockHttpSession confirm(<span class="kw">long</span> userId) throws Exception {</pre></td><td class="explain">打开确认页，拿到带快照的会话。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        MockHttpSession session = CartFixture.session(userId);</pre></td><td class="explain">新会话。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        mockMvc.perform(get("/checkout").session(session)).andReturn();</pre></td><td class="explain">生成快照。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">return</span> session;</pre></td><td class="explain">返回会话。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">111</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre class="cmtline">    /** 提交订单，返回状态码。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> place(MockHttpSession session) throws Exception {</pre></td><td class="explain">提交订单，返回状态码。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        MvcResult result = mockMvc.perform(post("/checkout").session(session)</pre></td><td class="explain">提交。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                        .param("receiverName", "张三")</pre></td><td class="explain">表单参数 receiverName="张三"</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>                        .param("receiverPhone", "13800000000")</pre></td><td class="explain">表单参数 receiverPhone="13800000000"</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>                        .param("receiverAddress", "某市某区某路 1 号"))</pre></td><td class="explain">表单参数 receiverAddress="某市某区某路 1 号"</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">取响应。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        <span class="kw">return</span> result.getResponse().getStatus();</pre></td><td class="explain">状态码。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">121</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre class="cmtline">    /** 取消订单，返回状态码。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> cancel(String orderNo, <span class="kw">long</span> userId) throws Exception {</pre></td><td class="explain">取消订单，返回状态码。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>        MvcResult result = mockMvc.perform(post("/orders/{no}/cancel", orderNo)</pre></td><td class="explain">发起请求，后面几条断言检查渲染结果</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">每次新会话，但同一用户。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>                .andReturn();</pre></td><td class="explain">取响应。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        <span class="kw">return</span> result.getResponse().getStatus();</pre></td><td class="explain">状态码。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">129</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre class="cmtline">    /** 造待支付订单 + 明细，并把库存设为"已扣"后的值。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seedPendingOrder(<span class="kw">long</span> owner, String orderNo, <span class="kw">long</span> productId, <span class="kw">int</span> quantity) {</pre></td><td class="explain">造待支付订单 + 明细，并把库存设为"已扣"后的值。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>        java.time.LocalDateTime created = java.time.LocalDateTime.of(2026, 11, 17, 9, 0);</pre></td><td class="explain">固定时间。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order(order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>                        + "receiver_phone, receiver_address, created_at) VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">参数续行：订单列名</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>                orderNo, owner, "PENDING_PAYMENT", <span class="kw">new</span> BigDecimal("56.00"), "张三", "13800000000",</pre></td><td class="explain">订单值：收货信息固定</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>                "某市某区某路 1 号", created);</pre></td><td class="explain">待支付订单。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>        Long orderId = jdbc.queryForObject("SELECT id FROM sales_order WHERE order_no = ?", Long.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">订单 id。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order_item(order_id, product_id, sku_snapshot, product_name_snapshot, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>                        + "cover_image_snapshot, unit_price, quantity, line_amount) VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">列清单续行。</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>                orderId, productId, "SKU-" + orderNo, "商品" + orderNo, "/images/covers/cc.svg",</pre></td><td class="explain">明细值：快照名称与封面</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal("28.00"), quantity, <span class="kw">new</span> BigDecimal("56.00"));</pre></td><td class="explain">明细。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">143</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> count(String sql, Object... args) {</pre></td><td class="explain">结构行：参与语法组织</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>        Integer value = jdbc.queryForObject(sql, Integer.<span class="kw">class</span>, args);</pre></td><td class="explain">单值。</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>        <span class="kw">return</span> value == null ? 0 : value;</pre></td><td class="explain">空按 0。</td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">148</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    <span class="kw">private</span> &lt;T&gt; T value(String sql, Class&lt;T&gt; type, Object... args) {</pre></td><td class="explain">结构行：参与语法组织</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        <span class="kw">return</span> jdbc.queryForObject(sql, type, args);</pre></td><td class="explain">任意类型单值。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-16 · M05-06 · 并发验证与收尾 · 1 个文件、152 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

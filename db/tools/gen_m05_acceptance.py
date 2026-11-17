@@ -111,6 +111,17 @@ TASKS = {
              "7 个用例：恢复一次/重复取消/已支付/他人/不存在/按钮/页签", "java"),
         ],
     },
+    "06": {
+        "title": "M05-06 · 并发验证与收尾",
+        "out": "M05-06-逐行验收.html",
+        "note": "内容：同一车并发提交只成交一单、同一订单并发取消只恢复一次库存。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 105, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，175 用例。",
+        "files": [
+            (WEB_TEST + "ConcurrentOrderTest.java", "ConcurrentOrderTest.java",
+             "2 个并发用例：下单与取消", "java"),
+        ],
+    },
 }
 
 NOTES: dict[tuple[str, str], str] = {
@@ -410,6 +421,19 @@ NOTES: dict[tuple[str, str], str] = {
     (WEB_TEST + "CancelOrderTest.java", 'paymentNo == null ? null : "MOCK", paymentNo,'):
         "支付凭证：只有已支付订单才有",
     (WEB_TEST + "CancelOrderTest.java", 'orderId, productId, "SKU-" + orderNo, "商品" + orderNo, "/images/covers/cx.svg",'):
+        "明细值：快照名称与封面",
+    # ---- M05-06 并发验证 ----
+    (WEB_TEST + "ConcurrentOrderTest.java", "class ConcurrentOrderTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "ConcurrentOrderTest.java", 'assertThat(value("SELECT status FROM sales_order WHERE order_no = ?", String.class,'):
+        "断言订单已取消",
+    (WEB_TEST + "ConcurrentOrderTest.java", "} finally {"):
+        "无论如何都收回线程池",
+    (WEB_TEST + "ConcurrentOrderTest.java", '+ "receiver_phone, receiver_address, created_at) VALUES (?,?,?,?,?,?,?,?)",'):
+        "参数续行：订单列名",
+    (WEB_TEST + "ConcurrentOrderTest.java", 'orderNo, owner, "PENDING_PAYMENT", new BigDecimal("56.00"), "张三", "13800000000",'):
+        "订单值：收货信息固定",
+    (WEB_TEST + "ConcurrentOrderTest.java", 'orderId, productId, "SKU-" + orderNo, "商品" + orderNo, "/images/covers/cc.svg",'):
         "明细值：快照名称与封面",
 }
 
