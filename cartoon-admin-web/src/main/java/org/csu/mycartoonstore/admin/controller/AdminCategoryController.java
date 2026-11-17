@@ -2,6 +2,7 @@ package org.csu.mycartoonstore.admin.controller; // 分类维护页面：列表�
 
 import jakarta.servlet.http.HttpServletResponse; // 表单校验失败时也要给出正确状态码。
 import org.csu.mycartoonstore.catalog.dto.CategoryForm; // 表单对象。
+import org.csu.mycartoonstore.catalog.dto.CategoryGroup; // 作品 + 品类分组。
 import org.csu.mycartoonstore.catalog.entity.Category; // 父分类展示。
 import org.csu.mycartoonstore.catalog.service.CategoryAdminService; // 业务规则都在这里。
 import org.csu.mycartoonstore.common.exception.BizException; // 校验失败回表单。
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping; // 新增、编辑�
 import org.springframework.web.bind.annotation.RequestMapping; // 路由前缀。
 import org.springframework.web.bind.annotation.RequestParam; // 可选的父级参数。
 import org.springframework.web.servlet.mvc.support.RedirectAttributes; // 一次性提示。
+
+import java.util.List; // 分组列表。
 
 // M07-04：依据 docs/04 §3.2、docs/05 §4.9、docs/06 AC-25/AC-26。
 // 只做参数绑定、页面选择与跳转；层级、编码、唯一性、引用校验全部在 CategoryAdminService。
@@ -29,10 +32,20 @@ public class AdminCategoryController {
         this.categoryAdminService = categoryAdminService; // 保存服务。
     }
 
-    /** 列表：两级缩进树 + 每行的计数与删除提示。 */
+    /**
+     * 列表：按作品分组（可折叠），支持按作品名或编码搜索。
+     *
+     * <p>折叠与展开交给浏览器的 {@code <details>}，不引前端框架；
+     * 搜索后模板会把命中的作品默认展开，省一次点击。</p>
+     */
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("rows", categoryAdminService.tree()); // 已排好序的扁平行。
+    public String list(@RequestParam(required = false) String keyword, Model model) {
+        List<CategoryGroup> groups = categoryAdminService.groups(keyword); // 已按作品排序。
+        int categories = groups.stream().mapToInt(CategoryGroup::getChildCount).sum(); // 当前结果里的品类总数。
+        model.addAttribute("groups", groups); // 分组数据。
+        model.addAttribute("keyword", keyword); // 回显关键字。
+        model.addAttribute("workCount", groups.size()); // 命中作品数。
+        model.addAttribute("categoryCount", categories); // 命中的品类总数。
         model.addAttribute("active", "categories"); // 导航高亮。
         return "admin/category-list"; // 列表模板。
     }

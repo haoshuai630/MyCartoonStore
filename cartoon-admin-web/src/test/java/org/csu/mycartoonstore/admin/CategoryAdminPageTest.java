@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc; // 请求入口。
 
 import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
+import static org.hamcrest.Matchers.not; // 反向断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 断言页面内容。
@@ -45,6 +46,42 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
                 .andExpect(content().string(containsString("单行本"))) // 二级名称。
                 .andExpect(content().string(containsString("PAGE-COMIC"))) // 二级编码。
                 .andExpect(content().string(containsString("新增品类"))); // 一级行有新增二级入口。
+    }
+
+    @Test // 折叠：默认收起，不带 searched 标记。
+    @DisplayName("列表：作品默认折叠")
+    void listCollapsedByDefault() throws Exception {
+        seedWorkAndChild(); // 一个作品 + 一个品类。
+
+        mockMvc.perform(get("/categories").session(adminSession()))
+                .andExpect(status().isOk()) // 200。
+                .andExpect(content().string(containsString("work-group"))) // 有折叠分组。
+                .andExpect(content().string(not(containsString("searched")))); // 没有搜索命中标记。
+    }
+
+    @Test // 搜索：只显示命中的作品。
+    @DisplayName("列表：按作品名搜索")
+    void listSearchByWorkName() throws Exception {
+        seedWorkAndChild(); // PAGE / 页面作品。
+        long otherTop = AdminFixture.createCategory(jdbc, "OTHER", null, "另一个作品", 2); // 干扰作品。
+        AdminFixture.createCategory(jdbc, "OTHER-COMIC", otherTop, "单行本", 1); // 它的品类。
+
+        mockMvc.perform(get("/categories").param("keyword", "页面").session(adminSession()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("页面作品"))) // 命中。
+                .andExpect(content().string(not(containsString("另一个作品")))) // 未命中。
+                .andExpect(content().string(containsString("searched"))); // 搜索时默认展开。
+    }
+
+    @Test // 搜索无结果：空状态。
+    @DisplayName("列表：搜索无结果 → 空状态")
+    void listSearchEmpty() throws Exception {
+        seedWorkAndChild(); // 有数据。
+
+        mockMvc.perform(get("/categories").param("keyword", "不存在").session(adminSession()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("没有匹配的作品"))) // 空状态文案。
+                .andExpect(content().string(containsString("清空搜索"))); // 给出口。
     }
 
     @Test // 新增表单：一级模式。
@@ -229,6 +266,12 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
                 .andExpect(redirectedUrl("/categories"));
 
         assertThat(count("SELECT COUNT(*) FROM category WHERE id = " + leaf)).isZero(); // 已删除。
+    }
+
+    /** 造"页面作品 + 单行本" */
+    private void seedWorkAndChild() {
+        long top = AdminFixture.createCategory(jdbc, "PAGE", null, "页面作品", 1); // 一级。
+        AdminFixture.createCategory(jdbc, "PAGE-COMIC", top, "单行本", 1); // 二级。
     }
 
     /** 管理员会话：拦截器只认 userId */

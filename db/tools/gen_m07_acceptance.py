@@ -264,6 +264,29 @@ TASKS = {
              "8 个页面用例", "java", None),
         ],
     },
+    "10": {
+        "title": "M07-10 · 分类折叠与作品搜索",
+        "out": "M07-10-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：分类维护改为按作品分组的可折叠列表（<details>，不引前端框架）、"
+                "新增「搜索作品」（名称或编码包含匹配、大小写不敏感、空不筛选、超长 400）、"
+                "搜索命中的作品默认展开、分组底部给作品计数、空状态区分'没有作品'与'没有匹配'。"
+                "验证：mvn -pl cartoon-catalog,cartoon-admin-web -am test 全绿；"
+                "全量 clean verify → 10 模块 SUCCESS、329 个用例（新增 5）。"
+                "模板（category-list.html）与样式按 docs/10 §5 用汇报里的手工表说明。",
+        "files": [
+            (CAT + "dto/CategoryGroup.java", "CategoryGroup.java",
+             "作品 + 品类分组", "java", None),
+            (CAT + "service/CategoryAdminService.java", "CategoryAdminService.java",
+             "分组、搜索与关键字校验", "java", [(60, 115)]),
+            (ADM + "controller/AdminCategoryController.java", "AdminCategoryController.java",
+             "列表接收 keyword 并给计数", "java", [(35, 51)]),
+            (CAT_TEST + "service/CategoryAdminServiceTest.java", "CategoryAdminServiceTest.java",
+             "分组与搜索用例", "java", [(266, 305)]),
+            (ADM_TEST + "CategoryAdminPageTest.java", "CategoryAdminPageTest.java",
+             "折叠、搜索、空状态用例", "java", [(51, 85), (271, 275)]),
+        ],
+    },
 }
 
 # 只有"没有行尾注释、规则解释器也认不出"的行才需要登记。
@@ -814,6 +837,18 @@ LINE_NOTES: dict[tuple[str, int], str] = {
     (ADM_TEST + "OrderAdminPageTest.java", 185): "明细：快照名与金额。",
     (ADM_TEST + "OrderAdminPageTest.java", 191): "管理员账号先查后建，避免同用例内重复插入。",
     (ADM_TEST + "OrderAdminPageTest.java", 193): "没有才建。",
+    # ---- M07-10 分类折叠与搜索 ----
+    (CAT + "dto/CategoryGroup.java", 10): "分类列表的一组：作品 + 它的品类。",
+    (CAT + "service/CategoryAdminService.java", 78): "只遍历一级：二级跟随父级输出。",
+    (CAT + "service/CategoryAdminService.java", 79): "二级跳过，避免重复成组。",
+    (CAT + "service/CategoryAdminService.java", 82): "搜索只筛作品，品类不参与匹配。",
+    (CAT + "service/CategoryAdminService.java", 86): "该作品的品类依次成行。",
+    (CAT + "service/CategoryAdminService.java", 111): "关键字超长与名称列宽一致地拒绝。",
+    (CAT_TEST + "service/CategoryAdminServiceTest.java", 270): "用例：按作品分组，计数正确。",
+    (CAT_TEST + "service/CategoryAdminServiceTest.java", 289): "用例：作品名/编码包含匹配，大小写不敏感。",
+    (ADM_TEST + "CategoryAdminPageTest.java", 53): "用例：作品默认折叠。",
+    (ADM_TEST + "CategoryAdminPageTest.java", 64): "用例：搜索只显示命中的作品并默认展开。",
+    (ADM_TEST + "CategoryAdminPageTest.java", 78): "用例：搜索无结果 → 空状态。",
 }
 
 

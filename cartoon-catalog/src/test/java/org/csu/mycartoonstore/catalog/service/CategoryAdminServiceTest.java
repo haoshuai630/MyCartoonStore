@@ -1,6 +1,7 @@
 package org.csu.mycartoonstore.catalog.service; // 分类维护服务：两级树、增删改与引用校验。
 
 import org.csu.mycartoonstore.catalog.dto.CategoryForm; // 表单。
+import org.csu.mycartoonstore.catalog.dto.CategoryGroup; // 作品 + 品类分组。
 import org.csu.mycartoonstore.catalog.dto.CategoryRow; // 列表行。
 import org.csu.mycartoonstore.catalog.dto.CategoryUsage; // 商品计数。
 import org.csu.mycartoonstore.catalog.entity.Category; // 分类实体。
@@ -264,25 +265,43 @@ class CategoryAdminServiceTest {
 
     // ---------------------------------------------------------------- 列表与回显
 
-    @Test // 树形：一级在前，二级紧随，带父名、层级、子分类数与商品数。
-    @DisplayName("列表：一级在前、二级紧随，计数正确")
-    void treeAssembles() {
+    @Test // 分组：一个作品 + 它的品类，计数正确。
+    @DisplayName("列表：按作品分组，计数正确")
+    void groupsAssemble() {
         Category top = category(7L, "STARLINE", null, "星轨列车", 1); // 一级。
         Category comic = category(8L, "STARLINE-COMIC", 7L, "单行本", 1); // 二级。
         Category badge = category(9L, "STARLINE-BADGE", 7L, "徽章", 2); // 二级。
         when(categoryMapper.selectList(any())).thenReturn(List.of(top, comic, badge)); // 查询顺序即展示顺序。
         when(productMapper.countByCategory()).thenReturn(List.of(usage(8L, 6))); // 单行本下 6 件商品。
 
-        List<CategoryRow> rows = service.tree(); // 组装。
+        List<CategoryGroup> groups = service.groups(null); // 不过滤。
 
-        assertThat(rows).hasSize(3); // 一行一个分类。
-        assertThat(rows.get(0).getLevel()).isEqualTo(1); // 一级。
-        assertThat(rows.get(0).getChildCount()).isEqualTo(2); // 两个品类。
-        assertThat(rows.get(0).getProductCount()).isZero(); // 商品挂在二级上。
-        assertThat(rows.get(1).getLevel()).isEqualTo(2); // 二级。
-        assertThat(rows.get(1).getParentName()).isEqualTo("星轨列车"); // 父名来自同一份数据。
-        assertThat(rows.get(1).getProductCount()).isEqualTo(6); // 商品数来自分组查询。
-        assertThat(rows.get(2).getProductCount()).isZero(); // 没有商品的分类默认 0。
+        assertThat(groups).hasSize(1); // 一个作品一组。
+        assertThat(groups.get(0).getWork().getName()).isEqualTo("星轨列车"); // 作品名。
+        assertThat(groups.get(0).getChildCount()).isEqualTo(2); // 两个品类。
+        assertThat(groups.get(0).getWork().getProductCount()).isZero(); // 商品挂在品类上。
+        assertThat(groups.get(0).getChildren().get(0).getParentName()).isEqualTo("星轨列车"); // 父名。
+        assertThat(groups.get(0).getChildren().get(0).getProductCount()).isEqualTo(6); // 商品数。
+    }
+
+    @Test // 搜索：按作品名与编码包含匹配，大小写不敏感。
+    @DisplayName("搜索：作品名/编码包含匹配")
+    void groupsSearch() {
+        Category starline = category(7L, "STARLINE", null, "星轨列车", 1); // 命中 "星轨" 与 "starline"。
+        Category mistport = category(8L, "MISTPORT", null, "雾港侦探", 2); // 不命中。
+        when(categoryMapper.selectList(any())).thenReturn(List.of(starline, mistport)); // 两个作品。
+
+        assertThat(service.groups("星轨")).hasSize(1); // 按名称。
+        assertThat(service.groups("starline")).hasSize(1); // 按编码，小写也命中。
+        assertThat(service.groups("不存在")).isEmpty(); // 无命中。
+    }
+
+    @Test // 关键字超长：400。
+    @DisplayName("搜索：关键字超长 → 400")
+    void groupsSearchTooLong() {
+        assertThatThrownBy(() -> service.groups("长".repeat(51)))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("50");
     }
 
     @Test // 删除按钮状态：有引用就给出具体原因。
