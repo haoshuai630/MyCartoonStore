@@ -8,12 +8,15 @@ import org.csu.mycartoonstore.order.dto.OrderPage; // 列表一页。
 import org.csu.mycartoonstore.order.entity.SalesOrder; // 订单主表。
 import org.csu.mycartoonstore.order.service.OrderListService; // 列表查询。
 import org.csu.mycartoonstore.order.service.OrderQueryService; // 详情查询。
+import org.csu.mycartoonstore.order.service.OrderService; // 取消订单。
 import org.csu.mycartoonstore.web.interceptor.LoginInterceptor; // 会话里 userId 的键。
 import org.springframework.stereotype.Controller; // MVC 控制器。
 import org.springframework.ui.Model; // 页面数据。
 import org.springframework.web.bind.annotation.GetMapping; // 只读页面。
 import org.springframework.web.bind.annotation.PathVariable; // 订单号来自路径。
+import org.springframework.web.bind.annotation.PostMapping; // 取消订单。
 import org.springframework.web.bind.annotation.RequestParam; // 状态、单号、页码。
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; // 取消后的一次性提示。
 
 import java.util.ArrayList; // 状态页签。
 import java.util.LinkedHashMap; // 标签顺序固定。
@@ -27,10 +30,13 @@ public class OrderController {
 
     private final OrderQueryService orderQueryService; // 详情查询。
     private final OrderListService orderListService; // 列表查询。
+    private final OrderService orderService; // 取消订单。
 
-    public OrderController(OrderQueryService orderQueryService, OrderListService orderListService) { // 构造器注入。
+    public OrderController(OrderQueryService orderQueryService, OrderListService orderListService,
+                           OrderService orderService) { // 构造器注入。
         this.orderQueryService = orderQueryService; // 保存详情服务。
         this.orderListService = orderListService; // 保存列表服务。
+        this.orderService = orderService; // 保存取消服务。
     }
 
     /**
@@ -61,6 +67,18 @@ public class OrderController {
         model.addAttribute("items", orderQueryService.items(order.getId())); // 明细快照。
         model.addAttribute("statusLabel", OrderStatus.labelOf(order.getStatus())); // 状态中文。
         return "order-detail"; // 渲染详情页。
+    }
+
+    /**
+     * 取消待支付订单：幂等，重复取消不重复恢复库存。
+     */
+    @PostMapping("/orders/{orderNo}/cancel") // 写操作，POST。
+    public String cancel(@PathVariable String orderNo, HttpSession session, RedirectAttributes redirect) {
+        long userId = currentUserId(session); // 当前用户。
+        boolean cancelled = orderService.cancel(userId, orderNo); // 已取消过会返回 false。
+        redirect.addFlashAttribute("message",
+                cancelled ? "订单已取消，库存已恢复" : "订单已取消，无需重复操作"); // 两种提示。
+        return "redirect:/orders/" + orderNo; // 回详情，刷新不会重复提交。
     }
 
     /** 页签：编码、中文、真实数量；在控制器算好，模板只负责显示。 */

@@ -16,6 +16,9 @@
                 <b th:text="${order.orderNo}">订单号</b>
             </nav>
 
+            <!-- 取消成功后的一次性提示 -->
+            <p class="auth-ok" th:if="${message}" th:text="${message}">订单已取消</p>
+
             <!-- 头部：状态、订单号、创建时间 -->
             <div class="order-head">
                 <div>
@@ -89,7 +92,14 @@
                         <span th:text="${order.paidAt != null} ? '已模拟支付' : '应付总额'">应付总额</span>
                         <b th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</b>
                     </div>
-                    <p class="hint">支付与取消在后续任务接入；本页只展示数据库里的真实快照与状态。</p>
+                    <p class="hint">模拟支付在 M06 接入；本页展示数据库里的真实快照与状态。</p>
+
+                    <!-- 待支付才能取消；取消后库存恢复，购物车不自动回填 -->
+                    <form th:if="${order.status == 'PENDING_PAYMENT'}"
+                          th:action="@{/orders/{no}/cancel(no=${order.orderNo})}" method="post" class="order-action">
+                        <button type="submit" class="btn btn-danger">取消订单</button>
+                    </form>
+                    <p class="hint" th:if="${order.status == 'PENDING_PAYMENT'}">取消后库存会恢复，购物车不会自动回填。</p>
                 </div>
             </div>
         </div>

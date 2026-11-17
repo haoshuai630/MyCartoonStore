@@ -95,6 +95,22 @@ TASKS = {
             (WEB_TEST + "OrderListTest.java", "OrderListTest.java", "9 个用例：空/归属/筛选/搜索/分页/400/快照/时间线/游客", "java"),
         ],
     },
+    "05": {
+        "title": "M05-05 · 取消订单与库存恢复",
+        "out": "M05-05-逐行验收.html",
+        "note": "内容：订单行锁、幂等取消、库存恢复与版本 +1、已支付不可取消、他人订单 404、车不回填。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 103, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，173 用例。"
+                "ProductMapper.restoreStock 是 3 行注解 SQL，未纳入逐行；由取消用例验证真实库存变化。",
+        "files": [
+            (ORDER + "service/OrderService.java", "OrderService.java", "下单事务 + 取消订单", "java"),
+            (WEB + "controller/OrderController.java", "OrderController.java", "取消路由与详情", "java"),
+            ("cartoon-user-web/src/main/resources/templates/order-detail.html", "order-detail.html",
+             "详情页：待支付显示取消按钮", "html"),
+            (WEB_TEST + "CancelOrderTest.java", "CancelOrderTest.java",
+             "7 个用例：恢复一次/重复取消/已支付/他人/不存在/按钮/页签", "java"),
+        ],
+    },
 }
 
 NOTES: dict[tuple[str, str], str] = {
@@ -364,6 +380,37 @@ NOTES: dict[tuple[str, str], str] = {
         "明细值：快照名称、封面与 SKU",
     (WEB_TEST + "OrderListTest.java", "new java.math.BigDecimal(price), quantity,"):
         "参数续行：单价与数量",
+    # ---- M05-05 取消订单 ----
+    (ORDER + "service/OrderService.java", "OrderNoGenerator orderNoGenerator,"):
+        "参数续行：订单号生成器",
+    (ORDER + "service/OrderService.java", "SalesOrder order = orderMapper.lockByOrderNo(orderNo);"):
+        "锁订单行：并发取消只有一个能迁移状态",
+    (ORDER + "service/OrderService.java", "if (order == null || order.getUserId() != userId) {"):
+        "不存在或非本人：统一 404",
+    (ORDER + "service/OrderService.java", "if (CANCELLED.equals(order.getStatus())) {"):
+        "幂等：已取消直接返回，不再恢复库存",
+    (ORDER + "service/OrderService.java", "if (!PENDING_PAYMENT.equals(order.getStatus())) {"):
+        "非待支付：409，已支付/已发货不可取消",
+    (ORDER + "service/OrderService.java", "List<SalesOrderItem> items = itemMapper.selectList(Wrappers.<SalesOrderItem>lambdaQuery()"):
+        "读该订单全部明细",
+    (ORDER + "service/OrderService.java", "for (SalesOrderItem item : items) {"):
+        "逐条恢复库存，数量来自下单快照",
+    (WEB + "controller/OrderController.java", "public OrderController(OrderQueryService orderQueryService, OrderListService orderListService,"):
+        "构造器注入：详情、列表、取消三个服务",
+    (WEB + "controller/OrderController.java", 'redirect.addFlashAttribute("message",'):
+        "取消结果提示：真取消 / 幂等",
+    (WEB_TEST + "CancelOrderTest.java", "class CancelOrderTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "CancelOrderTest.java", '+ "receiver_address, created_at, payment_method, payment_no, paid_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",'):
+        "参数续行：订单列名",
+    (WEB_TEST + "CancelOrderTest.java", 'orderNo, owner, status, new BigDecimal("56.00"), "张三", "13800000000",'):
+        "订单值：收货信息固定",
+    (WEB_TEST + "CancelOrderTest.java", '"某市某区某路 1 号", created,'):
+        "参数续行：地址与创建时间",
+    (WEB_TEST + "CancelOrderTest.java", 'paymentNo == null ? null : "MOCK", paymentNo,'):
+        "支付凭证：只有已支付订单才有",
+    (WEB_TEST + "CancelOrderTest.java", 'orderId, productId, "SKU-" + orderNo, "商品" + orderNo, "/images/covers/cx.svg",'):
+        "明细值：快照名称与封面",
 }
 
 

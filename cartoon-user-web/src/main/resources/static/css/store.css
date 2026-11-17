@@ -474,6 +474,11 @@ button{font-family:inherit}
 .timeline li.on::before{content:"";position:absolute;left:-9px;top:50%;transform:translateY(-50%);width:12px;height:12px;border:3px solid var(--ink);background:var(--yellow);border-radius:50%}
 .timeline li.cancel{border-left-color:var(--red)}
 .timeline li.cancel::before{background:var(--red);border-color:var(--red)}
+/* 危险操作：取消订单 */
+.btn-danger{background:var(--red);color:#fff;border-color:var(--ink)}
+.btn-danger:hover{background:#b3352b}
+.order-action{margin-top:14px}
+.order-action .btn{width:100%;justify-content:center}
 @media(max-width:900px){
   .order-card-body{grid-template-columns:56px 1fr 80px;gap:10px}
   .order-card-amount{grid-column:2;text-align:left}
