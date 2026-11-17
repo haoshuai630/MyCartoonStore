@@ -3,6 +3,8 @@ server:
   servlet:
     session:
       timeout: 30m
+      # 只允许 Cookie 跟踪会话：避免容器把会话 ID 拼进 URL（;CARTOON_USER_SESSION=…）
+      tracking-modes: cookie
       cookie:
         name: CARTOON_USER_SESSION
         http-only: true

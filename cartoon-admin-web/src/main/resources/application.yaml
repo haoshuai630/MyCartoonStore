@@ -4,6 +4,9 @@ server:
     context-path: /admin
     session:
       timeout: 30m
+      # 只允许 Cookie 跟踪会话：容器不再把会话 ID 拼进 URL（;CARTOON_ADMIN_SESSION=…），
+      # 否则首次登录的 302 会跳到 /admin/;<id>，被当成静态资源路径而 404。
+      tracking-modes: cookie
       cookie:
         name: CARTOON_ADMIN_SESSION
         http-only: true
