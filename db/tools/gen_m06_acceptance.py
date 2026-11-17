@@ -56,7 +56,20 @@ TASKS = {
             (WEB_RES + "payment.html", "payment.html", "支付页：大字金额、教学声明、两个按钮", "html"),
             (WEB_RES + "order-detail.html", "order-detail.html", "详情页：待支付给「去支付」", "html"),
             (WEB_RES + "orders.html", "orders.html", "列表卡片：待支付给「去支付/取消」", "html"),
-            (WEB_TEST + "PaymentPageTest.java", "PaymentPageTest.java", "8 个页面与入口用例", "java"),
+            (WEB_TEST + "PaymentPageTest.java", "PaymentPageTest.java", "9 个页面与入口用例", "java"),
+        ],
+    },
+    "03": {
+        "title": "M06-03 · 测试与收尾",
+        "out": "M06-03-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：AC-20 从真实入口验证（成功写三件套且不扣库存、失败无凭证、失败后重试、再次成功幂等、"
+                "他人 404、已取消/已发货 409、下单后改价下架仍可支付）、AC-24 支付与取消并发只有一种迁移成功、"
+                "并发重复支付只写一次凭证。"
+                "验证：mvn clean verify → 10 个模块 SUCCESS，207 个用例（user-web 124，本任务新增 10）。",
+        "files": [
+            (WEB_TEST + "PaymentTest.java", "PaymentTest.java", "8 个 AC-20 集成用例", "java"),
+            (WEB_TEST + "PaymentConcurrencyTest.java", "PaymentConcurrencyTest.java", "2 个 AC-24 并发用例", "java"),
         ],
     },
 }
@@ -191,6 +204,11 @@ NOTES: dict[tuple[str, str], str] = {
     (WEB_RES + "orders.html",
      '<button type="submit" class="btn btn-ghost">取消</button>'):
         "取消后库存恢复，页面回详情",
+    # ---- M06-03 测试类 ----
+    (WEB_TEST + "PaymentTest.java", "class PaymentTest extends AbstractIntegrationTest {"):
+        "AC-20 集成测试：真实 MySQL + MockMvc，从支付入口验证。",
+    (WEB_TEST + "PaymentConcurrencyTest.java", "class PaymentConcurrencyTest extends AbstractIntegrationTest {"):
+        "AC-24 并发：支付与取消同一订单只有一种迁移成功。",
 }
 
 
