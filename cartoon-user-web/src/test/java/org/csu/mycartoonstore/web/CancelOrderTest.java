@@ -171,6 +171,25 @@ class CancelOrderTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("已取消"))); // 状态已变。
     }
 
+    /** AC-22：下单后商品被下架，取消仍恢复库存，商品保持 DRAFT。 */
+    @Test
+    @DisplayName("AC-22：下单后商品下架，取消恢复库存且仍为 DRAFT")
+    void cancelAfterProductDelisted() throws Exception {
+        long userId = CartFixture.createUser(jdbc, "cx_draft"); // 建账号。
+        long productId = CartFixture.createProduct(jdbc, "CX-P07", "28.00", 10, "ON_SALE"); // 上架、库存 10。
+        seedOrder(userId, "CO202611161000000067", "PENDING_PAYMENT", productId, 2, 8); // 已下单，剩 8。
+        jdbc.update("UPDATE product SET status = 'DRAFT' WHERE id = ?", productId); // 下单后下架。
+        MockHttpSession session = CartFixture.session(userId); // 会话。
+
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000067").with(csrf()).session(session)) // 取消。
+                .andExpect(status().is3xxRedirection()); // 成功。
+
+        assertThat(statusOf("CO202611161000000067")).isEqualTo("CANCELLED"); // 状态迁移。
+        assertThat(stock(productId)).isEqualTo(10); // 库存仍要恢复。
+        assertThat(jdbc.queryForObject("SELECT status FROM product WHERE id = ?", String.class, productId))
+                .isEqualTo("DRAFT"); // 不自动上架。
+    }
+
     // ---------------------------------------------------------------- 夹具
 
     /** 造一单 + 一行明细，并把商品库存改成"已扣"后的值。 */
