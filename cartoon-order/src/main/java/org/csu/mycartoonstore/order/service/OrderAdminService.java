@@ -77,6 +77,17 @@ public class OrderAdminService {
                 .orderByAsc(SalesOrderItem::getId)); // 保持写入顺序。
     }
 
+    /**
+     * 该商品被多少条订单明细引用。
+     *
+     * <p>后台删除商品前调用：明细的 {@code product_id} 有外键指向商品，
+     * 有引用时商品只能下架、不能删除，历史订单才不会悬空。</p>
+     */
+    public long countItemsByProduct(long productId) {
+        return itemMapper.selectCount(Wrappers.<SalesOrderItem>lambdaQuery()
+                .eq(SalesOrderItem::getProductId, productId)); // 只数条数，不读明细内容。
+    }
+
     /** 订单号：去空白；空串视为未搜索；超过列宽给 400。 */
     private String normalizeOrderNo(String raw) {
         if (raw == null || raw.isBlank()) {

@@ -66,6 +66,14 @@ class OrderAdminServiceTest {
                 .hasMessageContaining("过长");
     }
 
+    @Test // 删除商品前查引用（M10-01）。
+    @DisplayName("商品引用计数：按 product_id 数明细")
+    void countItemsByProduct() {
+        when(itemMapper.selectCount(any())).thenReturn(2L); // 两条明细引用该商品。
+
+        assertThat(service.countItemsByProduct(7L)).isEqualTo(2L); // 原样返回条数。
+    }
+
     @Test // 详情不存在：404。
     @DisplayName("详情：不存在 → 404")
     void detailMissing() {

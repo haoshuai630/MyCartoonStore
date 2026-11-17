@@ -1,5 +1,6 @@
 package org.csu.mycartoonstore.cart.service;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.csu.mycartoonstore.cart.dto.CartItemView;
 import org.csu.mycartoonstore.cart.dto.CartLine;
 import org.csu.mycartoonstore.cart.dto.CartSummary;
@@ -152,6 +153,17 @@ public class CartService {
             return 0; // 没有条目可删，交给调用方按冲突处理。
         }
         return cartItemMapper.deleteByIdsAndUser(userId, cartItemIds); // 归属条件仍在 SQL 里。
+    }
+
+    /**
+     * 清掉所有用户购物车里指向该商品的条目。
+     *
+     * <p>后台删除商品前调用：{@code cart_item.product_id} 有外键指向商品，
+     * 不先清条目就无法删除商品。返回实际删除行数，供接口提示"顺手清了几条"。</p>
+     */
+    public int clearProduct(long productId) {
+        return cartItemMapper.delete(Wrappers.<CartItem>lambdaQuery()
+                .eq(CartItem::getProductId, productId)); // 只按商品过滤：这是跨用户的维护动作。
     }
 
     // ---------------------------------------------------------------- 内部规则

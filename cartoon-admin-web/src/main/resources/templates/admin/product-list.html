@@ -99,6 +99,12 @@
                                 <input type="number" name="quantity" value="10" min="1" max="100000" class="qty-input">
                                 <button type="submit" class="link-btn">补货</button>
                             </form>
+                            <!-- M10-01：删除是物理删除；有订单引用会被拒（409），提示改用下架 -->
+                            <form class="inline-form" th:action="@{/products/{id}/delete(id=${row.id})}" method="post"
+                                  onsubmit="return confirm('删除后不可恢复，历史订单引用时会被拒绝。若只是停售请用下架。确定删除吗？')">
+                                <input th:replace="~{admin/csrf :: hidden}">
+                                <button type="submit" class="link-btn danger">删除</button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>

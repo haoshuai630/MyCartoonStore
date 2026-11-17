@@ -273,8 +273,18 @@ class CartServiceTest {
 
     // ---------------------------------------------------------------- 夹具
 
-    private Product product(long id, String price, int stock, String status) {
-        Product p = new Product();
+    @Test // 后台删除商品前调用：跨用户清掉该商品（M10-01）。
+    @DisplayName("清商品：删除所有车里的该商品并返回行数")
+    void clearProductDeletesRows() {
+        when(cartItemMapper.delete(any())).thenReturn(3); // 三个顾客的车里有它。
+
+        int cleared = service.clearProduct(9L); // 清掉商品 9。
+
+        assertThat(cleared).isEqualTo(3); // 返回实际删除行数。
+        verify(cartItemMapper).delete(any()); // 只调一次删除。
+    }
+
+    private Product product(long id, String price, int stock, String status) {        Product p = new Product();
         p.setId(id);
         p.setName("测试商品" + id);
         p.setPrice(new BigDecimal(price));

@@ -36,6 +36,11 @@
             <groupId>org.csu.mycartoonstore</groupId>
             <artifactId>cartoon-order</artifactId>
         </dependency>
+        <!-- M10-01：删除商品前要清购物车条目，后台因此直接依赖 cart 模块。 -->
+        <dependency>
+            <groupId>org.csu.mycartoonstore</groupId>
+            <artifactId>cartoon-cart</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

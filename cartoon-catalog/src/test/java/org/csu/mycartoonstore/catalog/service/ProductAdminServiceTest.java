@@ -6,6 +6,7 @@ import org.csu.mycartoonstore.catalog.dto.ProductForm; // 表单。
 import org.csu.mycartoonstore.catalog.entity.Category; // 分类实体。
 import org.csu.mycartoonstore.catalog.entity.Product; // 商品实体。
 import org.csu.mycartoonstore.catalog.mapper.CategoryMapper; // 分类查询。
+import org.csu.mycartoonstore.catalog.mapper.ProductImageMapper; // 相册删除。
 import org.csu.mycartoonstore.catalog.mapper.ProductMapper; // 商品读写。
 import org.csu.mycartoonstore.common.exception.BizException; // 业务异常。
 import org.csu.mycartoonstore.common.exception.ErrorCode; // 错误码。
@@ -39,6 +40,9 @@ class ProductAdminServiceTest {
 
     @Mock // 分类查询。
     private CategoryMapper categoryMapper;
+
+    @Mock // 相册删除（M10-01）。
+    private ProductImageMapper productImageMapper;
 
     @InjectMocks // 被测服务。
     private ProductAdminService service;
@@ -231,8 +235,32 @@ class ProductAdminServiceTest {
         assertThatThrownBy(() -> service.create(noPrefix)).isInstanceOf(BizException.class);
     }
 
-    // ---------------------------------------------------------------- 编辑
-    @Test // 编辑：只写资料列，版本进条件，SKU 与库存不写。
+    // ---------------------------------------------------------------- 删除（M10-01）
+
+    @Test // 先删相册再删商品：顺序反了会被外键挡住。
+    @DisplayName("删除：相册随商品一起删")
+    void deleteRemovesImagesThenProduct() {
+        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L)); // 商品存在。
+
+        service.delete(5L); // 执行删除。
+
+        verify(productImageMapper).delete(any()); // 先清相册。
+        verify(productMapper).deleteById(5L); // 再删商品。
+    }
+
+    @Test // 不存在：404，且不删任何东西。
+    @DisplayName("删除：商品不存在 → 404")
+    void deleteMissing() {
+        when(productMapper.selectById(9L)).thenReturn(null); // 查不到。
+
+        assertThatThrownBy(() -> service.delete(9L))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND); // 404。
+        verify(productMapper, never()).deleteById(any(java.io.Serializable.class)); // 不误删。
+    }
+
+    // ---------------------------------------------------------------- 编辑    @Test // 编辑：只写资料列，版本进条件，SKU 与库存不写。
     @DisplayName("编辑：版本进条件，SKU 与库存不写")
     void updateWritesProfileOnly() {
         when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L)); // 已存在，版本 3。
