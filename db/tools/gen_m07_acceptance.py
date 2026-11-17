@@ -30,6 +30,8 @@ ADM_TEST = "cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/"
 CAT = "cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/"
 CAT_TEST = "cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/"
 CAT_XML = "cartoon-catalog/src/main/resources/mapper/"
+ORD = "cartoon-order/src/main/java/org/csu/mycartoonstore/order/"
+ORD_TEST = "cartoon-order/src/test/java/org/csu/mycartoonstore/order/"
 
 TASKS = {
     "01": {
@@ -226,6 +228,40 @@ TASKS = {
              "4 个页面用例", "java", [(226, 292)]),
             (ADM_TEST + "RestockConcurrencyTest.java", "RestockConcurrencyTest.java",
              "AC-28 并发用例", "java", None),
+        ],
+    },
+    "08": {
+        "title": "M07-08 · 全站订单与发货",
+        "out": "M07-08-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：全站订单列表（状态/完整单号/分页）、订单详情（明细快照、收货、支付凭证、所属用户）、"
+                "发货（行锁 + 只允许 PAID + 重复发货幂等）、控制台与导航接入、"
+                "5 个查询用例 + 6 个发货用例 + 8 个页面用例。"
+                "验证：mvn -pl cartoon-order -am test → 31；mvn -pl cartoon-admin-web -am test → 50；"
+                "全量 clean verify → 10 模块 SUCCESS、324 个用例。"
+                "两个订单模板与样式按 docs/10 §5 用汇报里的手工表说明；"
+                "SalesOrder 与 AccountService 只对照本次新增的状态标签与批量取名方法。",
+        "files": [
+            (ORD + "service/OrderAdminService.java", "OrderAdminService.java",
+             "全站列表、详情与参数归一", "java", None),
+            (ORD + "service/ShipService.java", "ShipService.java",
+             "发货：行锁、状态迁移与幂等", "java", None),
+            (ORD + "domain/ShipResult.java", "ShipResult.java",
+             "发货两种结局", "java", None),
+            (ORD + "dto/AdminOrderPage.java", "AdminOrderPage.java",
+             "后台订单一页", "java", None),
+            (ORD + "entity/SalesOrder.java", "SalesOrder.java",
+             "新增状态标签", "java", [(72, 76)]),
+            (ACC + "service/AccountService.java", "AccountService.java",
+             "新增批量取显示名", "java", [(126, 137)]),
+            (ADM + "controller/AdminOrderController.java", "AdminOrderController.java",
+             "列表、详情与发货路由", "java", None),
+            (ORD_TEST + "service/ShipServiceTest.java", "ShipServiceTest.java",
+             "6 个发货用例", "java", None),
+            (ORD_TEST + "service/OrderAdminServiceTest.java", "OrderAdminServiceTest.java",
+             "5 个查询用例", "java", None),
+            (ADM_TEST + "OrderAdminPageTest.java", "OrderAdminPageTest.java",
+             "8 个页面用例", "java", None),
         ],
     },
 }
@@ -713,6 +749,71 @@ LINE_NOTES: dict[tuple[str, int], str] = {
     (ADM_TEST + "RestockConcurrencyTest.java", 72): "线程 B：后台补货。",
     (ADM_TEST + "RestockConcurrencyTest.java", 75): "记下异常。",
     (ADM_TEST + "RestockConcurrencyTest.java", 82): "无论成败都收线程池。",
+    # ---- M07-08 订单服务 ----
+    (ORD + "service/OrderAdminService.java", 22): "后台订单查询服务：全站列表与详情；不做发货与状态编辑。",
+    (ORD + "service/OrderAdminService.java", 48): "条件：状态可选、单号精确。",
+    (ORD + "service/OrderAdminService.java", 56): "只取当前页，排序与分页交给 SQL。",
+    (ORD + "service/OrderAdminService.java", 60): "组装一页：含回显用的筛选条件。",
+    (ORD + "service/OrderAdminService.java", 67): "不存在即 404（全站可看，但要有这一单）。",
+    (ORD + "service/OrderAdminService.java", 75): "明细按下单顺序。",
+    (ORD + "service/OrderAdminService.java", 86): "超过列宽直接 400。",
+    (ORD + "service/ShipService.java", 19): "发货服务：只把 PAID 迁到 SHIPPED；重复发货走幂等。",
+    (ORD + "service/ShipService.java", 47): "订单不存在：404。",
+    (ORD + "domain/ShipResult.java", 5): "发货两种结局：本次成功 / 之前已发过。",
+    (ORD + "domain/ShipResult.java", 8): "本次真的发货了。",
+    (ORD + "domain/ShipResult.java", 11): "之前已经发过，保持首次时间。",
+    (ORD + "dto/AdminOrderPage.java", 11): "后台订单一页：订单 + 分页 + 回显的筛选条件。",
+    (ORD + "dto/AdminOrderPage.java", 35): "构造一页：",
+    (ORD + "dto/AdminOrderPage.java", 36): "续行：总数、总页数与回显条件。",
+    (ACC + "service/AccountService.java", 132): "没有 id 就不查库。",
+    (ACC + "service/AccountService.java", 135): "一次批量查完本页用户。",
+    (ADM + "controller/AdminOrderController.java", 27): "订单控制器：列表、详情、发货；状态机在 order 模块。",
+    (ADM + "controller/AdminOrderController.java", 35): "构造器注入：查询、发货、账号三个协作方。",
+    (ADM + "controller/AdminOrderController.java", 36): "续行：发货服务。",
+    (ADM + "controller/AdminOrderController.java", 44): "列表：全站订单。",
+    (ADM + "controller/AdminOrderController.java", 51): "本页涉及的用户 id。",
+    (ADM + "controller/AdminOrderController.java", 53): "去重后一次查显示名。",
+    (ADM + "controller/AdminOrderController.java", 63): "详情：明细、收货、支付与所属用户。",
+    (ADM + "controller/AdminOrderController.java", 75): "发货：仅 PAID；不可发货交给全局处理器转 409。",
+    (ADM + "controller/AdminOrderController.java", 78): "区分首次发货与重复提交的提示。",
+    (ORD_TEST + "service/ShipServiceTest.java", 31): "6 个发货用例：迁移、幂等、409、404。",
+    (ORD_TEST + "service/ShipServiceTest.java", 46): "用例：PAID → SHIPPED 并写时间。",
+    (ORD_TEST + "service/ShipServiceTest.java", 55): "断言东八区发货时间。",
+    (ORD_TEST + "service/ShipServiceTest.java", 61): "用例：已发货幂等，不重复写。",
+    (ORD_TEST + "service/ShipServiceTest.java", 70): "用例：已完成同样幂等。",
+    (ORD_TEST + "service/ShipServiceTest.java", 78): "用例：待支付 → 409。",
+    (ORD_TEST + "service/ShipServiceTest.java", 84): "断言 409。",
+    (ORD_TEST + "service/ShipServiceTest.java", 89): "用例：已取消 → 409。",
+    (ORD_TEST + "service/ShipServiceTest.java", 94): "断言文案。",
+    (ORD_TEST + "service/ShipServiceTest.java", 99): "用例：订单不存在 → 404。",
+    (ORD_TEST + "service/ShipServiceTest.java", 105): "断言 404。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 27): "5 个查询用例：默认分页、状态、超长单号、404。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 40): "用例：空参数用默认分页与 ALL。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 54): "用例：非法状态 → 400。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 58): "断言 400。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 63): "用例：超长订单号 → 400。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 71): "用例：详情不存在 → 404。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 77): "断言 404。",
+    (ORD_TEST + "service/OrderAdminServiceTest.java", 82): "用例：详情返回订单。",
+    (ADM_TEST + "OrderAdminPageTest.java", 29): "订单页面的 8 个用例：AC-29。",
+    (ADM_TEST + "OrderAdminPageTest.java", 39): "用例：跨用户列表与状态标签。",
+    (ADM_TEST + "OrderAdminPageTest.java", 57): "用例：按状态筛选。",
+    (ADM_TEST + "OrderAdminPageTest.java", 71): "用例：订单号精确匹配。",
+    (ADM_TEST + "OrderAdminPageTest.java", 85): "用例：详情快照与支付信息。",
+    (ADM_TEST + "OrderAdminPageTest.java", 101): "用例：PAID 发货并写时间（AC-29）。",
+    (ADM_TEST + "OrderAdminPageTest.java", 118): "用例：待支付发货 → 409。",
+    (ADM_TEST + "OrderAdminPageTest.java", 132): "用例：重复发货保持首次时间（AC-29）。",
+    (ADM_TEST + "OrderAdminPageTest.java", 150): "用例：不存在的订单 → 404。",
+    (ADM_TEST + "OrderAdminPageTest.java", 168): "夹具：建一张带明细的订单。",
+    (ADM_TEST + "OrderAdminPageTest.java", 169): "续行：商品名与总额。",
+    (ADM_TEST + "OrderAdminPageTest.java", 176): "续行：时间字段列。",
+    (ADM_TEST + "OrderAdminPageTest.java", 177): "续行：占位符与列一一对应。",
+    (ADM_TEST + "OrderAdminPageTest.java", 178): "值：单号、用户、状态、金额、收货快照。",
+    (ADM_TEST + "OrderAdminPageTest.java", 179): "值：支付三件套按状态成组。",
+    (ADM_TEST + "OrderAdminPageTest.java", 180): "值：取消/发货时间按状态成组。",
+    (ADM_TEST + "OrderAdminPageTest.java", 185): "明细：快照名与金额。",
+    (ADM_TEST + "OrderAdminPageTest.java", 191): "管理员账号先查后建，避免同用例内重复插入。",
+    (ADM_TEST + "OrderAdminPageTest.java", 193): "没有才建。",
 }
 
 

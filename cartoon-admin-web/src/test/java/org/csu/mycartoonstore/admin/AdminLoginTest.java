@@ -128,8 +128,9 @@ class AdminLoginTest extends AdminIntegrationTest {
                 .andExpect(status().isOk()) // 200。
                 .andExpect(content().string(containsString("控制台"))) // 页面标题。
                 .andExpect(content().string(containsString("测试管理员"))) // 当前管理员显示名。
-                .andExpect(content().string(containsString("分类维护"))) // 入口占位存在。
-                .andExpect(content().string(containsString("待接入"))); // 未接入的入口要标明，不放假链接。
+                .andExpect(content().string(containsString("分类维护"))) // 分类入口。
+                .andExpect(content().string(containsString("商品维护"))) // 商品入口。
+                .andExpect(content().string(containsString("订单处理"))); // 订单入口。
     }
 
     @Test // 顾客拿到管理端会话也不能用（AC-05）。

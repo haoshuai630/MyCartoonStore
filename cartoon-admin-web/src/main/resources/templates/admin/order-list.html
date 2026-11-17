@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('订单处理')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <section class="console">
+        <div class="wrap">
+            <!-- 标题区：全站订单，只读；发货在详情页 -->
+            <div class="console-head">
+                <div>
+                    <span class="kicker">ORDERS</span>
+                    <h1>订单处理</h1>
+                    <p class="lead">全站订单只读展示：金额、明细与凭证都不能改。发货只能对已支付订单操作，
+                        在详情页完成。</p>
+                </div>
+            </div>
+
+            <!-- 筛选：完整订单号 + 状态 -->
+            <form class="filter-bar" method="get" th:action="@{/orders}">
+                <label class="field">
+                    <span>订单号</span>
+                    <input type="text" name="orderNo" th:value="${orderNo}" maxlength="40"
+                           placeholder="完整订单号，精确匹配">
+                </label>
+                <label class="field">
+                    <span>状态</span>
+                    <select name="status">
+                        <option value="ALL" th:selected="${status == 'ALL'}">全部</option>
+                        <option value="PENDING_PAYMENT" th:selected="${status == 'PENDING_PAYMENT'}">待支付</option>
+                        <option value="PAID" th:selected="${status == 'PAID'}">待发货</option>
+                        <option value="SHIPPED" th:selected="${status == 'SHIPPED'}">已发货</option>
+                        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">已完成</option>
+                        <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">已取消</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn">查询</button>
+                <a class="link-btn" th:href="@{/orders}">重置</a>
+            </form>
+
+            <!-- 列表：所属用户来自 AccountService，状态标签来自实体 -->
+            <div class="panel" th:if="${!page.empty}">
+                <table class="data-table">
+                    <thead>
+                    <tr>
+                        <th style="width:230px">订单号</th>
+                        <th style="width:140px">所属用户</th>
+                        <th style="width:160px">创建时间</th>
+                        <th style="width:110px">状态</th>
+                        <th style="width:110px" class="num">金额</th>
+                        <th style="width:100px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${page.orders}">
+                        <td><code th:text="${order.orderNo}">CO...</code></td>
+                        <td th:text="${users.get(order.userId)} ?: '（账号不存在）'">用户</td>
+                        <td th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}">时间</td>
+                        <td>
+                            <span class="status-tag"
+                                  th:classappend="${order.status == 'PAID'} ? 'on' : (${order.status == 'CANCELLED'} ? 'off' : '')"
+                                  th:text="${order.statusLabel}">状态</span>
+                        </td>
+                        <td class="num" th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}">¥0.00</td>
+                        <td><a class="link-btn" th:href="@{/orders/{no}(no=${order.orderNo})}">详情</a></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- 翻页：保留单号与状态 -->
+                <div class="pager">
+                    <a th:if="${page.hasPrevious}"
+                       th:href="@{/orders(orderNo=${orderNo}, status=${status}, page=${page.page - 1})}">上一页</a>
+                    <span th:if="${!page.hasPrevious}" class="disabled">上一页</span>
+                    <span th:text="|第 ${page.page} / ${page.totalPages} 页，共 ${page.total} 单|">第 1 / 1 页</span>
+                    <a th:if="${page.hasNext}"
+                       th:href="@{/orders(orderNo=${orderNo}, status=${status}, page=${page.page + 1})}">下一页</a>
+                    <span th:if="${!page.hasNext}" class="disabled">下一页</span>
+                </div>
+            </div>
+
+            <!-- 空状态 -->
+            <div class="empty" th:if="${page.empty}">
+                <b>没有符合条件的订单</b>
+                <p>换个状态或清空订单号再试；订单由用户在用户端下单产生。</p>
+                <a class="btn" th:href="@{/orders}">清空筛选</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

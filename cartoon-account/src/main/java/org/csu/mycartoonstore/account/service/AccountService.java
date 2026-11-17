@@ -9,7 +9,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.regex.Pattern;
+import java.util.Collection; // 批量取显示名。
+import java.util.Map; // 后台订单列表的用户名索引。
+import java.util.regex.Pattern; // 用户名格式。
+import java.util.stream.Collectors; // 收集成 Map。
 
 /**
  * 账号服务：登录校验与注册。
@@ -118,6 +121,19 @@ public class AccountService {
         }
         return userMapper.selectOne(Wrappers.<StoreUser>lambdaQuery()
                 .eq(StoreUser::getUsername, username.trim()));
+    }
+
+    /**
+     * 批量取显示名：后台订单列表/详情一次查完，避免逐行查账号。
+     *
+     * <p>只返回存在的账号；被删账号在页面显示为空，由调用方兜底。</p>
+     */
+    public Map<Long, String> displayNames(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Map.of(); // 没有 id 就不查库。
+        }
+        return userMapper.selectBatchIds(ids).stream()
+                .collect(Collectors.toMap(StoreUser::getId, StoreUser::getDisplayName, (a, b) -> a)); // id → 显示名。
     }
 
     /** 按 id 查账号：登录后刷新会话里的展示信息时用 */
