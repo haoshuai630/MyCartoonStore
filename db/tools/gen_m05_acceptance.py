@@ -75,6 +75,26 @@ TASKS = {
             (WEB_TEST + "PlaceOrderTest.java", "PlaceOrderTest.java", "6 个用例：正常/缺字段/车变/库存/回滚/归属", "java"),
         ],
     },
+    "04": {
+        "title": "M05-04 · 订单列表与详情补全",
+        "out": "M05-04-逐行验收.html",
+        "note": "内容：状态页签与角标、完整单号精确搜索、分页、空状态、时间线、状态标签、归属 404。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 96, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，166 用例。"
+                "store.css 新增列表/时间线样式不逐行对照；支付与取消按钮在 M06 / M05-05。",
+        "files": [
+            (ORDER + "service/OrderListService.java", "OrderListService.java", "本人订单：状态/单号/分页/角标", "java"),
+            (ORDER + "domain/OrderStatus.java", "OrderStatus.java", "五种状态与中文标签", "java"),
+            (ORDER + "dto/OrderCard.java", "OrderCard.java", "列表卡片：首件缩略图与件数", "java"),
+            (ORDER + "dto/OrderPage.java", "OrderPage.java", "一页结果与上下页判断", "java"),
+            (WEB + "controller/OrderController.java", "OrderController.java", "列表与详情路由", "java"),
+            ("cartoon-user-web/src/main/resources/templates/orders.html", "orders.html",
+             "列表页：页签、搜索、卡片、空状态、分页", "html"),
+            ("cartoon-user-web/src/main/resources/templates/order-detail.html", "order-detail.html",
+             "详情页：时间线、金额标签、返回列表", "html"),
+            (WEB_TEST + "OrderListTest.java", "OrderListTest.java", "9 个用例：空/归属/筛选/搜索/分页/400/快照/时间线/游客", "java"),
+        ],
+    },
 }
 
 NOTES: dict[tuple[str, str], str] = {
@@ -275,6 +295,75 @@ NOTES: dict[tuple[str, str], str] = {
         "夹具参数续行",
     (ORDER + "service/OrderQueryService.java", "return itemMapper.selectList(Wrappers.<SalesOrderItem>lambdaQuery()"):
         "按订单 id 查明细，保持写入顺序",
+    # ---- M05-04 订单列表 ----
+    (ORDER + "service/OrderListService.java", "LambdaQueryWrapper<SalesOrder> filter = Wrappers.<SalesOrder>lambdaQuery()"):
+        "查询条件：只查本人，状态与单号可选",
+    (ORDER + "service/OrderListService.java", "List<SalesOrder> orders = orderMapper.selectList(filter"):
+        "按时间倒序取当前页",
+    (ORDER + "service/OrderListService.java", '.last("LIMIT " + PAGE_SIZE + " OFFSET " + (safePage - 1) * PAGE_SIZE));'):
+        "SQL 层分页：LIMIT/OFFSET，不把全部订单读进内存",
+    (ORDER + "service/OrderListService.java", "return new OrderPage(cards, safePage, PAGE_SIZE, total, totalPages,"):
+        "把当前页、总数与角标交给页面",
+    (ORDER + "service/OrderListService.java", 'statusCounts(userId), status == null ? "ALL" : status.name(), orderNo);'):
+        "参数续行：角标、当前状态、搜索词",
+    (ORDER + "service/OrderListService.java", "Map<String, Long> counts = new HashMap<>();"):
+        "六个角标：ALL + 五种状态",
+    (ORDER + "service/OrderListService.java", 'counts.put("ALL", orderMapper.selectCount(Wrappers.<SalesOrder>lambdaQuery()'):
+        "全部订单数",
+    (ORDER + "service/OrderListService.java", "counts.put(status.name(), orderMapper.selectCount(Wrappers.<SalesOrder>lambdaQuery()"):
+        "每种状态的真实数量",
+    (ORDER + "service/OrderListService.java", ".eq(SalesOrder::getUserId, userId)"):
+        "参数续行：只统计本人",
+    (ORDER + "service/OrderListService.java", ".eq(SalesOrder::getStatus, status.name())));"):
+        "参数续行：按状态计数",
+    (ORDER + "service/OrderListService.java", "if (orders.isEmpty()) {"):
+        "空页直接返回，不再查明细",
+    (ORDER + "service/OrderListService.java", "Map<Long, List<SalesOrderItem>> itemsByOrder = itemMapper.selectList("):
+        "一次查完本页全部明细，避免 N+1",
+    (ORDER + "service/OrderListService.java", "Wrappers.<SalesOrderItem>lambdaQuery()"):
+        "参数续行：明细查询条件",
+    (ORDER + "service/OrderListService.java", ".orderByAsc(SalesOrderItem::getId))"):
+        "参数续行：按写入顺序，保证首件稳定",
+    (ORDER + "service/OrderListService.java", ".stream()"):
+        "转成流，按订单分组",
+    (ORDER + "service/OrderListService.java", "for (SalesOrder order : orders) {"):
+        "按查询顺序组装卡片",
+    (ORDER + "service/OrderListService.java", "cards.add(new OrderCard(order.getOrderNo(), order.getStatus(), order.getTotalAmount(),"):
+        "组装一张卡片：订单头 + 首件缩略图",
+    (ORDER + "service/OrderListService.java", "order.getCreatedAt(),"):
+        "参数续行：创建时间",
+    (ORDER + "service/OrderListService.java", "if (page < 1) {"):
+        "0 与负数页码：400",
+    (ORDER + "service/OrderListService.java", "if (orderNo.length() > ORDER_NO_MAX) {"):
+        "超过 VARCHAR(40)：400",
+    (ORDER + "domain/OrderStatus.java", "public enum OrderStatus {"):
+        "五种状态：与数据库 CHECK 一一对应",
+    (ORDER + "dto/OrderCard.java", "public OrderCard(String orderNo, String status, BigDecimal totalAmount, LocalDateTime createdAt,"):
+        "卡片构造器：状态码在内部转成中文标签",
+    (ORDER + "dto/OrderPage.java", "public OrderPage(List<OrderCard> cards, int page, int size, long total, int totalPages,"):
+        "一页结果的构造器",
+    (WEB + "controller/OrderController.java", "HttpSession session, Model model) {"):
+        "参数续行：会话与页面数据",
+    (WEB + "controller/OrderController.java", "for (OrderStatus status : OrderStatus.values()) {"):
+        "按枚举顺序生成页签",
+    (WEB_TEST + "OrderListTest.java", "class OrderListTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "OrderListTest.java", 'org.assertj.core.api.Assertions.assertThat(html.indexOf("CO202611161100000002"))'):
+        "断言 11:00 的单排在 10:00 前",
+    (WEB_TEST + "OrderListTest.java", 'org.assertj.core.api.Assertions.assertThat(html.replaceAll("\\\\s+", ""))'):
+        "压缩空白后断言页签数量",
+    (WEB_TEST + "OrderListTest.java", 'seedOrder(String.format("CO2026111610%08d", i), "PENDING_PAYMENT", "28.00",'):
+        "循环造 11 单，单号与时间都可排序",
+    (WEB_TEST + "OrderListTest.java", '+ "receiver_phone, receiver_address, created_at, payment_method, payment_no, paid_at, cancelled_at) "'):
+        "参数续行：订单列名",
+    (WEB_TEST + "OrderListTest.java", 'orderNo, owner, status, new java.math.BigDecimal(total), "张三", "13800000000",'):
+        "订单值：收货信息固定",
+    (WEB_TEST + "OrderListTest.java", '"某市某区某路 1 号", createdAt,'):
+        "参数续行：地址与创建时间",
+    (WEB_TEST + "OrderListTest.java", 'orderId, productId, "SKU-" + orderNo, name, "/images/covers/ol.svg",'):
+        "明细值：快照名称、封面与 SKU",
+    (WEB_TEST + "OrderListTest.java", "new java.math.BigDecimal(price), quantity,"):
+        "参数续行：单价与数量",
 }
 
 
