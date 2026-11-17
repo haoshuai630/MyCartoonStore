@@ -11,6 +11,7 @@ import org.csu.mycartoonstore.order.entity.SalesOrderItem; // 明细快照。
 import org.csu.mycartoonstore.order.mapper.SalesOrderItemMapper; // 明细查询。
 import org.csu.mycartoonstore.order.mapper.SalesOrderMapper; // 订单查询。
 import org.springframework.stereotype.Service; // 业务服务。
+import org.springframework.transaction.annotation.Transactional; // 修改与删除要同事务。
 
 import java.util.List; // 列表。
 
@@ -86,6 +87,56 @@ public class OrderAdminService {
     public long countItemsByProduct(long productId) {
         return itemMapper.selectCount(Wrappers.<SalesOrderItem>lambdaQuery()
                 .eq(SalesOrderItem::getProductId, productId)); // 只数条数，不读明细内容。
+    }
+
+    /**
+     * 修改订单收货信息：只改收货人 / 电话 / 地址，且只在待支付与待发货。
+     *
+     * <p>已发货之后收货信息随货发出，改它只会让后台与面单不一致；金额与明细不在可改范围，
+     * 订单快照口径不变。</p>
+     */
+    @Transactional // 状态判断与更新同一事务。
+    public void updateReceiver(String orderNo, String rawName, String rawPhone, String rawAddress) {
+        SalesOrder order = detail(orderNo); // 不存在 404。
+        if (!"PENDING_PAYMENT".equals(order.getStatus()) && !"PAID".equals(order.getStatus())) {
+            throw BizException.conflict("已发货、已完成或已取消的订单不能修改收货信息"); // 409。
+        }
+        String name = require(rawName, "收货人", 50); // 与列宽一致。
+        String phone = require(rawPhone, "联系电话", 30);
+        String address = require(rawAddress, "详细地址", 255);
+        int rows = orderMapper.updateReceiver(order.getId(), name, phone, address); // 只写三列。
+        if (rows == 0) { // 并发删除的极端情况。
+            throw BizException.notFound("订单不存在");
+        }
+    }
+
+    /**
+     * 删除订单：只删已取消的订单，先删明细再删主表。
+     *
+     * <p>不恢复库存：取消时已经恢复过一次；这里只是清理记录，避免重复加库存。
+     * 已支付及之后的状态不能删，订单是交易凭证。</p>
+     */
+    @Transactional // 明细与主表同成同败。
+    public void delete(String orderNo) {
+        SalesOrder order = detail(orderNo); // 不存在 404。
+        if (!"CANCELLED".equals(order.getStatus())) {
+            throw BizException.conflict("只有已取消的订单可以删除"); // 409。
+        }
+        itemMapper.delete(Wrappers.<SalesOrderItem>lambdaQuery()
+                .eq(SalesOrderItem::getOrderId, order.getId())); // 明细先删，外键挡住主表。
+        orderMapper.deleteById(order.getId()); // 主表记录最后删。
+    }
+
+    /** 必填字段：去空白后非空、不超列宽，否则 400。 */
+    private String require(String raw, String field, int max) {
+        String value = raw == null ? "" : raw.strip(); // null 当空串。
+        if (value.isEmpty()) {
+            throw BizException.badRequest(field + "不能为空"); // 400。
+        }
+        if (value.length() > max) {
+            throw BizException.badRequest(field + "不能超过 " + max + " 个字符"); // 400，不截断。
+        }
+        return value; // 去空白后的值。
     }
 
     /** 订单号：去空白；空串视为未搜索；超过列宽给 400。 */
