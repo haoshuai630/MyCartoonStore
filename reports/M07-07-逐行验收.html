@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M07-07 · 上下架与增量补货（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M07-07 · 上下架与增量补货（逐行验收）</h1>
+<p>一行源码一行记录，行号取自原文件。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">ProductAdminService.java</a><a href="#s2">ProductMapper.java</a><a href="#s3">AdminProductController.java</a><a href="#s4">ProductAdminServiceTest.java</a><a href="#s5">ProductAdminPageTest.java</a><a href="#s6">RestockConcurrencyTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：上下架（只允许 ON_SALE/DRAFT，版本一致才迁移）、增量补货（1–100000，原子累加 + 溢出保护，返回最新库存）、列表行内两个动作、7 个服务用例 + 4 个页面用例 + AC-28 并发用例。验证：mvn -pl cartoon-catalog -am test → 62；mvn -pl cartoon-admin-web -am test → 42；全量 clean verify → 10 模块 SUCCESS、305 个用例。模板行内动作与样式改动按 docs/10 §5 用汇报里的手工表说明，不逐行展开。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>ProductAdminService.java<small>上下架、补货与两个校验 · 本任务改动行 88 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">    /** 补货单次上限：与 docs/04 §3.3 的 1–100000 一致 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> RESTOCK_MAX = 100_000;</pre></td><td class="explain">超出即 400。</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">    /** 可切换的状态：只有上架与下架 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; WRITABLE_STATUSES = Set.of("ON_SALE", "DRAFT");</pre></td><td class="explain">其他值 400。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre class="cmtline">     * 上下架：版本一致才迁移，成功后版本 + 1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre class="cmtline">     * &lt;p&gt;状态只能在上架与下架之间切换；"新增默认 DRAFT、显式上架"的口径由此动作落实。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre class="cmtline">     * 版本冲突返回 409，避免旧页面把别人刚改过的商品状态覆盖掉。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">条件更新同一事务。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">void</span> changeStatus(<span class="kw">long</span> id, String rawStatus, String rawVersion) {</pre></td><td class="explain">上下架：版本一致才迁移，成功后版本 + 1。 状态只能在上架与下架之间切换；"新增默认 DRAFT、显式上架"的口径由此动作落实。 版本冲突返回 409，避免旧页面把别人刚改过的商品状态覆盖掉。</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        String status = parseWritableStatus(rawStatus);</pre></td><td class="explain">只接受 ON_SALE / DRAFT。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersionText(rawVersion);</pre></td><td class="explain">隐藏域带回的版本。</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>        detail(id);</pre></td><td class="explain">不存在 404，先于更新判断。</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>        <span class="kw">int</span> rows = productMapper.updateStatus(id, status, version);</pre></td><td class="explain">WHERE id=? AND version=?</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">版本已变。</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>            throw BizException.conflict("数据已发生变化，请刷新后重试");</pre></td><td class="explain">409。</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">200</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre class="cmtline">     * 增量补货：在数据库最新库存上加 quantity，返回补货后的库存。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre class="cmtline">     * &lt;p&gt;不做"读-改-写"，也不提供"设为指定值"；与用户下单扣库存并发时，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre class="cmtline">     * 两条原子 UPDATE 各自成功即可，最终库存 = 初始 - 卖出 + 补货（AC-28）。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>    @Transactional</pre></td><td class="explain">更新与回读同一事务，返回的库存就是本次结果。</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">int</span> restock(<span class="kw">long</span> id, String rawQuantity) {</pre></td><td class="explain">增量补货：在数据库最新库存上加 quantity，返回补货后的库存。 不做"读-改-写"，也不提供"设为指定值"；与用户下单扣库存并发时， 两条原子 UPDATE 各自成功即可，最终库存 = 初始 - 卖出 + 补货（AC-28）。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>        detail(id);</pre></td><td class="explain">只处理一级，二级在内层跟随。</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>        <span class="kw">int</span> quantity = parseRestockQuantity(rawQuantity);</pre></td><td class="explain">1–100000 正整数。</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>        <span class="kw">int</span> rows = productMapper.restock(id, quantity);</pre></td><td class="explain">原子累加，溢出时不更新。</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>        if (rows == 0) {</pre></td><td class="explain">更新失败：商品被删或库存已到上限。</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>            Product current = productMapper.selectById(id);</pre></td><td class="explain">再读一次区分两种情况。</td></tr>
+<tr tabindex="0" data-line="214"><td class="line">214</td><td class="code"><pre>            if (current == null) {</pre></td><td class="explain">商品被并发删掉：按不存在处理。</td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>                throw BizException.notFound("商品不存在");</pre></td><td class="explain">并发删除。</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>            throw BizException.conflict("库存已达上限，无法继续补货");</pre></td><td class="explain">INT 溢出。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>        Product updated = productMapper.selectById(id);</pre></td><td class="explain">回读最新库存。</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>        <span class="kw">return</span> updated == null ? 0 : updated.getStock();</pre></td><td class="explain">理论上不会为空。</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">222</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="401"><td class="line">401</td><td class="code"><pre class="cmtline">    /** 上下架只接受 ON_SALE / DRAFT：其他值不进入 SQL。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="402"><td class="line">402</td><td class="code"><pre>    <span class="kw">private</span> String parseWritableStatus(String raw) {</pre></td><td class="explain">上下架只接受 ON_SALE / DRAFT：其他值不进入 SQL。</td></tr>
+<tr tabindex="0" data-line="403"><td class="line">403</td><td class="code"><pre>        String status = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="404"><td class="line">404</td><td class="code"><pre>        if (!WRITABLE_STATUSES.contains(status)) {</pre></td><td class="explain">状态不在白名单。</td></tr>
+<tr tabindex="0" data-line="405"><td class="line">405</td><td class="code"><pre>            throw BizException.badRequest("商品状态只能切换为上架或下架");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="406"><td class="line">406</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="407"><td class="line">407</td><td class="code"><pre>        <span class="kw">return</span> status;</pre></td><td class="explain">合法状态。</td></tr>
+<tr tabindex="0" data-line="408"><td class="line">408</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">409</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="410"><td class="line">410</td><td class="code"><pre class="cmtline">    /** 版本号（请求参数形式）：隐藏域没带或格式错都拒绝。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="411"><td class="line">411</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> parseVersionText(String raw) {</pre></td><td class="explain">版本号（请求参数形式）：隐藏域没带或格式错都拒绝。</td></tr>
+<tr tabindex="0" data-line="412"><td class="line">412</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="413"><td class="line">413</td><td class="code"><pre>            throw BizException.badRequest("缺少版本号，请刷新后重试");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="414"><td class="line">414</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="415"><td class="line">415</td><td class="code"><pre>        try {</pre></td><td class="explain">分类按父级、排序、id 排序。</td></tr>
+<tr tabindex="0" data-line="416"><td class="line">416</td><td class="code"><pre>            <span class="kw">long</span> version = Long.parseLong(raw.trim());</pre></td><td class="explain">只接受整数。</td></tr>
+<tr tabindex="0" data-line="417"><td class="line">417</td><td class="code"><pre>            <span class="kw">return</span> parseVersion(version);</pre></td><td class="explain">负数同样拒绝。</td></tr>
+<tr tabindex="0" data-line="418"><td class="line">418</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="419"><td class="line">419</td><td class="code"><pre>            throw BizException.badRequest("版本号格式不正确");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="420"><td class="line">420</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="421"><td class="line">421</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">422</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="423"><td class="line">423</td><td class="code"><pre class="cmtline">    /** 补货数量：1–100000 的正整数。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="424"><td class="line">424</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> parseRestockQuantity(String raw) {</pre></td><td class="explain">补货数量：1–100000 的正整数。</td></tr>
+<tr tabindex="0" data-line="425"><td class="line">425</td><td class="code"><pre>        String text = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="426"><td class="line">426</td><td class="code"><pre>        if (text.isEmpty()) {</pre></td><td class="explain">补货数量必填。</td></tr>
+<tr tabindex="0" data-line="427"><td class="line">427</td><td class="code"><pre>            throw BizException.badRequest("补货数量不能为空");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="428"><td class="line">428</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="429"><td class="line">429</td><td class="code"><pre>        <span class="kw">int</span> quantity;</pre></td><td class="explain">先声明，解析失败在下面处理。</td></tr>
+<tr tabindex="0" data-line="430"><td class="line">430</td><td class="code"><pre>        try {</pre></td><td class="explain">解析失败按 400。</td></tr>
+<tr tabindex="0" data-line="431"><td class="line">431</td><td class="code"><pre>            quantity = Integer.parseInt(text);</pre></td><td class="explain">只接受整数。</td></tr>
+<tr tabindex="0" data-line="432"><td class="line">432</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="433"><td class="line">433</td><td class="code"><pre>            throw BizException.badRequest("补货数量必须是整数");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="434"><td class="line">434</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="435"><td class="line">435</td><td class="code"><pre>        if (quantity &lt; 1) {</pre></td><td class="explain">不提供后台扣减入口。</td></tr>
+<tr tabindex="0" data-line="436"><td class="line">436</td><td class="code"><pre>            throw BizException.badRequest("补货数量必须大于 0");</pre></td><td class="explain">不提供后台扣减入口。</td></tr>
+<tr tabindex="0" data-line="437"><td class="line">437</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="438"><td class="line">438</td><td class="code"><pre>        if (quantity &gt; RESTOCK_MAX) {</pre></td><td class="explain">单次上限与文档一致。</td></tr>
+<tr tabindex="0" data-line="439"><td class="line">439</td><td class="code"><pre>            throw BizException.badRequest("补货数量不能超过 " + RESTOCK_MAX);</pre></td><td class="explain">与文档上限一致。</td></tr>
+<tr tabindex="0" data-line="440"><td class="line">440</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="441"><td class="line">441</td><td class="code"><pre>        <span class="kw">return</span> quantity;</pre></td><td class="explain">合法数量。</td></tr>
+<tr tabindex="0" data-line="442"><td class="line">442</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">443</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>ProductMapper.java<small>条件上下架与原子补货 · 本任务改动行 19 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/mapper/ProductMapper.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre class="cmtline">     * 上下架：版本一致才写，同时 version + 1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre class="cmtline">     * @return 影响行数；0 表示版本已变（或商品被删），调用方转 409</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>    @Update("UPDATE product SET status = #{status}, version = version + 1 "</pre></td><td class="explain">SQL：改数量并把版本 +1，条件含归属与旧版本</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>            + "WHERE id = #{id} AND version = #{version}")</pre></td><td class="explain">续行：版本作条件。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>    <span class="kw">int</span> updateStatus(@Param("id") Long id, @Param("status") String status, @Param("version") <span class="kw">long</span> version);</pre></td><td class="explain">返回影响行数：0 表示版本已变。</td></tr>
+<tr class="gap"><td class="line">87</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre class="cmtline">     * 增量补货：在数据库最新库存上原子累加，溢出时不更新。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre class="cmtline">     * &lt;p&gt;不提供"设为指定库存"：条件里用 stock &lt;= INT_MAX - qty 挡住溢出，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre class="cmtline">     * 影响 0 行可能是商品不存在，也可能是库存已到上限，由调用方区分。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    @Update("UPDATE product SET stock = stock + #{qty}, version = version + 1 "</pre></td><td class="explain">SQL：改数量并把版本 +1，条件含归属与旧版本</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>            + "WHERE id = #{id} AND stock &lt;= 2147483647 - #{qty}")</pre></td><td class="explain">续行：溢出时不更新。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    <span class="kw">int</span> restock(@Param("id") Long id, @Param("qty") <span class="kw">int</span> qty);</pre></td><td class="explain">返回影响行数：0 表示不存在或已到上限。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>AdminProductController.java<small>两个动作的路由 · 本任务改动行 21 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/AdminProductController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre class="cmtline">    /** 上下架：成功后回列表；版本冲突由全局处理器转 409。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    @PostMapping("/{id}/status")</pre></td><td class="explain">上下架：POST，成功后回列表。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>    <span class="kw">public</span> String changeStatus(@PathVariable <span class="kw">long</span> id,</pre></td><td class="explain">参数：路径 id、目标状态、隐藏域版本。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                               @RequestParam String status,</pre></td><td class="explain">ON_SALE / DRAFT。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                               @RequestParam(required = false) String version,</pre></td><td class="explain">隐藏域带回的版本。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>                               RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        productAdminService.changeStatus(id, status, version);</pre></td><td class="explain">失败回表单：保留输入并设 400/409。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        redirect.addFlashAttribute("message", "ON_SALE".equals(status) ? "已上架该商品" : "已下架该商品");</pre></td><td class="explain">续行：响应与模型；编辑时还要带只读的库存与状态。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/products";</pre></td><td class="explain">回列表。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">111</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre class="cmtline">    /** 增量补货：成功后回列表并提示最新库存。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>    @PostMapping("/{id}/restock")</pre></td><td class="explain">补货：POST，成功后回列表。</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>    <span class="kw">public</span> String restock(@PathVariable <span class="kw">long</span> id,</pre></td><td class="explain">参数：路径 id 与增加数量。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>                          @RequestParam String quantity,</pre></td><td class="explain">增加数量，1–100000。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>                          RedirectAttributes redirect) {</pre></td><td class="explain">参数：成功后携带一次性提示。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>        <span class="kw">int</span> stock = productAdminService.restock(id, quantity);</pre></td><td class="explain">原子累加后的库存。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>        redirect.addFlashAttribute("message", "已补货，当前库存 " + stock);</pre></td><td class="explain">反馈实际结果。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        <span class="kw">return</span> "redirect:/products";</pre></td><td class="explain">回列表。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">121</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>ProductAdminServiceTest.java<small>7 个服务用例 · 本任务改动行 93 行</small></h2>
+<p class="path">cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/service/ProductAdminServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 上下架</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">272</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="273"><td class="line">273</td><td class="code"><pre>    @Test</pre></td><td class="explain">上下架：状态与版本一起提交，版本一致才更新。</td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>    @DisplayName("上下架：版本一致 → 切换成功")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>    <span class="kw">void</span> changeStatusOk() {</pre></td><td class="explain">用例：版本一致 → 切换成功。</td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">已存在，版本 3。</td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>        when(productMapper.updateStatus(5L, "ON_SALE", 3L)).thenReturn(1);</pre></td><td class="explain">条件更新成功。</td></tr>
+<tr class="gap"><td class="line">278</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>        service.changeStatus(5L, "ON_SALE", "3");</pre></td><td class="explain">上架。</td></tr>
+<tr class="gap"><td class="line">280</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>        verify(productMapper).updateStatus(5L, "ON_SALE", 3L);</pre></td><td class="explain">参数原样传下去。</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">283</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="284"><td class="line">284</td><td class="code"><pre>    @Test</pre></td><td class="explain">状态只能是上架或下架。</td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>    @DisplayName("上下架：非法状态 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>    <span class="kw">void</span> changeStatusBadValue() {</pre></td><td class="explain">用例：非法状态 → 400 且不写库。</td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeStatus(5L, "SOLD_OUT", "0"))</pre></td><td class="explain">不存在的状态。</td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="289"><td class="line">289</td><td class="code"><pre>                .hasMessageContaining("上架或下架");</pre></td><td class="explain">断言提示包含「上架或下架」</td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>        verify(productMapper, never()).updateStatus(any(), any(), any(Long.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">292</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="293"><td class="line">293</td><td class="code"><pre>    @Test</pre></td><td class="explain">版本冲突：409。</td></tr>
+<tr tabindex="0" data-line="294"><td class="line">294</td><td class="code"><pre>    @DisplayName("上下架：版本冲突 → 409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="295"><td class="line">295</td><td class="code"><pre>    <span class="kw">void</span> changeStatusStale() {</pre></td><td class="explain">用例：旧版本上下架 → 409。</td></tr>
+<tr tabindex="0" data-line="296"><td class="line">296</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">已存在。</td></tr>
+<tr tabindex="0" data-line="297"><td class="line">297</td><td class="code"><pre>        when(productMapper.updateStatus(5L, "DRAFT", 2L)).thenReturn(0);</pre></td><td class="explain">旧版本。</td></tr>
+<tr class="gap"><td class="line">298</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="299"><td class="line">299</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeStatus(5L, "DRAFT", "2"))</pre></td><td class="explain">调用 service.changeStatus(5L, "DRAFT", "2"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="300"><td class="line">300</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="301"><td class="line">301</td><td class="code"><pre>                .hasMessage("数据已发生变化，请刷新后重试");</pre></td><td class="explain">断言冲突文案。</td></tr>
+<tr tabindex="0" data-line="302"><td class="line">302</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">303</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="304"><td class="line">304</td><td class="code"><pre>    @Test</pre></td><td class="explain">缺版本号：400。</td></tr>
+<tr tabindex="0" data-line="305"><td class="line">305</td><td class="code"><pre>    @DisplayName("上下架：缺版本号 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="306"><td class="line">306</td><td class="code"><pre>    <span class="kw">void</span> changeStatusMissingVersion() {</pre></td><td class="explain">用例：缺版本号 → 400。</td></tr>
+<tr tabindex="0" data-line="307"><td class="line">307</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.changeStatus(5L, "ON_SALE", " "))</pre></td><td class="explain">调用 service.changeStatus(5L, "ON_SALE", " "，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="308"><td class="line">308</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="309"><td class="line">309</td><td class="code"><pre>                .hasMessageContaining("版本号");</pre></td><td class="explain">断言提示包含「版本号」</td></tr>
+<tr tabindex="0" data-line="310"><td class="line">310</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">311</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="312"><td class="line">312</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 补货</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">313</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="314"><td class="line">314</td><td class="code"><pre>    @Test</pre></td><td class="explain">补货成功：返回最新库存。</td></tr>
+<tr tabindex="0" data-line="315"><td class="line">315</td><td class="code"><pre>    @DisplayName("补货：返回累加后的库存")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="316"><td class="line">316</td><td class="code"><pre>    <span class="kw">void</span> restockOk() {</pre></td><td class="explain">用例：补货返回累加后的库存。</td></tr>
+<tr tabindex="0" data-line="317"><td class="line">317</td><td class="code"><pre>        Product before = product(5L, "S-5", 3L);</pre></td><td class="explain">补货前库存 5。</td></tr>
+<tr tabindex="0" data-line="318"><td class="line">318</td><td class="code"><pre>        Product after = product(5L, "S-5", 4L);</pre></td><td class="explain">补货后版本 4。</td></tr>
+<tr tabindex="0" data-line="319"><td class="line">319</td><td class="code"><pre>        after.setStock(8);</pre></td><td class="explain">5 + 3。</td></tr>
+<tr tabindex="0" data-line="320"><td class="line">320</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(before, after);</pre></td><td class="explain">更新前、更新后各读一次。</td></tr>
+<tr tabindex="0" data-line="321"><td class="line">321</td><td class="code"><pre>        when(productMapper.restock(5L, 3)).thenReturn(1);</pre></td><td class="explain">原子累加成功。</td></tr>
+<tr class="gap"><td class="line">322</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="323"><td class="line">323</td><td class="code"><pre>        <span class="kw">int</span> stock = service.restock(5L, "3");</pre></td><td class="explain">补 3 件。</td></tr>
+<tr class="gap"><td class="line">324</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="325"><td class="line">325</td><td class="code"><pre>        assertThat(stock).isEqualTo(8);</pre></td><td class="explain">返回最新库存。</td></tr>
+<tr tabindex="0" data-line="326"><td class="line">326</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">327</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="328"><td class="line">328</td><td class="code"><pre>    @Test</pre></td><td class="explain">数量边界：0、超上限、非数字都拒绝。</td></tr>
+<tr tabindex="0" data-line="329"><td class="line">329</td><td class="code"><pre>    @DisplayName("补货：数量非法 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="330"><td class="line">330</td><td class="code"><pre>    <span class="kw">void</span> restockBadQuantity() {</pre></td><td class="explain">用例：数量 0 / 超上限 / 非整数都 400。</td></tr>
+<tr tabindex="0" data-line="331"><td class="line">331</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">商品存在。</td></tr>
+<tr class="gap"><td class="line">332</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="333"><td class="line">333</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.restock(5L, "0"))</pre></td><td class="explain">不能为 0。</td></tr>
+<tr tabindex="0" data-line="334"><td class="line">334</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">断言 400（数量 0）。</td></tr>
+<tr tabindex="0" data-line="335"><td class="line">335</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.restock(5L, "100001"))</pre></td><td class="explain">超过单次上限。</td></tr>
+<tr tabindex="0" data-line="336"><td class="line">336</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">断言 400（超上限）。</td></tr>
+<tr tabindex="0" data-line="337"><td class="line">337</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.restock(5L, "abc"))</pre></td><td class="explain">非整数。</td></tr>
+<tr tabindex="0" data-line="338"><td class="line">338</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">断言 400（非整数）。</td></tr>
+<tr tabindex="0" data-line="339"><td class="line">339</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">340</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="341"><td class="line">341</td><td class="code"><pre>    @Test</pre></td><td class="explain">更新 0 行且商品不存在：404。</td></tr>
+<tr tabindex="0" data-line="342"><td class="line">342</td><td class="code"><pre>    @DisplayName("补货：商品不存在 → 404")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="343"><td class="line">343</td><td class="code"><pre>    <span class="kw">void</span> restockMissing() {</pre></td><td class="explain">用例：补货时商品被删 → 404。</td></tr>
+<tr tabindex="0" data-line="344"><td class="line">344</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L), null);</pre></td><td class="explain">第一次存在，更新后已被删。</td></tr>
+<tr tabindex="0" data-line="345"><td class="line">345</td><td class="code"><pre>        when(productMapper.restock(5L, 3)).thenReturn(0);</pre></td><td class="explain">没更新到。</td></tr>
+<tr class="gap"><td class="line">346</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="347"><td class="line">347</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.restock(5L, "3"))</pre></td><td class="explain">调用 service.restock(5L, "3"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="348"><td class="line">348</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="349"><td class="line">349</td><td class="code"><pre>                .extracting(e -&gt; ((BizException) e).code())</pre></td><td class="explain">取出错误码再断言。</td></tr>
+<tr tabindex="0" data-line="350"><td class="line">350</td><td class="code"><pre>                .isEqualTo(ErrorCode.NOT_FOUND);</pre></td><td class="explain">断言 404。</td></tr>
+<tr tabindex="0" data-line="351"><td class="line">351</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">352</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="353"><td class="line">353</td><td class="code"><pre>    @Test</pre></td><td class="explain">更新 0 行但商品还在：库存到上限，409。</td></tr>
+<tr tabindex="0" data-line="354"><td class="line">354</td><td class="code"><pre>    @DisplayName("补货：库存溢出 → 409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="355"><td class="line">355</td><td class="code"><pre>    <span class="kw">void</span> restockOverflow() {</pre></td><td class="explain">用例：库存溢出 → 409。</td></tr>
+<tr tabindex="0" data-line="356"><td class="line">356</td><td class="code"><pre>        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L));</pre></td><td class="explain">商品还在。</td></tr>
+<tr tabindex="0" data-line="357"><td class="line">357</td><td class="code"><pre>        when(productMapper.restock(5L, 100000)).thenReturn(0);</pre></td><td class="explain">溢出保护挡住了。</td></tr>
+<tr class="gap"><td class="line">358</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="359"><td class="line">359</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.restock(5L, "100000"))</pre></td><td class="explain">调用 service.restock(5L, "100000"，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="360"><td class="line">360</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="361"><td class="line">361</td><td class="code"><pre>                .hasMessageContaining("上限");</pre></td><td class="explain">断言提示包含「上限」</td></tr>
+<tr tabindex="0" data-line="362"><td class="line">362</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">363</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>ProductAdminPageTest.java<small>4 个页面用例 · 本任务改动行 67 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/ProductAdminPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>    @Test</pre></td><td class="explain">上下架：版本一致才切换。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>    @DisplayName("上下架：上架成功，版本 +1")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>    <span class="kw">void</span> toggleStatus() throws Exception {</pre></td><td class="explain">用例：上架成功且版本 +1。</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        <span class="kw">long</span> leaf = seedLeaf();</pre></td><td class="explain">二级分类。</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProductIn(jdbc, "ST-1", leaf, "28.00", 4, "DRAFT");</pre></td><td class="explain">下架商品，版本 0。</td></tr>
+<tr class="gap"><td class="line">231</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        mockMvc.perform(post("/products/{id}/status", productId)</pre></td><td class="explain">点「上架」。</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>                        .param("status", "ON_SALE")</pre></td><td class="explain">目标状态。</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>                        .param("version", "0")</pre></td><td class="explain">隐藏域带回的版本。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>                        .session(adminSession()))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="236"><td class="line">236</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">PRG。</td></tr>
+<tr tabindex="0" data-line="237"><td class="line">237</td><td class="code"><pre>                .andExpect(redirectedUrl("/products"));</pre></td><td class="explain">断言重定向到 /products</td></tr>
+<tr class="gap"><td class="line">238</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="239"><td class="line">239</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT status FROM product WHERE id = ?", String.<span class="kw">class</span>, productId))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="240"><td class="line">240</td><td class="code"><pre>                .isEqualTo("ON_SALE");</pre></td><td class="explain">已上架。</td></tr>
+<tr tabindex="0" data-line="241"><td class="line">241</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.<span class="kw">class</span>, productId))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="242"><td class="line">242</td><td class="code"><pre>                .isEqualTo(1L);</pre></td><td class="explain">版本 +1。</td></tr>
+<tr tabindex="0" data-line="243"><td class="line">243</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">244</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="245"><td class="line">245</td><td class="code"><pre>    @Test</pre></td><td class="explain">上下架：旧版本 → 409。</td></tr>
+<tr tabindex="0" data-line="246"><td class="line">246</td><td class="code"><pre>    @DisplayName("上下架：旧版本 → 409")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="247"><td class="line">247</td><td class="code"><pre>    <span class="kw">void</span> toggleStatusStale() throws Exception {</pre></td><td class="explain">用例：旧版本上下架 → 409。</td></tr>
+<tr tabindex="0" data-line="248"><td class="line">248</td><td class="code"><pre>        <span class="kw">long</span> leaf = seedLeaf();</pre></td><td class="explain">二级分类。</td></tr>
+<tr tabindex="0" data-line="249"><td class="line">249</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProductIn(jdbc, "ST-2", leaf, "28.00", 4, "DRAFT");</pre></td><td class="explain">下架商品。</td></tr>
+<tr tabindex="0" data-line="250"><td class="line">250</td><td class="code"><pre>        jdbc.update("UPDATE product SET version = 3 WHERE id = ?", productId);</pre></td><td class="explain">别人已经改过。</td></tr>
+<tr class="gap"><td class="line">251</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="252"><td class="line">252</td><td class="code"><pre>        mockMvc.perform(post("/products/{id}/status", productId)</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="253"><td class="line">253</td><td class="code"><pre>                        .param("status", "ON_SALE")</pre></td><td class="explain">表单参数 status="ON_SALE"</td></tr>
+<tr tabindex="0" data-line="254"><td class="line">254</td><td class="code"><pre>                        .param("version", "0")</pre></td><td class="explain">旧页面手里的版本。</td></tr>
+<tr tabindex="0" data-line="255"><td class="line">255</td><td class="code"><pre>                        .session(adminSession()))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="256"><td class="line">256</td><td class="code"><pre>                .andExpect(status().isConflict());</pre></td><td class="explain">409 错误页。</td></tr>
+<tr class="gap"><td class="line">257</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="258"><td class="line">258</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT status FROM product WHERE id = ?", String.<span class="kw">class</span>, productId))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="259"><td class="line">259</td><td class="code"><pre>                .isEqualTo("DRAFT");</pre></td><td class="explain">状态没被改。</td></tr>
+<tr tabindex="0" data-line="260"><td class="line">260</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">261</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="262"><td class="line">262</td><td class="code"><pre>    @Test</pre></td><td class="explain">补货：在最新库存上累加并回列表提示。</td></tr>
+<tr tabindex="0" data-line="263"><td class="line">263</td><td class="code"><pre>    @DisplayName("补货：库存 +3，版本 +1")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="264"><td class="line">264</td><td class="code"><pre>    <span class="kw">void</span> restock() throws Exception {</pre></td><td class="explain">用例：补货 +3、版本 +1。</td></tr>
+<tr tabindex="0" data-line="265"><td class="line">265</td><td class="code"><pre>        <span class="kw">long</span> leaf = seedLeaf();</pre></td><td class="explain">二级分类。</td></tr>
+<tr tabindex="0" data-line="266"><td class="line">266</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProductIn(jdbc, "RS-1", leaf, "28.00", 4, "ON_SALE");</pre></td><td class="explain">库存 4。</td></tr>
+<tr class="gap"><td class="line">267</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="268"><td class="line">268</td><td class="code"><pre>        mockMvc.perform(post("/products/{id}/restock", productId)</pre></td><td class="explain">补 3 件。</td></tr>
+<tr tabindex="0" data-line="269"><td class="line">269</td><td class="code"><pre>                        .param("quantity", "3")</pre></td><td class="explain">表单参数 quantity="3"</td></tr>
+<tr tabindex="0" data-line="270"><td class="line">270</td><td class="code"><pre>                        .session(adminSession()))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="271"><td class="line">271</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">PRG。</td></tr>
+<tr tabindex="0" data-line="272"><td class="line">272</td><td class="code"><pre>                .andExpect(redirectedUrl("/products"));</pre></td><td class="explain">断言重定向到 /products</td></tr>
+<tr class="gap"><td class="line">273</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="274"><td class="line">274</td><td class="code"><pre>        assertThat(AdminFixture.stockOf(jdbc, productId)).isEqualTo(7);</pre></td><td class="explain">4 + 3。</td></tr>
+<tr tabindex="0" data-line="275"><td class="line">275</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.<span class="kw">class</span>, productId))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="276"><td class="line">276</td><td class="code"><pre>                .isEqualTo(1L);</pre></td><td class="explain">版本 +1。</td></tr>
+<tr tabindex="0" data-line="277"><td class="line">277</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">278</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="279"><td class="line">279</td><td class="code"><pre>    @Test</pre></td><td class="explain">补货数量非法：400。</td></tr>
+<tr tabindex="0" data-line="280"><td class="line">280</td><td class="code"><pre>    @DisplayName("补货：数量为 0 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="281"><td class="line">281</td><td class="code"><pre>    <span class="kw">void</span> restockInvalidQuantity() throws Exception {</pre></td><td class="explain">用例：补货数量 0 → 400。</td></tr>
+<tr tabindex="0" data-line="282"><td class="line">282</td><td class="code"><pre>        <span class="kw">long</span> leaf = seedLeaf();</pre></td><td class="explain">二级分类。</td></tr>
+<tr tabindex="0" data-line="283"><td class="line">283</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProductIn(jdbc, "RS-2", leaf, "28.00", 4, "ON_SALE");</pre></td><td class="explain">库存 4。</td></tr>
+<tr class="gap"><td class="line">284</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="285"><td class="line">285</td><td class="code"><pre>        mockMvc.perform(post("/products/{id}/restock", productId)</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="286"><td class="line">286</td><td class="code"><pre>                        .param("quantity", "0")</pre></td><td class="explain">不允许 0。</td></tr>
+<tr tabindex="0" data-line="287"><td class="line">287</td><td class="code"><pre>                        .session(adminSession()))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="288"><td class="line">288</td><td class="code"><pre>                .andExpect(status().isBadRequest());</pre></td><td class="explain">400 错误页。</td></tr>
+<tr class="gap"><td class="line">289</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="290"><td class="line">290</td><td class="code"><pre>        assertThat(AdminFixture.stockOf(jdbc, productId)).isEqualTo(4);</pre></td><td class="explain">库存没变。</td></tr>
+<tr tabindex="0" data-line="291"><td class="line">291</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">292</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s6">
+<h2>RestockConcurrencyTest.java<small>AC-28 并发用例 · 全文件 94 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/RestockConcurrencyTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin;</pre></td><td class="explain">AC-28：用户下单与后台补货并发，库存最终一致。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminFixture;</pre></td><td class="explain">造账号、分类与商品。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.admin.support.AdminIntegrationTest;</pre></td><td class="explain">真实 MySQL + 每例重建表。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.catalog.service.ProductAdminService;</pre></td><td class="explain">后台补货入口。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.CheckoutSnapshot;</pre></td><td class="explain">下单需要的确认快照。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.Receiver;</pre></td><td class="explain">已校验的收货信息。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderService;</pre></td><td class="explain">用户下单入口。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入服务与 JdbcTemplate。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">造数据与核对。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> java.time.Instant;</pre></td><td class="explain">快照时刻。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">快照行。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.CountDownLatch;</pre></td><td class="explain">同步起点。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.ExecutorService;</pre></td><td class="explain">两个线程。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.Executors;</pre></td><td class="explain">创建线程池。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.Future;</pre></td><td class="explain">结果。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.TimeUnit;</pre></td><td class="explain">超时。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre><span class="kw">import</span> java.util.concurrent.atomic.AtomicReference;</pre></td><td class="explain">收集异常。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">值断言。</td></tr>
+<tr class="gap"><td class="line">25</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">// M07-07：依据 docs/06 AC-28、docs/02 §8.1、docs/09 §5「并发测试用两个独立事务」。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">// 场景：初始库存 10，用户买 2 件、后台补 3 件，两个事务同时发起。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">// 期望：两项都成功后库存 = 10 - 2 + 3 = 11，版本 +2，恰好一单。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">// 说明：这里是两个独立连接、两个独立事务（同一进程）；"两个应用实例"的手工证据在 M07-09。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre><span class="kw">class</span> RestockConcurrencyTest <span class="kw">extends</span> AdminIntegrationTest {</pre></td><td class="explain">AC-28 并发：两个独立事务同时下单与补货。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造数据与核对。</td></tr>
+<tr class="gap"><td class="line">34</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> OrderService orderService;</pre></td><td class="explain">用户下单入口。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    <span class="kw">private</span> ProductAdminService productAdminService;</pre></td><td class="explain">后台补货入口。</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    @Test</pre></td><td class="explain">两个事务并发：库存最终一致。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    @DisplayName("AC-28：用户买 2 与后台补 3 并发，库存 10 → 11")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    <span class="kw">void</span> restockAndOrderConcurrently() throws Exception {</pre></td><td class="explain">用例：初始 10，买 2 补 3，最终 11。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">long</span> userId = AdminFixture.createUser(jdbc, "conc_user", "CUSTOMER", "ENABLED");</pre></td><td class="explain">买家。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        <span class="kw">long</span> top = AdminFixture.createCategory(jdbc, "CONC", null, "并发作品", 1);</pre></td><td class="explain">一级。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        <span class="kw">long</span> leaf = AdminFixture.createCategory(jdbc, "CONC-COMIC", top, "单行本", 1);</pre></td><td class="explain">二级。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        <span class="kw">long</span> productId = AdminFixture.createProductIn(jdbc, "CONC-1", leaf, "28.00", 10, "ON_SALE");</pre></td><td class="explain">初始库存 10。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        jdbc.update("INSERT INTO cart_item (user_id, product_id, quantity, version) VALUES (?,?,?,0)",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                userId, productId, 2);</pre></td><td class="explain">车里 2 件。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">long</span> cartItemId = jdbc.queryForObject(</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                "SELECT id FROM cart_item WHERE user_id = ? AND product_id = ?", Long.<span class="kw">class</span>, userId, productId);</pre></td><td class="explain">快照行要用。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        CheckoutSnapshot snapshot = <span class="kw">new</span> CheckoutSnapshot(userId,</pre></td><td class="explain">确认快照：与车行完全一致。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                List.of(<span class="kw">new</span> CheckoutSnapshot.Line(cartItemId, productId, 2, 0L, <span class="kw">new</span> BigDecimal("28.00"))),</pre></td><td class="explain">快照行：与车行一致（条目、商品、数量、版本、价格）。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                <span class="kw">new</span> BigDecimal("56.00"), Instant.now());</pre></td><td class="explain">总额 = 28 × 2。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        Receiver receiver = <span class="kw">new</span> Receiver("张三", "13800000000", "某市某区某路 1 号");</pre></td><td class="explain">收货信息已校验。</td></tr>
+<tr class="gap"><td class="line">57</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        CountDownLatch start = <span class="kw">new</span> CountDownLatch(1);</pre></td><td class="explain">两个线程同一起点。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        AtomicReference&lt;Throwable&gt; orderError = <span class="kw">new</span> AtomicReference&lt;&gt;();</pre></td><td class="explain">下单异常。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        AtomicReference&lt;Throwable&gt; restockError = <span class="kw">new</span> AtomicReference&lt;&gt;();</pre></td><td class="explain">补货异常。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        ExecutorService pool = Executors.newFixedThreadPool(2);</pre></td><td class="explain">两个独立线程。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        try {</pre></td><td class="explain">两个线程同一起点，异常各自收集。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>            Future&lt;?&gt; order = pool.submit(() -&gt; {</pre></td><td class="explain">线程 A：用户下单。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                try {</pre></td><td class="explain">线程 A：用户下单。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                    start.await();</pre></td><td class="explain">等发令。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                    orderService.placeOrder(userId, snapshot, receiver);</pre></td><td class="explain">独立事务。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                } catch (Throwable t) {</pre></td><td class="explain">记下异常，主线程断言。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                    orderError.set(t);</pre></td><td class="explain">记下异常，主线程断言。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            });</pre></td><td class="explain">断言代码块结束</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>            Future&lt;?&gt; restock = pool.submit(() -&gt; {</pre></td><td class="explain">线程 B：后台补货。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                try {</pre></td><td class="explain">线程 B：后台补货。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                    start.await();</pre></td><td class="explain">等发令。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                    productAdminService.restock(productId, "3");</pre></td><td class="explain">独立事务。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                } catch (Throwable t) {</pre></td><td class="explain">记下异常。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                    restockError.set(t);</pre></td><td class="explain">记下异常。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>            });</pre></td><td class="explain">断言代码块结束</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>            start.countDown();</pre></td><td class="explain">同时放行。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>            order.get(15, TimeUnit.SECONDS);</pre></td><td class="explain">等下单结束。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>            restock.get(15, TimeUnit.SECONDS);</pre></td><td class="explain">等补货结束。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        } finally {</pre></td><td class="explain">无论成败都收线程池。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>            pool.shutdownNow();</pre></td><td class="explain">无论成败都收线程池。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">85</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        assertThat(orderError.get()).isNull();</pre></td><td class="explain">下单不应失败。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        assertThat(restockError.get()).isNull();</pre></td><td class="explain">补货不应失败。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        assertThat(AdminFixture.stockOf(jdbc, productId)).isEqualTo(11);</pre></td><td class="explain">10 - 2 + 3。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.<span class="kw">class</span>, productId))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                .isEqualTo(2L);</pre></td><td class="explain">扣减与补货各 +1。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM sales_order", Integer.<span class="kw">class</span>))</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                .isEqualTo(1);</pre></td><td class="explain">恰好一单。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-17 · M07-07 · 上下架与增量补货 · 6 个文件、382 行（兜底 0 行）。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

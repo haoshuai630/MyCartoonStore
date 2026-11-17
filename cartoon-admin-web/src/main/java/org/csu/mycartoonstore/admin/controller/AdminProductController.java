@@ -98,6 +98,27 @@ public class AdminProductController {
         }
     }
 
+    /** 上下架：成功后回列表；版本冲突由全局处理器转 409。 */
+    @PostMapping("/{id}/status")
+    public String changeStatus(@PathVariable long id,
+                               @RequestParam String status, // ON_SALE / DRAFT。
+                               @RequestParam(required = false) String version, // 隐藏域带回的版本。
+                               RedirectAttributes redirect) {
+        productAdminService.changeStatus(id, status, version); // 版本一致才迁移。
+        redirect.addFlashAttribute("message", "ON_SALE".equals(status) ? "已上架该商品" : "已下架该商品"); // 一次性提示。
+        return "redirect:/products"; // 回列表。
+    }
+
+    /** 增量补货：成功后回列表并提示最新库存。 */
+    @PostMapping("/{id}/restock")
+    public String restock(@PathVariable long id,
+                          @RequestParam String quantity, // 增加数量，1–100000。
+                          RedirectAttributes redirect) {
+        int stock = productAdminService.restock(id, quantity); // 原子累加后的库存。
+        redirect.addFlashAttribute("message", "已补货，当前库存 " + stock); // 反馈实际结果。
+        return "redirect:/products"; // 回列表。
+    }
+
     /**
      * 校验失败：回到表单页。
      *

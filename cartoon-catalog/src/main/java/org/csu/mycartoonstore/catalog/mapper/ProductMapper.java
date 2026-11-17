@@ -75,4 +75,23 @@ public interface ProductMapper extends BaseMapper<Product> {
              WHERE id = #{p.id} AND version = #{p.version}
             """)
     int updateProfile(@Param("p") Product product);
+
+    /**
+     * 上下架：版本一致才写，同时 version + 1。
+     *
+     * @return 影响行数；0 表示版本已变（或商品被删），调用方转 409
+     */
+    @Update("UPDATE product SET status = #{status}, version = version + 1 "
+            + "WHERE id = #{id} AND version = #{version}")
+    int updateStatus(@Param("id") Long id, @Param("status") String status, @Param("version") long version);
+
+    /**
+     * 增量补货：在数据库最新库存上原子累加，溢出时不更新。
+     *
+     * <p>不提供"设为指定库存"：条件里用 stock <= INT_MAX - qty 挡住溢出，
+     * 影响 0 行可能是商品不存在，也可能是库存已到上限，由调用方区分。</p>
+     */
+    @Update("UPDATE product SET stock = stock + #{qty}, version = version + 1 "
+            + "WHERE id = #{id} AND stock <= 2147483647 - #{qty}")
+    int restock(@Param("id") Long id, @Param("qty") int qty);
 }

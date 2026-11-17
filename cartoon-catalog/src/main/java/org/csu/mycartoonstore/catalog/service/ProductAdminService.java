@@ -60,6 +60,12 @@ public class ProductAdminService {
     /** 初始库存上限：教学场景足够，避免误填把 INT 撑爆 */
     private static final int STOCK_MAX = 1_000_000; // 正整数校验。
 
+    /** 补货单次上限：与 docs/04 §3.3 的 1–100000 一致 */
+    private static final int RESTOCK_MAX = 100_000; // 超出即 400。
+
+    /** 可切换的状态：只有上架与下架 */
+    private static final Set<String> WRITABLE_STATUSES = Set.of("ON_SALE", "DRAFT"); // 其他值 400。
+
     private final ProductMapper productMapper; // 商品读写。
     private final CategoryMapper categoryMapper; // 分类存在性与下拉。
 
@@ -173,6 +179,45 @@ public class ProductAdminService {
             throw BizException.conflict("数据已发生变化，请刷新后重试"); // 409。
         }
         return existing; // 调用方只需提示成功并回列表。
+    }
+
+    /**
+     * 上下架：版本一致才迁移，成功后版本 + 1。
+     *
+     * <p>状态只能在上架与下架之间切换；"新增默认 DRAFT、显式上架"的口径由此动作落实。
+     * 版本冲突返回 409，避免旧页面把别人刚改过的商品状态覆盖掉。</p>
+     */
+    @Transactional // 条件更新同一事务。
+    public void changeStatus(long id, String rawStatus, String rawVersion) {
+        String status = parseWritableStatus(rawStatus); // 只接受 ON_SALE / DRAFT。
+        long version = parseVersionText(rawVersion); // 隐藏域带回的版本。
+        detail(id); // 不存在 404，先于更新判断。
+        int rows = productMapper.updateStatus(id, status, version); // WHERE id=? AND version=?
+        if (rows == 0) { // 版本已变。
+            throw BizException.conflict("数据已发生变化，请刷新后重试"); // 409。
+        }
+    }
+
+    /**
+     * 增量补货：在数据库最新库存上加 quantity，返回补货后的库存。
+     *
+     * <p>不做"读-改-写"，也不提供"设为指定值"；与用户下单扣库存并发时，
+     * 两条原子 UPDATE 各自成功即可，最终库存 = 初始 - 卖出 + 补货（AC-28）。</p>
+     */
+    @Transactional // 更新与回读同一事务，返回的库存就是本次结果。
+    public int restock(long id, String rawQuantity) {
+        detail(id); // 不存在 404。
+        int quantity = parseRestockQuantity(rawQuantity); // 1–100000 正整数。
+        int rows = productMapper.restock(id, quantity); // 原子累加，溢出时不更新。
+        if (rows == 0) { // 更新失败：商品被删或库存已到上限。
+            Product current = productMapper.selectById(id); // 再读一次区分两种情况。
+            if (current == null) {
+                throw BizException.notFound("商品不存在"); // 并发删除。
+            }
+            throw BizException.conflict("库存已达上限，无法继续补货"); // INT 溢出。
+        }
+        Product updated = productMapper.selectById(id); // 回读最新库存。
+        return updated == null ? 0 : updated.getStock(); // 理论上不会为空。
     }
 
     /** 编辑页回填：价格转成两位小数字符串，库存不放进表单（编辑页库存只读）。 */
@@ -351,6 +396,49 @@ public class ProductAdminService {
             throw BizException.badRequest("库存不能超过 " + STOCK_MAX); // 防误填。
         }
         return value; // 合法值。
+    }
+
+    /** 上下架只接受 ON_SALE / DRAFT：其他值不进入 SQL。 */
+    private String parseWritableStatus(String raw) {
+        String status = raw == null ? "" : raw.trim(); // 容忍首尾空格。
+        if (!WRITABLE_STATUSES.contains(status)) {
+            throw BizException.badRequest("商品状态只能切换为上架或下架"); // 400。
+        }
+        return status; // 合法状态。
+    }
+
+    /** 版本号（请求参数形式）：隐藏域没带或格式错都拒绝。 */
+    private long parseVersionText(String raw) {
+        if (raw == null || raw.isBlank()) {
+            throw BizException.badRequest("缺少版本号，请刷新后重试"); // 400。
+        }
+        try {
+            long version = Long.parseLong(raw.trim()); // 只接受整数。
+            return parseVersion(version); // 负数同样拒绝。
+        } catch (NumberFormatException e) {
+            throw BizException.badRequest("版本号格式不正确"); // 400。
+        }
+    }
+
+    /** 补货数量：1–100000 的正整数。 */
+    private int parseRestockQuantity(String raw) {
+        String text = raw == null ? "" : raw.trim(); // 容忍首尾空格。
+        if (text.isEmpty()) {
+            throw BizException.badRequest("补货数量不能为空"); // 必填。
+        }
+        int quantity;
+        try {
+            quantity = Integer.parseInt(text); // 只接受整数。
+        } catch (NumberFormatException e) {
+            throw BizException.badRequest("补货数量必须是整数"); // 400。
+        }
+        if (quantity < 1) {
+            throw BizException.badRequest("补货数量必须大于 0"); // 不提供后台扣减入口。
+        }
+        if (quantity > RESTOCK_MAX) {
+            throw BizException.badRequest("补货数量不能超过 " + RESTOCK_MAX); // 与文档上限一致。
+        }
+        return quantity; // 合法数量。
     }
 
     /** 版本号：编辑时必须带，缺了就不允许保存（否则无法发现并发覆盖）。 */

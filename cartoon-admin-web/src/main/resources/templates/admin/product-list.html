@@ -82,8 +82,19 @@
                         <td class="num" th:text="${row.sortOrder}">0</td>
                         <td class="row-actions">
                             <a class="link-btn" th:href="@{/products/{id}/edit(id=${row.id})}">编辑</a>
-                            <!-- 上下架与补货入口在 M07-07 接入 -->
-                            <small class="hint-inline">上下架 / 补货随后接入</small>
+                            <!-- 上下架：提交当前版本，版本冲突由服务端给 409 -->
+                            <form class="inline-form" th:action="@{/products/{id}/status(id=${row.id})}" method="post">
+                                <input type="hidden" name="version" th:value="${row.version}">
+                                <input type="hidden" name="status"
+                                       th:value="${row.status == 'ON_SALE'} ? 'DRAFT' : 'ON_SALE'">
+                                <button type="submit" class="link-btn"
+                                        th:text="${row.status == 'ON_SALE'} ? '下架' : '上架'">上架</button>
+                            </form>
+                            <!-- 增量补货：只填"加多少"，服务端在最新库存上累加 -->
+                            <form class="inline-form" th:action="@{/products/{id}/restock(id=${row.id})}" method="post">
+                                <input type="number" name="quantity" value="10" min="1" max="100000" class="qty-input">
+                                <button type="submit" class="link-btn">补货</button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>

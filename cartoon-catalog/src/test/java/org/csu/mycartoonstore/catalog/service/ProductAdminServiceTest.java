@@ -268,6 +268,99 @@ class ProductAdminServiceTest {
         assertThat(form.getSku()).isEqualTo("S-5"); // 只读展示。
     }
 
+    // ---------------------------------------------------------------- 上下架
+
+    @Test // 上下架：状态与版本一起提交，版本一致才更新。
+    @DisplayName("上下架：版本一致 → 切换成功")
+    void changeStatusOk() {
+        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L)); // 已存在，版本 3。
+        when(productMapper.updateStatus(5L, "ON_SALE", 3L)).thenReturn(1); // 条件更新成功。
+
+        service.changeStatus(5L, "ON_SALE", "3"); // 上架。
+
+        verify(productMapper).updateStatus(5L, "ON_SALE", 3L); // 参数原样传下去。
+    }
+
+    @Test // 状态只能是上架或下架。
+    @DisplayName("上下架：非法状态 → 400")
+    void changeStatusBadValue() {
+        assertThatThrownBy(() -> service.changeStatus(5L, "SOLD_OUT", "0")) // 不存在的状态。
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("上架或下架");
+        verify(productMapper, never()).updateStatus(any(), any(), any(Long.class)); // 不写库。
+    }
+
+    @Test // 版本冲突：409。
+    @DisplayName("上下架：版本冲突 → 409")
+    void changeStatusStale() {
+        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L)); // 已存在。
+        when(productMapper.updateStatus(5L, "DRAFT", 2L)).thenReturn(0); // 旧版本。
+
+        assertThatThrownBy(() -> service.changeStatus(5L, "DRAFT", "2"))
+                .isInstanceOf(BizException.class)
+                .hasMessage("数据已发生变化，请刷新后重试");
+    }
+
+    @Test // 缺版本号：400。
+    @DisplayName("上下架：缺版本号 → 400")
+    void changeStatusMissingVersion() {
+        assertThatThrownBy(() -> service.changeStatus(5L, "ON_SALE", " "))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("版本号");
+    }
+
+    // ---------------------------------------------------------------- 补货
+
+    @Test // 补货成功：返回最新库存。
+    @DisplayName("补货：返回累加后的库存")
+    void restockOk() {
+        Product before = product(5L, "S-5", 3L); // 补货前库存 5。
+        Product after = product(5L, "S-5", 4L); // 补货后版本 4。
+        after.setStock(8); // 5 + 3。
+        when(productMapper.selectById(5L)).thenReturn(before, after); // 更新前、更新后各读一次。
+        when(productMapper.restock(5L, 3)).thenReturn(1); // 原子累加成功。
+
+        int stock = service.restock(5L, "3"); // 补 3 件。
+
+        assertThat(stock).isEqualTo(8); // 返回最新库存。
+    }
+
+    @Test // 数量边界：0、超上限、非数字都拒绝。
+    @DisplayName("补货：数量非法 → 400")
+    void restockBadQuantity() {
+        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L)); // 商品存在。
+
+        assertThatThrownBy(() -> service.restock(5L, "0")) // 不能为 0。
+                .isInstanceOf(BizException.class);
+        assertThatThrownBy(() -> service.restock(5L, "100001")) // 超过单次上限。
+                .isInstanceOf(BizException.class);
+        assertThatThrownBy(() -> service.restock(5L, "abc")) // 非整数。
+                .isInstanceOf(BizException.class);
+    }
+
+    @Test // 更新 0 行且商品不存在：404。
+    @DisplayName("补货：商品不存在 → 404")
+    void restockMissing() {
+        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L), null); // 第一次存在，更新后已被删。
+        when(productMapper.restock(5L, 3)).thenReturn(0); // 没更新到。
+
+        assertThatThrownBy(() -> service.restock(5L, "3"))
+                .isInstanceOf(BizException.class)
+                .extracting(e -> ((BizException) e).code())
+                .isEqualTo(ErrorCode.NOT_FOUND);
+    }
+
+    @Test // 更新 0 行但商品还在：库存到上限，409。
+    @DisplayName("补货：库存溢出 → 409")
+    void restockOverflow() {
+        when(productMapper.selectById(5L)).thenReturn(product(5L, "S-5", 3L)); // 商品还在。
+        when(productMapper.restock(5L, 100000)).thenReturn(0); // 溢出保护挡住了。
+
+        assertThatThrownBy(() -> service.restock(5L, "100000"))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("上限");
+    }
+
     // ---------------------------------------------------------------- 夹具
 
     /** 造表单：常用字段一次给全 */

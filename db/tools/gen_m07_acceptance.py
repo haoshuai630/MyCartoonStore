@@ -204,6 +204,30 @@ TASKS = {
              "夹具新增 createProductIn", "java", [(59, 67)]),
         ],
     },
+    "07": {
+        "title": "M07-07 · 上下架与增量补货",
+        "out": "M07-07-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：上下架（只允许 ON_SALE/DRAFT，版本一致才迁移）、增量补货（1–100000，原子累加 + 溢出保护，"
+                "返回最新库存）、列表行内两个动作、7 个服务用例 + 4 个页面用例 + AC-28 并发用例。"
+                "验证：mvn -pl cartoon-catalog -am test → 62；mvn -pl cartoon-admin-web -am test → 42；"
+                "全量 clean verify → 10 模块 SUCCESS、305 个用例。"
+                "模板行内动作与样式改动按 docs/10 §5 用汇报里的手工表说明，不逐行展开。",
+        "files": [
+            (CAT + "service/ProductAdminService.java", "ProductAdminService.java",
+             "上下架、补货与两个校验", "java", [(63, 68), (184, 222), (401, 443)]),
+            (CAT + "mapper/ProductMapper.java", "ProductMapper.java",
+             "条件上下架与原子补货", "java", [(78, 96)]),
+            (ADM + "controller/AdminProductController.java", "AdminProductController.java",
+             "两个动作的路由", "java", [(101, 121)]),
+            (CAT_TEST + "service/ProductAdminServiceTest.java", "ProductAdminServiceTest.java",
+             "7 个服务用例", "java", [(271, 363)]),
+            (ADM_TEST + "ProductAdminPageTest.java", "ProductAdminPageTest.java",
+             "4 个页面用例", "java", [(226, 292)]),
+            (ADM_TEST + "RestockConcurrencyTest.java", "RestockConcurrencyTest.java",
+             "AC-28 并发用例", "java", None),
+        ],
+    },
 }
 
 # 只有"没有行尾注释、规则解释器也认不出"的行才需要登记。
@@ -646,6 +670,49 @@ LINE_NOTES: dict[tuple[str, int], str] = {
     # ---- 商品页夹具 ----
     (ADM_TEST + "support/AdminFixture.java", 60): "在指定二级分类下建商品：状态由用例给。",
     (ADM_TEST + "support/AdminFixture.java", 61): "续行：价格与库存。",
+    # ---- M07-07 服务与 Mapper ----
+    (CAT + "service/ProductAdminService.java", 214): "商品被并发删掉：按不存在处理。",
+    (CAT + "service/ProductAdminService.java", 404): "状态不在白名单。",
+    (CAT + "service/ProductAdminService.java", 426): "补货数量必填。",
+    (CAT + "service/ProductAdminService.java", 429): "先声明，解析失败在下面处理。",
+    (CAT + "service/ProductAdminService.java", 430): "解析失败按 400。",
+    (CAT + "service/ProductAdminService.java", 435): "不提供后台扣减入口。",
+    (CAT + "service/ProductAdminService.java", 438): "单次上限与文档一致。",
+    (CAT + "mapper/ProductMapper.java", 85): "续行：版本作条件。",
+    (CAT + "mapper/ProductMapper.java", 86): "返回影响行数：0 表示版本已变。",
+    (CAT + "mapper/ProductMapper.java", 95): "续行：溢出时不更新。",
+    (CAT + "mapper/ProductMapper.java", 96): "返回影响行数：0 表示不存在或已到上限。",
+    (ADM + "controller/AdminProductController.java", 102): "上下架：POST，成功后回列表。",
+    (ADM + "controller/AdminProductController.java", 103): "参数：路径 id、目标状态、隐藏域版本。",
+    (ADM + "controller/AdminProductController.java", 113): "补货：POST，成功后回列表。",
+    (ADM + "controller/AdminProductController.java", 114): "参数：路径 id 与增加数量。",
+    # ---- M07-07 用例 ----
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 275): "用例：版本一致 → 切换成功。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 286): "用例：非法状态 → 400 且不写库。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 295): "用例：旧版本上下架 → 409。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 301): "断言冲突文案。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 306): "用例：缺版本号 → 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 316): "用例：补货返回累加后的库存。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 330): "用例：数量 0 / 超上限 / 非整数都 400。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 334): "断言 400（数量 0）。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 336): "断言 400（超上限）。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 338): "断言 400（非整数）。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 343): "用例：补货时商品被删 → 404。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 350): "断言 404。",
+    (CAT_TEST + "service/ProductAdminServiceTest.java", 355): "用例：库存溢出 → 409。",
+    (ADM_TEST + "ProductAdminPageTest.java", 228): "用例：上架成功且版本 +1。",
+    (ADM_TEST + "ProductAdminPageTest.java", 247): "用例：旧版本上下架 → 409。",
+    (ADM_TEST + "ProductAdminPageTest.java", 264): "用例：补货 +3、版本 +1。",
+    (ADM_TEST + "ProductAdminPageTest.java", 281): "用例：补货数量 0 → 400。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 30): "AC-28 并发：两个独立事务同时下单与补货。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 43): "用例：初始 10，买 2 补 3，最终 11。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 54): "快照行：与车行一致（条目、商品、数量、版本、价格）。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 62): "两个线程同一起点，异常各自收集。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 64): "线程 A：用户下单。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 67): "记下异常，主线程断言。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 72): "线程 B：后台补货。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 75): "记下异常。",
+    (ADM_TEST + "RestockConcurrencyTest.java", 82): "无论成败都收线程池。",
 }
 
 

@@ -223,6 +223,73 @@ class ProductAdminPageTest extends AdminIntegrationTest {
                 .isEqualTo(3L); // 版本未变。
     }
 
+    @Test // 上下架：版本一致才切换。
+    @DisplayName("上下架：上架成功，版本 +1")
+    void toggleStatus() throws Exception {
+        long leaf = seedLeaf(); // 二级分类。
+        long productId = AdminFixture.createProductIn(jdbc, "ST-1", leaf, "28.00", 4, "DRAFT"); // 下架商品，版本 0。
+
+        mockMvc.perform(post("/products/{id}/status", productId) // 点「上架」。
+                        .param("status", "ON_SALE") // 目标状态。
+                        .param("version", "0") // 隐藏域带回的版本。
+                        .session(adminSession()))
+                .andExpect(status().is3xxRedirection()) // PRG。
+                .andExpect(redirectedUrl("/products"));
+
+        assertThat(jdbc.queryForObject("SELECT status FROM product WHERE id = ?", String.class, productId))
+                .isEqualTo("ON_SALE"); // 已上架。
+        assertThat(jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.class, productId))
+                .isEqualTo(1L); // 版本 +1。
+    }
+
+    @Test // 上下架：旧版本 → 409。
+    @DisplayName("上下架：旧版本 → 409")
+    void toggleStatusStale() throws Exception {
+        long leaf = seedLeaf(); // 二级分类。
+        long productId = AdminFixture.createProductIn(jdbc, "ST-2", leaf, "28.00", 4, "DRAFT"); // 下架商品。
+        jdbc.update("UPDATE product SET version = 3 WHERE id = ?", productId); // 别人已经改过。
+
+        mockMvc.perform(post("/products/{id}/status", productId)
+                        .param("status", "ON_SALE")
+                        .param("version", "0") // 旧页面手里的版本。
+                        .session(adminSession()))
+                .andExpect(status().isConflict()); // 409 错误页。
+
+        assertThat(jdbc.queryForObject("SELECT status FROM product WHERE id = ?", String.class, productId))
+                .isEqualTo("DRAFT"); // 状态没被改。
+    }
+
+    @Test // 补货：在最新库存上累加并回列表提示。
+    @DisplayName("补货：库存 +3，版本 +1")
+    void restock() throws Exception {
+        long leaf = seedLeaf(); // 二级分类。
+        long productId = AdminFixture.createProductIn(jdbc, "RS-1", leaf, "28.00", 4, "ON_SALE"); // 库存 4。
+
+        mockMvc.perform(post("/products/{id}/restock", productId) // 补 3 件。
+                        .param("quantity", "3")
+                        .session(adminSession()))
+                .andExpect(status().is3xxRedirection()) // PRG。
+                .andExpect(redirectedUrl("/products"));
+
+        assertThat(AdminFixture.stockOf(jdbc, productId)).isEqualTo(7); // 4 + 3。
+        assertThat(jdbc.queryForObject("SELECT version FROM product WHERE id = ?", Long.class, productId))
+                .isEqualTo(1L); // 版本 +1。
+    }
+
+    @Test // 补货数量非法：400。
+    @DisplayName("补货：数量为 0 → 400")
+    void restockInvalidQuantity() throws Exception {
+        long leaf = seedLeaf(); // 二级分类。
+        long productId = AdminFixture.createProductIn(jdbc, "RS-2", leaf, "28.00", 4, "ON_SALE"); // 库存 4。
+
+        mockMvc.perform(post("/products/{id}/restock", productId)
+                        .param("quantity", "0") // 不允许 0。
+                        .session(adminSession()))
+                .andExpect(status().isBadRequest()); // 400 错误页。
+
+        assertThat(AdminFixture.stockOf(jdbc, productId)).isEqualTo(4); // 库存没变。
+    }
+
     /** 造"作品 + 单行本"，返回二级分类 id */
     private long seedLeaf() {
         long top = AdminFixture.createCategory(jdbc, "PAGE", null, "页面作品", 1); // 一级。
