@@ -20,6 +20,8 @@ ROOT = g5.ROOT
 
 ACC = "cartoon-account/src/main/java/org/csu/mycartoonstore/account/"
 ACC_TEST = "cartoon-account/src/test/java/org/csu/mycartoonstore/account/"
+ORDER = "cartoon-order/src/main/java/org/csu/mycartoonstore/order/"
+ORDER_TEST = "cartoon-order/src/test/java/org/csu/mycartoonstore/order/"
 WEB = "cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/"
 WEB_TEST = "cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/"
 
@@ -60,6 +62,23 @@ TASKS = {
             (WEB + "config/WebConfig.java", "WebConfig.java", "把 /password 纳入受保护路径", "java"),
             (ACC_TEST + "service/AccountServiceTest.java", "AccountServiceTest.java", "7 个改密用例", "java"),
             (WEB_TEST + "PasswordPageTest.java", "PasswordPageTest.java", "7 个页面与会话用例", "java"),
+        ],
+    },
+    "03": {
+        "title": "M08-03 · 确认收货",
+        "out": "M08-03-逐行验收.html",
+        "date": "2026-11-18",
+        "note": "内容：SHIPPED → COMPLETED 并写首次 completed_at、已完成幂等、其他状态 409、他人订单与不存在统一 404、"
+                "订单详情的「确认收货」按钮与二次确认、POST /orders/{orderNo}/complete 的提示与跳转、"
+                "5 个服务单测 + 5 个页面用例。"
+                "验证：mvn -pl cartoon-order,cartoon-user-web -am test → order 36、user-web 148，全绿。"
+                "模板 order-detail.html 的按钮改动按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。",
+        "files": [
+            (ORDER + "domain/CompleteResult.java", "CompleteResult.java", "确认收货两种结局", "java"),
+            (ORDER + "service/OrderCompletionService.java", "OrderCompletionService.java", "状态迁移、幂等与归属", "java"),
+            (ORDER_TEST + "service/OrderCompletionServiceTest.java", "OrderCompletionServiceTest.java", "5 个服务用例", "java"),
+            (WEB + "controller/OrderController.java", "OrderController.java", "新增确认收货路由", "java"),
+            (WEB_TEST + "CompleteOrderTest.java", "CompleteOrderTest.java", "5 个页面与状态用例", "java"),
         ],
     },
 }
@@ -196,6 +215,36 @@ NOTES: dict[tuple[str, str], str] = {
         "成功：跳登录、当前会话失效、新散列可校验。",
     (WEB_TEST + "PasswordPageTest.java", "void otherSessionStaysLoggedIn() throws Exception {"):
         "其他浏览器的会话不受影响。",
+    # ---- M08-03：确认收货 ----
+    (ORDER_TEST + "service/OrderCompletionServiceTest.java", "void completeShipped() {"):
+        "已发货：完成并写首次完成时间。",
+    (ORDER_TEST + "service/OrderCompletionServiceTest.java", "void completeAgainIsIdempotent() {"):
+        "已完成：幂等且不写库。",
+    (ORDER_TEST + "service/OrderCompletionServiceTest.java", "void completePaidRejected() {"):
+        "待发货：409 且不写库。",
+    (ORDER_TEST + "service/OrderCompletionServiceTest.java", "void completeOtherUserRejected() {"):
+        "他人订单：404，不泄露存在性。",
+    (ORDER_TEST + "service/OrderCompletionServiceTest.java", "void completeMissing() {"):
+        "订单不存在：404。",
+    (WEB_TEST + "CompleteOrderTest.java", "void shippedOrderCanBeCompleted() throws Exception {"):
+        "确认收货：状态完成、时间落库、发货时间不变。",
+    (WEB_TEST + "CompleteOrderTest.java", "void repeatIsIdempotent() throws Exception {"):
+        "重复提交：提示已处理，完成时间不变。",
+    (WEB_TEST + "CompleteOrderTest.java", "void pendingCannotBeCompleted() throws Exception {"):
+        "待支付：409 且状态不变。",
+    (WEB_TEST + "CompleteOrderTest.java", "void otherUsersOrderCannotBeCompleted() throws Exception {"):
+        "他人订单：404 且状态不变。",
+    (WEB_TEST + "CompleteOrderTest.java", "void buttonOnlyOnShippedOrder() throws Exception {"):
+        "「确认收货」只出现在已发货详情页。",
+    (WEB_TEST + "CompleteOrderTest.java",
+     'orderNo, userId, status, new BigDecimal("28.00"), "收货人", "13900000000", "地址");'):
+        "续行：必填列的值；待支付没有支付与发货时间。",
+    (WEB_TEST + "CompleteOrderTest.java", "private String statusOf(String orderNo) {"):
+        "读状态：断言迁移与未迁移。",
+    (WEB_TEST + "CompleteOrderTest.java", "private Timestamp completedAtOf(String orderNo) {"):
+        "读完成时间：幂等断言用。",
+    (WEB_TEST + "CompleteOrderTest.java", "private Timestamp shippedAtOf(String orderNo) {"):
+        "读发货时间：确认收货不改它。",
 }
 
 # 规则解释器产出的兜底句：正常应为 0 行，用它做自检。
