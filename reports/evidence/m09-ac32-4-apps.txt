@@ -1,0 +1,10 @@
+﻿== 4-apps ==
+user GET http://127.0.0.1:18080/health -> 200 len=22
+user-main GET http://127.0.0.1:18080/main -> 200 len=9646
+admin GET http://127.0.0.1:18081/admin/health -> 200 len=23
+admin-login GET http://127.0.0.1:18081/admin/login -> 200 len=1501
+--- 启动日志 ---
+2026-11-18T05:11:20.033+08:00  INFO 32616 --- [cartoon-user] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 18080 (http) with context path '/'
+2026-11-18T05:11:20.044+08:00  INFO 32616 --- [cartoon-user] [           main] o.c.m.web.CartoonUserApplication         : Started CartoonUserApplication in 2.586 seconds (process running for 2.934)
+2026-11-18T05:11:22.196+08:00  INFO 17200 --- [cartoon-admin] [           main] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 18081 (http) with context path '/admin'
+2026-11-18T05:11:22.202+08:00  INFO 17200 --- [cartoon-admin] [           main] o.c.m.admin.CartoonAdminApplication      : Started CartoonAdminApplication in 2.546 seconds (process running for 3.1)

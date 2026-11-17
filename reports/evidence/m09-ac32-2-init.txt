@@ -1,0 +1,5 @@
+== 2-init ==
+脚本：db\02-schema-with-demo.sql
+退出码：0
+stderr：mysql: [Warning] Using a password on the command line interface can be insecure.
+表数量：7

@@ -1,0 +1,10 @@
+== 3-verify ==
+表数量：7
+store_user             6   期望   4   OK
+category              60   期望  60   OK
+product               95   期望  95   OK
+product_image        160   期望 160   OK
+cart_item             10   期望  10   OK
+sales_order           15   期望  10   OK
+sales_order_item      25   期望  20   OK
+RESULT: PASS
