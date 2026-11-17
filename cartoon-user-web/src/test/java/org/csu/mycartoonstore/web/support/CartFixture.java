@@ -17,10 +17,15 @@ public final class CartFixture {
     private CartFixture() {
     }
 
-    /** 建一个登录用户，返回 id；密码哈希只要非空即可，测试不走登录接口 */
+    /** 建一个启用的普通顾客，返回 id；密码哈希只要非空即可，测试不走登录接口 */
     public static long createUser(JdbcTemplate jdbc, String username) {
+        return createUser(jdbc, username, "CUSTOMER", "ENABLED");
+    }
+
+    /** 建指定角色与状态的账号：管理员/禁用账号的拦截用例要用 */
+    public static long createUser(JdbcTemplate jdbc, String username, String role, String status) {
         jdbc.update("INSERT INTO store_user (username, password_hash, display_name, role, status) "
-                + "VALUES (?,?,?,?,?)", username, "$2a$10$test", "测试用户", "CUSTOMER", "ENABLED");
+                + "VALUES (?,?,?,?,?)", username, "$2a$10$test", "测试用户", role, status);
         return jdbc.queryForObject("SELECT id FROM store_user WHERE username = ?", Long.class, username);
     }
 

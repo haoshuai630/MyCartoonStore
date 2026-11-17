@@ -26,8 +26,17 @@ public class AccountService {
     /** 密码最短长度：与注册页提示保持一致 */
     private static final int PASSWORD_MIN = 8;
 
-    /** 登录失败统一文案：不告诉对方是账号不存在还是密码错 */
-    private static final String LOGIN_FAILED = "用户名或密码不正确";
+    /** 用户端角色：只有普通顾客能从用户端登录 */
+    private static final String ROLE_CUSTOMER = "CUSTOMER"; // 两端共用账号表，用角色区分入口。
+
+    /** 管理端角色：只有管理员能从管理端登录 */
+    private static final String ROLE_ADMIN = "ADMIN"; // 用户端也不接受管理员，防止两头混用。
+
+    /** 启用状态：登录只接受启用账号 */
+    private static final String STATUS_ENABLED = "ENABLED"; // 禁用账号密码正确也不放行。
+
+    /** 登录失败统一文案：不告诉对方是账号不存在、密码错、角色不符还是已停用 */
+    private static final String LOGIN_FAILED = "账号或密码错误，或账号不可用";
 
     private final StoreUserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -38,21 +47,40 @@ public class AccountService {
     }
 
     /**
-     * 登录校验：账号存在、密码匹配、状态为 ENABLED，三者都满足才返回用户。
+     * 用户端登录：只接受启用状态的 CUSTOMER。
      *
-     * <p>失败时抛 {@link BizException}，由全局异常处理器转成 401/403。</p>
+     * <p>管理员不能从用户端登录，避免在用户端以管理身份购买（docs/01 §2、AC-05）。</p>
      */
-    public StoreUser authenticate(String username, String rawPassword) {
-        StoreUser user = findByUsername(username);
-        // 用户不存在时也走一次哈希比对，避免通过响应时间判断账号是否存在
-        boolean matched = user != null && passwordEncoder.matches(rawPassword, user.getPasswordHash());
-        if (!matched) {
-            throw new BizException(ErrorCode.UNAUTHORIZED, LOGIN_FAILED);
+    public StoreUser authenticateCustomer(String username, String rawPassword) { // 用户端登录入口专用。
+        return authenticate(username, rawPassword, ROLE_CUSTOMER); // 角色不符与密码错同文案。
+    }
+
+    /**
+     * 管理端登录：只接受启用状态的 ADMIN。
+     *
+     * <p>CUSTOMER 不能从管理端登录（FR-A-01）；失败文案与用户端一致。</p>
+     */
+    public StoreUser authenticateAdmin(String username, String rawPassword) { // 管理端登录入口专用。
+        return authenticate(username, rawPassword, ROLE_ADMIN); // CUSTOMER 在这里被角色条件挡掉。
+    }
+
+    /**
+     * 登录校验：账号存在、密码匹配、角色与入口一致、状态为 ENABLED，全部满足才返回用户。
+     *
+     * <p>任一条件不满足都抛同一个 401 与同一句文案，不区分"账号不存在 / 密码错 / 角色不符 / 已停用"，
+     * 避免被用来枚举账号或探测账号状态（FR-U-01、AC-05）。</p>
+     */
+    private StoreUser authenticate(String username, String rawPassword, String requiredRole) {
+        StoreUser user = findByUsername(username); // 不存在时返回 null。
+        boolean matched = user != null && rawPassword != null // 账号与密码都要有值。
+                && passwordEncoder.matches(rawPassword, user.getPasswordHash()); // 真实 BCrypt 比对。
+        boolean allowed = matched // 密码对。
+                && requiredRole.equals(user.getRole()) // 角色必须与本次登录入口一致。
+                && STATUS_ENABLED.equals(user.getStatus()); // 账号仍处于启用状态。
+        if (!allowed) {
+            throw new BizException(ErrorCode.UNAUTHORIZED, LOGIN_FAILED); // 所有失败同码同文案。
         }
-        if (!"ENABLED".equals(user.getStatus())) {
-            throw new BizException(ErrorCode.FORBIDDEN, "账号已停用，请联系店长");
-        }
-        return user;
+        return user; // 登录成功，调用方只取 id 与显示名进会话。
     }
 
     /**
