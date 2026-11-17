@@ -43,9 +43,11 @@
                 <!-- 两个 POST 动作：成功与失败都是显式按钮，没有第三方渠道 -->
                 <div class="pay-actions">
                     <form th:action="@{/payment/{no}/success(no=${order.orderNo})}" method="post">
+                        <input th:replace="~{fragments/csrf :: hidden}">
                         <button type="submit" class="btn btn-primary">模拟支付成功</button>
                     </form>
                     <form th:action="@{/payment/{no}/failure(no=${order.orderNo})}" method="post">
+                        <input th:replace="~{fragments/csrf :: hidden}">
                         <button type="submit" class="btn btn-ghost">模拟支付失败</button>
                     </form>
                 </div>
@@ -55,6 +57,7 @@
                     <a th:href="@{/orders/{no}(no=${order.orderNo})}">返回订单详情</a>
                     <form th:action="@{/orders/{no}/cancel(no=${order.orderNo})}" method="post"
                           onsubmit="return confirm('取消后将关闭订单并释放库存，确定取消吗？')">
+                        <input th:replace="~{fragments/csrf :: hidden}">
                         <button type="submit" class="link-btn">取消订单</button>
                     </form>
                 </div>

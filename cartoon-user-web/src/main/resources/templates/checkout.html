@@ -46,6 +46,7 @@
 
                 <!-- 右：收货信息与总额；提交后由 M05-03 的事务写订单 -->
                 <form class="checkout-side" th:action="@{/checkout}" method="post">
+                    <input th:replace="~{fragments/csrf :: hidden}">
                     <h3>收货信息</h3>
                     <div class="receiver">
                         <label>收货人

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录 | 漫屿 MANGA ISLE</title>
+    <link rel="stylesheet" href="/css/store.css">
+</head>
+<body>
+
+<div style="display:contents">
+    <div class="topbar">
+        <div class="wrap">
+            <span>官方正版 <span class="dot">/</span> 满 99 包邮 <span class="dot">/</span> 教学演示站点，商品与订单均为虚构</span>
+            <!-- 已登录显示名字与退出，未登录给登录/注册入口 -->
+            <span>
+                <a href="/login">登录</a>
+                <span class="dot">/</span>
+                <a href="/register">注册</a>
+            </span>
+            
+        </div>
+    </div>
+    <header class="site-header">
+        <div class="wrap header-main">
+            <a class="brand" href="/main">
+                <span class="mark">漫</span>
+                <span><b>漫屿</b><small>MANGA ISLE</small></span>
+            </a>
+            <nav class="nav">
+                <a href="/main">首页</a>
+                <a href="/works">作品</a>
+                <a href="/category">全部商品</a>
+                <a href="/category?sort=NEWEST">新作上架</a>
+                <a href="/orders">我的订单</a>
+            </nav>
+            <div class="header-tools">
+                <form class="search" action="/category" method="get">
+                    <input name="keyword" placeholder="搜索商品名称">
+                    <button type="submit">搜索</button>
+                </form>
+                <a class="cart-link" href="/cart">购物车 <b>0</b></a>
+            </div>
+        </div>
+    </header>
+</div>
+
+<main>
+    <section class="section">
+        <div class="wrap auth-box">
+            <h1>登录</h1>
+
+            <!-- 注册成功等一次性提示 -->
+            
+            
+
+            <form action="/login" method="post" class="auth-form">
+                <input type="hidden" name="_csrf" value="afbe7c3d-0fc6-42e5-9f9d-e7148f8a70c9">
+                <input type="hidden" name="redirect" value="">
+                <label>
+                    <span>用户名</span>
+                    <input name="username" value="" required autocomplete="username">
+                </label>
+                <label>
+                    <span>密码</span>
+                    <input type="password" name="password" required autocomplete="current-password">
+                </label>
+                <button class="btn btn-primary" type="submit">登录</button>
+            </form>
+
+            <p class="auth-switch">还没有账号？<a href="/register">去注册</a></p>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="wrap">
+        <b>漫屿 MANGA ISLE</b>
+        <span>原创漫画 · 官方周边 · 教学演示</span>
+    </div>
+</footer>
+
+</body>
+</html>

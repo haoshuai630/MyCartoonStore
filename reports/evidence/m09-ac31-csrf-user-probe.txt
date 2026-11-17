@@ -1,0 +1,5 @@
+GET  /login       status=200 token=yes
+POST /login       status=403 page=请求未被接受
+GET  /css/store.css    status=200 setCookie=False
+POST /login       status=200 formError=True (valid token)
+GET  /login       status=200 tokenStable=True

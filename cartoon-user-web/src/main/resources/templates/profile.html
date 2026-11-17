@@ -18,6 +18,7 @@
             <p class="auth-error" th:if="${error}" th:text="${error}">错误提示</p>
 
             <form th:action="@{/profile}" method="post" class="auth-form">
+                <input th:replace="~{fragments/csrf :: hidden}">
                 <label>
                     <span>用户名（只读）</span>
                     <!-- 不带 name：既不会被提交，也不给用户改的机会 -->

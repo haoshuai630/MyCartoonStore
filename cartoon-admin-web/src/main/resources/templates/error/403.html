@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('操作被拒绝')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <!-- CSRF 校验失败：后台不提示"重试提交"，只给回控制台 -->
+    <div class="error-box">
+        <span class="kicker">403</span>
+        <h1>操作被拒绝</h1>
+        <p class="error-message">页面已过期或请求来源不可信，请刷新后重试。</p>
+        <a class="btn" th:href="@{/}">返回控制台</a>
+    </div>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>

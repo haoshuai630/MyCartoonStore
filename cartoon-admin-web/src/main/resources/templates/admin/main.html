@@ -20,6 +20,7 @@
                     <span>当前管理员</span>
                     <b th:text="${adminName}">admin</b>
                     <form th:action="@{/logout}" method="post">
+                        <input th:replace="~{admin/csrf :: hidden}">
                         <button type="submit" class="btn btn-ghost">退出登录</button>
                     </form>
                 </div>

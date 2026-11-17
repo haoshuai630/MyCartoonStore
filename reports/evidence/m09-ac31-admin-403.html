@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>操作被拒绝 | 漫屿管理端</title>
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+
+<div class="admin-topbar">
+    <div class="wrap">
+        <span>漫屿 MANGA ISLE <b class="tag">管理端</b> 教学演示站点，商品与订单均为虚构数据</span>
+        <!-- 模板里直接取会话中的显示名：拦截器已经校验过身份 -->
+        
+    </div>
+</div>
+<header class="admin-header">
+    <div class="wrap header-main">
+        <a class="brand" href="/admin/">
+            <span class="mark">漫</span>
+            <span><b>漫屿</b><small>ADMIN CONSOLE</small></span>
+        </a>
+        <nav class="admin-nav">
+            <a href="/admin/">控制台</a>
+            <a href="/admin/categories">分类维护</a>
+            <a href="/admin/products">商品维护</a>
+            <a href="/admin/orders">订单处理</a>
+            <!-- M08-04：顾客管理（启停）；管理员账号不在此页 -->
+            <a href="/admin/users">顾客管理</a>
+        </nav>
+        
+    </div>
+</header>
+
+<main>
+    <!-- CSRF 校验失败：后台不提示"重试提交"，只给回控制台 -->
+    <div class="error-box">
+        <span class="kicker">403</span>
+        <h1>操作被拒绝</h1>
+        <p class="error-message">页面已过期或请求来源不可信，请刷新后重试。</p>
+        <a class="btn" href="/admin/">返回控制台</a>
+    </div>
+</main>
+
+<footer class="admin-footer">
+    <div class="wrap">
+        <b>漫屿 MANGA ISLE</b>
+        <span>管理端 · 教学演示，不涉及真实资金与物流</span>
+    </div>
+</footer>
+
+</body>
+</html>

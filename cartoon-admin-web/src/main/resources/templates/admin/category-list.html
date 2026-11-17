@@ -55,6 +55,7 @@
                             <form th:action="@{/categories/{id}/delete(id=${g.work.id})}" method="post"
                                   onclick="event.stopPropagation()"
                                   onsubmit="return confirm('删除后不可恢复，确定删除该作品吗？')">
+                                <input th:replace="~{admin/csrf :: hidden}">
                                 <button type="submit" class="link-btn danger"
                                         th:disabled="${!g.work.deletable}"
                                         th:title="${g.work.deleteHint}">删除</button>
@@ -87,6 +88,7 @@
                                 <a class="link-btn" th:href="@{/categories/{id}/edit(id=${child.id})}">编辑</a>
                                 <form th:action="@{/categories/{id}/delete(id=${child.id})}" method="post"
                                       onsubmit="return confirm('删除后不可恢复，确定删除该分类吗？')">
+                                    <input th:replace="~{admin/csrf :: hidden}">
                                     <button type="submit" class="link-btn danger"
                                             th:disabled="${!child.deletable}"
                                             th:title="${child.deleteHint}">删除</button>

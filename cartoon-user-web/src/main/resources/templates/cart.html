@@ -55,6 +55,7 @@
 
                         <!-- 改数量带旧 version，页面放旧了会被后端拒绝并要求刷新 -->
                         <form class="cart-qty" th:action="@{/cart/items/{id}/quantity(id=${line.itemId})}" method="post">
+                            <input th:replace="~{fragments/csrf :: hidden}">
                             <input type="hidden" name="version" th:value="${line.version}">
                             <input type="number" name="quantity" th:value="${line.quantity}" min="1" max="99">
                             <button type="submit" class="btn btn-ghost">更新</button>
@@ -64,6 +65,7 @@
                              th:text="'¥' + ${#numbers.formatDecimal(line.lineAmount, 1, 2)}">¥0.00</div>
 
                         <form class="cart-remove" th:action="@{/cart/items/{id}/remove(id=${line.itemId})}" method="post">
+                            <input th:replace="~{fragments/csrf :: hidden}">
                             <input type="hidden" name="version" th:value="${line.version}">
                             <button type="submit" class="link-btn">移除</button>
                         </form>

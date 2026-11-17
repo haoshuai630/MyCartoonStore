@@ -68,6 +68,7 @@
                             <form th:if="${card.status == 'PENDING_PAYMENT'}"
                                   th:action="@{/orders/{no}/cancel(no=${card.orderNo})}" method="post"
                                   onsubmit="return confirm('取消后将关闭订单并释放库存，确定取消吗？')">
+                                <input th:replace="~{fragments/csrf :: hidden}">
                                 <button type="submit" class="btn btn-ghost">取消</button>
                             </form>
                             <a class="btn btn-ghost" th:href="@{/orders/{no}(no=${card.orderNo})}">查看</a>

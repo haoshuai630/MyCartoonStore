@@ -86,6 +86,7 @@
                             <a class="link-btn" th:href="@{/products/{id}/images(id=${row.id})}">相册</a>
                             <!-- 上下架：提交当前版本，版本冲突由服务端给 409 -->
                             <form class="inline-form" th:action="@{/products/{id}/status(id=${row.id})}" method="post">
+                                <input th:replace="~{admin/csrf :: hidden}">
                                 <input type="hidden" name="version" th:value="${row.version}">
                                 <input type="hidden" name="status"
                                        th:value="${row.status == 'ON_SALE'} ? 'DRAFT' : 'ON_SALE'">
@@ -94,6 +95,7 @@
                             </form>
                             <!-- 增量补货：只填"加多少"，服务端在最新库存上累加 -->
                             <form class="inline-form" th:action="@{/products/{id}/restock(id=${row.id})}" method="post">
+                                <input th:replace="~{admin/csrf :: hidden}">
                                 <input type="number" name="quantity" value="10" min="1" max="100000" class="qty-input">
                                 <button type="submit" class="link-btn">补货</button>
                             </form>

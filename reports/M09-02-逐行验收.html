@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M09-02 · 两端接入与 403 页面（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M09-02 · 两端接入与 403 页面（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">CsrfFilterConfig.java</a><a href="#s2">CsrfFilterConfig.java</a><a href="#s3">CsrfAdvice.java</a><a href="#s4">CsrfAdvice.java</a></nav>
+</header>
+<main>
+<p class="note">内容：两端注册 CsrfFilter（全站、最高优先级）、CsrfAdvice 注入 csrfToken、隐藏域片段、403 页面、29 处写表单接入、docs/02 §6.3 与 docs/04 §1 口径改为已启用、运行指南把 CSRF 挪到能测一栏。验证：临时端口 18080/18081 起真实容器，探针 → 页面含令牌、无令牌 403 且渲染 403 页、静态资源无 Set-Cookie、令牌跨请求稳定。模板与 29 处表单按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>CsrfFilterConfig.java<small>用户端注册过滤器 · 27 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/config/CsrfFilterConfig.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.config;</pre></td><td class="explain">注册 CSRF 过滤器：全站生效并排在过滤器链最前。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfFilter;</pre></td><td class="explain">校验逻辑在公共件里，web 层只负责挂载。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.web.servlet.FilterRegistrationBean;</pre></td><td class="explain">声明路径与顺序。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Bean;</pre></td><td class="explain">暴露给容器。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">标记配置类。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.Ordered;</pre></td><td class="explain">用优先级数值表达"最先执行"。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M09-02：依据 docs/02 §6.3、docs/04 §1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 负责：把 CsrfFilter 挂到全站路径，并排在字符编码过滤器之后、登录拦截器之前。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 不做：令牌签发与比对（CsrfFilter）、页面隐藏域（fragments/csrf.html）、身份校验（LoginInterceptor）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：不写业务逻辑。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CsrfFilterConfig {</pre></td><td class="explain">CsrfFilterConfig：见类注释</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 过滤器顺序：HIGHEST_PRECEDENCE 留给字符编码，这里紧随其后。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> ORDER = Ordered.HIGHEST_PRECEDENCE + 10;</pre></td><td class="explain">数字越小越先执行。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">    /** 注册 CSRF 过滤器：静态资源由过滤器内部放行，这里仍然挂全站。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Bean</pre></td><td class="explain">交给 Spring Boot 装配到内嵌容器。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">public</span> FilterRegistrationBean&lt;CsrfFilter&gt; csrfFilter() {</pre></td><td class="explain">用户端注册：全站路径、固定顺序。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        FilterRegistrationBean&lt;CsrfFilter&gt; bean = <span class="kw">new</span> FilterRegistrationBean&lt;&gt;(<span class="kw">new</span> CsrfFilter());</pre></td><td class="explain">过滤器无状态，每次启动 new 一个。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        bean.addUrlPatterns("/*");</pre></td><td class="explain">全站：登录、注册、购物车、订单、支付都要校验。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        bean.setName("csrfFilter");</pre></td><td class="explain">日志里能直接认出是哪个过滤器。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        bean.setOrder(ORDER);</pre></td><td class="explain">固定顺序，避免与拦截器、编码过滤器的先后关系被改动。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        <span class="kw">return</span> bean;</pre></td><td class="explain">注册完成。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>CsrfFilterConfig.java<small>管理端注册过滤器 · 27 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/config/CsrfFilterConfig.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.config;</pre></td><td class="explain">注册 CSRF 过滤器：后台全站生效。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfFilter;</pre></td><td class="explain">校验逻辑与用户端共用同一份。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.web.servlet.FilterRegistrationBean;</pre></td><td class="explain">声明路径与顺序。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Bean;</pre></td><td class="explain">暴露给容器。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.context.annotation.Configuration;</pre></td><td class="explain">标记配置类。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.core.Ordered;</pre></td><td class="explain">用优先级数值表达"最先执行"。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M09-02：依据 docs/02 §6.3、docs/04 §1。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 负责：把 CsrfFilter 挂到 /admin 下的全部路径，排在身份拦截器之前。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 不做：令牌签发与比对（CsrfFilter）、页面隐藏域（admin/csrf.html）、身份校验（AdminAuthInterceptor）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@Configuration</pre></td><td class="explain">配置类：不写业务逻辑。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CsrfFilterConfig {</pre></td><td class="explain">CsrfFilterConfig：见类注释</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 过滤器顺序：HIGHEST_PRECEDENCE 留给字符编码，这里紧随其后。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> ORDER = Ordered.HIGHEST_PRECEDENCE + 10;</pre></td><td class="explain">数字越小越先执行。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">    /** 注册 CSRF 过滤器：路径以应用内路径书写，容器会自动拼上 /admin。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    @Bean</pre></td><td class="explain">交给 Spring Boot 装配到内嵌容器。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">public</span> FilterRegistrationBean&lt;CsrfFilter&gt; csrfFilter() {</pre></td><td class="explain">管理端注册：容器会拼上 /admin 前缀。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        FilterRegistrationBean&lt;CsrfFilter&gt; bean = <span class="kw">new</span> FilterRegistrationBean&lt;&gt;(<span class="kw">new</span> CsrfFilter());</pre></td><td class="explain">过滤器无状态。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        bean.addUrlPatterns("/*");</pre></td><td class="explain">后台所有入口：登录、分类、商品、订单、顾客、相册。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        bean.setName("csrfFilter");</pre></td><td class="explain">日志里能直接认出是哪个过滤器。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        bean.setOrder(ORDER);</pre></td><td class="explain">先校验来源，再判断身份。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        <span class="kw">return</span> bean;</pre></td><td class="explain">注册完成。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>CsrfAdvice.java<small>用户端注入令牌 · 25 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/controller/CsrfAdvice.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">把会话里的 CSRF 令牌送到每个页面。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletRequest;</pre></td><td class="explain">读当前请求的会话。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">令牌存在会话里，不落库。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfToken;</pre></td><td class="explain">会话键与参数名的唯一来源。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ControllerAdvice;</pre></td><td class="explain">对所有控制器生效。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ModelAttribute;</pre></td><td class="explain">每次渲染前注入模型属性。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M09-02：依据 docs/02 §6.3。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 负责：给模板注入 csrfToken，让 fragments/csrf.html 能渲染隐藏域。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 不做：令牌签发与校验（CsrfFilter 已保证读请求的会话里有值）、隐藏域渲染（片段文件）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@ControllerAdvice</pre></td><td class="explain">全站生效：登录、购物车、订单、后台表单都要用。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CsrfAdvice {</pre></td><td class="explain">CsrfAdvice：见类注释</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 当前会话的令牌：没有会话或没签发过时返回 null，页面隐藏域为空即无法通过校验。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @ModelAttribute("csrfToken")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> String csrfToken(HttpServletRequest request) {</pre></td><td class="explain">用户端注入：模板隐藏域取的就是这个值。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">不新建会话：过滤器已经发过了。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        if (session == null) {</pre></td><td class="explain">异常路径（例如被直接转发的错误页）。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">宁可让隐藏域为空，也不在这里伪造令牌。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        Object token = session.getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">过滤器签发的值。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        <span class="kw">return</span> token == null ? null : token.toString();</pre></td><td class="explain">模板只需要字符串。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>CsrfAdvice.java<small>管理端注入令牌 · 25 行</small></h2>
+<p class="path">cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/controller/CsrfAdvice.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.admin.controller;</pre></td><td class="explain">把会话里的 CSRF 令牌送到每个后台页面。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletRequest;</pre></td><td class="explain">读当前请求的会话。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">令牌存在会话里。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.security.CsrfToken;</pre></td><td class="explain">会话键与参数名的唯一来源。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ControllerAdvice;</pre></td><td class="explain">对后台所有控制器生效。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.ModelAttribute;</pre></td><td class="explain">每次渲染前注入模型属性。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M09-02：依据 docs/02 §6.3。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 负责：给后台模板注入 csrfToken，让 admin/csrf.html 能渲染隐藏域。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">// 不做：令牌签发与校验（CsrfFilter）、隐藏域渲染（片段文件）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>@ControllerAdvice</pre></td><td class="explain">全站生效：登录、分类、商品、订单、顾客、相册都要用。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CsrfAdvice {</pre></td><td class="explain">CsrfAdvice：见类注释</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 当前会话的令牌：没有会话或没签发过时返回 null，后台隐藏域为空即无法通过校验。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    @ModelAttribute("csrfToken")</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">public</span> String csrfToken(HttpServletRequest request) {</pre></td><td class="explain">管理端注入：与用户端同一会话键。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">不新建会话：过滤器已经发过了。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>        if (session == null) {</pre></td><td class="explain">异常路径（例如被直接转发的错误页）。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">不在这里伪造令牌。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        Object token = session.getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">过滤器签发的值。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>        <span class="kw">return</span> token == null ? null : token.toString();</pre></td><td class="explain">模板只需要字符串。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-18 · M09-02 · 两端接入与 403 页面 · 4 个文件、104 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

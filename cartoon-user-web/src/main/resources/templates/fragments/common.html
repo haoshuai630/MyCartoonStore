@@ -25,6 +25,7 @@
                 <!-- M08-01：资料入口放在身份区，不动顶部五栏导航 -->
                 <a th:href="@{/profile}">个人资料</a>
                 <form th:action="@{/logout}" method="post" class="logout-form">
+                    <input th:replace="~{fragments/csrf :: hidden}">
                     <button type="submit" class="link-btn">退出</button>
                 </form>
             </span>
