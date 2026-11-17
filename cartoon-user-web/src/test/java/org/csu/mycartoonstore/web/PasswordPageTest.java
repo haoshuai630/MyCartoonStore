@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -69,7 +70,7 @@ class PasswordPageTest extends AbstractIntegrationTest {
         long userId = user("alice");
         String before = hashOf(userId);
 
-        mockMvc.perform(post("/password").session(CartFixture.session(userId))
+        mockMvc.perform(post("/password").with(csrf()).session(CartFixture.session(userId))
                         .param("oldPassword", "wrong-old")
                         .param("newPassword", "NewPass123")
                         .param("confirmPassword", "NewPass123"))
@@ -84,7 +85,7 @@ class PasswordPageTest extends AbstractIntegrationTest {
     void weakPasswordRejected() throws Exception {
         long userId = user("alice");
 
-        mockMvc.perform(post("/password").session(CartFixture.session(userId))
+        mockMvc.perform(post("/password").with(csrf()).session(CartFixture.session(userId))
                         .param("oldPassword", OLD_PASSWORD)
                         .param("newPassword", "abcdefgh")
                         .param("confirmPassword", "abcdefgh"))
@@ -98,7 +99,7 @@ class PasswordPageTest extends AbstractIntegrationTest {
         long userId = user("alice");
         String before = hashOf(userId);
 
-        mockMvc.perform(post("/password").session(CartFixture.session(userId))
+        mockMvc.perform(post("/password").with(csrf()).session(CartFixture.session(userId))
                         .param("oldPassword", OLD_PASSWORD)
                         .param("newPassword", "NewPass123")
                         .param("confirmPassword", "NewPass456"))
@@ -114,7 +115,7 @@ class PasswordPageTest extends AbstractIntegrationTest {
         long userId = user("alice");
         MockHttpSession session = CartFixture.session(userId);
 
-        MvcResult result = mockMvc.perform(post("/password").session(session)
+        MvcResult result = mockMvc.perform(post("/password").with(csrf()).session(session)
                         .param("oldPassword", OLD_PASSWORD)
                         .param("newPassword", "NewPass123")
                         .param("confirmPassword", "NewPass123"))
@@ -138,7 +139,7 @@ class PasswordPageTest extends AbstractIntegrationTest {
         MockHttpSession current = CartFixture.session(userId);
         MockHttpSession other = CartFixture.session(userId);
 
-        mockMvc.perform(post("/password").session(current)
+        mockMvc.perform(post("/password").with(csrf()).session(current)
                         .param("oldPassword", OLD_PASSWORD)
                         .param("newPassword", "NewPass123")
                         .param("confirmPassword", "NewPass123"))

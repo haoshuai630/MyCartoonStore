@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit; // 超时。
 
 import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 
 // M05-06：依据 docs/06 AC-17（同一车并发提交只成交一次）与 AC-21（取消只恢复一次）。
 // 用两个独立会话同时发请求，验证行锁 + 快照比对 + 幂等分支在真实事务下的表现。
@@ -111,7 +112,7 @@ class ConcurrentOrderTest extends AbstractIntegrationTest {
 
     /** 提交订单，返回状态码。 */
     private int place(MockHttpSession session) throws Exception {
-        MvcResult result = mockMvc.perform(post("/checkout").session(session) // 提交。
+        MvcResult result = mockMvc.perform(post("/checkout").with(csrf()).session(session) // 提交。
                         .param("receiverName", "张三")
                         .param("receiverPhone", "13800000000")
                         .param("receiverAddress", "某市某区某路 1 号"))
@@ -121,7 +122,7 @@ class ConcurrentOrderTest extends AbstractIntegrationTest {
 
     /** 取消订单，返回状态码。 */
     private int cancel(String orderNo, long userId) throws Exception {
-        MvcResult result = mockMvc.perform(post("/orders/{no}/cancel", orderNo)
+        MvcResult result = mockMvc.perform(post("/orders/{no}/cancel", orderNo).with(csrf())
                         .session(CartFixture.session(userId))) // 每次新会话，但同一用户。
                 .andReturn(); // 取响应。
         return result.getResponse().getStatus(); // 状态码。

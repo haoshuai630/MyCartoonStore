@@ -30,6 +30,7 @@
 
             <!-- 新增：路径必填，说明可空，排序默认 0 -->
             <form class="filter-bar" method="post" th:action="@{/products/{id}/images(id=${product.id})}">
+                <input th:replace="~{admin/csrf :: hidden}">
                 <label class="field">
                     <span>图片路径（站内）</span>
                     <input type="text" name="imagePath" th:value="${formPath}" maxlength="255"
@@ -52,6 +53,7 @@
                     <img th:src="@{${row.imagePath}}" th:alt="${row.altText}" alt="相册图">
                     <form class="image-edit" method="post"
                           th:action="@{/products/{p}/images/{i}(p=${product.id}, i=${row.id})}">
+                        <input th:replace="~{admin/csrf :: hidden}">
                         <label class="field">
                             <span>图片路径</span>
                             <input type="text" name="imagePath" th:value="${row.imagePath}" maxlength="255">
@@ -70,6 +72,7 @@
                     <form class="image-delete" method="post"
                           th:action="@{/products/{p}/images/{i}/delete(p=${product.id}, i=${row.id})}"
                           onsubmit="return confirm('只删除这条相册记录，图片文件与商品封面不受影响。确定删除吗？')">
+                        <input th:replace="~{admin/csrf :: hidden}">
                         <button type="submit" class="btn btn-danger">删除</button>
                     </form>
                 </div>

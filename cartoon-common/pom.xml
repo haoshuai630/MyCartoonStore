@@ -27,6 +27,13 @@
             <artifactId>spring-web</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- M09-01：CsrfFilter 继承 OncePerRequestFilter，其父类实现了 EnvironmentAware，
+             需要 spring-context 才能编译；provided 表示运行期仍由 web 模块提供，不向下游传递。 -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>

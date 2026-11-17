@@ -101,6 +101,7 @@
                     <form th:if="${order.status == 'PENDING_PAYMENT'}"
                           th:action="@{/orders/{no}/cancel(no=${order.orderNo})}" method="post" class="order-action"
                           onsubmit="return confirm('取消后将关闭订单并释放库存，确定取消吗？')">
+                        <input th:replace="~{fragments/csrf :: hidden}">
                         <button type="submit" class="btn btn-danger">取消订单</button>
                     </form>
                     <p class="hint" th:if="${order.status == 'PENDING_PAYMENT'}">取消后库存会恢复，购物车不会自动回填。</p>
@@ -109,6 +110,7 @@
                     <form th:if="${order.status == 'SHIPPED'}"
                           th:action="@{/orders/{no}/complete(no=${order.orderNo})}" method="post" class="order-action"
                           onsubmit="return confirm('确认已收到商品？确认后订单将标记为已完成。')">
+                        <input th:replace="~{fragments/csrf :: hidden}">
                         <button type="submit" class="btn btn-primary">确认收货</button>
                     </form>
                     <p class="hint" th:if="${order.status == 'SHIPPED'}">这是教学状态确认，不代表物流签收。</p>

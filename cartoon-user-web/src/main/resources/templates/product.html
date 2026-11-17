@@ -40,6 +40,7 @@
 
                 <!-- 加车走 POST /cart/items；游客会被拦到登录页，登录后回到本页再点一次 -->
                 <form class="buy" th:action="@{/cart/items}" method="post">
+                    <input th:replace="~{fragments/csrf :: hidden}">
                     <input type="hidden" name="productId" th:value="${detail.product().id}">
                     <input type="number" name="quantity" value="1" min="1" max="99"
                            th:max="${detail.product().stock}" th:disabled="${detail.product().stock == 0}">

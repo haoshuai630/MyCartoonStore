@@ -14,7 +14,8 @@ import java.math.BigDecimal; // 金额。
 import java.time.LocalDateTime; // paid_at 类型。
 
 import static org.assertj.core.api.Assertions.assertThat; // 值断言。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 断言重定向。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码断言。
 
@@ -40,7 +41,7 @@ class PaymentTest extends AbstractIntegrationTest {
         CartFixture.addCartItem(jdbc, userId, productId, 2); // 车里还有 2 件（与订单无关）。
         seedOrder(userId, "CO202611171600000001", "PENDING_PAYMENT", productId, 2, 8, 1); // 待支付，库存已扣到 8。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000001")
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000001").with(csrf())
                         .session(CartFixture.session(userId))) // 模拟支付成功。
                 .andExpect(status().is3xxRedirection()) // PRG。
                 .andExpect(redirectedUrl("/orders/CO202611171600000001")); // 回详情。
@@ -65,7 +66,7 @@ class PaymentTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "PT-P02", "28.00", 10, "ON_SALE"); // 商品。
         seedOrder(userId, "CO202611171600000002", "PENDING_PAYMENT", productId, 2, 8, 1); // 待支付。
 
-        mockMvc.perform(post("/payment/{no}/failure", "CO202611171600000002")
+        mockMvc.perform(post("/payment/{no}/failure", "CO202611171600000002").with(csrf())
                         .session(CartFixture.session(userId))) // 模拟支付失败。
                 .andExpect(status().is3xxRedirection()) // PRG。
                 .andExpect(redirectedUrl("/payment/CO202611171600000002")); // 回支付页。
@@ -89,11 +90,11 @@ class PaymentTest extends AbstractIntegrationTest {
         seedOrder(userId, "CO202611171600000003", "PENDING_PAYMENT", productId, 2, 8, 1); // 待支付。
         MockHttpSession session = CartFixture.session(userId); // 同一会话。
 
-        mockMvc.perform(post("/payment/{no}/failure", "CO202611171600000003").session(session)) // 先失败。
+        mockMvc.perform(post("/payment/{no}/failure", "CO202611171600000003").with(csrf()).session(session)) // 先失败。
                 .andExpect(status().is3xxRedirection()); // 可重试。
         assertThat(statusOf("CO202611171600000003")).isEqualTo("PENDING_PAYMENT"); // 仍待支付。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000003").session(session)) // 再成功。
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000003").with(csrf()).session(session)) // 再成功。
                 .andExpect(status().is3xxRedirection()); // PRG。
 
         assertThat(statusOf("CO202611171600000003")).isEqualTo("PAID"); // 迁移成功。
@@ -111,14 +112,14 @@ class PaymentTest extends AbstractIntegrationTest {
         seedOrder(userId, "CO202611171600000004", "PENDING_PAYMENT", productId, 1, 9, 1); // 待支付。
         MockHttpSession session = CartFixture.session(userId); // 同一会话。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000004").session(session)) // 第一次支付。
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000004").with(csrf()).session(session)) // 第一次支付。
                 .andExpect(status().is3xxRedirection()); // 成功。
         String firstNo = stringValue("SELECT payment_no FROM sales_order WHERE order_no = ?",
                 "CO202611171600000004"); // 首次凭证。
         LocalDateTime firstPaidAt = value("SELECT paid_at FROM sales_order WHERE order_no = ?",
                 LocalDateTime.class, "CO202611171600000004"); // 首次支付时间。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000004").session(session)) // 再点一次。
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000004").with(csrf()).session(session)) // 再点一次。
                 .andExpect(status().is3xxRedirection()) // 幂等成功。
                 .andExpect(redirectedUrl("/orders/CO202611171600000004")); // 回详情。
 
@@ -138,7 +139,7 @@ class PaymentTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "PT-P05", "28.00", 10, "ON_SALE"); // 商品。
         seedOrder(owner, "CO202611171600000005", "PENDING_PAYMENT", productId, 1, 9, 1); // 他人待支付单。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000005")
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000005").with(csrf())
                         .session(CartFixture.session(other))) // 别人来付。
                 .andExpect(status().isNotFound()); // 统一 404。
 
@@ -155,7 +156,7 @@ class PaymentTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "PT-P06", "28.00", 10, "ON_SALE"); // 商品。
         seedOrder(userId, "CO202611171600000006", "CANCELLED", productId, 2, 10, 2); // 已取消，库存已恢复。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000006")
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000006").with(csrf())
                         .session(CartFixture.session(userId))) // 试图支付已取消订单。
                 .andExpect(status().isConflict()); // 409。
 
@@ -173,7 +174,7 @@ class PaymentTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "PT-P07", "28.00", 10, "ON_SALE"); // 商品。
         seedOrder(userId, "CO202611171600000007", "SHIPPED", productId, 1, 9, 1); // 已发货。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000007")
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000007").with(csrf())
                         .session(CartFixture.session(userId))) // 试图再支付。
                 .andExpect(status().isConflict()); // 409。
 
@@ -189,7 +190,7 @@ class PaymentTest extends AbstractIntegrationTest {
         seedOrder(userId, "CO202611171600000008", "PENDING_PAYMENT", productId, 2, 8, 1); // 待支付。
         jdbc.update("UPDATE product SET price = 99.00, status = 'DRAFT' WHERE id = ?", productId); // 改价 + 下架。
 
-        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000008")
+        mockMvc.perform(post("/payment/{no}/success", "CO202611171600000008").with(csrf())
                         .session(CartFixture.session(userId))) // 支付。
                 .andExpect(status().is3xxRedirection()); // 成功。
 

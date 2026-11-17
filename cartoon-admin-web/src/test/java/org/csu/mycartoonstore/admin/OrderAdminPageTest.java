@@ -17,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
 import static org.hamcrest.Matchers.not; // 反向断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 断言页面内容。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 断言 302 目标。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码断言。
@@ -103,7 +104,7 @@ class OrderAdminPageTest extends AdminIntegrationTest {
         long buyer = AdminFixture.createCustomer(jdbc, "buyer6"); // 买家。
         seedOrder("ORD-S", buyer, "PAID", productId, "商品", "28.00"); // 待发货。
 
-        mockMvc.perform(post("/orders/{no}/ship", "ORD-S").session(adminSession()))
+        mockMvc.perform(post("/orders/{no}/ship", "ORD-S").with(csrf()).session(adminSession()))
                 .andExpect(status().is3xxRedirection()) // PRG。
                 .andExpect(redirectedUrl("/orders/ORD-S")); // 回详情。
 
@@ -120,7 +121,7 @@ class OrderAdminPageTest extends AdminIntegrationTest {
         long buyer = AdminFixture.createCustomer(jdbc, "buyer7"); // 买家。
         seedOrder("ORD-N", buyer, "PENDING_PAYMENT", productId, "商品", "28.00"); // 待支付。
 
-        mockMvc.perform(post("/orders/{no}/ship", "ORD-N").session(adminSession()))
+        mockMvc.perform(post("/orders/{no}/ship", "ORD-N").with(csrf()).session(adminSession()))
                 .andExpect(status().isConflict()); // 409 错误页。
 
         assertThat(jdbc.queryForObject("SELECT status FROM sales_order WHERE order_no = 'ORD-N'", String.class))
@@ -133,11 +134,11 @@ class OrderAdminPageTest extends AdminIntegrationTest {
         long productId = seedProduct(); // 商品。
         long buyer = AdminFixture.createCustomer(jdbc, "buyer8"); // 买家。
         seedOrder("ORD-T", buyer, "PAID", productId, "商品", "28.00"); // 待发货。
-        mockMvc.perform(post("/orders/{no}/ship", "ORD-T").session(adminSession())); // 第一次发货。
+        mockMvc.perform(post("/orders/{no}/ship", "ORD-T").with(csrf()).session(adminSession())); // 第一次发货。
         LocalDateTime first = jdbc.queryForObject("SELECT shipped_at FROM sales_order WHERE order_no = 'ORD-T'",
                 LocalDateTime.class); // 首次时间。
 
-        mockMvc.perform(post("/orders/{no}/ship", "ORD-T").session(adminSession())) // 再点一次。
+        mockMvc.perform(post("/orders/{no}/ship", "ORD-T").with(csrf()).session(adminSession())) // 再点一次。
                 .andExpect(status().is3xxRedirection()) // 不报错。
                 .andExpect(redirectedUrl("/orders/ORD-T"));
 

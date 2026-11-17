@@ -16,6 +16,7 @@
         <span th:if="${session.displayName != null}">
             <b th:text="${session.displayName}">管理员</b>
             <form th:action="@{/logout}" method="post" class="logout-form">
+                <input th:replace="~{admin/csrf :: hidden}">
                 <button type="submit" class="link-btn">退出</button>
             </form>
         </span>

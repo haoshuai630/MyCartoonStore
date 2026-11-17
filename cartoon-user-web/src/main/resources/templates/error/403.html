@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('请求未被接受')}"></head>
+<body>
+
+<div th:replace="~{fragments/common :: header}"></div>
+
+<main>
+    <!-- CSRF 校验失败：只提示刷新，不提供"再试一次"的写按钮 -->
+    <section class="section">
+        <div class="wrap error-box">
+            <h1>请求未被接受</h1>
+            <p class="error-message">页面已过期或请求来源不可信，请刷新后重试。</p>
+            <p><a class="btn btn-primary" th:href="@{/main}">回首页</a>
+               <a class="btn btn-ghost" th:href="@{/category}">去逛逛</a></p>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/common :: footer}"></footer>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 所有写表单共用的 CSRF 隐藏域：值由 CsrfFilter 在会话里签发，模板只负责回显 -->
+<input th:fragment="hidden" type="hidden" name="_csrf" th:value="${csrfToken}">
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+[setup]   product CICADA-C01 id=77 stock=10（基线）
+[user]    注册 ac28 → 200
+[user]    登录 → 200
+[user]    加入购物车 2 件 → 200
+[user]    结算页 → 200
+[admin]   登录 → 200
+[race]    下单 POST → 200 http://127.0.0.1:18080/orders/CO202611180509436763
+[race]    补货 POST → 200 http://127.0.0.1:18081/admin/products
+[after]   库存 stock=11（期望 11 = 10 - 2 + 3）
+[after]   订单 CO202611180509436763	PENDING_PAYMENT	56.00	2
+RESULT: PASS

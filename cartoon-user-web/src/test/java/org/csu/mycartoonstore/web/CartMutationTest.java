@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,7 +40,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "MUT-C01", "28.00", 10, "ON_SALE");
         long itemId = CartFixture.addCartItem(jdbc, userId, productId, 2);
 
-        mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
+        mockMvc.perform(post("/cart/items/{id}/quantity", itemId).with(csrf())
                         .param("quantity", "5")
                         .param("version", "0")
                         .session(CartFixture.session(userId)))
@@ -58,7 +59,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long itemId = CartFixture.addCartItem(jdbc, userId, productId, 2);
         jdbc.update("UPDATE cart_item SET version = 3 WHERE id = ?", itemId);
 
-        mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
+        mockMvc.perform(post("/cart/items/{id}/quantity", itemId).with(csrf())
                         .param("quantity", "5")
                         .param("version", "2")
                         .session(CartFixture.session(userId)))
@@ -77,7 +78,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "OWN-C01", "28.00", 10, "ON_SALE");
         long itemId = CartFixture.addCartItem(jdbc, owner, productId, 2);
 
-        mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
+        mockMvc.perform(post("/cart/items/{id}/quantity", itemId).with(csrf())
                         .param("quantity", "9")
                         .param("version", "0")
                         .session(CartFixture.session(other)))
@@ -94,7 +95,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "MZ-C01", "28.00", 10, "ON_SALE");
         long itemId = CartFixture.addCartItem(jdbc, userId, productId, 2);
 
-        mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
+        mockMvc.perform(post("/cart/items/{id}/quantity", itemId).with(csrf())
                         .param("quantity", "0")
                         .param("version", "0")
                         .session(CartFixture.session(userId)))
@@ -110,7 +111,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "MS-C01", "28.00", 3, "ON_SALE");
         long itemId = CartFixture.addCartItem(jdbc, userId, productId, 1);
 
-        mockMvc.perform(post("/cart/items/{id}/quantity", itemId)
+        mockMvc.perform(post("/cart/items/{id}/quantity", itemId).with(csrf())
                         .param("quantity", "4")
                         .param("version", "0")
                         .session(CartFixture.session(userId)))
@@ -127,7 +128,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "RM-C01", "28.00", 10, "ON_SALE");
         long itemId = CartFixture.addCartItem(jdbc, userId, productId, 2);
 
-        mockMvc.perform(post("/cart/items/{id}/remove", itemId)
+        mockMvc.perform(post("/cart/items/{id}/remove", itemId).with(csrf())
                         .param("version", "0")
                         .session(CartFixture.session(userId)))
                 .andExpect(status().is3xxRedirection())
@@ -144,7 +145,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long itemId = CartFixture.addCartItem(jdbc, userId, productId, 2);
         jdbc.update("UPDATE cart_item SET version = 1 WHERE id = ?", itemId);
 
-        mockMvc.perform(post("/cart/items/{id}/remove", itemId)
+        mockMvc.perform(post("/cart/items/{id}/remove", itemId).with(csrf())
                         .param("version", "0")
                         .session(CartFixture.session(userId)))
                 .andExpect(status().isConflict());
@@ -160,7 +161,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "RO-C01", "28.00", 10, "ON_SALE");
         long itemId = CartFixture.addCartItem(jdbc, owner, productId, 2);
 
-        mockMvc.perform(post("/cart/items/{id}/remove", itemId)
+        mockMvc.perform(post("/cart/items/{id}/remove", itemId).with(csrf())
                         .param("version", "0")
                         .session(CartFixture.session(other)))
                 .andExpect(status().isNotFound());
@@ -178,7 +179,7 @@ class CartMutationTest extends AbstractIntegrationTest {
         }
         long extra = CartFixture.createProduct(jdbc, "FULL-X", "28.00", 10, "ON_SALE");
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(extra))
                         .param("quantity", "1")
                         .session(CartFixture.session(userId)))

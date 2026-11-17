@@ -17,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
 import static org.hamcrest.Matchers.not; // 反向断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 内容断言。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 取消后回详情。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码。
@@ -43,7 +44,7 @@ class CancelOrderTest extends AbstractIntegrationTest {
         CartFixture.addCartItem(jdbc, userId, productId, 2); // 买 2 件。
         MockHttpSession session = CartFixture.session(userId); // 同一个会话。
         mockMvc.perform(get("/checkout").session(session)).andExpect(status().isOk()); // 生成快照。
-        MvcResult placed = mockMvc.perform(post("/checkout").session(session) // 下单。
+        MvcResult placed = mockMvc.perform(post("/checkout").with(csrf()).session(session) // 下单。
                         .param("receiverName", "张三")
                         .param("receiverPhone", "13800000000")
                         .param("receiverAddress", "某市某区某路 1 号"))
@@ -52,7 +53,7 @@ class CancelOrderTest extends AbstractIntegrationTest {
         String orderNo = placed.getResponse().getRedirectedUrl().substring("/orders/".length()); // 订单号。
         assertThat(stock(productId)).isEqualTo(8); // 下单后库存 8。
 
-        mockMvc.perform(post("/orders/{no}/cancel", orderNo).session(session)) // 取消。
+        mockMvc.perform(post("/orders/{no}/cancel", orderNo).with(csrf()).session(session)) // 取消。
                 .andExpect(status().is3xxRedirection()) // PRG。
                 .andExpect(redirectedUrl("/orders/" + orderNo)); // 回详情。
 
@@ -72,12 +73,12 @@ class CancelOrderTest extends AbstractIntegrationTest {
         seedOrder(userId, "CO202611161000000061", "PENDING_PAYMENT", productId, 2, 8); // 模拟已扣 2 件。
         MockHttpSession session = CartFixture.session(userId); // 会话。
 
-        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000061").session(session)) // 第一次取消。
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000061").with(csrf()).session(session)) // 第一次取消。
                 .andExpect(status().is3xxRedirection()); // 成功。
         mockMvc.perform(get("/orders/{no}", "CO202611161000000061").session(session)) // 看第一次提示。
                 .andExpect(status().isOk()) // 正常。
                 .andExpect(content().string(containsString("库存已恢复"))); // 第一次是真取消。
-        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000061").session(session)) // 第二次取消。
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000061").with(csrf()).session(session)) // 第二次取消。
                 .andExpect(status().is3xxRedirection()); // 幂等，不报错。
         mockMvc.perform(get("/orders/{no}", "CO202611161000000061").session(session)) // 看第二次提示。
                 .andExpect(status().isOk()) // 正常。
@@ -95,7 +96,7 @@ class CancelOrderTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "CX-P03", "28.00", 8, "ON_SALE"); // 已扣库存 8。
         seedOrder(userId, "CO202611161000000062", "PAID", productId, 2, 8); // 已支付订单。
 
-        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000062")
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000062").with(csrf())
                         .session(CartFixture.session(userId))) // 取消。
                 .andExpect(status().isConflict()); // 409。
 
@@ -112,7 +113,7 @@ class CancelOrderTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "CX-P04", "28.00", 8, "ON_SALE"); // 已扣库存。
         seedOrder(owner, "CO202611161000000063", "PENDING_PAYMENT", productId, 2, 8); // 他人待支付单。
 
-        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000063")
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000063").with(csrf())
                         .session(CartFixture.session(other))) // 别人来取消。
                 .andExpect(status().isNotFound()); // 统一 404。
 
@@ -126,7 +127,7 @@ class CancelOrderTest extends AbstractIntegrationTest {
     void cancelMissingOrderIs404() throws Exception {
         long userId = CartFixture.createUser(jdbc, "cx_missing"); // 建账号。
 
-        mockMvc.perform(post("/orders/{no}/cancel", "CO00000000000000")
+        mockMvc.perform(post("/orders/{no}/cancel", "CO00000000000000").with(csrf())
                         .session(CartFixture.session(userId))) // 取消不存在的单。
                 .andExpect(status().isNotFound()); // 404。
     }
@@ -158,7 +159,7 @@ class CancelOrderTest extends AbstractIntegrationTest {
         seedOrder(userId, "CO202611161000000066", "PENDING_PAYMENT", productId, 1, 8); // 待支付。
         MockHttpSession session = CartFixture.session(userId); // 会话。
 
-        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000066").session(session)) // 取消。
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000066").with(csrf()).session(session)) // 取消。
                 .andExpect(status().is3xxRedirection()); // 成功。
 
         mockMvc.perform(get("/orders").param("status", "PENDING_PAYMENT").session(session)) // 待支付页签。
@@ -168,6 +169,25 @@ class CancelOrderTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk()) // 正常。
                 .andExpect(content().string(containsString("CO202611161000000066"))) // 还在全部。
                 .andExpect(content().string(containsString("已取消"))); // 状态已变。
+    }
+
+    /** AC-22：下单后商品被下架，取消仍恢复库存，商品保持 DRAFT。 */
+    @Test
+    @DisplayName("AC-22：下单后商品下架，取消恢复库存且仍为 DRAFT")
+    void cancelAfterProductDelisted() throws Exception {
+        long userId = CartFixture.createUser(jdbc, "cx_draft"); // 建账号。
+        long productId = CartFixture.createProduct(jdbc, "CX-P07", "28.00", 10, "ON_SALE"); // 上架、库存 10。
+        seedOrder(userId, "CO202611161000000067", "PENDING_PAYMENT", productId, 2, 8); // 已下单，剩 8。
+        jdbc.update("UPDATE product SET status = 'DRAFT' WHERE id = ?", productId); // 下单后下架。
+        MockHttpSession session = CartFixture.session(userId); // 会话。
+
+        mockMvc.perform(post("/orders/{no}/cancel", "CO202611161000000067").with(csrf()).session(session)) // 取消。
+                .andExpect(status().is3xxRedirection()); // 成功。
+
+        assertThat(statusOf("CO202611161000000067")).isEqualTo("CANCELLED"); // 状态迁移。
+        assertThat(stock(productId)).isEqualTo(10); // 库存仍要恢复。
+        assertThat(jdbc.queryForObject("SELECT status FROM product WHERE id = ?", String.class, productId))
+                .isEqualTo("DRAFT"); // 不自动上架。
     }
 
     // ---------------------------------------------------------------- 夹具

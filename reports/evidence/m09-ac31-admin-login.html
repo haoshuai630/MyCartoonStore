@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>管理员登录 | 漫屿管理端</title>
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body class="login-body">
+
+<!-- 管理端登录：与用户端同构，但文案明确"管理员入口" -->
+<main class="login-wrap">
+    <div class="login-card">
+        <span class="kicker">MANGA ISLE / ADMIN</span>
+        <h1>管理员登录</h1>
+        <p class="lead">这里是店铺管理后台，只接受管理员账号。顾客请到用户端登录。</p>
+
+        <!-- 登录失败时的一次性提示：文案统一为"账号或密码错误，或账号不可用" -->
+        
+
+        <form action="/admin/login" method="post" class="login-form">
+            <input type="hidden" name="_csrf" value="2aa4cd04-838f-492b-8445-00461d0ed5e1">
+            <label>
+                <span>管理员账号</span>
+                <!-- 失败时回显用户名，但密码永远不回显 -->
+                <input type="text" name="username" value="" required autofocus autocomplete="username">
+            </label>
+            <label>
+                <span>密码</span>
+                <input type="password" name="password" required autocomplete="current-password">
+            </label>
+            <button type="submit" class="btn btn-primary">登录后台</button>
+        </form>
+
+        <p class="hint">教学账号：<b>admin</b> / <b>Cartoon123!</b></p>
+        <p class="hint">顾客不能从这里登录；管理员也不能在用户端下单。</p>
+    </div>
+</main>
+
+<footer class="admin-footer">
+    <div class="wrap">
+        <b>漫屿 MANGA ISLE</b>
+        <span>管理端 · 教学演示，不涉及真实资金与物流</span>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -23,7 +23,8 @@ import static org.mockito.ArgumentMatchers.anyList; // 匹配条目 id 列表。
 import static org.mockito.ArgumentMatchers.anyLong; // 匹配用户 id。
 import static org.mockito.Mockito.doThrow; // 让 Spy 在指定方法上抛异常。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 内容断言。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern; // 断言跳转。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码断言。
@@ -93,7 +94,7 @@ class PlaceOrderTest extends AbstractIntegrationTest {
         CartFixture.addCartItem(jdbc, userId, productId, 1); // 1 件。
         MockHttpSession session = confirm(userId); // 生成快照。
 
-        mockMvc.perform(post("/checkout").session(session) // 不传收货人。
+        mockMvc.perform(post("/checkout").with(csrf()).session(session) // 不传收货人。
                         .param("receiverName", " ") // 全空白也算缺失。
                         .param("receiverPhone", PHONE)
                         .param("receiverAddress", ADDRESS))
@@ -195,7 +196,7 @@ class PlaceOrderTest extends AbstractIntegrationTest {
     private org.springframework.test.web.servlet.ResultActions place(MockHttpSession session,
                                                                      String name, String phone, String address)
             throws Exception {
-        return mockMvc.perform(post("/checkout").session(session) // POST 提交。
+        return mockMvc.perform(post("/checkout").with(csrf()).session(session) // POST 提交。
                 .param("receiverName", name) // 收货人。
                 .param("receiverPhone", phone) // 电话。
                 .param("receiverAddress", address)); // 地址。

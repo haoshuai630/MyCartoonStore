@@ -1,0 +1,4 @@
+-- AC-28 前后对照
+-- 基线：UPDATE product SET stock=10 WHERE sku='CICADA-C01';
+-- 终态：SELECT stock FROM product WHERE sku='CICADA-C01';  -- 11
+-- 订单：CO202611180509436763	PENDING_PAYMENT	56.00	2

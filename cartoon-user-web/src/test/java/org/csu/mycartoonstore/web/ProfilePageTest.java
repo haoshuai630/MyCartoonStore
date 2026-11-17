@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -64,7 +65,7 @@ class ProfilePageTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "alice");
         MockHttpSession session = CartFixture.session(userId);
 
-        mockMvc.perform(post("/profile").session(session)
+        mockMvc.perform(post("/profile").with(csrf()).session(session)
                         .param("displayName", "  新名字  ")
                         .param("email", "new@example.com")
                         .param("phone", "13800000000"))
@@ -84,7 +85,7 @@ class ProfilePageTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "alice");
         jdbc.update("UPDATE store_user SET email = 'old@example.com' WHERE id = ?", userId);
 
-        mockMvc.perform(post("/profile").session(CartFixture.session(userId))
+        mockMvc.perform(post("/profile").with(csrf()).session(CartFixture.session(userId))
                         .param("displayName", "爱丽丝")
                         .param("email", "   ")
                         .param("phone", ""))
@@ -99,7 +100,7 @@ class ProfilePageTest extends AbstractIntegrationTest {
     void profileRejectsBlankDisplayName() throws Exception {
         long userId = CartFixture.createUser(jdbc, "alice");
 
-        mockMvc.perform(post("/profile").session(CartFixture.session(userId))
+        mockMvc.perform(post("/profile").with(csrf()).session(CartFixture.session(userId))
                         .param("displayName", "   ")
                         .param("email", "alice@example.com"))
                 .andExpect(status().isOk())
@@ -114,7 +115,7 @@ class ProfilePageTest extends AbstractIntegrationTest {
     void profileRejectsTooLongEmail() throws Exception {
         long userId = CartFixture.createUser(jdbc, "alice");
 
-        mockMvc.perform(post("/profile").session(CartFixture.session(userId))
+        mockMvc.perform(post("/profile").with(csrf()).session(CartFixture.session(userId))
                         .param("displayName", "爱丽丝")
                         .param("email", "a".repeat(95) + "@example.com"))
                 .andExpect(status().isOk())
@@ -126,7 +127,7 @@ class ProfilePageTest extends AbstractIntegrationTest {
     void profileIgnoresProtectedFields() throws Exception {
         long userId = CartFixture.createUser(jdbc, "alice");
 
-        mockMvc.perform(post("/profile").session(CartFixture.session(userId))
+        mockMvc.perform(post("/profile").with(csrf()).session(CartFixture.session(userId))
                         .param("displayName", "爱丽丝")
                         .param("username", "hacker")
                         .param("role", "ADMIN")
@@ -150,7 +151,7 @@ class ProfilePageTest extends AbstractIntegrationTest {
                 "CO20261118000001", userId, "PENDING_PAYMENT", new BigDecimal("28.00"),
                 "旧收货人", "13900000000", "旧地址");
 
-        mockMvc.perform(post("/profile").session(CartFixture.session(userId))
+        mockMvc.perform(post("/profile").with(csrf()).session(CartFixture.session(userId))
                         .param("displayName", "新名字")
                         .param("phone", "13700000000"))
                 .andExpect(status().is3xxRedirection());

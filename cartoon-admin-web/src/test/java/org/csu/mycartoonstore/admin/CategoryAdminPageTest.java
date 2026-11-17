@@ -14,7 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat; // 值断言。
 import static org.hamcrest.Matchers.containsString; // 页面内容断言。
 import static org.hamcrest.Matchers.not; // 反向断言。
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get; // 构造 GET。
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post; // 构造 POST。
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf; // 构造 POST。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content; // 断言页面内容。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl; // 断言 302 目标。
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // 状态码断言。
@@ -117,7 +118,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
     @Test // AC-25：新增一级作品。
     @DisplayName("新增一级：入库成功并回列表（AC-25）")
     void createTop() throws Exception {
-        mockMvc.perform(post("/categories") // 提交新增。
+        mockMvc.perform(post("/categories").with(csrf()) // 提交新增。
                         .param("code", "NEWWORK") // 大写编码。
                         .param("name", "新作品") // 名称。
                         .param("sortOrder", "3") // 排序。
@@ -135,7 +136,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
     void createChild() throws Exception {
         long top = AdminFixture.createCategory(jdbc, "NEWWORK", null, "新作品", 1); // 一级父分类。
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/categories").with(csrf())
                         .param("code", "NEWWORK-COMIC") // 二级编码。
                         .param("name", "单行本") // 名称。
                         .param("parentId", String.valueOf(top)) // 父级。
@@ -152,7 +153,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
     void createChildBadSuffix() throws Exception {
         long top = AdminFixture.createCategory(jdbc, "NEWWORK", null, "新作品", 1); // 一级。
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/categories").with(csrf())
                         .param("code", "NEWWORK-BADGE") // 不是 -COMIC/-MERCH。
                         .param("name", "徽章")
                         .param("parentId", String.valueOf(top))
@@ -168,7 +169,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
     void createDuplicateCode() throws Exception {
         AdminFixture.createCategory(jdbc, "DUP", null, "已存在", 1); // 占住编码。
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(post("/categories").with(csrf())
                         .param("code", "DUP")
                         .param("name", "另一个")
                         .session(adminSession()))
@@ -194,7 +195,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
         long top = AdminFixture.createCategory(jdbc, "PAGE", null, "页面作品", 1); // 一级。
         long leaf = AdminFixture.createCategory(jdbc, "PAGE-COMIC", top, "单行本", 1); // 二级。
 
-        mockMvc.perform(post("/categories/{id}", leaf) // 提交编辑。
+        mockMvc.perform(post("/categories/{id}", leaf).with(csrf()) // 提交编辑。
                         .param("code", "HACKED") // 故意改编码：服务端忽略。
                         .param("name", "单行本（新）") // 名称。
                         .param("sortOrder", "9") // 排序。
@@ -219,7 +220,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
         long first = AdminFixture.createCategory(jdbc, "A1", null, "同名", 1); // 第一个一级。
         long second = AdminFixture.createCategory(jdbc, "A2", null, "另一个", 2); // 第二个一级。
 
-        mockMvc.perform(post("/categories/{id}", second) // 把第二个改成和第一个同名。
+        mockMvc.perform(post("/categories/{id}", second).with(csrf()) // 把第二个改成和第一个同名。
                         .param("name", "同名")
                         .param("sortOrder", "2")
                         .session(adminSession()))
@@ -235,7 +236,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
         long top = AdminFixture.createCategory(jdbc, "PAGE", null, "页面作品", 1); // 一级。
         AdminFixture.createCategory(jdbc, "PAGE-COMIC", top, "单行本", 1); // 二级。
 
-        mockMvc.perform(post("/categories/{id}/delete", top).session(adminSession()))
+        mockMvc.perform(post("/categories/{id}/delete", top).with(csrf()).session(adminSession()))
                 .andExpect(status().isConflict()); // 409 错误页。
 
         assertThat(count("SELECT COUNT(*) FROM category WHERE id = " + top)).isEqualTo(1); // 没被删。
@@ -249,7 +250,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
         jdbc.update("INSERT INTO product (sku, category_id, name, cover_image, price, stock, status, sort_order) "
                 + "VALUES ('PAGE-D1', ?, '下架商品', 'images/x.svg', 10.00, 0, 'DRAFT', 1)", leaf); // 下架商品也算引用。
 
-        mockMvc.perform(post("/categories/{id}/delete", leaf).session(adminSession()))
+        mockMvc.perform(post("/categories/{id}/delete", leaf).with(csrf()).session(adminSession()))
                 .andExpect(status().isConflict()); // 409。
 
         assertThat(count("SELECT COUNT(*) FROM category WHERE id = " + leaf)).isEqualTo(1); // 没被删。
@@ -261,7 +262,7 @@ class CategoryAdminPageTest extends AdminIntegrationTest {
         long top = AdminFixture.createCategory(jdbc, "PAGE", null, "页面作品", 1); // 一级。
         long leaf = AdminFixture.createCategory(jdbc, "PAGE-PAPER", top, "色纸", 5); // 二级，无商品。
 
-        mockMvc.perform(post("/categories/{id}/delete", leaf).session(adminSession()))
+        mockMvc.perform(post("/categories/{id}/delete", leaf).with(csrf()).session(adminSession()))
                 .andExpect(status().is3xxRedirection()) // PRG。
                 .andExpect(redirectedUrl("/categories"));
 

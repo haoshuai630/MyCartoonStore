@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -62,7 +63,7 @@ class ImageAdminPageTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
         long productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");
 
-        mockMvc.perform(post("/products/" + productId + "/images").session(AdminFixture.session(adminId))
+        mockMvc.perform(post("/products/" + productId + "/images").with(csrf()).session(AdminFixture.session(adminId))
                         .param("imagePath", "images/products/IMGPROD/2.svg")
                         .param("altText", "新图")
                         .param("sortOrder", "4"))
@@ -83,7 +84,7 @@ class ImageAdminPageTest extends AdminIntegrationTest {
         long productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");
         long imageId = insertImage(productId, "images/products/IMGPROD/1.svg", "旧说明", 1);
 
-        mockMvc.perform(post("/products/" + productId + "/images/" + imageId)
+        mockMvc.perform(post("/products/" + productId + "/images/" + imageId).with(csrf())
                         .session(AdminFixture.session(adminId))
                         .param("imagePath", "images/products/IMGPROD/9.svg")
                         .param("altText", "新说明")
@@ -108,7 +109,7 @@ class ImageAdminPageTest extends AdminIntegrationTest {
         String coverBefore = coverOf(productId);
         long versionBefore = versionOf(productId);
 
-        mockMvc.perform(post("/products/" + productId + "/images/" + imageId + "/delete")
+        mockMvc.perform(post("/products/" + productId + "/images/" + imageId + "/delete").with(csrf())
                         .session(AdminFixture.session(adminId)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("message", "已删除相册图（文件保留）"));
@@ -125,7 +126,7 @@ class ImageAdminPageTest extends AdminIntegrationTest {
         long adminId = AdminFixture.createAdmin(jdbc, "rootadmin");
         long productId = AdminFixture.createProduct(jdbc, "IMGPROD", "28.00", 10, "ON_SALE");
 
-        mockMvc.perform(post("/products/" + productId + "/images").session(AdminFixture.session(adminId))
+        mockMvc.perform(post("/products/" + productId + "/images").with(csrf()).session(AdminFixture.session(adminId))
                         .param("imagePath", "https://example.com/a.jpg"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string(containsString("图片路径只接受站内路径")));

@@ -22,6 +22,7 @@
             <!-- 新建与编辑共用一个表单；编辑时编码与父级不可改 -->
             <form class="panel" method="post"
                   th:action="${editing} ? @{/categories/{id}(id=${form.id})} : @{/categories}">
+                <input th:replace="~{admin/csrf :: hidden}">
                 <h2 th:text="${editing} ? '编辑分类' : (${parentName} != null ? '新增品类' : '新增作品')">新增作品</h2>
 
                 <div class="form-grid">

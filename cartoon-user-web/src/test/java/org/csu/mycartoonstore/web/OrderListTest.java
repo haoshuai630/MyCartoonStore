@@ -176,6 +176,20 @@ class OrderListTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("<b>模拟支付</b>"))); // 显示支付节点。
     }
 
+    /** AC-18：他人订单详情 —— 404，且不泄露明细内容。 */
+    @Test
+    @DisplayName("AC-18：他人订单详情 → 404")
+    void othersOrderDetailIs404() throws Exception {
+        long intruder = CartFixture.createUser(jdbc, "ol_intruder"); // 另一个账号。
+        seedOrder("CO202611161000000051", "PENDING_PAYMENT", "28.00", T0); // 主用户的单。
+        seedItem("CO202611161000000051", "私有商品", "28.00", 1); // 明细里有内容可泄露。
+
+        mockMvc.perform(get("/orders/{no}", "CO202611161000000051")
+                        .session(CartFixture.session(intruder))) // 用别人的会话访问。
+                .andExpect(status().isNotFound()) // 404：与"不存在"同码。
+                .andExpect(content().string(not(containsString("私有商品")))); // 不泄露明细。
+    }
+
     /** 游客打开列表：拦到登录页。 */
     @Test
     @DisplayName("游客打开列表：拦到登录页")

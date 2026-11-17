@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>请求未被接受 | 漫屿 MANGA ISLE</title>
+    <link rel="stylesheet" href="/css/store.css">
+</head>
+<body>
+
+<div style="display:contents">
+    <div class="topbar">
+        <div class="wrap">
+            <span>官方正版 <span class="dot">/</span> 满 99 包邮 <span class="dot">/</span> 教学演示站点，商品与订单均为虚构</span>
+            <!-- 已登录显示名字与退出，未登录给登录/注册入口 -->
+            <span>
+                <a href="/login">登录</a>
+                <span class="dot">/</span>
+                <a href="/register">注册</a>
+            </span>
+            
+        </div>
+    </div>
+    <header class="site-header">
+        <div class="wrap header-main">
+            <a class="brand" href="/main">
+                <span class="mark">漫</span>
+                <span><b>漫屿</b><small>MANGA ISLE</small></span>
+            </a>
+            <nav class="nav">
+                <a href="/main">首页</a>
+                <a href="/works">作品</a>
+                <a href="/category">全部商品</a>
+                <a href="/category?sort=NEWEST">新作上架</a>
+                <a href="/orders">我的订单</a>
+            </nav>
+            <div class="header-tools">
+                <form class="search" action="/category" method="get">
+                    <input name="keyword" placeholder="搜索商品名称">
+                    <button type="submit">搜索</button>
+                </form>
+                <a class="cart-link" href="/cart">购物车 <b>0</b></a>
+            </div>
+        </div>
+    </header>
+</div>
+
+<main>
+    <!-- CSRF 校验失败：只提示刷新，不提供"再试一次"的写按钮 -->
+    <section class="section">
+        <div class="wrap error-box">
+            <h1>请求未被接受</h1>
+            <p class="error-message">页面已过期或请求来源不可信，请刷新后重试。</p>
+            <p><a class="btn btn-primary" href="/main">回首页</a>
+               <a class="btn btn-ghost" href="/category">去逛逛</a></p>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <div class="wrap">
+        <b>漫屿 MANGA ISLE</b>
+        <span>原创漫画 · 官方周边 · 教学演示</span>
+    </div>
+</footer>
+
+</body>
+</html>

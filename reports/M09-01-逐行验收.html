@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M09-01 · CSRF 令牌公共件（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M09-01 · CSRF 令牌公共件（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">CsrfToken.java</a><a href="#s2">CsrfFilter.java</a><a href="#s3">CsrfTokenTest.java</a><a href="#s4">CsrfFilterTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：会话键与参数名常量、UUID 令牌生成、恒定时间比对、读请求签发令牌、写请求校验并失败 403、静态资源放行且不建会话、方法名统一大写、context-path 归一；5 个令牌单测 + 10 个过滤器用例。验证：mvn -pl cartoon-common test → Tests run: 25, Failures: 0, Errors: 0, Skipped: 0。pom.xml 新增 spring-context(provided) 与两端注册、403 页面、表单隐藏域属于 M09-02，按 docs/10 §5 用汇报里的分区表说明，不逐行渲染。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>CsrfToken.java<small>会话键、参数名、生成与恒定时间比对 · 40 行</small></h2>
+<p class="path">cartoon-common/src/main/java/org/csu/mycartoonstore/common/security/CsrfToken.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.common.security;</pre></td><td class="explain">CSRF 同步令牌：会话键、表单参数名、生成与比对。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> java.nio.charset.StandardCharsets;</pre></td><td class="explain">令牌按 UTF-8 转字节，比较结果不受平台默认编码影响。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> java.security.MessageDigest;</pre></td><td class="explain">恒定时间比较，避免按字节短路泄露令牌内容。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.util.UUID;</pre></td><td class="explain">令牌取 UUID v4：128 位随机，同一会话内不需要额外去重。</td></tr>
+<tr class="gap"><td class="line">6</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre class="cmtline">// M09-01：依据 docs/02 §6.3（同步令牌）与 docs/06 AC-31。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// 负责：签发令牌、把表单隐藏域的值与会话里的值做恒定时间比对。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 不做：会话创建与销毁（CsrfFilter）、页面渲染（fragments/csrf.html）、身份判断（拦截器）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">public</span> <span class="kw">final</span> <span class="kw">class</span> CsrfToken {</pre></td><td class="explain">全静态工具类：不允许被实例化，也不做成 Bean。</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre class="cmtline">    /** 会话里存令牌的键：两端同名，过滤器、模板与测试共用同一套规则。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String SESSION_KEY = "csrfToken";</pre></td><td class="explain">会话键取值直接决定两端能否共用同一套过滤器与模板。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">    /** 写表单隐藏域的参数名：与 docs/04 §1 的 `_csrf` 一致。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> <span class="kw">final</span> String PARAM_NAME = "_csrf";</pre></td><td class="explain">参数名与 docs/04 §1 一致，改名会同时影响 29 个表单。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">    /** 工具类不允许实例化：所有方法都是静态的。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> CsrfToken() {</pre></td><td class="explain">私有构造器，防止被当成 Bean 或工具对象使用。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">    /** 生成一个新令牌：UUID v4 的字符串形式。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> String generate() {</pre></td><td class="explain">生成一个新令牌：UUID v4 的字符串形式。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        <span class="kw">return</span> UUID.randomUUID().toString();</pre></td><td class="explain">每次调用都不同，登录换会话后也会重新签发。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre class="cmtline">     * 比对会话令牌与表单令牌是否一致。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">     * &lt;p&gt;任一边为空一律判失败：缺令牌不是"放行"，而是请求来源不可信。&lt;/p&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> boolean matches(String expected, String actual) {</pre></td><td class="explain">比对会话令牌与表单令牌是否一致。 任一边为空一律判失败：缺令牌不是"放行"，而是请求来源不可信。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        if (expected == null || expected.isEmpty() || actual == null || actual.isEmpty()) {</pre></td><td class="explain">空值没有可比的内容。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>            <span class="kw">return</span> false;</pre></td><td class="explain">直接拒绝，避免把"没带"当成"一致"。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        byte[] left = expected.getBytes(StandardCharsets.UTF_8);</pre></td><td class="explain">会话里的令牌。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        byte[] right = actual.getBytes(StandardCharsets.UTF_8);</pre></td><td class="explain">表单带来的令牌。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        <span class="kw">return</span> MessageDigest.isEqual(left, right);</pre></td><td class="explain">恒定时间比较：长度不同也走完整个循环。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>CsrfFilter.java<small>读发令牌、写验令牌、静态资源放行 · 89 行</small></h2>
+<p class="path">cartoon-common/src/main/java/org/csu/mycartoonstore/common/security/CsrfFilter.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.common.security;</pre></td><td class="explain">每请求一次：读请求签发令牌，写请求校验令牌。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.FilterChain;</pre></td><td class="explain">校验通过后要继续走后面的过滤器与 DispatcherServlet。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.ServletException;</pre></td><td class="explain">下游抛出的检查异常原样透传。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletRequest;</pre></td><td class="explain">读方法、路径、参数与会话。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpServletResponse;</pre></td><td class="explain">校验失败时直接回 403，不进 Controller。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">令牌存在会话里，不写 Cookie。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.filter.OncePerRequestFilter;</pre></td><td class="explain">保证一次请求只跑一遍，错误分发不重复校验。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.io.IOException;</pre></td><td class="explain">过滤器方法签名要求。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">静态资源前缀清单。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> java.util.Locale;</pre></td><td class="explain">方法名统一按大写比较，避免大小写差异绕过判断。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">安全方法与固定静态文件集合。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline">// M09-01：依据 docs/02 §6.3、docs/04 §1、docs/06 AC-31。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline">// 负责：读请求确保会话里有令牌并放行；写请求比对 `_csrf`，不一致直接 403 并中断链路。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline">// 不做：身份与归属判断（拦截器 / Service）、错误页渲染（容器 + templates/error/403.html）、</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre class="cmtline">//       静态资源鉴权（CSS 与图片直接放行，不为它们建会话）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> CsrfFilter <span class="kw">extends</span> OncePerRequestFilter {</pre></td><td class="explain">继承一次性过滤器：错误分发不会重复校验同一个请求。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">    /** 不改变状态的方法：浏览器预取与普通链接都可能不带令牌，不能因此 403。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; SAFE_METHODS = Set.of("GET", "HEAD", "TRACE", "OPTIONS");</pre></td><td class="explain">不改变状态的方法：浏览器预取与普通链接都可能不带令牌，不能因此 403。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">    /** 静态资源目录：直接放行，避免每个 CSS / 图片请求都建一个会话。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> List&lt;String&gt; STATIC_PREFIXES = List.of("/css/", "/images/", "/js/", "/webjars/");</pre></td><td class="explain">静态资源目录：直接放行，避免每个 CSS / 图片请求都建一个会话。</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 根目录下的固定静态文件：只列确实存在的，不做通配。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> Set&lt;String&gt; STATIC_FILES = Set.of("/favicon.ico");</pre></td><td class="explain">根目录下的固定静态文件：只列确实存在的，不做通配。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Override</pre></td><td class="explain">覆盖一次性过滤器的扩展点。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    protected <span class="kw">void</span> doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)</pre></td><td class="explain">主流程只有三条分支：静态资源、读请求、写请求。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>            throws ServletException, IOException {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        String path = pathWithinApplication(request);</pre></td><td class="explain">去掉 context-path，两端共用同一套判断。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        if (isStatic(path)) {</pre></td><td class="explain">静态资源不参与令牌流程。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            chain.doFilter(request, response);</pre></td><td class="explain">原样放行。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">不建会话、不校验。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        if (SAFE_METHODS.contains(methodOf(request))) {</pre></td><td class="explain">读请求只负责发令牌。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            ensureToken(request);</pre></td><td class="explain">会话里没有就签发，页面渲染才有值可填。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>            chain.doFilter(request, response);</pre></td><td class="explain">继续走 MVC。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">读请求到此结束。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        HttpSession session = request.getSession(false);</pre></td><td class="explain">写请求不新建会话：没有会话就不可能持有令牌。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        String expected = session == null ? null : (String) session.getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">会话里的令牌。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        String actual = request.getParameter(CsrfToken.PARAM_NAME);</pre></td><td class="explain">表单隐藏域带来的令牌。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        if (!CsrfToken.matches(expected, actual)) {</pre></td><td class="explain">缺失、空值、不相等都拒绝。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            response.sendError(HttpServletResponse.SC_FORBIDDEN, "请求来源校验失败，请刷新后重试");</pre></td><td class="explain">由 error/403.html 呈现。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>            <span class="kw">return</span>;</pre></td><td class="explain">不把请求交给 Controller，业务与数据库都不会被触碰。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        chain.doFilter(request, response);</pre></td><td class="explain">令牌一致，正常执行。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">    /** 取请求方法并统一大写：Servlet 规范给的是大写，这里再兜一层。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">private</span> String methodOf(HttpServletRequest request) {</pre></td><td class="explain">取请求方法并统一大写：Servlet 规范给的是大写，这里再兜一层。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        String method = request.getMethod();</pre></td><td class="explain">可能是 null（畸形请求）。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        <span class="kw">return</span> method == null ? "" : method.toUpperCase(Locale.ROOT);</pre></td><td class="explain">空串不在安全方法集合里，按写请求处理。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">58</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre class="cmtline">    /** 应用内路径：MockMvc 下 context-path 为空，Tomcat 下管理端为 /admin。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>    <span class="kw">private</span> String pathWithinApplication(HttpServletRequest request) {</pre></td><td class="explain">应用内路径：MockMvc 下 context-path 为空，Tomcat 下管理端为 /admin。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        String uri = request.getRequestURI();</pre></td><td class="explain">含 context-path 的原始地址。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        String contextPath = request.getContextPath();</pre></td><td class="explain">管理端是 /admin，用户端是空串。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        if (contextPath != null &amp;&amp; !contextPath.isEmpty() &amp;&amp; uri.startsWith(contextPath)) {</pre></td><td class="explain">只有带前缀时才截。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>            <span class="kw">return</span> uri.substring(contextPath.length());</pre></td><td class="explain">得到 /css/... 这样的站内路径。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        <span class="kw">return</span> uri;</pre></td><td class="explain">用户端原样返回。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre class="cmtline">    /** 静态资源判断：只按前缀与固定文件名匹配，避免误放行 /api 之类的业务路径。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>    <span class="kw">private</span> boolean isStatic(String path) {</pre></td><td class="explain">静态资源判断：只按前缀与固定文件名匹配，避免误放行 /api 之类的业务路径。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        if (STATIC_FILES.contains(path)) {</pre></td><td class="explain">/favicon.ico 这类根文件。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>            <span class="kw">return</span> true;</pre></td><td class="explain">直接放行。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        for (String prefix : STATIC_PREFIXES) {</pre></td><td class="explain">目录前缀清单很短，线性判断足够。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>            if (path.startsWith(prefix)) {</pre></td><td class="explain">/css/store.css、/images/... 都命中。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                <span class="kw">return</span> true;</pre></td><td class="explain">命中即放行。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        <span class="kw">return</span> false;</pre></td><td class="explain">其余路径都要走令牌流程。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">81</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre class="cmtline">    /** 确保会话里有令牌：已存在就不覆盖，否则同一会话里开着两个页面会互相失效。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> ensureToken(HttpServletRequest request) {</pre></td><td class="explain">确保会话里有令牌：已存在就不覆盖，否则同一会话里开着两个页面会互相失效。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        HttpSession session = request.getSession(true);</pre></td><td class="explain">读页面可以建会话：登录页本身就要发令牌。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        if (session.getAttribute(CsrfToken.SESSION_KEY) == null) {</pre></td><td class="explain">首次访问或会话被重建之后。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>            session.setAttribute(CsrfToken.SESSION_KEY, CsrfToken.generate());</pre></td><td class="explain">一个会话只签发一次。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>CsrfTokenTest.java<small>5 个令牌用例 · 56 行</small></h2>
+<p class="path">cartoon-common/src/test/java/org/csu/mycartoonstore/common/security/CsrfTokenTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.common.security;</pre></td><td class="explain">令牌生成与比对的单元测试。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名用中文说明意图。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 用例。</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.util.HashSet;</pre></td><td class="explain">检查生成结果不重复。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.util.Set;</pre></td><td class="explain">同上。</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">断言库。</td></tr>
+<tr class="gap"><td class="line">10</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre class="cmtline">/** 令牌本身的两件事：够随机、比对够严格。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">class</span> CsrfTokenTest {</pre></td><td class="explain">不启 Spring：令牌是纯函数，坏掉时一眼能定位。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    @DisplayName("生成 100 个令牌互不相同且非空")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">void</span> generateIsRandom() {</pre></td><td class="explain">100 次生成互不相同：令牌不能是固定值。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>        Set&lt;String&gt; seen = <span class="kw">new</span> HashSet&lt;&gt;();</pre></td><td class="explain">收集已生成的令牌。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        for (<span class="kw">int</span> i = 0; i &lt; 100; i++) {</pre></td><td class="explain">100 次足够暴露固定值或短随机源。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>            String token = CsrfToken.generate();</pre></td><td class="explain">每次调用都应当是新值。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            assertThat(token).isNotBlank();</pre></td><td class="explain">空令牌会让页面隐藏域失效。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>            assertThat(seen.add(token)).isTrue();</pre></td><td class="explain">重复即失败。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>    @DisplayName("同一个令牌与自身比对通过")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>    <span class="kw">void</span> matchesSameToken() {</pre></td><td class="explain">同一令牌自比：页面回传的正是签发出去的那个。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        String token = CsrfToken.generate();</pre></td><td class="explain">任意一个合法令牌。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        assertThat(CsrfToken.matches(token, token)).isTrue();</pre></td><td class="explain">页面回传的正是签发出去的那个。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    @DisplayName("不同令牌比对失败")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">void</span> rejectsDifferentToken() {</pre></td><td class="explain">两个会话的令牌不能互相通用。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        assertThat(CsrfToken.matches(CsrfToken.generate(), CsrfToken.generate())).isFalse();</pre></td><td class="explain">另一个会话的令牌不能通用。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    @DisplayName("null 与空串一律判失败")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">void</span> rejectsNullAndEmpty() {</pre></td><td class="explain">会话没令牌与表单没带令牌都按失败处理。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        String token = CsrfToken.generate();</pre></td><td class="explain">一个有效的参照值。</td></tr>
+<tr class="gap"><td class="line">43</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        assertThat(CsrfToken.matches(null, token)).isFalse();</pre></td><td class="explain">会话里没令牌。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        assertThat(CsrfToken.matches(token, null)).isFalse();</pre></td><td class="explain">表单没带令牌。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        assertThat(CsrfToken.matches("", token)).isFalse();</pre></td><td class="explain">会话值为空。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        assertThat(CsrfToken.matches(token, "")).isFalse();</pre></td><td class="explain">表单值为空。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        assertThat(CsrfToken.matches(null, null)).isFalse();</pre></td><td class="explain">两边都空。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">50</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @DisplayName("长度不同的令牌比对失败")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    <span class="kw">void</span> rejectsDifferentLength() {</pre></td><td class="explain">前缀相同但长度不同也要拒绝。</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>        assertThat(CsrfToken.matches("abc", "abcd")).isFalse();</pre></td><td class="explain">前缀相同也不能放过。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>CsrfFilterTest.java<small>10 个过滤器用例 · 155 行</small></h2>
+<p class="path">cartoon-common/src/test/java/org/csu/mycartoonstore/common/security/CsrfFilterTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.common.security;</pre></td><td class="explain">过滤器行为：读请求发令牌、写请求校验、静态资源放行。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.ServletException;</pre></td><td class="explain">过滤器方法签名声明了它。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名用中文说明意图。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 5 用例。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockFilterChain;</pre></td><td class="explain">记录请求有没有走到下游。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpServletRequest;</pre></td><td class="explain">不启 Spring 上下文也能造请求。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.mock.web.MockHttpServletResponse;</pre></td><td class="explain">断言 403 与是否提交响应。</td></tr>
+<tr class="gap"><td class="line">9</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> java.io.IOException;</pre></td><td class="explain">过滤器方法签名声明了它。</td></tr>
+<tr class="gap"><td class="line">11</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.assertj.core.api.Assertions.assertThat;</pre></td><td class="explain">断言库。</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre class="cmtline">/**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre class="cmtline"> * 不启动 Spring 上下文，直接驱动过滤器：这里只验证"放行 / 拦截"的分支，</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre class="cmtline"> * 令牌怎么渲染到页面由两端接入任务的用例覆盖。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre class="cmtline"> */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">class</span> CsrfFilterTest {</pre></td><td class="explain">不启 Spring：用 Mock 请求直接驱动过滤器，只验证放行与拦截。</td></tr>
+<tr class="gap"><td class="line">19</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre class="cmtline">    /** 被测对象：每个用例共用一份，过滤器本身无状态。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> CsrfFilter filter = <span class="kw">new</span> CsrfFilter();</pre></td><td class="explain">被测对象：每个用例共用一份，过滤器本身无状态。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    @DisplayName("GET 页面：签发令牌并放行")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>    <span class="kw">void</span> getIssuesToken() throws ServletException, IOException {</pre></td><td class="explain">GET /login：签发令牌、放行、200。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("GET", "/login");</pre></td><td class="explain">登录页是第一个会用到令牌的页面。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        MockHttpServletResponse response = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        MockFilterChain chain = <span class="kw">new</span> MockFilterChain();</pre></td><td class="explain">记录是否继续走链路。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        filter.doFilter(request, response, chain);</pre></td><td class="explain">只跑过滤器。</td></tr>
+<tr class="gap"><td class="line">31</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        assertThat(chain.getRequest()).isNotNull();</pre></td><td class="explain">放行：下游收到了请求。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        assertThat(request.getSession(false)).isNotNull();</pre></td><td class="explain">读页面建了会话。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        assertThat(request.getSession(false).getAttribute(CsrfToken.SESSION_KEY)).isNotNull();</pre></td><td class="explain">会话里有令牌。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>        assertThat(response.getStatus()).isEqualTo(200);</pre></td><td class="explain">没有错误状态。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @DisplayName("同一会话多次 GET：令牌保持不变")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">void</span> tokenIsStableWithinSession() throws ServletException, IOException {</pre></td><td class="explain">同一会话第二次请求不换令牌，另一个页面才不会失效。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        MockHttpServletRequest first = <span class="kw">new</span> MockHttpServletRequest("GET", "/login");</pre></td><td class="explain">第一次访问。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        filter.doFilter(first, <span class="kw">new</span> MockHttpServletResponse(), <span class="kw">new</span> MockFilterChain());</pre></td><td class="explain">发令牌。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>        Object token = first.getSession(false).getAttribute(CsrfToken.SESSION_KEY);</pre></td><td class="explain">记住它。</td></tr>
+<tr class="gap"><td class="line">44</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        MockHttpServletRequest second = <span class="kw">new</span> MockHttpServletRequest("GET", "/cart");</pre></td><td class="explain">同一浏览器的下一次请求。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        second.setSession((jakarta.servlet.http.HttpSession) first.getSession(false));</pre></td><td class="explain">复用同一个会话。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        filter.doFilter(second, <span class="kw">new</span> MockHttpServletResponse(), <span class="kw">new</span> MockFilterChain());</pre></td><td class="explain">再过一次过滤器。</td></tr>
+<tr class="gap"><td class="line">48</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        assertThat(second.getSession(false).getAttribute(CsrfToken.SESSION_KEY)).isEqualTo(token);</pre></td><td class="explain">会话内不换令牌。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">51</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    @DisplayName("静态资源：放行且不建会话")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>    <span class="kw">void</span> staticResourceSkipsSession() throws ServletException, IOException {</pre></td><td class="explain">CSS 请求放行且不建会话。</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("GET", "/css/store.css");</pre></td><td class="explain">样式表。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>        MockFilterChain chain = <span class="kw">new</span> MockFilterChain();</pre></td><td class="explain">记录放行。</td></tr>
+<tr class="gap"><td class="line">57</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        filter.doFilter(request, <span class="kw">new</span> MockHttpServletResponse(), chain);</pre></td><td class="explain">静态请求不应参与令牌流程。</td></tr>
+<tr class="gap"><td class="line">59</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        assertThat(chain.getRequest()).isNotNull();</pre></td><td class="explain">放行。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        assertThat(request.getSession(false)).isNull();</pre></td><td class="explain">关键：没有为静态资源创建会话。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">63</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>    @DisplayName("带 context-path 的静态资源同样放行")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>    <span class="kw">void</span> staticResourceWithContextPath() throws ServletException, IOException {</pre></td><td class="explain">管理端的 /admin 前缀先截掉再判断。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("GET", "/css/admin.css");</pre></td><td class="explain">站内路径。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        request.setContextPath("/admin");</pre></td><td class="explain">模拟管理端。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        MockFilterChain chain = <span class="kw">new</span> MockFilterChain();</pre></td><td class="explain">记录放行。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>        filter.doFilter(request, <span class="kw">new</span> MockHttpServletResponse(), chain);</pre></td><td class="explain">路径要先截掉 /admin 再判断。</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        assertThat(chain.getRequest()).isNotNull();</pre></td><td class="explain">放行。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        assertThat(request.getSession(false)).isNull();</pre></td><td class="explain">仍然不建会话。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">76</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    @DisplayName("POST 没有会话：403 且不进 Controller")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>    <span class="kw">void</span> postWithoutSessionForbidden() throws ServletException, IOException {</pre></td><td class="explain">没有会话的 POST 直接 403，不进 Controller。</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("POST", "/login");</pre></td><td class="explain">伪造的同源外提交。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        MockHttpServletResponse response = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        MockFilterChain chain = <span class="kw">new</span> MockFilterChain();</pre></td><td class="explain">用来确认没放行。</td></tr>
+<tr class="gap"><td class="line">83</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>        filter.doFilter(request, response, chain);</pre></td><td class="explain">没有会话就没有令牌。</td></tr>
+<tr class="gap"><td class="line">85</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        assertThat(response.getStatus()).isEqualTo(403);</pre></td><td class="explain">拒。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>        assertThat(chain.getRequest()).isNull();</pre></td><td class="explain">没有走到下游。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">89</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    @DisplayName("POST 有会话但没带令牌：403")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>    <span class="kw">void</span> postWithoutParamForbidden() throws ServletException, IOException {</pre></td><td class="explain">有会话但表单没带隐藏域：403。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("POST", "/cart/items");</pre></td><td class="explain">加车。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        request.getSession(true).setAttribute(CsrfToken.SESSION_KEY, "token-a");</pre></td><td class="explain">会话里有令牌。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        MockHttpServletResponse response = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>        MockFilterChain chain = <span class="kw">new</span> MockFilterChain();</pre></td><td class="explain">用来确认没放行。</td></tr>
+<tr class="gap"><td class="line">97</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        filter.doFilter(request, response, chain);</pre></td><td class="explain">表单没带隐藏域。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        assertThat(response.getStatus()).isEqualTo(403);</pre></td><td class="explain">拒。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>        assertThat(chain.getRequest()).isNull();</pre></td><td class="explain">没有走到下游。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">103</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>    @DisplayName("POST 令牌不匹配：403")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>    <span class="kw">void</span> postWithWrongTokenForbidden() throws ServletException, IOException {</pre></td><td class="explain">令牌不匹配：403。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("POST", "/cart/items");</pre></td><td class="explain">加车。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        request.getSession(true).setAttribute(CsrfToken.SESSION_KEY, "token-a");</pre></td><td class="explain">会话里的令牌。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>        request.addParameter(CsrfToken.PARAM_NAME, "token-b");</pre></td><td class="explain">另一个会话的令牌（或猜的）。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>        MockHttpServletResponse response = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr class="gap"><td class="line">111</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>        filter.doFilter(request, response, <span class="kw">new</span> MockFilterChain());</pre></td><td class="explain">比对失败。</td></tr>
+<tr class="gap"><td class="line">113</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>        assertThat(response.getStatus()).isEqualTo(403);</pre></td><td class="explain">拒。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">116</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>    @DisplayName("POST 令牌一致：放行")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>    <span class="kw">void</span> postWithCorrectTokenPasses() throws ServletException, IOException {</pre></td><td class="explain">令牌一致：放行到下游。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("POST", "/cart/items");</pre></td><td class="explain">加车。</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        request.getSession(true).setAttribute(CsrfToken.SESSION_KEY, "token-a");</pre></td><td class="explain">页面拿到的令牌。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>        request.addParameter(CsrfToken.PARAM_NAME, "token-a");</pre></td><td class="explain">原样回传。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>        MockFilterChain chain = <span class="kw">new</span> MockFilterChain();</pre></td><td class="explain">记录放行。</td></tr>
+<tr class="gap"><td class="line">124</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        filter.doFilter(request, <span class="kw">new</span> MockHttpServletResponse(), chain);</pre></td><td class="explain">校验通过。</td></tr>
+<tr class="gap"><td class="line">126</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        assertThat(chain.getRequest()).isNotNull();</pre></td><td class="explain">放行。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">129</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    @DisplayName("小写 post 按写请求校验")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>    <span class="kw">void</span> lowercaseMethodIsChecked() throws ServletException, IOException {</pre></td><td class="explain">小写 post 也要校验，不能靠大小写绕过。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        MockHttpServletRequest request = <span class="kw">new</span> MockHttpServletRequest("post", "/cart/items");</pre></td><td class="explain">畸形方法名。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>        MockHttpServletResponse response = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr class="gap"><td class="line">135</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        filter.doFilter(request, response, <span class="kw">new</span> MockFilterChain());</pre></td><td class="explain">不能因为大小写绕过。</td></tr>
+<tr class="gap"><td class="line">137</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>        assertThat(response.getStatus()).isEqualTo(403);</pre></td><td class="explain">仍要校验。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">140</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>    @DisplayName("PUT 与 DELETE 也要校验令牌")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>    <span class="kw">void</span> otherUnsafeMethodsAreChecked() throws ServletException, IOException {</pre></td><td class="explain">PUT / DELETE 同样属于写请求。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>        MockHttpServletRequest put = <span class="kw">new</span> MockHttpServletRequest("PUT", "/profile");</pre></td><td class="explain">将来可能的接口。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>        MockHttpServletResponse putResponse = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr tabindex="0" data-line="146"><td class="line">146</td><td class="code"><pre>        filter.doFilter(put, putResponse, <span class="kw">new</span> MockFilterChain());</pre></td><td class="explain">无令牌。</td></tr>
+<tr class="gap"><td class="line">147</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>        MockHttpServletRequest delete = <span class="kw">new</span> MockHttpServletRequest("DELETE", "/cart/items/1");</pre></td><td class="explain">同上。</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>        MockHttpServletResponse deleteResponse = <span class="kw">new</span> MockHttpServletResponse();</pre></td><td class="explain">记录状态码。</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>        filter.doFilter(delete, deleteResponse, <span class="kw">new</span> MockFilterChain());</pre></td><td class="explain">无令牌。</td></tr>
+<tr class="gap"><td class="line">151</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        assertThat(putResponse.getStatus()).isEqualTo(403);</pre></td><td class="explain">PUT 被拒。</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        assertThat(deleteResponse.getStatus()).isEqualTo(403);</pre></td><td class="explain">DELETE 被拒。</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-18 · M09-01 · CSRF 令牌公共件 · 4 个行段 · 合计 340 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

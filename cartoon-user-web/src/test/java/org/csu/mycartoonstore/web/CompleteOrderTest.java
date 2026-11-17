@@ -18,6 +18,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -50,7 +51,7 @@ class CompleteOrderTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "alice");
         insertOrder(userId, "CO-COMPLETE-1", "SHIPPED");
 
-        mockMvc.perform(post("/orders/CO-COMPLETE-1/complete").session(CartFixture.session(userId)))
+        mockMvc.perform(post("/orders/CO-COMPLETE-1/complete").with(csrf()).session(CartFixture.session(userId)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/orders/CO-COMPLETE-1"))
                 .andExpect(flash().attribute("message", "已确认收货，订单完成"));
@@ -66,11 +67,11 @@ class CompleteOrderTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "alice");
         insertOrder(userId, "CO-COMPLETE-2", "SHIPPED");
 
-        mockMvc.perform(post("/orders/CO-COMPLETE-2/complete").session(CartFixture.session(userId)))
+        mockMvc.perform(post("/orders/CO-COMPLETE-2/complete").with(csrf()).session(CartFixture.session(userId)))
                 .andExpect(status().is3xxRedirection());
         Timestamp first = completedAtOf("CO-COMPLETE-2");
 
-        mockMvc.perform(post("/orders/CO-COMPLETE-2/complete").session(CartFixture.session(userId)))
+        mockMvc.perform(post("/orders/CO-COMPLETE-2/complete").with(csrf()).session(CartFixture.session(userId)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(flash().attribute("message", "订单已完成，无需重复操作"));
 
@@ -83,7 +84,7 @@ class CompleteOrderTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "alice");
         insertOrder(userId, "CO-COMPLETE-3", "PENDING_PAYMENT");
 
-        mockMvc.perform(post("/orders/CO-COMPLETE-3/complete").session(CartFixture.session(userId)))
+        mockMvc.perform(post("/orders/CO-COMPLETE-3/complete").with(csrf()).session(CartFixture.session(userId)))
                 .andExpect(status().isConflict())
                 .andExpect(content().string(containsString("当前状态不可确认收货")));
 
@@ -97,7 +98,7 @@ class CompleteOrderTest extends AbstractIntegrationTest {
         long other = CartFixture.createUser(jdbc, "alice");
         insertOrder(owner, "CO-COMPLETE-4", "SHIPPED");
 
-        mockMvc.perform(post("/orders/CO-COMPLETE-4/complete").session(CartFixture.session(other)))
+        mockMvc.perform(post("/orders/CO-COMPLETE-4/complete").with(csrf()).session(CartFixture.session(other)))
                 .andExpect(status().isNotFound());
 
         assertThat(statusOf("CO-COMPLETE-4")).isEqualTo("SHIPPED");

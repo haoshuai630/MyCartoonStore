@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M09-05 · 商品描述与封面路径收紧（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M09-05 · 商品描述与封面路径收紧（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">ProductAdminService.java</a><a href="#s2">ProductAdminService.java</a><a href="#s3">ProductAdminService.java</a><a href="#s4">ProductAdminService.java</a><a href="#s5">ProductAdminServiceTest.java</a><a href="#s6">ProductAdminPageTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：新增 DESCRIPTION_MAX=2000 与 normalizeDescription（空白存 NULL、超长 400）；normalizeCover 增加站内路径判断（拒绝外链、协议相对地址、.. 上跳、缺 images/ 前缀）；create/update 改为使用校验后的描述；4 个服务用例 + 2 个页面用例；docs/01 FR-A-03 与 docs/03 §2.3 同步。验证：mvn -pl cartoon-catalog,cartoon-admin-web -am test → catalog 78、admin-web 78，全绿。只渲染改动的行段（常量、create/update 两处调用、两个校验方法、新增用例），其余 M07 已验收代码不重复。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>ProductAdminService.java<small>描述上限常量 · 6 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre class="cmtline">    /** 封面上限：VARCHAR(255) */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> COVER_MAX = 255;</pre></td><td class="explain">必填。</td></tr>
+<tr class="gap"><td class="line">53</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">    /** 描述上限：TEXT 列本身能存 65535 字节，2000 是后台录入口径 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> DESCRIPTION_MAX = 2000;</pre></td><td class="explain">防误填，也防详情页整页渲染过重。</td></tr>
+<tr class="gap"><td class="line">56</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>ProductAdminService.java<small>新增时的描述与封面校验 · 6 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>        <span class="kw">int</span> stock = parseStock(form.getStock(), 0);</pre></td><td class="explain">新增时的初始库存。</td></tr>
+<tr tabindex="0" data-line="126"><td class="line">126</td><td class="code"><pre>        String summary = normalizeSummary(form.getSummary());</pre></td><td class="explain">可空 ≤500。</td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        String description = normalizeDescription(form.getDescription());</pre></td><td class="explain">可空 ≤2000。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>        String coverImage = normalizeCover(form.getCoverImage());</pre></td><td class="explain">必填、站内路径 ≤255。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        <span class="kw">int</span> sortOrder = normalizeSort(form.getSortOrder());</pre></td><td class="explain">非负，缺省 0。</td></tr>
+<tr class="gap"><td class="line">130</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>ProductAdminService.java<small>编辑时的描述与封面校验 · 6 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        BigDecimal price = parsePrice(form.getPrice());</pre></td><td class="explain">价格。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>        String summary = normalizeSummary(form.getSummary());</pre></td><td class="explain">简介。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>        String description = normalizeDescription(form.getDescription());</pre></td><td class="explain">描述。</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        String coverImage = normalizeCover(form.getCoverImage());</pre></td><td class="explain">封面。</td></tr>
+<tr tabindex="0" data-line="169"><td class="line">169</td><td class="code"><pre>        <span class="kw">int</span> sortOrder = normalizeSort(form.getSortOrder());</pre></td><td class="explain">排序。</td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        <span class="kw">long</span> version = parseVersion(form.getVersion());</pre></td><td class="explain">隐藏域带回的版本。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>ProductAdminService.java<small>描述与封面校验方法 · 32 行</small></h2>
+<p class="path">cartoon-catalog/src/main/java/org/csu/mycartoonstore/catalog/service/ProductAdminService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="339"><td class="line">339</td><td class="code"><pre class="cmtline">    /** 描述：可空，去首尾空白后 ≤2000，空串存 NULL。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="340"><td class="line">340</td><td class="code"><pre>    <span class="kw">private</span> String normalizeDescription(String raw) {</pre></td><td class="explain">描述：可空，去首尾空白后 ≤2000，空串存 NULL。</td></tr>
+<tr tabindex="0" data-line="341"><td class="line">341</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">不填按没有描述处理。</td></tr>
+<tr tabindex="0" data-line="342"><td class="line">342</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">存 NULL，页面自然不渲染空段落。</td></tr>
+<tr tabindex="0" data-line="343"><td class="line">343</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="344"><td class="line">344</td><td class="code"><pre>        String description = raw.trim();</pre></td><td class="explain">去掉首尾空白，保留内部换行。</td></tr>
+<tr tabindex="0" data-line="345"><td class="line">345</td><td class="code"><pre>        if (description.length() &gt; DESCRIPTION_MAX) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="346"><td class="line">346</td><td class="code"><pre>            throw BizException.badRequest("描述不能超过 " + DESCRIPTION_MAX + " 个字符");</pre></td><td class="explain">400，不静默截断。</td></tr>
+<tr tabindex="0" data-line="347"><td class="line">347</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="348"><td class="line">348</td><td class="code"><pre>        <span class="kw">return</span> description;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="349"><td class="line">349</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">350</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="351"><td class="line">351</td><td class="code"><pre class="cmtline">    /** 封面：必填、站内路径、≤255。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="352"><td class="line">352</td><td class="code"><pre>    <span class="kw">private</span> String normalizeCover(String raw) {</pre></td><td class="explain">封面：必填、站内路径、≤255。</td></tr>
+<tr tabindex="0" data-line="353"><td class="line">353</td><td class="code"><pre>        String cover = raw == null ? "" : raw.trim();</pre></td><td class="explain">容忍首尾空格。</td></tr>
+<tr tabindex="0" data-line="354"><td class="line">354</td><td class="code"><pre>        if (cover.isEmpty()) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="355"><td class="line">355</td><td class="code"><pre>            throw BizException.badRequest("封面路径不能为空");</pre></td><td class="explain">必填。</td></tr>
+<tr tabindex="0" data-line="356"><td class="line">356</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="357"><td class="line">357</td><td class="code"><pre>        if (cover.length() &gt; COVER_MAX) {</pre></td><td class="explain">位于当前方法内：本行是该流程中的一步，具体作用由相邻行上下文确定。</td></tr>
+<tr tabindex="0" data-line="358"><td class="line">358</td><td class="code"><pre>            throw BizException.badRequest("封面路径不能超过 " + COVER_MAX + " 个字符");</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="359"><td class="line">359</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="360"><td class="line">360</td><td class="code"><pre>        if (cover.contains("://") || cover.startsWith("//")) {</pre></td><td class="explain">外链与协议相对地址。</td></tr>
+<tr tabindex="0" data-line="361"><td class="line">361</td><td class="code"><pre>            throw BizException.badRequest("封面只接受站内路径（以 images/ 开头）");</pre></td><td class="explain">外链留到 docs/12。</td></tr>
+<tr tabindex="0" data-line="362"><td class="line">362</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="363"><td class="line">363</td><td class="code"><pre>        if (cover.contains("..")) {</pre></td><td class="explain">上跳目录：可能指到静态目录之外。</td></tr>
+<tr tabindex="0" data-line="364"><td class="line">364</td><td class="code"><pre>            throw BizException.badRequest("封面只接受站内路径（以 images/ 开头）");</pre></td><td class="explain">与 ImageForm 同一口径。</td></tr>
+<tr tabindex="0" data-line="365"><td class="line">365</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="366"><td class="line">366</td><td class="code"><pre>        if (!cover.startsWith("images/")) {</pre></td><td class="explain">站内静态资源都在 images/ 下。</td></tr>
+<tr tabindex="0" data-line="367"><td class="line">367</td><td class="code"><pre>            throw BizException.badRequest("封面只接受站内路径（以 images/ 开头）");</pre></td><td class="explain">缺前缀的路径渲染出来是 404。</td></tr>
+<tr tabindex="0" data-line="368"><td class="line">368</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="369"><td class="line">369</td><td class="code"><pre>        <span class="kw">return</span> cover;</pre></td><td class="explain">通过校验。</td></tr>
+<tr tabindex="0" data-line="370"><td class="line">370</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>ProductAdminServiceTest.java<small>4 个校验用例 · 55 行</small></h2>
+<p class="path">cartoon-catalog/src/test/java/org/csu/mycartoonstore/catalog/service/ProductAdminServiceTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr class="gap"><td class="line">179</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    @Test</pre></td><td class="explain">描述超长：400，不写库（M09-05）。</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>    @DisplayName("新增：描述超 2000 字 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    <span class="kw">void</span> createTooLongDescription() {</pre></td><td class="explain">描述 2001 字：400 且不写库。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法，让校验走到描述。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>        ProductForm form = form("S-4", "商品", "8", "10.00", "0", 0);</pre></td><td class="explain">常规表单。</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>        form.setDescription("描".repeat(2001));</pre></td><td class="explain">刚好超一个字符。</td></tr>
+<tr class="gap"><td class="line">186</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="187"><td class="line">187</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form))</pre></td><td class="explain">调用 service.create(form，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="189"><td class="line">189</td><td class="code"><pre>                .hasMessageContaining("2000");</pre></td><td class="explain">文案带上限值。</td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre>        verify(productMapper, never()).insert(any(Product.<span class="kw">class</span>));</pre></td><td class="explain">不写库。</td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">192</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>    @Test</pre></td><td class="explain">空白描述：存 NULL，而不是空串。</td></tr>
+<tr tabindex="0" data-line="194"><td class="line">194</td><td class="code"><pre>    @DisplayName("新增：空白描述存 NULL")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre>    <span class="kw">void</span> createBlankDescriptionStoredAsNull() {</pre></td><td class="explain">空白描述：入库为 NULL。</td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">参数续行：把上一行的参数列表补齐，然后调用。</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>        when(productMapper.selectCount(any())).thenReturn(0L);</pre></td><td class="explain">SKU 不重复。</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        ProductForm form = form("S-5", "商品", "8", "10.00", "0", 0);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        form.setDescription("   ");</pre></td><td class="explain">只有空白。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        ArgumentCaptor&lt;Product&gt; saved = ArgumentCaptor.forClass(Product.<span class="kw">class</span>);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr class="gap"><td class="line">201</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>        service.create(form);</pre></td><td class="explain">调用 create：form</td></tr>
+<tr class="gap"><td class="line">203</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>        verify(productMapper).insert(saved.capture());</pre></td><td class="explain">确认调用插入（新增条目）</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>        assertThat(saved.getValue().getDescription()).isNull();</pre></td><td class="explain">空描述不入库为空串。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">207</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>    @Test</pre></td><td class="explain">外链封面：400（外链留到 docs/12）。</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>    @DisplayName("新增：外链封面 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>    <span class="kw">void</span> createExternalCover() {</pre></td><td class="explain">外链封面：400。</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法。</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>        ProductForm form = form("S-6", "商品", "8", "10.00", "0", 0);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>        form.setCoverImage("https://evil.example.com/a.png");</pre></td><td class="explain">外部地址。</td></tr>
+<tr class="gap"><td class="line">214</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(form))</pre></td><td class="explain">调用 service.create(form，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>                .isInstanceOf(BizException.<span class="kw">class</span>)</pre></td><td class="explain">断言是业务异常。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>                .hasMessageContaining("站内路径");</pre></td><td class="explain">文案说明只收站内路径。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        verify(productMapper, never()).insert(any(Product.<span class="kw">class</span>));</pre></td><td class="explain">确认没有调用插入（新增条目）</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">220</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>    @Test</pre></td><td class="explain">目录上跳与缺前缀：都按非站内路径拒绝。</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>    @DisplayName("新增：封面含 .. 或缺少 images/ 前缀 → 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>    <span class="kw">void</span> createBadCoverPath() {</pre></td><td class="explain">上跳目录与缺前缀：都拒绝。</td></tr>
+<tr tabindex="0" data-line="224"><td class="line">224</td><td class="code"><pre>        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));</pre></td><td class="explain">分类合法。</td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre>        ProductForm traversal = form("S-7", "商品", "8", "10.00", "0", 0);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>        traversal.setCoverImage("images/../secret.svg");</pre></td><td class="explain">上跳目录。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>        ProductForm noPrefix = form("S-8", "商品", "8", "10.00", "0", 0);</pre></td><td class="explain">语句：执行本行的赋值或调用，结果供下文使用。</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>        noPrefix.setCoverImage("products/S/cover.svg");</pre></td><td class="explain">少了 images/ 前缀。</td></tr>
+<tr class="gap"><td class="line">229</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(traversal)).isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">调用 service.create(traversal)).isInstanceOf(BizException.class);，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>        assertThatThrownBy(() -&gt; service.create(noPrefix)).isInstanceOf(BizException.<span class="kw">class</span>);</pre></td><td class="explain">调用 service.create(noPrefix)).isInstanceOf(BizException.class);，期望抛出业务异常</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">233</td><td></td><td></td></tr>
+</tbody></table>
+</section>
+<section id="s6">
+<h2>ProductAdminPageTest.java<small>2 个页面用例 · 37 行</small></h2>
+<p class="path">cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/ProductAdminPageTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr class="gap"><td class="line">130</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>    @Test</pre></td><td class="explain">M09-05：描述上限 2000，超了回表单。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>    @DisplayName("新增：描述超 2000 字 → 400 回表单")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    <span class="kw">void</span> createTooLongDescription() throws Exception {</pre></td><td class="explain">页面层：超长描述回表单 400。</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>        <span class="kw">long</span> leaf = seedLeaf();</pre></td><td class="explain">二级分类。</td></tr>
+<tr class="gap"><td class="line">135</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        mockMvc.perform(post("/products").with(csrf())</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>                        .param("sku", "LONG-DESC")</pre></td><td class="explain">表单参数 sku="LONG-DESC"</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>                        .param("name", "新商品")</pre></td><td class="explain">表单参数 name="新商品"</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>                        .param("categoryId", String.valueOf(leaf))</pre></td><td class="explain">表单参数 categoryId=leaf</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>                        .param("price", "28.50")</pre></td><td class="explain">表单参数 price="28.50"</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>                        .param("description", "描".repeat(2001))</pre></td><td class="explain">刚好超一个字符。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                        .param("coverImage", "images/x.svg")</pre></td><td class="explain">表单参数 coverImage="images/x.svg"</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>                        .session(adminSession()))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                .andExpect(status().isBadRequest())</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>                .andExpect(content().string(containsString("2000")));</pre></td><td class="explain">文案带上限。</td></tr>
+<tr class="gap"><td class="line">146</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre>        assertThat(count("SELECT COUNT(*) FROM product WHERE sku = 'LONG-DESC'")).isZero();</pre></td><td class="explain">未写库。</td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">149</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    @Test</pre></td><td class="explain">M09-05：封面只收站内路径。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>    @DisplayName("新增：外链封面 → 400 回表单")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>    <span class="kw">void</span> createExternalCover() throws Exception {</pre></td><td class="explain">页面层：外链封面回表单 400。</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        <span class="kw">long</span> leaf = seedLeaf();</pre></td><td class="explain">二级分类。</td></tr>
+<tr class="gap"><td class="line">154</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="155"><td class="line">155</td><td class="code"><pre>        mockMvc.perform(post("/products").with(csrf())</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>                        .param("sku", "EXT-COVER")</pre></td><td class="explain">表单参数 sku="EXT-COVER"</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>                        .param("name", "新商品")</pre></td><td class="explain">表单参数 name="新商品"</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>                        .param("categoryId", String.valueOf(leaf))</pre></td><td class="explain">表单参数 categoryId=leaf</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>                        .param("price", "28.50")</pre></td><td class="explain">表单参数 price="28.50"</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                        .param("coverImage", "https://evil.example.com/a.png")</pre></td><td class="explain">外链。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>                        .session(adminSession()))</pre></td><td class="explain">以该用户身份请求（会话里带 userId）</td></tr>
+<tr tabindex="0" data-line="162"><td class="line">162</td><td class="code"><pre>                .andExpect(status().isBadRequest())</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre>                .andExpect(content().string(containsString("站内路径")));</pre></td><td class="explain">文案说明口径。</td></tr>
+<tr class="gap"><td class="line">164</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>        assertThat(count("SELECT COUNT(*) FROM product WHERE sku = 'EXT-COVER'")).isZero();</pre></td><td class="explain">未写库。</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-18 · M09-05 · 商品描述与封面路径收紧 · 6 个行段 · 合计 142 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

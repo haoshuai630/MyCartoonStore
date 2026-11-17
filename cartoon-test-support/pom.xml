@@ -29,5 +29,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>compile</scope>
         </dependency>
+        <!-- M09-03：CsrfTestSupport 要给 MockHttpServletRequest 的会话写令牌，
+             需要 servlet-api 才能编译；provided 表示运行期由 web 模块提供。 -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

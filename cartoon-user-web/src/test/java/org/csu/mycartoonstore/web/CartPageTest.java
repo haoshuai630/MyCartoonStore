@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.csu.mycartoonstore.testsupport.CsrfTestSupport.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -89,7 +90,7 @@ class CartPageTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "cart_add");
         long productId = CartFixture.createProduct(jdbc, "ADD-C01", "28.00", 10, "ON_SALE");
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(productId))
                         .param("quantity", "2")
                         .session(CartFixture.session(userId)))
@@ -109,9 +110,9 @@ class CartPageTest extends AbstractIntegrationTest {
         long productId = CartFixture.createProduct(jdbc, "MERGE-C01", "28.00", 10, "ON_SALE");
         MockHttpSession session = CartFixture.session(userId);
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                 .param("productId", String.valueOf(productId)).param("quantity", "1").session(session));
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                 .param("productId", String.valueOf(productId)).param("quantity", "2").session(session));
 
         assertThat(CartFixture.countItems(jdbc, userId)).isEqualTo(1);
@@ -125,7 +126,7 @@ class CartPageTest extends AbstractIntegrationTest {
     void guestAddRedirectsToDetailPage() throws Exception {
         long productId = CartFixture.createProduct(jdbc, "GUEST-C01", "28.00", 10, "ON_SALE");
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(productId))
                         .param("quantity", "1")
                         .header("Referer", "http://localhost/product/" + productId))
@@ -139,7 +140,7 @@ class CartPageTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "cart_zero");
         long productId = CartFixture.createProduct(jdbc, "ZERO-C01", "28.00", 10, "ON_SALE");
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(productId))
                         .param("quantity", "0")
                         .session(CartFixture.session(userId)))
@@ -155,7 +156,7 @@ class CartPageTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "cart_stock");
         long productId = CartFixture.createProduct(jdbc, "STOCK-C01", "28.00", 2, "ON_SALE");
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(productId))
                         .param("quantity", "3")
                         .session(CartFixture.session(userId)))
@@ -171,7 +172,7 @@ class CartPageTest extends AbstractIntegrationTest {
         long userId = CartFixture.createUser(jdbc, "cart_draft");
         long productId = CartFixture.createProduct(jdbc, "DRAFT-C01", "28.00", 10, "DRAFT");
 
-        mockMvc.perform(post("/cart/items")
+        mockMvc.perform(post("/cart/items").with(csrf())
                         .param("productId", String.valueOf(productId))
                         .param("quantity", "1")
                         .session(CartFixture.session(userId)))

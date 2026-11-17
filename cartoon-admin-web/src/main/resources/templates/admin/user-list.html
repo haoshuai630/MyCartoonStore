@@ -70,6 +70,7 @@
                             <form class="inline-form" th:action="@{/users/{id}/status(id=${row.id})}" method="post"
                                   th:onsubmit="${row.status == 'ENABLED'} ?
                                       'return confirm(\'禁用后该账号将立即无法登录，确定禁用吗？\')' : 'return true'">
+                                <input th:replace="~{admin/csrf :: hidden}">
                                 <input type="hidden" name="status"
                                        th:value="${row.status == 'ENABLED'} ? 'DISABLED' : 'ENABLED'">
                                 <button type="submit" class="link-btn"
