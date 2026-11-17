@@ -1,5 +1,6 @@
 package org.csu.mycartoonstore.order.service; // 下单事务：写订单与明细、扣库存、删结算条目，同成同败。
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers; // 按订单 id 查明细。
 import org.csu.mycartoonstore.cart.dto.CartLine; // 锁定的购物车行：条目、商品、数量、版本、单价。
 import org.csu.mycartoonstore.cart.dto.CartSummary; // 复用购物车汇总做快照比对。
 import org.csu.mycartoonstore.cart.service.CartService; // 锁车与删条目都走购物车模块。
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service; // 业务服务。
 import org.springframework.transaction.annotation.Transactional; // 事务边界。
 
 import java.math.BigDecimal; // 金额合计。
+import java.time.Clock; // 取取消时间，测试可固定。
+import java.time.LocalDateTime; // cancelled_at。
 import java.util.ArrayList; // 收集明细。
 import java.util.List; // 行列表。
 import java.util.Map; // id → 商品。
@@ -25,33 +28,39 @@ import java.util.function.Function; // 收集 Map。
 import java.util.stream.Collectors; // 收集 Map。
 
 // M05-03：依据 docs/01 FR-O-02、docs/02 §7.3、docs/06 AC-14～17。
-// 负责一次事务内完成：校验快照 → 锁车 → 锁商品 → 写订单与明细 → 扣库存 → 删结算条目。
-// 不负责支付、发货与页面渲染（M06 / M07 / M05-04）。
+// M05-05：补取消订单与库存恢复（AC-21/22/23）。
+// 负责下单与取消两种事务；不做支付、发货与页面渲染（M06 / M07 / M05-04）。
 @Service // 业务服务：Controller 只调它。
 public class OrderService {
 
     /** 下单初始状态：等待模拟支付。 */
     private static final String PENDING_PAYMENT = "PENDING_PAYMENT";
 
+    /** 已取消：幂等判断用。 */
+    private static final String CANCELLED = "CANCELLED";
+
     private final CartService cartService; // 锁车、删条目。
     private final CheckoutService checkoutService; // 快照比对与超时判断。
-    private final ProductMapper productMapper; // 商品行锁与扣库存。
-    private final SalesOrderMapper orderMapper; // 写订单。
-    private final SalesOrderItemMapper itemMapper; // 写明细。
+    private final ProductMapper productMapper; // 商品行锁、扣库存与恢复库存。
+    private final SalesOrderMapper orderMapper; // 写订单、锁订单行。
+    private final SalesOrderItemMapper itemMapper; // 写明细、取消时读明细。
     private final OrderNoGenerator orderNoGenerator; // 生成唯一订单号。
+    private final Clock clock; // 取消时间来源。
 
     public OrderService(CartService cartService,
                         CheckoutService checkoutService,
                         ProductMapper productMapper,
                         SalesOrderMapper orderMapper,
                         SalesOrderItemMapper itemMapper,
-                        OrderNoGenerator orderNoGenerator) { // 构造器注入六个协作方。
+                        OrderNoGenerator orderNoGenerator,
+                        Clock clock) { // 构造器注入七个协作方。
         this.cartService = cartService; // 保存购物车服务。
         this.checkoutService = checkoutService; // 保存结算服务。
         this.productMapper = productMapper; // 保存商品 Mapper。
         this.orderMapper = orderMapper; // 保存订单 Mapper。
         this.itemMapper = itemMapper; // 保存明细 Mapper。
         this.orderNoGenerator = orderNoGenerator; // 保存订单号生成器。
+        this.clock = clock; // 保存时钟。
     }
 
     /**
@@ -149,5 +158,46 @@ public class OrderService {
             throw BizException.conflict("购物车已变化，请重新确认");
         }
         return new PlacedOrder(order, items); // 事务提交后返回订单与明细。
+    }
+
+    /**
+     * 取消待支付订单并恢复库存。
+     *
+     * <p>先锁订单行：并发取消只有一个事务能迁移状态；第二次进来看到 CANCELLED 直接返回，
+     * 不会再恢复一次库存。已支付/已发货订单拒绝取消（AC-22）。</p>
+     *
+     * @return true = 本次真的取消了；false = 之前已取消（幂等）
+     */
+    @Transactional // 状态迁移与库存恢复同一事务。
+    public boolean cancel(long userId, String orderNo) {
+        // 锁订单行：同一订单的取消/支付串行化。
+        SalesOrder order = orderMapper.lockByOrderNo(orderNo);
+        // 不存在或不是本人的订单：统一 404，不泄露存在性。
+        if (order == null || order.getUserId() != userId) {
+            throw BizException.notFound("订单不存在");
+        }
+        // 幂等：已经取消过就不再恢复库存，直接告诉调用方"无需重复操作"。
+        if (CANCELLED.equals(order.getStatus())) {
+            return false;
+        }
+        // 只有待支付可取消；已支付/已发货/已完成一律 409。
+        if (!PENDING_PAYMENT.equals(order.getStatus())) {
+            throw BizException.conflict("当前状态不可取消");
+        }
+
+        order.setStatus(CANCELLED); // 迁移到已取消。
+        order.setCancelledAt(LocalDateTime.now(clock)); // 记录取消时间。
+        orderMapper.updateById(order); // 只更新非空字段，支付字段保持为空。
+
+        // 读明细并逐条恢复库存：每条明细只加一次，数量来自下单快照。
+        List<SalesOrderItem> items = itemMapper.selectList(Wrappers.<SalesOrderItem>lambdaQuery()
+                .eq(SalesOrderItem::getOrderId, order.getId())); // 该订单的全部明细。
+        for (SalesOrderItem item : items) {
+            int rows = productMapper.restoreStock(item.getProductId(), item.getQuantity()); // 库存 + 数量，版本 +1。
+            if (rows == 0) {
+                throw BizException.conflict("商品不存在，无法恢复库存"); // 外键保证一般不会发生。
+            }
+        }
+        return true; // 本次取消成功。
     }
 }

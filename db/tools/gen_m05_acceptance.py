@@ -75,6 +75,53 @@ TASKS = {
             (WEB_TEST + "PlaceOrderTest.java", "PlaceOrderTest.java", "6 个用例：正常/缺字段/车变/库存/回滚/归属", "java"),
         ],
     },
+    "04": {
+        "title": "M05-04 · 订单列表与详情补全",
+        "out": "M05-04-逐行验收.html",
+        "note": "内容：状态页签与角标、完整单号精确搜索、分页、空状态、时间线、状态标签、归属 404。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 96, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，166 用例。"
+                "store.css 新增列表/时间线样式不逐行对照；支付与取消按钮在 M06 / M05-05。",
+        "files": [
+            (ORDER + "service/OrderListService.java", "OrderListService.java", "本人订单：状态/单号/分页/角标", "java"),
+            (ORDER + "domain/OrderStatus.java", "OrderStatus.java", "五种状态与中文标签", "java"),
+            (ORDER + "dto/OrderCard.java", "OrderCard.java", "列表卡片：首件缩略图与件数", "java"),
+            (ORDER + "dto/OrderPage.java", "OrderPage.java", "一页结果与上下页判断", "java"),
+            (WEB + "controller/OrderController.java", "OrderController.java", "列表与详情路由", "java"),
+            ("cartoon-user-web/src/main/resources/templates/orders.html", "orders.html",
+             "列表页：页签、搜索、卡片、空状态、分页", "html"),
+            ("cartoon-user-web/src/main/resources/templates/order-detail.html", "order-detail.html",
+             "详情页：时间线、金额标签、返回列表", "html"),
+            (WEB_TEST + "OrderListTest.java", "OrderListTest.java", "9 个用例：空/归属/筛选/搜索/分页/400/快照/时间线/游客", "java"),
+        ],
+    },
+    "05": {
+        "title": "M05-05 · 取消订单与库存恢复",
+        "out": "M05-05-逐行验收.html",
+        "note": "内容：订单行锁、幂等取消、库存恢复与版本 +1、已支付不可取消、他人订单 404、车不回填。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 103, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，173 用例。"
+                "ProductMapper.restoreStock 是 3 行注解 SQL，未纳入逐行；由取消用例验证真实库存变化。",
+        "files": [
+            (ORDER + "service/OrderService.java", "OrderService.java", "下单事务 + 取消订单", "java"),
+            (WEB + "controller/OrderController.java", "OrderController.java", "取消路由与详情", "java"),
+            ("cartoon-user-web/src/main/resources/templates/order-detail.html", "order-detail.html",
+             "详情页：待支付显示取消按钮", "html"),
+            (WEB_TEST + "CancelOrderTest.java", "CancelOrderTest.java",
+             "7 个用例：恢复一次/重复取消/已支付/他人/不存在/按钮/页签", "java"),
+        ],
+    },
+    "06": {
+        "title": "M05-06 · 并发验证与收尾",
+        "out": "M05-06-逐行验收.html",
+        "note": "内容：同一车并发提交只成交一单、同一订单并发取消只恢复一次库存。"
+                "验证：mvn -pl cartoon-user-web -am test → Tests run: 105, Failures: 0；"
+                "mvn clean verify → 10 模块 SUCCESS，175 用例。",
+        "files": [
+            (WEB_TEST + "ConcurrentOrderTest.java", "ConcurrentOrderTest.java",
+             "2 个并发用例：下单与取消", "java"),
+        ],
+    },
 }
 
 NOTES: dict[tuple[str, str], str] = {
@@ -275,6 +322,119 @@ NOTES: dict[tuple[str, str], str] = {
         "夹具参数续行",
     (ORDER + "service/OrderQueryService.java", "return itemMapper.selectList(Wrappers.<SalesOrderItem>lambdaQuery()"):
         "按订单 id 查明细，保持写入顺序",
+    # ---- M05-04 订单列表 ----
+    (ORDER + "service/OrderListService.java", "LambdaQueryWrapper<SalesOrder> filter = Wrappers.<SalesOrder>lambdaQuery()"):
+        "查询条件：只查本人，状态与单号可选",
+    (ORDER + "service/OrderListService.java", "List<SalesOrder> orders = orderMapper.selectList(filter"):
+        "按时间倒序取当前页",
+    (ORDER + "service/OrderListService.java", '.last("LIMIT " + PAGE_SIZE + " OFFSET " + (safePage - 1) * PAGE_SIZE));'):
+        "SQL 层分页：LIMIT/OFFSET，不把全部订单读进内存",
+    (ORDER + "service/OrderListService.java", "return new OrderPage(cards, safePage, PAGE_SIZE, total, totalPages,"):
+        "把当前页、总数与角标交给页面",
+    (ORDER + "service/OrderListService.java", 'statusCounts(userId), status == null ? "ALL" : status.name(), orderNo);'):
+        "参数续行：角标、当前状态、搜索词",
+    (ORDER + "service/OrderListService.java", "Map<String, Long> counts = new HashMap<>();"):
+        "六个角标：ALL + 五种状态",
+    (ORDER + "service/OrderListService.java", 'counts.put("ALL", orderMapper.selectCount(Wrappers.<SalesOrder>lambdaQuery()'):
+        "全部订单数",
+    (ORDER + "service/OrderListService.java", "counts.put(status.name(), orderMapper.selectCount(Wrappers.<SalesOrder>lambdaQuery()"):
+        "每种状态的真实数量",
+    (ORDER + "service/OrderListService.java", ".eq(SalesOrder::getUserId, userId)"):
+        "参数续行：只统计本人",
+    (ORDER + "service/OrderListService.java", ".eq(SalesOrder::getStatus, status.name())));"):
+        "参数续行：按状态计数",
+    (ORDER + "service/OrderListService.java", "if (orders.isEmpty()) {"):
+        "空页直接返回，不再查明细",
+    (ORDER + "service/OrderListService.java", "Map<Long, List<SalesOrderItem>> itemsByOrder = itemMapper.selectList("):
+        "一次查完本页全部明细，避免 N+1",
+    (ORDER + "service/OrderListService.java", "Wrappers.<SalesOrderItem>lambdaQuery()"):
+        "参数续行：明细查询条件",
+    (ORDER + "service/OrderListService.java", ".orderByAsc(SalesOrderItem::getId))"):
+        "参数续行：按写入顺序，保证首件稳定",
+    (ORDER + "service/OrderListService.java", ".stream()"):
+        "转成流，按订单分组",
+    (ORDER + "service/OrderListService.java", "for (SalesOrder order : orders) {"):
+        "按查询顺序组装卡片",
+    (ORDER + "service/OrderListService.java", "cards.add(new OrderCard(order.getOrderNo(), order.getStatus(), order.getTotalAmount(),"):
+        "组装一张卡片：订单头 + 首件缩略图",
+    (ORDER + "service/OrderListService.java", "order.getCreatedAt(),"):
+        "参数续行：创建时间",
+    (ORDER + "service/OrderListService.java", "if (page < 1) {"):
+        "0 与负数页码：400",
+    (ORDER + "service/OrderListService.java", "if (orderNo.length() > ORDER_NO_MAX) {"):
+        "超过 VARCHAR(40)：400",
+    (ORDER + "domain/OrderStatus.java", "public enum OrderStatus {"):
+        "五种状态：与数据库 CHECK 一一对应",
+    (ORDER + "dto/OrderCard.java", "public OrderCard(String orderNo, String status, BigDecimal totalAmount, LocalDateTime createdAt,"):
+        "卡片构造器：状态码在内部转成中文标签",
+    (ORDER + "dto/OrderPage.java", "public OrderPage(List<OrderCard> cards, int page, int size, long total, int totalPages,"):
+        "一页结果的构造器",
+    (WEB + "controller/OrderController.java", "HttpSession session, Model model) {"):
+        "参数续行：会话与页面数据",
+    (WEB + "controller/OrderController.java", "for (OrderStatus status : OrderStatus.values()) {"):
+        "按枚举顺序生成页签",
+    (WEB_TEST + "OrderListTest.java", "class OrderListTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "OrderListTest.java", 'org.assertj.core.api.Assertions.assertThat(html.indexOf("CO202611161100000002"))'):
+        "断言 11:00 的单排在 10:00 前",
+    (WEB_TEST + "OrderListTest.java", 'org.assertj.core.api.Assertions.assertThat(html.replaceAll("\\\\s+", ""))'):
+        "压缩空白后断言页签数量",
+    (WEB_TEST + "OrderListTest.java", 'seedOrder(String.format("CO2026111610%08d", i), "PENDING_PAYMENT", "28.00",'):
+        "循环造 11 单，单号与时间都可排序",
+    (WEB_TEST + "OrderListTest.java", '+ "receiver_phone, receiver_address, created_at, payment_method, payment_no, paid_at, cancelled_at) "'):
+        "参数续行：订单列名",
+    (WEB_TEST + "OrderListTest.java", 'orderNo, owner, status, new java.math.BigDecimal(total), "张三", "13800000000",'):
+        "订单值：收货信息固定",
+    (WEB_TEST + "OrderListTest.java", '"某市某区某路 1 号", createdAt,'):
+        "参数续行：地址与创建时间",
+    (WEB_TEST + "OrderListTest.java", 'orderId, productId, "SKU-" + orderNo, name, "/images/covers/ol.svg",'):
+        "明细值：快照名称、封面与 SKU",
+    (WEB_TEST + "OrderListTest.java", "new java.math.BigDecimal(price), quantity,"):
+        "参数续行：单价与数量",
+    # ---- M05-05 取消订单 ----
+    (ORDER + "service/OrderService.java", "OrderNoGenerator orderNoGenerator,"):
+        "参数续行：订单号生成器",
+    (ORDER + "service/OrderService.java", "SalesOrder order = orderMapper.lockByOrderNo(orderNo);"):
+        "锁订单行：并发取消只有一个能迁移状态",
+    (ORDER + "service/OrderService.java", "if (order == null || order.getUserId() != userId) {"):
+        "不存在或非本人：统一 404",
+    (ORDER + "service/OrderService.java", "if (CANCELLED.equals(order.getStatus())) {"):
+        "幂等：已取消直接返回，不再恢复库存",
+    (ORDER + "service/OrderService.java", "if (!PENDING_PAYMENT.equals(order.getStatus())) {"):
+        "非待支付：409，已支付/已发货不可取消",
+    (ORDER + "service/OrderService.java", "List<SalesOrderItem> items = itemMapper.selectList(Wrappers.<SalesOrderItem>lambdaQuery()"):
+        "读该订单全部明细",
+    (ORDER + "service/OrderService.java", "for (SalesOrderItem item : items) {"):
+        "逐条恢复库存，数量来自下单快照",
+    (WEB + "controller/OrderController.java", "public OrderController(OrderQueryService orderQueryService, OrderListService orderListService,"):
+        "构造器注入：详情、列表、取消三个服务",
+    (WEB + "controller/OrderController.java", 'redirect.addFlashAttribute("message",'):
+        "取消结果提示：真取消 / 幂等",
+    (WEB_TEST + "CancelOrderTest.java", "class CancelOrderTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "CancelOrderTest.java", '+ "receiver_address, created_at, payment_method, payment_no, paid_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",'):
+        "参数续行：订单列名",
+    (WEB_TEST + "CancelOrderTest.java", 'orderNo, owner, status, new BigDecimal("56.00"), "张三", "13800000000",'):
+        "订单值：收货信息固定",
+    (WEB_TEST + "CancelOrderTest.java", '"某市某区某路 1 号", created,'):
+        "参数续行：地址与创建时间",
+    (WEB_TEST + "CancelOrderTest.java", 'paymentNo == null ? null : "MOCK", paymentNo,'):
+        "支付凭证：只有已支付订单才有",
+    (WEB_TEST + "CancelOrderTest.java", 'orderId, productId, "SKU-" + orderNo, "商品" + orderNo, "/images/covers/cx.svg",'):
+        "明细值：快照名称与封面",
+    # ---- M05-06 并发验证 ----
+    (WEB_TEST + "ConcurrentOrderTest.java", "class ConcurrentOrderTest extends AbstractIntegrationTest {"):
+        "集成测试：真实 MySQL + MockMvc",
+    (WEB_TEST + "ConcurrentOrderTest.java", 'assertThat(value("SELECT status FROM sales_order WHERE order_no = ?", String.class,'):
+        "断言订单已取消",
+    (WEB_TEST + "ConcurrentOrderTest.java", "} finally {"):
+        "无论如何都收回线程池",
+    (WEB_TEST + "ConcurrentOrderTest.java", '+ "receiver_phone, receiver_address, created_at) VALUES (?,?,?,?,?,?,?,?)",'):
+        "参数续行：订单列名",
+    (WEB_TEST + "ConcurrentOrderTest.java", 'orderNo, owner, "PENDING_PAYMENT", new BigDecimal("56.00"), "张三", "13800000000",'):
+        "订单值：收货信息固定",
+    (WEB_TEST + "ConcurrentOrderTest.java", 'orderId, productId, "SKU-" + orderNo, "商品" + orderNo, "/images/covers/cc.svg",'):
+        "明细值：快照名称与封面",
 }
 
 

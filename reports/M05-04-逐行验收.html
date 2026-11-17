@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<title>M05-04 · 订单列表与详情补全（逐行验收）</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:#182333;font:15px/1.7 "Microsoft YaHei",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:2;background:white;border-bottom:1px solid #cad3df;padding:18px 30px}
+h1{font-size:24px;margin:0}header p{color:#536176;margin:6px 0 10px}
+nav{display:flex;gap:10px;flex-wrap:wrap}nav a{background:#eaf2ff;border:1px solid #b7cce9;color:#14558c;border-radius:5px;padding:5px 12px;text-decoration:none}
+main{max-width:1500px;margin:auto;padding:18px 30px 46px}.note{padding:12px 16px;background:white;border-left:4px solid #2677ba;color:#536176}
+section{margin:22px 0 36px}h2{font-size:20px;margin:0 0 3px}small{margin-left:12px;font-size:13px;font-weight:400;color:#536176}
+.path{font:13px/1.5 Consolas,monospace;color:#536176;margin:0 0 10px;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #bcc9da}
+th{background:#dae3ef;text-align:left;padding:9px 12px;font-size:13px}th:first-child{text-align:center}
+td{vertical-align:top;padding:5px 12px}.line{background:#121d30;color:#9badc7;text-align:right;font:13px/1.7 Consolas,monospace}
+.code{background:#182337;color:#f3f6fd}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:13.5px/1.6 Consolas,"Microsoft YaHei",monospace;tab-size:4}
+pre.cmtline{color:#8fd0a8}
+.explain{background:#fff2cf;color:#653d10;border-left:4px solid #e4ae49;font-size:13px;line-height:1.7}
+.kw{color:#d5b9ff}.gap td{height:7px;padding:0}
+tbody tr{transition:background .08s}
+tbody tr:hover .code{background:#24406b}
+tbody tr:hover .explain{background:#ffe08a;color:#3d2400}
+tbody tr:hover .line{background:#1d3350;color:#d6e4ff}
+tbody tr:focus{outline:2px solid #2677ba;outline-offset:-2px}
+footer{color:#536176;font-size:13px}
+</style></head>
+<body>
+<header>
+<h1>M05-04 · 订单列表与详情补全（逐行验收）</h1>
+<p>一行源码一行记录，行号连续。左列代码已去掉行尾注释，注释文字放在右列；整行注释仍在原位、绿色显示。</p>
+<nav><a href="#s1">OrderListService.java</a><a href="#s2">OrderStatus.java</a><a href="#s3">OrderCard.java</a><a href="#s4">OrderPage.java</a><a href="#s5">OrderController.java</a><a href="#s6">orders.html</a><a href="#s7">order-detail.html</a><a href="#s8">OrderListTest.java</a></nav>
+</header>
+<main>
+<p class="note">内容：状态页签与角标、完整单号精确搜索、分页、空状态、时间线、状态标签、归属 404。验证：mvn -pl cartoon-user-web -am test → Tests run: 96, Failures: 0；mvn clean verify → 10 模块 SUCCESS，166 用例。store.css 新增列表/时间线样式不逐行对照；支付与取消按钮在 M06 / M05-05。</p>
+<p class="note" style="margin-top:8px">格式约定：左列不出现行尾注释，避免与右列重复；每一条代码行都有说明，不出现「—」。</p>
+<section id="s1">
+<h2>OrderListService.java<small>本人订单：状态/单号/分页/角标 · 138 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/service/OrderListService.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.service;</pre></td><td class="explain">订单列表查询：本人、状态、完整单号、分页与角标。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;</pre></td><td class="explain">条件拼装。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> com.baomidou.mybatisplus.core.toolkit.Wrappers;</pre></td><td class="explain">构造 Lambda 条件。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">非法参数 400。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.OrderStatus;</pre></td><td class="explain">状态校验与标签。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.OrderCard;</pre></td><td class="explain">卡片。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.OrderPage;</pre></td><td class="explain">一页结果。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单主表。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrderItem;</pre></td><td class="explain">明细快照。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderItemMapper;</pre></td><td class="explain">批量查明细。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.mapper.SalesOrderMapper;</pre></td><td class="explain">查订单。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Service;</pre></td><td class="explain">业务服务。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList;</pre></td><td class="explain">组装卡片。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> java.util.HashMap;</pre></td><td class="explain">角标。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">列表。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.Map;</pre></td><td class="explain">分组。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.stream.Collectors;</pre></td><td class="explain">分组。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre class="cmtline">// M05-04：依据 docs/05 §4.6、docs/06 AC-19/AC-30。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">// 只做"查本人订单"：状态过滤、完整单号精确匹配、分页、状态角标。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">// 不做支付、取消、发货等写操作（M05-05 / M06 / M07）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>@Service</pre></td><td class="explain">业务服务。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderListService {</pre></td><td class="explain">OrderListService：见类注释</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">    /** 每页 10 条：与 docs/05 §4.6 的分页一致。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> PAGE_SIZE = 10;</pre></td><td class="explain">每页 10 条：与 docs/05 §4.6 的分页一致。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre class="cmtline">    /** 订单号最大长度：数据库 VARCHAR(40)。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> <span class="kw">int</span> ORDER_NO_MAX = 40;</pre></td><td class="explain">订单号最大长度：数据库 VARCHAR(40)。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> SalesOrderMapper orderMapper;</pre></td><td class="explain">订单查询。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> SalesOrderItemMapper itemMapper;</pre></td><td class="explain">卡片缩略图与件数。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">public</span> OrderListService(SalesOrderMapper orderMapper, SalesOrderItemMapper itemMapper) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        this.orderMapper = orderMapper;</pre></td><td class="explain">保存订单 Mapper。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>        this.itemMapper = itemMapper;</pre></td><td class="explain">保存明细 Mapper。</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">40</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre class="cmtline">     * 查询本人订单一页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre class="cmtline">     *</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre class="cmtline">     * @param rawStatus  状态码或 ALL</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre class="cmtline">     * @param rawOrderNo 完整订单号（精确匹配，可空）</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">     * @param rawPage    页码（1 起，可空）</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">public</span> OrderPage list(<span class="kw">long</span> userId, String rawStatus, String rawOrderNo, String rawPage) {</pre></td><td class="explain">查询本人订单一页。 @param rawStatus 状态码或 ALL @param rawOrderNo 完整订单号（精确匹配，可空） @param rawPage 页码（1 起，可空）</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        OrderStatus status = OrderStatus.ofFilter(rawStatus);</pre></td><td class="explain">非法状态 400。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        String orderNo = normalizeOrderNo(rawOrderNo);</pre></td><td class="explain">空串按未搜索；超长 400。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>        <span class="kw">int</span> page = parsePage(rawPage);</pre></td><td class="explain">非法页码 400。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>        LambdaQueryWrapper&lt;SalesOrder&gt; filter = Wrappers.&lt;SalesOrder&gt;lambdaQuery()</pre></td><td class="explain">查询条件：只查本人，状态与单号可选</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                .eq(SalesOrder::getUserId, userId)</pre></td><td class="explain">参数续行：只统计本人</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                .eq(status != null, SalesOrder::getStatus, status == null ? null : status.name())</pre></td><td class="explain">状态页签。</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                .eq(orderNo != null, SalesOrder::getOrderNo, orderNo);</pre></td><td class="explain">完整单号精确匹配。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>        <span class="kw">long</span> total = orderMapper.selectCount(filter);</pre></td><td class="explain">当前条件总数。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        <span class="kw">int</span> totalPages = (<span class="kw">int</span>) Math.max(1, (total + PAGE_SIZE - 1) / PAGE_SIZE);</pre></td><td class="explain">至少 1 页。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        <span class="kw">int</span> safePage = Math.min(page, totalPages);</pre></td><td class="explain">超过末页时回到末页，避免空白页。</td></tr>
+<tr class="gap"><td class="line">60</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre class="cmtline">        // 只取当前页：排序与分页都交给 SQL，避免把所有订单读进内存。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        List&lt;SalesOrder&gt; orders = orderMapper.selectList(filter</pre></td><td class="explain">按时间倒序取当前页</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                .orderByDesc(SalesOrder::getCreatedAt)</pre></td><td class="explain">新的在前。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                .orderByDesc(SalesOrder::getId)</pre></td><td class="explain">同秒下单按 id 兜底。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .last("LIMIT " + PAGE_SIZE + " OFFSET " + (safePage - 1) * PAGE_SIZE));</pre></td><td class="explain">SQL 层分页：LIMIT/OFFSET，不把全部订单读进内存</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>        List&lt;OrderCard&gt; cards = toCards(orders);</pre></td><td class="explain">明细一次批量查，避免 N+1。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>        <span class="kw">return</span> <span class="kw">new</span> OrderPage(cards, safePage, PAGE_SIZE, total, totalPages,</pre></td><td class="explain">把当前页、总数与角标交给页面</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                statusCounts(userId), status == null ? "ALL" : status.name(), orderNo);</pre></td><td class="explain">参数续行：角标、当前状态、搜索词</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">70</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre class="cmtline">    /** 六种角标数量：ALL + 五种状态，全部来自真实数据。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>    <span class="kw">public</span> Map&lt;String, Long&gt; statusCounts(<span class="kw">long</span> userId) {</pre></td><td class="explain">六种角标数量：ALL + 五种状态，全部来自真实数据。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>        Map&lt;String, Long&gt; counts = <span class="kw">new</span> HashMap&lt;&gt;();</pre></td><td class="explain">六个角标：ALL + 五种状态</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>        counts.put("ALL", orderMapper.selectCount(Wrappers.&lt;SalesOrder&gt;lambdaQuery()</pre></td><td class="explain">全部订单数</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                .eq(SalesOrder::getUserId, userId)));</pre></td><td class="explain">全部。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        for (OrderStatus status : OrderStatus.values()) {</pre></td><td class="explain">五种状态各查一次。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>            counts.put(status.name(), orderMapper.selectCount(Wrappers.&lt;SalesOrder&gt;lambdaQuery()</pre></td><td class="explain">每种状态的真实数量</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>                    .eq(SalesOrder::getUserId, userId)</pre></td><td class="explain">参数续行：只统计本人</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>                    .eq(SalesOrder::getStatus, status.name())));</pre></td><td class="explain">参数续行：按状态计数</td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        <span class="kw">return</span> counts;</pre></td><td class="explain">交给页面显示角标。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">83</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre class="cmtline">    /** 把订单转成卡片：首件商品缩略图、种类数、总件数。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>    <span class="kw">private</span> List&lt;OrderCard&gt; toCards(List&lt;SalesOrder&gt; orders) {</pre></td><td class="explain">把订单转成卡片：首件商品缩略图、种类数、总件数。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        if (orders.isEmpty()) {</pre></td><td class="explain">空页直接返回，不再查明细</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>            <span class="kw">return</span> List.of();</pre></td><td class="explain">空页直接返回。</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        List&lt;Long&gt; orderIds = orders.stream().map(SalesOrder::getId).toList();</pre></td><td class="explain">本页订单 id。</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>        Map&lt;Long, List&lt;SalesOrderItem&gt;&gt; itemsByOrder = itemMapper.selectList(</pre></td><td class="explain">一次查完本页全部明细，避免 N+1</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                        Wrappers.&lt;SalesOrderItem&gt;lambdaQuery()</pre></td><td class="explain">参数续行：明细查询条件</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                                .in(SalesOrderItem::getOrderId, orderIds)</pre></td><td class="explain">一次查完本页明细。</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                                .orderByAsc(SalesOrderItem::getId))</pre></td><td class="explain">参数续行：按写入顺序，保证首件稳定</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>                .stream()</pre></td><td class="explain">转成流，按订单分组</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>                .collect(Collectors.groupingBy(SalesOrderItem::getOrderId));</pre></td><td class="explain">按订单分组。</td></tr>
+<tr class="gap"><td class="line">96</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        List&lt;OrderCard&gt; cards = <span class="kw">new</span> ArrayList&lt;&gt;(orders.size());</pre></td><td class="explain">按查询顺序组装。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        for (SalesOrder order : orders) {</pre></td><td class="explain">按查询顺序组装卡片</td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>            List&lt;SalesOrderItem&gt; items = itemsByOrder.getOrDefault(order.getId(), List.of());</pre></td><td class="explain">该订单明细。</td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>            SalesOrderItem first = items.isEmpty() ? null : items.get(0);</pre></td><td class="explain">首件做缩略图。</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>            <span class="kw">int</span> quantity = items.stream().mapToInt(SalesOrderItem::getQuantity).sum();</pre></td><td class="explain">总件数。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>            cards.add(<span class="kw">new</span> OrderCard(order.getOrderNo(), order.getStatus(), order.getTotalAmount(),</pre></td><td class="explain">组装一张卡片：订单头 + 首件缩略图</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                    order.getCreatedAt(),</pre></td><td class="explain">参数续行：创建时间</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                    first == null ? "" : first.getProductNameSnapshot(),</pre></td><td class="explain">首件名称。</td></tr>
+<tr tabindex="0" data-line="105"><td class="line">105</td><td class="code"><pre>                    first == null ? "" : first.getCoverImageSnapshot(),</pre></td><td class="explain">首件封面。</td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>                    items.size(), quantity));</pre></td><td class="explain">种类数与总件数。</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>        <span class="kw">return</span> cards;</pre></td><td class="explain">返回卡片。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">110</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="111"><td class="line">111</td><td class="code"><pre class="cmtline">    /** 页码：空按 1；非数字或小于 1 给 400。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> parsePage(String raw) {</pre></td><td class="explain">页码：空按 1；非数字或小于 1 给 400。</td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>            <span class="kw">return</span> 1;</pre></td><td class="explain">默认第一页。</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        try {</pre></td><td class="explain">插入可能撞唯一键，所以包在 try 里</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>            <span class="kw">int</span> page = Integer.parseInt(raw.trim());</pre></td><td class="explain">只接受整数。</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>            if (page &lt; 1) {</pre></td><td class="explain">0 与负数页码：400</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>                throw BizException.badRequest("页码不合法");</pre></td><td class="explain">0 与负数都不行。</td></tr>
+<tr tabindex="0" data-line="120"><td class="line">120</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>            <span class="kw">return</span> page;</pre></td><td class="explain">合法页码。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>        } catch (NumberFormatException e) {</pre></td><td class="explain">非数字一律转 400，不把解析异常抛给容器。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>            throw BizException.badRequest("页码不合法");</pre></td><td class="explain">非数字也 400。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">126</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre class="cmtline">    /** 订单号：去空白；空串视为未搜索；超过列宽给 400。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>    <span class="kw">private</span> String normalizeOrderNo(String raw) {</pre></td><td class="explain">订单号：去空白；空串视为未搜索；超过列宽给 400。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>        if (raw == null || raw.isBlank()) {</pre></td><td class="explain">空值/空白按出错处理，不当作缺省值</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">未搜索。</td></tr>
+<tr tabindex="0" data-line="131"><td class="line">131</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>        String orderNo = raw.trim();</pre></td><td class="explain">去首尾空白。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>        if (orderNo.length() &gt; ORDER_NO_MAX) {</pre></td><td class="explain">超过 VARCHAR(40)：400</td></tr>
+<tr tabindex="0" data-line="134"><td class="line">134</td><td class="code"><pre>            throw BizException.badRequest("订单号过长");</pre></td><td class="explain">超过 VARCHAR(40)。</td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>        <span class="kw">return</span> orderNo;</pre></td><td class="explain">精确匹配用。</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s2">
+<h2>OrderStatus.java<small>五种状态与中文标签 · 49 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/domain/OrderStatus.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.domain;</pre></td><td class="explain">订单状态：五种状态与中文标签的唯一来源。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">非法状态转 400。</td></tr>
+<tr class="gap"><td class="line">4</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre class="cmtline">// M05-04：依据 docs/03 §2.6 的 status 注释与 docs/05 §4.6 的状态页签。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre class="cmtline">// 只做"状态 ↔ 标签"的映射与校验；状态迁移由 OrderService/M06/M07 负责。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">public</span> enum OrderStatus {</pre></td><td class="explain">五种状态：与数据库 CHECK 一一对应</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    PENDING_PAYMENT("待支付"),</pre></td><td class="explain">下单后、支付前。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>    PAID("待发货"),</pre></td><td class="explain">模拟支付成功。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>    SHIPPED("已发货"),</pre></td><td class="explain">管理端发货（P1）。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>    COMPLETED("已完成"),</pre></td><td class="explain">确认收货（P1）。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    CANCELLED("已取消");</pre></td><td class="explain">取消的待支付订单。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String label;</pre></td><td class="explain">页面显示的中文。</td></tr>
+<tr class="gap"><td class="line">16</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    OrderStatus(String label) {</pre></td><td class="explain">每个状态自带标签。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>        this.label = label;</pre></td><td class="explain">保存标签。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">20</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">public</span> String getLabel() {</pre></td><td class="explain">模板取标签。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>        <span class="kw">return</span> label;</pre></td><td class="explain">返回中文。</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">24</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre class="cmtline">     * 把查询参数转成状态；ALL 或空表示不过滤，非法值给 400。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> OrderStatus ofFilter(String raw) {</pre></td><td class="explain">把查询参数转成状态；ALL 或空表示不过滤，非法值给 400。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        if (raw == null || raw.isBlank() || "ALL".equals(raw)) {</pre></td><td class="explain">默认与"全部"。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>            <span class="kw">return</span> null;</pre></td><td class="explain">null 表示不过滤。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        for (OrderStatus status : values()) {</pre></td><td class="explain">只认枚举里的值。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>            if (status.name().equals(raw)) {</pre></td><td class="explain">精确匹配。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                <span class="kw">return</span> status;</pre></td><td class="explain">命中即返回。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>        throw BizException.badRequest("订单状态不合法");</pre></td><td class="explain">其他值：400。</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">39</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre class="cmtline">    /** 根据库里的字符串取标签；未知值原样显示，避免页面空白。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>    <span class="kw">public</span> <span class="kw">static</span> String labelOf(String code) {</pre></td><td class="explain">根据库里的字符串取标签；未知值原样显示，避免页面空白。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        for (OrderStatus status : values()) {</pre></td><td class="explain">遍历五种状态。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>            if (status.name().equals(code)) {</pre></td><td class="explain">命中。</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                <span class="kw">return</span> status.getLabel();</pre></td><td class="explain">返回中文。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>            }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        <span class="kw">return</span> code;</pre></td><td class="explain">未知值原样显示，便于发现问题。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s3">
+<h2>OrderCard.java<small>列表卡片：首件缩略图与件数 · 36 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/dto/OrderCard.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto;</pre></td><td class="explain">订单列表的一张卡片：主表摘要 + 首件商品缩略图。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.OrderStatus;</pre></td><td class="explain">引入 OrderStatus</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.math.BigDecimal;</pre></td><td class="explain">金额用 BigDecimal，避免 double 的精度误差</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">引入 LocalDateTime</td></tr>
+<tr class="gap"><td class="line">8</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// M05-04：依据 docs/05 §4.6 的卡片（订单号、时间、状态、缩略图、总额、查看）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre class="cmtline">// 只读展示：不参与状态迁移，也不含收货地址（列表不展示隐私）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>@Getter</pre></td><td class="explain">全部字段只读。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderCard {</pre></td><td class="explain">OrderCard：见类注释</td></tr>
+<tr class="gap"><td class="line">13</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String orderNo;</pre></td><td class="explain">完整订单号。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String status;</pre></td><td class="explain">数据库里的状态码。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String statusLabel;</pre></td><td class="explain">状态中文标签。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> BigDecimal totalAmount;</pre></td><td class="explain">订单总额。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> LocalDateTime createdAt;</pre></td><td class="explain">创建时间。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String firstProductName;</pre></td><td class="explain">首件商品名（快照）。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String firstCover;</pre></td><td class="explain">首件封面（快照）。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> itemCount;</pre></td><td class="explain">明细种类数。</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> totalQuantity;</pre></td><td class="explain">商品总件数。</td></tr>
+<tr class="gap"><td class="line">23</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>    <span class="kw">public</span> OrderCard(String orderNo, String status, BigDecimal totalAmount, LocalDateTime createdAt,</pre></td><td class="explain">卡片构造器：状态码在内部转成中文标签</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                     String firstProductName, String firstCover, <span class="kw">int</span> itemCount, <span class="kw">int</span> totalQuantity) {</pre></td><td class="explain">构造器。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        this.orderNo = orderNo;</pre></td><td class="explain">订单号。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        this.status = status;</pre></td><td class="explain">状态码。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        this.statusLabel = OrderStatus.labelOf(status);</pre></td><td class="explain">状态中文。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.totalAmount = totalAmount;</pre></td><td class="explain">总额。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        this.createdAt = createdAt;</pre></td><td class="explain">创建时间。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        this.firstProductName = firstProductName;</pre></td><td class="explain">首件商品名。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        this.firstCover = firstCover;</pre></td><td class="explain">首件封面。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        this.itemCount = itemCount;</pre></td><td class="explain">明细种类数。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>        this.totalQuantity = totalQuantity;</pre></td><td class="explain">总件数。</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s4">
+<h2>OrderPage.java<small>一页结果与上下页判断 · 43 行</small></h2>
+<p class="path">cartoon-order/src/main/java/org/csu/mycartoonstore/order/dto/OrderPage.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.order.dto;</pre></td><td class="explain">订单一页：卡片、分页信息与状态角标。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> lombok.Getter;</pre></td><td class="explain">Lombok：为字段生成 getter</td></tr>
+<tr class="gap"><td class="line">4</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">集合类型</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> java.util.Map;</pre></td><td class="explain">引入 Map</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre class="cmtline">// M05-04：依据 docs/05 §4.6 的页签、卡片与分页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre class="cmtline">// 只读：把"当前页查什么、总共有多少"一并交给页面，控制器不再算分页。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>@Getter</pre></td><td class="explain">字段只读。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderPage {</pre></td><td class="explain">OrderPage：见类注释</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> List&lt;OrderCard&gt; cards;</pre></td><td class="explain">当前页卡片。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> page;</pre></td><td class="explain">当前页（1 起）。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> size;</pre></td><td class="explain">每页条数。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">long</span> total;</pre></td><td class="explain">当前筛选条件下的总数。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> <span class="kw">int</span> totalPages;</pre></td><td class="explain">总页数（至少 1）。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> Map&lt;String, Long&gt; statusCounts;</pre></td><td class="explain">ALL 与五种状态的数量。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String status;</pre></td><td class="explain">当前状态（ALL 或状态码）。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> String orderNo;</pre></td><td class="explain">当前搜索的完整订单号（可为空）。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>    <span class="kw">public</span> OrderPage(List&lt;OrderCard&gt; cards, <span class="kw">int</span> page, <span class="kw">int</span> size, <span class="kw">long</span> total, <span class="kw">int</span> totalPages,</pre></td><td class="explain">一页结果的构造器</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                     Map&lt;String, Long&gt; statusCounts, String status, String orderNo) {</pre></td><td class="explain">构造器。</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>        this.cards = List.copyOf(cards);</pre></td><td class="explain">不可变，避免页面改到查询结果。</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>        this.page = page;</pre></td><td class="explain">当前页。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>        this.size = size;</pre></td><td class="explain">每页条数。</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>        this.total = total;</pre></td><td class="explain">总数。</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>        this.totalPages = totalPages;</pre></td><td class="explain">总页数。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>        this.statusCounts = Map.copyOf(statusCounts);</pre></td><td class="explain">角标数量。</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>        this.status = status;</pre></td><td class="explain">当前状态。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>        this.orderNo = orderNo;</pre></td><td class="explain">搜索词。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">33</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre class="cmtline">    /** 是否有上一页。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>    <span class="kw">public</span> boolean isHasPrev() {</pre></td><td class="explain">是否有上一页。</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>        <span class="kw">return</span> page &gt; 1;</pre></td><td class="explain">第一页没有上一页。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre class="cmtline">    /** 是否有下一页。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">public</span> boolean isHasNext() {</pre></td><td class="explain">是否有下一页。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        <span class="kw">return</span> page &lt; totalPages;</pre></td><td class="explain">最后一页没有下一页。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s5">
+<h2>OrderController.java<small>列表与详情路由 · 97 行</small></h2>
+<p class="path">cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/controller/OrderController.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web.controller;</pre></td><td class="explain">订单列表与详情：本人订单的只读页面。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> jakarta.servlet.http.HttpSession;</pre></td><td class="explain">取当前用户。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.BizException;</pre></td><td class="explain">未登录兜底 401。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.common.exception.ErrorCode;</pre></td><td class="explain">错误码。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.domain.OrderStatus;</pre></td><td class="explain">状态标签。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.dto.OrderPage;</pre></td><td class="explain">列表一页。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.entity.SalesOrder;</pre></td><td class="explain">订单主表。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderListService;</pre></td><td class="explain">列表查询。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.order.service.OrderQueryService;</pre></td><td class="explain">详情查询。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.interceptor.LoginInterceptor;</pre></td><td class="explain">会话里 userId 的键。</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre><span class="kw">import</span> org.springframework.stereotype.Controller;</pre></td><td class="explain">MVC 控制器。</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> org.springframework.ui.Model;</pre></td><td class="explain">页面数据。</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.GetMapping;</pre></td><td class="explain">只读页面。</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.PathVariable;</pre></td><td class="explain">订单号来自路径。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> org.springframework.web.bind.annotation.RequestParam;</pre></td><td class="explain">状态、单号、页码。</td></tr>
+<tr class="gap"><td class="line">17</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> java.util.ArrayList;</pre></td><td class="explain">状态页签。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> java.util.LinkedHashMap;</pre></td><td class="explain">标签顺序固定。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> java.util.List;</pre></td><td class="explain">页签列表。</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre><span class="kw">import</span> java.util.Map;</pre></td><td class="explain">标签表。</td></tr>
+<tr class="gap"><td class="line">22</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">// M05-03 建立最小详情；M05-04 补列表（状态页签、完整单号、分页、空状态）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">// 只做"看"：支付/取消/发货等写操作在 M05-05、M06、M07。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@Controller</pre></td><td class="explain">注册为控制器。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">public</span> <span class="kw">class</span> OrderController {</pre></td><td class="explain">OrderController：见类注释</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> OrderQueryService orderQueryService;</pre></td><td class="explain">详情查询。</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">final</span> OrderListService orderListService;</pre></td><td class="explain">列表查询。</td></tr>
+<tr class="gap"><td class="line">30</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">public</span> OrderController(OrderQueryService orderQueryService, OrderListService orderListService) {</pre></td><td class="explain">构造器注入。</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>        this.orderQueryService = orderQueryService;</pre></td><td class="explain">保存详情服务。</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>        this.orderListService = orderListService;</pre></td><td class="explain">保存列表服务。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre class="cmtline">     * 我的订单：状态页签 + 完整单号搜索 + 分页，条件互相保留。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @GetMapping("/orders")</pre></td><td class="explain">受保护路径。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">public</span> String list(@RequestParam(required = false) String status,</pre></td><td class="explain">状态码或 ALL。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                       @RequestParam(required = false) String orderNo,</pre></td><td class="explain">完整订单号。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                       @RequestParam(required = false) String page,</pre></td><td class="explain">页码。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                       HttpSession session, Model model) {</pre></td><td class="explain">参数续行：会话与页面数据</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">当前用户。</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>        OrderPage pageData = orderListService.list(userId, status, orderNo, page);</pre></td><td class="explain">非法参数在这里 400。</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>        model.addAttribute("pageData", pageData);</pre></td><td class="explain">卡片、分页与角标。</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>        model.addAttribute("tabs", statusTabs(pageData));</pre></td><td class="explain">六个页签（编码、标签、真实数量）。</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>        model.addAttribute("currentLabel",</pre></td><td class="explain">把数据放进模型，模板里可直接取</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                "ALL".equals(pageData.getStatus()) ? "全部" : OrderStatus.labelOf(pageData.getStatus()));</pre></td><td class="explain">空状态文案用。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>        <span class="kw">return</span> "orders";</pre></td><td class="explain">渲染列表页。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">52</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre class="cmtline">    /**</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre class="cmtline">     * 订单详情：不存在与他人订单一律 404（同码同文案）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">     */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @GetMapping("/orders/{orderNo}")</pre></td><td class="explain">受保护路径。</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    <span class="kw">public</span> String detail(@PathVariable String orderNo, HttpSession session, Model model) {</pre></td><td class="explain">订单详情：不存在与他人订单一律 404（同码同文案）。</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>        <span class="kw">long</span> userId = currentUserId(session);</pre></td><td class="explain">当前用户。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        SalesOrder order = orderQueryService.detail(userId, orderNo);</pre></td><td class="explain">归属校验在服务层。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        model.addAttribute("order", order);</pre></td><td class="explain">订单头与收货快照。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        model.addAttribute("items", orderQueryService.items(order.getId()));</pre></td><td class="explain">明细快照。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        model.addAttribute("statusLabel", OrderStatus.labelOf(order.getStatus()));</pre></td><td class="explain">状态中文。</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>        <span class="kw">return</span> "order-detail";</pre></td><td class="explain">渲染详情页。</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">65</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre class="cmtline">    /** 页签：编码、中文、真实数量；在控制器算好，模板只负责显示。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>    <span class="kw">private</span> List&lt;Map&lt;String, Object&gt;&gt; statusTabs(OrderPage pageData) {</pre></td><td class="explain">页签：编码、中文、真实数量；在控制器算好，模板只负责显示。</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>        List&lt;Map&lt;String, Object&gt;&gt; tabs = <span class="kw">new</span> ArrayList&lt;&gt;(1 + OrderStatus.values().length);</pre></td><td class="explain">六个页签。</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        for (String code : statusCodes()) {</pre></td><td class="explain">全部 + 五种状态。</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            Map&lt;String, Object&gt; tab = <span class="kw">new</span> LinkedHashMap&lt;&gt;();</pre></td><td class="explain">一个页签。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>            tab.put("code", code);</pre></td><td class="explain">查询参数。</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>            tab.put("label", "ALL".equals(code) ? "全部" : OrderStatus.labelOf(code));</pre></td><td class="explain">中文标签。</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>            tab.put("count", pageData.getStatusCounts().getOrDefault(code, 0L));</pre></td><td class="explain">真实数量。</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>            tabs.add(tab);</pre></td><td class="explain">收集。</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>        <span class="kw">return</span> tabs;</pre></td><td class="explain">交给模板。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre class="cmtline">    /** 页签顺序：全部 + 五种状态。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>    <span class="kw">private</span> List&lt;String&gt; statusCodes() {</pre></td><td class="explain">页签顺序：全部 + 五种状态。</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        List&lt;String&gt; codes = <span class="kw">new</span> ArrayList&lt;&gt;(1 + OrderStatus.values().length);</pre></td><td class="explain">预留 6 个位置。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>        codes.add("ALL");</pre></td><td class="explain">第一个是全部。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>        for (OrderStatus status : OrderStatus.values()) {</pre></td><td class="explain">按枚举顺序生成页签</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>            codes.add(status.name());</pre></td><td class="explain">依次加五种状态。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>        <span class="kw">return</span> codes;</pre></td><td class="explain">固定顺序。</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">88</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre class="cmtline">    /** 当前登录用户 id：拦截器已保证有会话，这里兜底 401。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> currentUserId(HttpSession session) {</pre></td><td class="explain">当前登录用户 id：拦截器已保证有会话，这里兜底 401。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>        Object userId = session.getAttribute(LoginInterceptor.USER_ID);</pre></td><td class="explain">取拦截器写入的 userId。</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>        if (userId instanceof Long id) {</pre></td><td class="explain">只认 Long：会话可能没有该属性或类型不对</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>            <span class="kw">return</span> id;</pre></td><td class="explain">正常路径。</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        throw <span class="kw">new</span> BizException(ErrorCode.UNAUTHORIZED);</pre></td><td class="explain">异常路径：401。</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+<section id="s6">
+<h2>orders.html<small>列表页：页签、搜索、卡片、空状态、分页 · 84 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/orders.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('我的订单')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="section-head"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">内容分组容器</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="en"&gt;MY ORDERS&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                    &lt;<span class="kw">h2</span>&gt;我的订单&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/products}"&gt;继续逛逛&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">            &lt;!-- 状态页签：角标数量来自真实查询；当前页签高亮 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;<span class="kw">nav</span> class="order-tabs"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:each="tab : ${tabs}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                   th:href="@{/orders(status=${tab.code}, orderNo=${pageData.orderNo})}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                   th:classappend="${pageData.status == tab.code} ? 'on'"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                   th:text="|${tab.label} ${tab.count}|"&gt;全部 0&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>            &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;nav&gt; 容器</td></tr>
+<tr class="gap"><td class="line">26</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre class="cmtline">            &lt;!-- 搜索：完整订单号精确匹配，与状态页签共同生效 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>            &lt;<span class="kw">form</span> class="order-search" th:action="@{/orders}" method="get"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="hidden" name="status" th:value="${pageData.status}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                &lt;<span class="kw">input</span> type="text" name="orderNo" maxlength="40"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                       th:value="${pageData.orderNo}" placeholder="输入完整订单号"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                &lt;<span class="kw">button</span> type="submit" class="btn btn-primary"&gt;搜索&lt;/<span class="kw">button</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/orders(status=${pageData.status})}" class="link-btn"&gt;清空&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>            &lt;/<span class="kw">form</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;form&gt; 容器</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre class="cmtline">            &lt;!-- 空状态：按是否有筛选条件给不同文案 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="order-empty" th:if="${pageData.cards.isEmpty()}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre>                &lt;<span class="kw">p</span> th:if="${pageData.orderNo != null}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>                   th:text="|没有订单号是「${pageData.orderNo}」的订单。|"&gt;没有匹配的订单。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                &lt;<span class="kw">p</span> th:if="${pageData.orderNo == null and pageData.status == 'ALL'}"&gt;还没有订单，去挑一本喜欢的漫画吧。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                &lt;<span class="kw">p</span> th:if="${pageData.orderNo == null and pageData.status != 'ALL'}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                   th:text="|没有「${currentLabel}」状态的订单。|"&gt;该状态下没有订单。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                &lt;<span class="kw">a</span> class="btn btn-primary" th:href="@{/products}"&gt;去逛逛&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">45</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre class="cmtline">            &lt;!-- 订单卡片：订单号、时间、状态、首件缩略图、件数、总额、查看 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="order-list" th:if="${not pageData.cards.isEmpty()}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;article class="order-card" th:each="card : ${pageData.cards}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="order-card-top"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                        &lt;<span class="kw">b</span> class="no" th:text="${card.orderNo}"&gt;CO00000000000000&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="time"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                              th:text="${#temporals.format(card.createdAt, 'yyyy-MM-dd HH:mm')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="order-badge" th:classappend="| s-${card.status}|"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                              th:text="${card.statusLabel}"&gt;待支付&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="order-card-body"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${card.firstCover}}" th:alt="${card.firstProductName}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="order-card-text"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                            &lt;<span class="kw">b</span> th:text="${card.firstProductName}"&gt;首件商品&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>                            &lt;<span class="kw">small</span> th:text="|共 ${card.totalQuantity} 件 · ${card.itemCount} 种商品|"&gt;共 1 件&lt;/<span class="kw">small</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="order-card-amount"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre>                             th:text="'¥' + ${#numbers.formatDecimal(card.totalAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                        &lt;<span class="kw">a</span> class="btn btn-ghost" th:href="@{/orders/{no}(no=${card.orderNo})}"&gt;查看&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                &lt;/article&gt;</pre></td><td class="explain">结构闭合：结束 &lt;article&gt; 容器</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre class="cmtline">            &lt;!-- 分页：保留状态与单号 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>            &lt;<span class="kw">nav</span> class="pager" th:if="${pageData.totalPages &gt; 1}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:if="${pageData.hasPrev}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                   th:href="@{/orders(status=${pageData.status}, orderNo=${pageData.orderNo}, page=${pageData.page - 1})}"&gt;上一页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                &lt;<span class="kw">span</span> th:text="|第 ${pageData.page} / ${pageData.totalPages} 页 · 共 ${pageData.total} 单|"&gt;第 1 页&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:if="${pageData.hasNext}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                   th:href="@{/orders(status=${pageData.status}, orderNo=${pageData.orderNo}, page=${pageData.page + 1})}"&gt;下一页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>            &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;nav&gt; 容器</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">82</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s7">
+<h2>order-detail.html<small>详情页：时间线、金额标签、返回列表 · 102 行</small></h2>
+<p class="path">cartoon-user-web/src/main/resources/templates/order-detail.html</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre>&lt;!DOCTYPE <span class="kw">html</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="2"><td class="line">2</td><td class="code"><pre>&lt;<span class="kw">html</span> lang="zh-CN" xmlns:th="http://www.thymeleaf.org"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre>&lt;<span class="kw">head</span> th:replace="~{fragments/common :: head('订单详情')}"&gt;&lt;/<span class="kw">head</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre>&lt;<span class="kw">body</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">5</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre>&lt;<span class="kw">div</span> th:replace="~{fragments/common :: header}"&gt;&lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">7</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre>&lt;<span class="kw">main</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre>    &lt;<span class="kw">section</span> class="section"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre>        &lt;<span class="kw">div</span> class="wrap"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre>            &lt;<span class="kw">nav</span> class="crumbs"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="12"><td class="line">12</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/main}"&gt;首页&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre>                &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="14"><td class="line">14</td><td class="code"><pre>                &lt;<span class="kw">a</span> th:href="@{/orders}"&gt;我的订单&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre>                &lt;<span class="kw">span</span>&gt;/&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre>                &lt;<span class="kw">b</span> th:text="${order.orderNo}"&gt;订单号&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre>            &lt;/<span class="kw">nav</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;nav&gt; 容器</td></tr>
+<tr class="gap"><td class="line">18</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre class="cmtline">            &lt;!-- 头部：状态、订单号、创建时间 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="order-head"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="21"><td class="line">21</td><td class="code"><pre>                &lt;<span class="kw">div</span>&gt;</pre></td><td class="explain">内容分组容器</td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre>                    &lt;<span class="kw">span</span> class="en"&gt;ORDER&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre>                    &lt;<span class="kw">h2</span> th:text="${order.orderNo}"&gt;订单号&lt;/<span class="kw">h2</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="hint"&gt;创建时间</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>                        &lt;<span class="kw">span</span> th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm:ss')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre>                    &lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;p&gt; 容器</td></tr>
+<tr tabindex="0" data-line="27"><td class="line">27</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="order-status" th:switch="${order.status}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="29"><td class="line">29</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:case="'PENDING_PAYMENT'"&gt;待支付&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:case="'PAID'"&gt;待发货&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:case="'SHIPPED'"&gt;已发货&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="32"><td class="line">32</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:case="'COMPLETED'"&gt;已完成&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:case="'CANCELLED'"&gt;已取消&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>                    &lt;<span class="kw">b</span> th:case="*" th:text="${statusLabel}"&gt;状态&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="35"><td class="line">35</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">37</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="38"><td class="line">38</td><td class="code"><pre class="cmtline">            &lt;!-- 时间线：只显示已经发生的节点，未发生的节点不占位 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>            &lt;ol class="timeline"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>                &lt;li class="on"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>                    &lt;<span class="kw">b</span>&gt;创建订单&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>                    &lt;<span class="kw">span</span> th:text="${#temporals.format(order.createdAt, 'MM-dd HH:mm')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>                &lt;/li&gt;</pre></td><td class="explain">结构闭合：结束 &lt;li&gt; 容器</td></tr>
+<tr tabindex="0" data-line="44"><td class="line">44</td><td class="code"><pre>                &lt;li class="on" th:if="${order.paidAt != null}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre>                    &lt;<span class="kw">b</span>&gt;模拟支付&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>                    &lt;<span class="kw">span</span> th:text="${#temporals.format(order.paidAt, 'MM-dd HH:mm')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>                &lt;/li&gt;</pre></td><td class="explain">结构闭合：结束 &lt;li&gt; 容器</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>                &lt;li class="on" th:if="${order.shippedAt != null}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>                    &lt;<span class="kw">b</span>&gt;发货&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                    &lt;<span class="kw">span</span> th:text="${#temporals.format(order.shippedAt, 'MM-dd HH:mm')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                &lt;/li&gt;</pre></td><td class="explain">结构闭合：结束 &lt;li&gt; 容器</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                &lt;li class="on" th:if="${order.completedAt != null}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>                    &lt;<span class="kw">b</span>&gt;完成&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="54"><td class="line">54</td><td class="code"><pre>                    &lt;<span class="kw">span</span> th:text="${#temporals.format(order.completedAt, 'MM-dd HH:mm')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre>                &lt;/li&gt;</pre></td><td class="explain">结构闭合：结束 &lt;li&gt; 容器</td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>                &lt;li class="cancel" th:if="${order.cancelledAt != null}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>                    &lt;<span class="kw">b</span>&gt;已取消&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>                    &lt;<span class="kw">span</span> th:text="${#temporals.format(order.cancelledAt, 'MM-dd HH:mm')}"&gt;时间&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>                &lt;/li&gt;</pre></td><td class="explain">结构闭合：结束 &lt;li&gt; 容器</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>            &lt;/ol&gt;</pre></td><td class="explain">结构闭合：结束 &lt;ol&gt; 容器</td></tr>
+<tr class="gap"><td class="line">61</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>            &lt;<span class="kw">div</span> class="order-grid"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="63"><td class="line">63</td><td class="code"><pre class="cmtline">                &lt;!-- 商品快照：名称、SKU、单价、数量、行金额都不是当前商品值，而是下单时的快照 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="order-items"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                    &lt;h3&gt;商品明细&lt;/h3&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="order-row" th:each="item : ${items}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                        &lt;<span class="kw">img</span> th:src="@{${item.coverImageSnapshot}}" th:alt="${item.productNameSnapshot}"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="68"><td class="line">68</td><td class="code"><pre>                        &lt;<span class="kw">div</span> class="order-row-text"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>                            &lt;<span class="kw">a</span> class="title" th:href="@{/product/{id}(id=${item.productId})}"</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                               th:text="${item.productNameSnapshot}"&gt;商品名&lt;/<span class="kw">a</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>                            &lt;<span class="kw">small</span> th:text="${item.skuSnapshot}"&gt;SKU&lt;/<span class="kw">small</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="72"><td class="line">72</td><td class="code"><pre>                        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre>                        &lt;<span class="kw">span</span> th:text="'¥' + ${#numbers.formatDecimal(item.unitPrice, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>                        &lt;<span class="kw">span</span> th:text="'× ' + ${item.quantity}"&gt;× 1&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>                        &lt;<span class="kw">span</span> class="order-line" th:text="'¥' + ${#numbers.formatDecimal(item.lineAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr class="gap"><td class="line">78</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre class="cmtline">                &lt;!-- 右侧：收货快照与总额；操作按钮等 M05-05/M06 接入后再出现 --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="80"><td class="line">80</td><td class="code"><pre>                &lt;<span class="kw">div</span> class="order-side"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>                    &lt;h3&gt;收货信息&lt;/h3&gt;</pre></td><td class="explain">右栏标题</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                    &lt;ul class="order-receiver"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                        &lt;li&gt;&lt;<span class="kw">span</span>&gt;收货人&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">b</span> th:text="${order.receiverName}"&gt;姓名&lt;/<span class="kw">b</span>&gt;&lt;/li&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                        &lt;li&gt;&lt;<span class="kw">span</span>&gt;联系电话&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">b</span> th:text="${order.receiverPhone}"&gt;电话&lt;/<span class="kw">b</span>&gt;&lt;/li&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                        &lt;li&gt;&lt;<span class="kw">span</span>&gt;详细地址&lt;/<span class="kw">span</span>&gt;&lt;<span class="kw">b</span> th:text="${order.receiverAddress}"&gt;地址&lt;/<span class="kw">b</span>&gt;&lt;/li&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                    &lt;/ul&gt;</pre></td><td class="explain">结构闭合：结束 &lt;ul&gt; 容器</td></tr>
+<tr tabindex="0" data-line="87"><td class="line">87</td><td class="code"><pre>                    &lt;<span class="kw">div</span> class="order-total"&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre class="cmtline">                        &lt;!-- 待支付显示“应付”，已支付（含发货/完成）显示“已模拟支付” --&gt;</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>                        &lt;<span class="kw">span</span> th:text="${order.paidAt != null} ? '已模拟支付' : '应付总额'"&gt;应付总额&lt;/<span class="kw">span</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                        &lt;<span class="kw">b</span> th:text="'¥' + ${#numbers.formatDecimal(order.totalAmount, 1, 2)}"&gt;¥0.00&lt;/<span class="kw">b</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>                    &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="92"><td class="line">92</td><td class="code"><pre>                    &lt;<span class="kw">p</span> class="hint"&gt;支付与取消在后续任务接入；本页只展示数据库里的真实快照与状态。&lt;/<span class="kw">p</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre>                &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>            &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>        &lt;/<span class="kw">div</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;div&gt; 容器</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    &lt;/<span class="kw">section</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;section&gt; 容器</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>&lt;/<span class="kw">main</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;main&gt; 容器</td></tr>
+<tr class="gap"><td class="line">98</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="99"><td class="line">99</td><td class="code"><pre>&lt;<span class="kw">footer</span> th:replace="~{fragments/common :: footer}"&gt;&lt;/<span class="kw">footer</span>&gt;</pre></td><td class="explain">区块：页面上的一个内容单元</td></tr>
+<tr class="gap"><td class="line">100</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>&lt;/<span class="kw">body</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;body&gt; 容器</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>&lt;/<span class="kw">html</span>&gt;</pre></td><td class="explain">结构闭合：结束 &lt;html&gt; 容器</td></tr>
+</tbody></table>
+</section>
+<section id="s8">
+<h2>OrderListTest.java<small>9 个用例：空/归属/筛选/搜索/分页/400/快照/时间线/游客 · 235 行</small></h2>
+<p class="path">cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/OrderListTest.java</p>
+<table>
+<colgroup><col style="width:64px"><col style="width:58%"><col></colgroup>
+<thead><tr><th>行号</th><th>实际源码（行尾注释已移到右列，整行注释保持绿色）</th><th>该行的说明</th></tr></thead>
+<tbody>
+<tr tabindex="0" data-line="1"><td class="line">1</td><td class="code"><pre><span class="kw">package</span> org.csu.mycartoonstore.web;</pre></td><td class="explain">订单列表：状态页签、完整单号、分页、空状态与快照不变。</td></tr>
+<tr class="gap"><td class="line">2</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="3"><td class="line">3</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.AbstractIntegrationTest;</pre></td><td class="explain">真实 MySQL + 重建表。</td></tr>
+<tr tabindex="0" data-line="4"><td class="line">4</td><td class="code"><pre><span class="kw">import</span> org.csu.mycartoonstore.web.support.CartFixture;</pre></td><td class="explain">建用户/商品。</td></tr>
+<tr tabindex="0" data-line="5"><td class="line">5</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.BeforeEach;</pre></td><td class="explain">每个用例造基础数据。</td></tr>
+<tr tabindex="0" data-line="6"><td class="line">6</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.DisplayName;</pre></td><td class="explain">用例名。</td></tr>
+<tr tabindex="0" data-line="7"><td class="line">7</td><td class="code"><pre><span class="kw">import</span> org.junit.jupiter.api.Test;</pre></td><td class="explain">JUnit 入口。</td></tr>
+<tr tabindex="0" data-line="8"><td class="line">8</td><td class="code"><pre><span class="kw">import</span> org.springframework.beans.factory.annotation.Autowired;</pre></td><td class="explain">注入 MockMvc。</td></tr>
+<tr tabindex="0" data-line="9"><td class="line">9</td><td class="code"><pre><span class="kw">import</span> org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;</pre></td><td class="explain">开启 MockMvc。</td></tr>
+<tr tabindex="0" data-line="10"><td class="line">10</td><td class="code"><pre><span class="kw">import</span> org.springframework.jdbc.core.JdbcTemplate;</pre></td><td class="explain">直接造订单。</td></tr>
+<tr tabindex="0" data-line="11"><td class="line">11</td><td class="code"><pre><span class="kw">import</span> org.springframework.test.web.servlet.MockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">12</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="13"><td class="line">13</td><td class="code"><pre><span class="kw">import</span> java.time.LocalDateTime;</pre></td><td class="explain">控制创建时间与时间线。</td></tr>
+<tr class="gap"><td class="line">14</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="15"><td class="line">15</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.containsString;</pre></td><td class="explain">页面内容断言。</td></tr>
+<tr tabindex="0" data-line="16"><td class="line">16</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.hamcrest.Matchers.not;</pre></td><td class="explain">反向断言。</td></tr>
+<tr tabindex="0" data-line="17"><td class="line">17</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;</pre></td><td class="explain">构造 GET。</td></tr>
+<tr tabindex="0" data-line="18"><td class="line">18</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;</pre></td><td class="explain">内容断言。</td></tr>
+<tr tabindex="0" data-line="19"><td class="line">19</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;</pre></td><td class="explain">状态码。</td></tr>
+<tr tabindex="0" data-line="20"><td class="line">20</td><td class="code"><pre><span class="kw">import</span> <span class="kw">static</span> org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;</pre></td><td class="explain">游客拦截。</td></tr>
+<tr class="gap"><td class="line">21</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="22"><td class="line">22</td><td class="code"><pre class="cmtline">// M05-04：依据 docs/05 §4.6/4.7 与 docs/06 AC-19/AC-30。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="23"><td class="line">23</td><td class="code"><pre class="cmtline">// 覆盖：空状态、只显示本人、按状态过滤、完整单号搜索、分页、非法参数 400、快照不随商品改、时间线。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="24"><td class="line">24</td><td class="code"><pre class="cmtline">// 不覆盖：支付/取消按钮（M06 / M05-05）。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="25"><td class="line">25</td><td class="code"><pre>@AutoConfigureMockMvc</pre></td><td class="explain">不占端口。</td></tr>
+<tr tabindex="0" data-line="26"><td class="line">26</td><td class="code"><pre><span class="kw">class</span> OrderListTest <span class="kw">extends</span> AbstractIntegrationTest {</pre></td><td class="explain">集成测试：真实 MySQL + MockMvc</td></tr>
+<tr class="gap"><td class="line">27</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="28"><td class="line">28</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">static</span> <span class="kw">final</span> LocalDateTime T0 = LocalDateTime.of(2026, 11, 16, 10, 0);</pre></td><td class="explain">固定基准时间。</td></tr>
+<tr class="gap"><td class="line">29</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="30"><td class="line">30</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="31"><td class="line">31</td><td class="code"><pre>    <span class="kw">private</span> MockMvc mockMvc;</pre></td><td class="explain">请求入口。</td></tr>
+<tr class="gap"><td class="line">32</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="33"><td class="line">33</td><td class="code"><pre>    @Autowired</pre></td><td class="explain">由 Spring 注入。</td></tr>
+<tr tabindex="0" data-line="34"><td class="line">34</td><td class="code"><pre>    <span class="kw">private</span> JdbcTemplate jdbc;</pre></td><td class="explain">造订单与明细。</td></tr>
+<tr class="gap"><td class="line">35</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="36"><td class="line">36</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> userId;</pre></td><td class="explain">主测试用户。</td></tr>
+<tr tabindex="0" data-line="37"><td class="line">37</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">long</span> productId;</pre></td><td class="explain">明细引用的商品。</td></tr>
+<tr class="gap"><td class="line">38</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="39"><td class="line">39</td><td class="code"><pre>    @BeforeEach</pre></td><td class="explain">每个用例前重建基础数据（基类已重置库）。</td></tr>
+<tr tabindex="0" data-line="40"><td class="line">40</td><td class="code"><pre>    <span class="kw">void</span> setUp() {</pre></td><td class="explain">每个用例前重建 Mock 与服务。</td></tr>
+<tr tabindex="0" data-line="41"><td class="line">41</td><td class="code"><pre>        userId = CartFixture.createUser(jdbc, "ol_user");</pre></td><td class="explain">主用户。</td></tr>
+<tr tabindex="0" data-line="42"><td class="line">42</td><td class="code"><pre>        productId = CartFixture.createProduct(jdbc, "OL-P01", "28.00", 100, "ON_SALE");</pre></td><td class="explain">明细引用。</td></tr>
+<tr tabindex="0" data-line="43"><td class="line">43</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">44</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="45"><td class="line">45</td><td class="code"><pre class="cmtline">    /** 没有订单：空状态文案，且给出继续逛的入口。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="46"><td class="line">46</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="47"><td class="line">47</td><td class="code"><pre>    @DisplayName("没有订单：显示空状态")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="48"><td class="line">48</td><td class="code"><pre>    <span class="kw">void</span> emptyOrderListShowsEmptyState() throws Exception {</pre></td><td class="explain">没有订单：空状态文案，且给出继续逛的入口。</td></tr>
+<tr tabindex="0" data-line="49"><td class="line">49</td><td class="code"><pre>        mockMvc.perform(get("/orders").session(CartFixture.session(userId)))</pre></td><td class="explain">打开列表。</td></tr>
+<tr tabindex="0" data-line="50"><td class="line">50</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常渲染。</td></tr>
+<tr tabindex="0" data-line="51"><td class="line">51</td><td class="code"><pre>                .andExpect(content().string(containsString("还没有订单")))</pre></td><td class="explain">空状态文案。</td></tr>
+<tr tabindex="0" data-line="52"><td class="line">52</td><td class="code"><pre>                .andExpect(content().string(containsString("去逛逛")));</pre></td><td class="explain">有继续逛的入口。</td></tr>
+<tr tabindex="0" data-line="53"><td class="line">53</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">54</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="55"><td class="line">55</td><td class="code"><pre class="cmtline">    /** 只显示本人订单，且新的在前。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="56"><td class="line">56</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="57"><td class="line">57</td><td class="code"><pre>    @DisplayName("只显示本人订单，新的在前")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="58"><td class="line">58</td><td class="code"><pre>    <span class="kw">void</span> listShowsOnlyOwnOrdersNewestFirst() throws Exception {</pre></td><td class="explain">只显示本人订单，且新的在前。</td></tr>
+<tr tabindex="0" data-line="59"><td class="line">59</td><td class="code"><pre>        seedOrder("CO202611161000000001", "PENDING_PAYMENT", "28.00", T0);</pre></td><td class="explain">本人 10:00。</td></tr>
+<tr tabindex="0" data-line="60"><td class="line">60</td><td class="code"><pre>        seedOrder("CO202611161100000002", "PENDING_PAYMENT", "56.00", T0.plusHours(1));</pre></td><td class="explain">本人 11:00。</td></tr>
+<tr tabindex="0" data-line="61"><td class="line">61</td><td class="code"><pre>        <span class="kw">long</span> other = CartFixture.createUser(jdbc, "ol_other");</pre></td><td class="explain">另一个用户。</td></tr>
+<tr tabindex="0" data-line="62"><td class="line">62</td><td class="code"><pre>        seedOrderFor(other, "CO202611161200000003", "PENDING_PAYMENT", "30.00", T0.plusHours(2));</pre></td><td class="explain">他人订单。</td></tr>
+<tr class="gap"><td class="line">63</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="64"><td class="line">64</td><td class="code"><pre>        String html = mockMvc.perform(get("/orders").session(CartFixture.session(userId)))</pre></td><td class="explain">打开列表。</td></tr>
+<tr tabindex="0" data-line="65"><td class="line">65</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="66"><td class="line">66</td><td class="code"><pre>                .andExpect(content().string(not(containsString("CO202611161200000003"))))</pre></td><td class="explain">不显示他人订单。</td></tr>
+<tr tabindex="0" data-line="67"><td class="line">67</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取页面。</td></tr>
+<tr class="gap"><td class="line">68</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="69"><td class="line">69</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(html.indexOf("CO202611161100000002"))</pre></td><td class="explain">断言 11:00 的单排在 10:00 前</td></tr>
+<tr tabindex="0" data-line="70"><td class="line">70</td><td class="code"><pre>                .isLessThan(html.indexOf("CO202611161000000001"));</pre></td><td class="explain">11:00 排在 10:00 前。</td></tr>
+<tr tabindex="0" data-line="71"><td class="line">71</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">72</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="73"><td class="line">73</td><td class="code"><pre class="cmtline">    /** 状态页签：只显示该状态，角标是真实数量。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="74"><td class="line">74</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="75"><td class="line">75</td><td class="code"><pre>    @DisplayName("状态页签过滤：只显示该状态")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="76"><td class="line">76</td><td class="code"><pre>    <span class="kw">void</span> statusTabFiltersOrders() throws Exception {</pre></td><td class="explain">状态页签：只显示该状态，角标是真实数量。</td></tr>
+<tr tabindex="0" data-line="77"><td class="line">77</td><td class="code"><pre>        seedOrder("CO202611161000000011", "PENDING_PAYMENT", "28.00", T0);</pre></td><td class="explain">待支付。</td></tr>
+<tr tabindex="0" data-line="78"><td class="line">78</td><td class="code"><pre>        seedOrder("CO202611161000000012", "PAID", "56.00", T0.plusMinutes(1));</pre></td><td class="explain">待发货。</td></tr>
+<tr tabindex="0" data-line="79"><td class="line">79</td><td class="code"><pre>        seedOrder("CO202611161000000013", "CANCELLED", "30.00", T0.plusMinutes(2));</pre></td><td class="explain">已取消。</td></tr>
+<tr class="gap"><td class="line">80</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="81"><td class="line">81</td><td class="code"><pre>        String html = mockMvc.perform(get("/orders").param("status", "PAID").session(CartFixture.session(userId)))</pre></td><td class="explain">待发货页签。</td></tr>
+<tr tabindex="0" data-line="82"><td class="line">82</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="83"><td class="line">83</td><td class="code"><pre>                .andExpect(content().string(containsString("CO202611161000000012")))</pre></td><td class="explain">只显示待发货。</td></tr>
+<tr tabindex="0" data-line="84"><td class="line">84</td><td class="code"><pre>                .andExpect(content().string(not(containsString("CO202611161000000011"))))</pre></td><td class="explain">不显示待支付。</td></tr>
+<tr tabindex="0" data-line="85"><td class="line">85</td><td class="code"><pre>                .andExpect(content().string(not(containsString("CO202611161000000013"))))</pre></td><td class="explain">不显示已取消。</td></tr>
+<tr tabindex="0" data-line="86"><td class="line">86</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取页面。</td></tr>
+<tr class="gap"><td class="line">87</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="88"><td class="line">88</td><td class="code"><pre class="cmtline">        // 页签文案里的空格受模板换行影响，先压缩空白再断言"待发货 1"。</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="89"><td class="line">89</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(html.replaceAll("\\s+", ""))</pre></td><td class="explain">压缩空白后断言页签数量</td></tr>
+<tr tabindex="0" data-line="90"><td class="line">90</td><td class="code"><pre>                .contains("待发货1");</pre></td><td class="explain">角标数量来自真实数据。</td></tr>
+<tr tabindex="0" data-line="91"><td class="line">91</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">92</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="93"><td class="line">93</td><td class="code"><pre class="cmtline">    /** 完整单号搜索：精确匹配；部分单号搜不到。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="94"><td class="line">94</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="95"><td class="line">95</td><td class="code"><pre>    @DisplayName("完整单号搜索：精确匹配")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="96"><td class="line">96</td><td class="code"><pre>    <span class="kw">void</span> searchByExactOrderNo() throws Exception {</pre></td><td class="explain">完整单号搜索：精确匹配；部分单号搜不到。</td></tr>
+<tr tabindex="0" data-line="97"><td class="line">97</td><td class="code"><pre>        seedOrder("CO202611161000000021", "PENDING_PAYMENT", "28.00", T0);</pre></td><td class="explain">目标。</td></tr>
+<tr tabindex="0" data-line="98"><td class="line">98</td><td class="code"><pre>        seedOrder("CO202611161000000022", "PENDING_PAYMENT", "56.00", T0.plusMinutes(1));</pre></td><td class="explain">干扰项。</td></tr>
+<tr class="gap"><td class="line">99</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="100"><td class="line">100</td><td class="code"><pre>        mockMvc.perform(get("/orders").param("orderNo", "CO202611161000000021")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="101"><td class="line">101</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">精确搜索。</td></tr>
+<tr tabindex="0" data-line="102"><td class="line">102</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="103"><td class="line">103</td><td class="code"><pre>                .andExpect(content().string(containsString("CO202611161000000021")))</pre></td><td class="explain">命中。</td></tr>
+<tr tabindex="0" data-line="104"><td class="line">104</td><td class="code"><pre>                .andExpect(content().string(not(containsString("CO202611161000000022"))));</pre></td><td class="explain">不命中干扰项。</td></tr>
+<tr class="gap"><td class="line">105</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="106"><td class="line">106</td><td class="code"><pre>        mockMvc.perform(get("/orders").param("orderNo", "CO20261116100000002")</pre></td><td class="explain">发起请求，随后断言状态与内容</td></tr>
+<tr tabindex="0" data-line="107"><td class="line">107</td><td class="code"><pre>                        .session(CartFixture.session(userId)))</pre></td><td class="explain">只输入前缀。</td></tr>
+<tr tabindex="0" data-line="108"><td class="line">108</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="109"><td class="line">109</td><td class="code"><pre>                .andExpect(content().string(containsString("没有订单号是")));</pre></td><td class="explain">精确匹配，搜不到。</td></tr>
+<tr tabindex="0" data-line="110"><td class="line">110</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">111</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="112"><td class="line">112</td><td class="code"><pre class="cmtline">    /** 11 单分两页：第 1 页 10 单，第 2 页 1 单，翻页保留条件。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="113"><td class="line">113</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="114"><td class="line">114</td><td class="code"><pre>    @DisplayName("分页：11 单分两页")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="115"><td class="line">115</td><td class="code"><pre>    <span class="kw">void</span> paginationWorks() throws Exception {</pre></td><td class="explain">11 单分两页：第 1 页 10 单，第 2 页 1 单，翻页保留条件。</td></tr>
+<tr tabindex="0" data-line="116"><td class="line">116</td><td class="code"><pre>        for (<span class="kw">int</span> i = 1; i &lt;= 11; i++) {</pre></td><td class="explain">造 11 单。</td></tr>
+<tr tabindex="0" data-line="117"><td class="line">117</td><td class="code"><pre>            seedOrder(String.format("CO2026111610%08d", i), "PENDING_PAYMENT", "28.00",</pre></td><td class="explain">循环造 11 单，单号与时间都可排序</td></tr>
+<tr tabindex="0" data-line="118"><td class="line">118</td><td class="code"><pre>                    T0.plusMinutes(i));</pre></td><td class="explain">时间递增，保证顺序稳定。</td></tr>
+<tr tabindex="0" data-line="119"><td class="line">119</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">120</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="121"><td class="line">121</td><td class="code"><pre>        String first = mockMvc.perform(get("/orders").session(CartFixture.session(userId)))</pre></td><td class="explain">第 1 页。</td></tr>
+<tr tabindex="0" data-line="122"><td class="line">122</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="123"><td class="line">123</td><td class="code"><pre>                .andExpect(content().string(containsString("第 1 / 2 页")))</pre></td><td class="explain">两页。</td></tr>
+<tr tabindex="0" data-line="124"><td class="line">124</td><td class="code"><pre>                .andExpect(content().string(containsString("page=2")))</pre></td><td class="explain">有下一页链接。</td></tr>
+<tr tabindex="0" data-line="125"><td class="line">125</td><td class="code"><pre>                .andReturn().getResponse().getContentAsString();</pre></td><td class="explain">取页面。</td></tr>
+<tr class="gap"><td class="line">126</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="127"><td class="line">127</td><td class="code"><pre>        mockMvc.perform(get("/orders").param("page", "2").session(CartFixture.session(userId)))</pre></td><td class="explain">第 2 页。</td></tr>
+<tr tabindex="0" data-line="128"><td class="line">128</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="129"><td class="line">129</td><td class="code"><pre>                .andExpect(content().string(containsString("第 2 / 2 页")))</pre></td><td class="explain">第 2 页。</td></tr>
+<tr tabindex="0" data-line="130"><td class="line">130</td><td class="code"><pre>                .andExpect(content().string(containsString("CO202611161000000001")));</pre></td><td class="explain">最早那单在末页。</td></tr>
+<tr class="gap"><td class="line">131</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="132"><td class="line">132</td><td class="code"><pre>        org.assertj.core.api.Assertions.assertThat(countCards(first)).isEqualTo(10);</pre></td><td class="explain">第一页正好 10 张卡。</td></tr>
+<tr tabindex="0" data-line="133"><td class="line">133</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">134</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="135"><td class="line">135</td><td class="code"><pre class="cmtline">    /** 非法参数：未知状态、非数字页码、0 页码都 400。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="136"><td class="line">136</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="137"><td class="line">137</td><td class="code"><pre>    @DisplayName("非法参数：状态/页码错误都 400")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="138"><td class="line">138</td><td class="code"><pre>    <span class="kw">void</span> invalidParamsReturn400() throws Exception {</pre></td><td class="explain">非法参数：未知状态、非数字页码、0 页码都 400。</td></tr>
+<tr tabindex="0" data-line="139"><td class="line">139</td><td class="code"><pre>        mockMvc.perform(get("/orders").param("status", "FOO").session(CartFixture.session(userId)))</pre></td><td class="explain">未知状态。</td></tr>
+<tr tabindex="0" data-line="140"><td class="line">140</td><td class="code"><pre>                .andExpect(status().isBadRequest());</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="141"><td class="line">141</td><td class="code"><pre>        mockMvc.perform(get("/orders").param("page", "abc").session(CartFixture.session(userId)))</pre></td><td class="explain">非数字页码。</td></tr>
+<tr tabindex="0" data-line="142"><td class="line">142</td><td class="code"><pre>                .andExpect(status().isBadRequest());</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="143"><td class="line">143</td><td class="code"><pre>        mockMvc.perform(get("/orders").param("page", "0").session(CartFixture.session(userId)))</pre></td><td class="explain">0 页码。</td></tr>
+<tr tabindex="0" data-line="144"><td class="line">144</td><td class="code"><pre>                .andExpect(status().isBadRequest());</pre></td><td class="explain">400。</td></tr>
+<tr tabindex="0" data-line="145"><td class="line">145</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">146</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="147"><td class="line">147</td><td class="code"><pre class="cmtline">    /** AC-19：下单后改商品名与价格，列表与详情仍显示成交快照。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="148"><td class="line">148</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="149"><td class="line">149</td><td class="code"><pre>    @DisplayName("AC-19：商品改名改价，历史订单仍显示快照")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="150"><td class="line">150</td><td class="code"><pre>    <span class="kw">void</span> snapshotSurvivesProductEdit() throws Exception {</pre></td><td class="explain">AC-19：下单后改商品名与价格，列表与详情仍显示成交快照。</td></tr>
+<tr tabindex="0" data-line="151"><td class="line">151</td><td class="code"><pre>        seedOrder("CO202611161000000031", "PENDING_PAYMENT", "28.00", T0);</pre></td><td class="explain">一单。</td></tr>
+<tr tabindex="0" data-line="152"><td class="line">152</td><td class="code"><pre>        seedItem("CO202611161000000031", "旧商品名", "28.00", 1);</pre></td><td class="explain">明细快照：旧名 ¥28。</td></tr>
+<tr tabindex="0" data-line="153"><td class="line">153</td><td class="code"><pre>        jdbc.update("UPDATE product SET name = ?, price = ?, status = 'DRAFT', cover_image = ? WHERE id = ?",</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="154"><td class="line">154</td><td class="code"><pre>                "新商品名", "99.00", "/images/covers/new.svg", productId);</pre></td><td class="explain">商品改名、改价、下架。</td></tr>
+<tr class="gap"><td class="line">155</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="156"><td class="line">156</td><td class="code"><pre>        mockMvc.perform(get("/orders/{no}", "CO202611161000000031").session(CartFixture.session(userId)))</pre></td><td class="explain">详情。</td></tr>
+<tr tabindex="0" data-line="157"><td class="line">157</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="158"><td class="line">158</td><td class="code"><pre>                .andExpect(content().string(containsString("旧商品名")))</pre></td><td class="explain">名称快照。</td></tr>
+<tr tabindex="0" data-line="159"><td class="line">159</td><td class="code"><pre>                .andExpect(content().string(not(containsString("新商品名"))))</pre></td><td class="explain">不显示新名。</td></tr>
+<tr tabindex="0" data-line="160"><td class="line">160</td><td class="code"><pre>                .andExpect(content().string(containsString("¥28.00")));</pre></td><td class="explain">价格快照。</td></tr>
+<tr tabindex="0" data-line="161"><td class="line">161</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">162</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="163"><td class="line">163</td><td class="code"><pre class="cmtline">    /** 时间线：待支付只有创建；已支付多一个“模拟支付”节点。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="164"><td class="line">164</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="165"><td class="line">165</td><td class="code"><pre>    @DisplayName("时间线：只显示已发生节点")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="166"><td class="line">166</td><td class="code"><pre>    <span class="kw">void</span> timelineShowsOnlyOccurredNodes() throws Exception {</pre></td><td class="explain">时间线：待支付只有创建；已支付多一个“模拟支付”节点。</td></tr>
+<tr tabindex="0" data-line="167"><td class="line">167</td><td class="code"><pre>        seedOrder("CO202611161000000041", "PENDING_PAYMENT", "28.00", T0);</pre></td><td class="explain">待支付。</td></tr>
+<tr tabindex="0" data-line="168"><td class="line">168</td><td class="code"><pre>        seedOrder("CO202611161000000042", "PAID", "28.00", T0.plusMinutes(1));</pre></td><td class="explain">已支付。</td></tr>
+<tr class="gap"><td class="line">169</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="170"><td class="line">170</td><td class="code"><pre>        mockMvc.perform(get("/orders/{no}", "CO202611161000000041").session(CartFixture.session(userId)))</pre></td><td class="explain">待支付。</td></tr>
+<tr tabindex="0" data-line="171"><td class="line">171</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="172"><td class="line">172</td><td class="code"><pre>                .andExpect(content().string(not(containsString("&lt;b&gt;模拟支付&lt;/b&gt;"))));</pre></td><td class="explain">未支付不显示支付节点。</td></tr>
+<tr class="gap"><td class="line">173</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="174"><td class="line">174</td><td class="code"><pre>        mockMvc.perform(get("/orders/{no}", "CO202611161000000042").session(CartFixture.session(userId)))</pre></td><td class="explain">已支付。</td></tr>
+<tr tabindex="0" data-line="175"><td class="line">175</td><td class="code"><pre>                .andExpect(status().isOk())</pre></td><td class="explain">正常。</td></tr>
+<tr tabindex="0" data-line="176"><td class="line">176</td><td class="code"><pre>                .andExpect(content().string(containsString("&lt;b&gt;模拟支付&lt;/b&gt;")));</pre></td><td class="explain">显示支付节点。</td></tr>
+<tr tabindex="0" data-line="177"><td class="line">177</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">178</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="179"><td class="line">179</td><td class="code"><pre class="cmtline">    /** 游客打开列表：拦到登录页。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="180"><td class="line">180</td><td class="code"><pre>    @Test</pre></td><td class="explain">JUnit 用例：运行时由框架发现并执行</td></tr>
+<tr tabindex="0" data-line="181"><td class="line">181</td><td class="code"><pre>    @DisplayName("游客打开列表：拦到登录页")</pre></td><td class="explain">用例名：测试报告里显示这句，失败时先看它</td></tr>
+<tr tabindex="0" data-line="182"><td class="line">182</td><td class="code"><pre>    <span class="kw">void</span> guestOrderListRedirectsToLogin() throws Exception {</pre></td><td class="explain">游客打开列表：拦到登录页。</td></tr>
+<tr tabindex="0" data-line="183"><td class="line">183</td><td class="code"><pre>        mockMvc.perform(get("/orders"))</pre></td><td class="explain">不带会话。</td></tr>
+<tr tabindex="0" data-line="184"><td class="line">184</td><td class="code"><pre>                .andExpect(status().is3xxRedirection())</pre></td><td class="explain">302。</td></tr>
+<tr tabindex="0" data-line="185"><td class="line">185</td><td class="code"><pre>                .andExpect(redirectedUrlPattern("/login?redirect=*%2Forders*"));</pre></td><td class="explain">登录后回列表。</td></tr>
+<tr tabindex="0" data-line="186"><td class="line">186</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">187</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="188"><td class="line">188</td><td class="code"><pre class="cmtline">    // ---------------------------------------------------------------- 夹具</pre></td><td class="explain"></td></tr>
+<tr class="gap"><td class="line">189</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="190"><td class="line">190</td><td class="code"><pre class="cmtline">    /** 给主用户造一单，并按状态补齐约束字段。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="191"><td class="line">191</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seedOrder(String orderNo, String status, String total, LocalDateTime createdAt) {</pre></td><td class="explain">给主用户造一单，并按状态补齐约束字段。</td></tr>
+<tr tabindex="0" data-line="192"><td class="line">192</td><td class="code"><pre>        seedOrderFor(userId, orderNo, status, total, createdAt);</pre></td><td class="explain">复用通用夹具。</td></tr>
+<tr tabindex="0" data-line="193"><td class="line">193</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">194</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="195"><td class="line">195</td><td class="code"><pre class="cmtline">    /** 给指定用户造一单：状态字段满足数据库 CHECK。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="196"><td class="line">196</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seedOrderFor(<span class="kw">long</span> owner, String orderNo, String status, String total, LocalDateTime createdAt) {</pre></td><td class="explain">给指定用户造一单：状态字段满足数据库 CHECK。</td></tr>
+<tr tabindex="0" data-line="197"><td class="line">197</td><td class="code"><pre>        String paymentNo = null;</pre></td><td class="explain">未支付为空。</td></tr>
+<tr tabindex="0" data-line="198"><td class="line">198</td><td class="code"><pre>        LocalDateTime paidAt = null;</pre></td><td class="explain">未支付为空。</td></tr>
+<tr tabindex="0" data-line="199"><td class="line">199</td><td class="code"><pre>        LocalDateTime cancelledAt = null;</pre></td><td class="explain">未取消为空。</td></tr>
+<tr tabindex="0" data-line="200"><td class="line">200</td><td class="code"><pre>        if ("PAID".equals(status)) {</pre></td><td class="explain">已支付：三件套齐全。</td></tr>
+<tr tabindex="0" data-line="201"><td class="line">201</td><td class="code"><pre>            paymentNo = "PAY" + orderNo;</pre></td><td class="explain">唯一凭证。</td></tr>
+<tr tabindex="0" data-line="202"><td class="line">202</td><td class="code"><pre>            paidAt = createdAt.plusMinutes(5);</pre></td><td class="explain">支付时间在创建之后。</td></tr>
+<tr tabindex="0" data-line="203"><td class="line">203</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="204"><td class="line">204</td><td class="code"><pre>        if ("CANCELLED".equals(status)) {</pre></td><td class="explain">已取消：取消时间必填。</td></tr>
+<tr tabindex="0" data-line="205"><td class="line">205</td><td class="code"><pre>            cancelledAt = createdAt.plusMinutes(10);</pre></td><td class="explain">取消时间。</td></tr>
+<tr tabindex="0" data-line="206"><td class="line">206</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="207"><td class="line">207</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order(order_no, user_id, status, total_amount, receiver_name, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="208"><td class="line">208</td><td class="code"><pre>                        + "receiver_phone, receiver_address, created_at, payment_method, payment_no, paid_at, cancelled_at) "</pre></td><td class="explain">参数续行：订单列名</td></tr>
+<tr tabindex="0" data-line="209"><td class="line">209</td><td class="code"><pre>                        + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",</pre></td><td class="explain">SQL 续行：占位符与列数一一对应</td></tr>
+<tr tabindex="0" data-line="210"><td class="line">210</td><td class="code"><pre>                orderNo, owner, status, <span class="kw">new</span> java.math.BigDecimal(total), "张三", "13800000000",</pre></td><td class="explain">订单值：收货信息固定</td></tr>
+<tr tabindex="0" data-line="211"><td class="line">211</td><td class="code"><pre>                "某市某区某路 1 号", createdAt,</pre></td><td class="explain">参数续行：地址与创建时间</td></tr>
+<tr tabindex="0" data-line="212"><td class="line">212</td><td class="code"><pre>                paymentNo == null ? null : "MOCK", paymentNo, paidAt, cancelledAt);</pre></td><td class="explain">一次插入。</td></tr>
+<tr tabindex="0" data-line="213"><td class="line">213</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">214</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="215"><td class="line">215</td><td class="code"><pre class="cmtline">    /** 给订单造一行明细快照。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="216"><td class="line">216</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">void</span> seedItem(String orderNo, String name, String price, <span class="kw">int</span> quantity) {</pre></td><td class="explain">给订单造一行明细快照。</td></tr>
+<tr tabindex="0" data-line="217"><td class="line">217</td><td class="code"><pre>        Long orderId = jdbc.queryForObject("SELECT id FROM sales_order WHERE order_no = ?", Long.<span class="kw">class</span>, orderNo);</pre></td><td class="explain">订单 id。</td></tr>
+<tr tabindex="0" data-line="218"><td class="line">218</td><td class="code"><pre>        jdbc.update("INSERT INTO sales_order_item(order_id, product_id, sku_snapshot, product_name_snapshot, "</pre></td><td class="explain">直接写库/查库，准备或核对测试数据</td></tr>
+<tr tabindex="0" data-line="219"><td class="line">219</td><td class="code"><pre>                        + "cover_image_snapshot, unit_price, quantity, line_amount) VALUES (?,?,?,?,?,?,?,?)",</pre></td><td class="explain">列清单续行。</td></tr>
+<tr tabindex="0" data-line="220"><td class="line">220</td><td class="code"><pre>                orderId, productId, "SKU-" + orderNo, name, "/images/covers/ol.svg",</pre></td><td class="explain">明细值：快照名称、封面与 SKU</td></tr>
+<tr tabindex="0" data-line="221"><td class="line">221</td><td class="code"><pre>                <span class="kw">new</span> java.math.BigDecimal(price), quantity,</pre></td><td class="explain">参数续行：单价与数量</td></tr>
+<tr tabindex="0" data-line="222"><td class="line">222</td><td class="code"><pre>                <span class="kw">new</span> java.math.BigDecimal(price).multiply(java.math.BigDecimal.valueOf(quantity)));</pre></td><td class="explain">行金额 = 单价 × 数量。</td></tr>
+<tr tabindex="0" data-line="223"><td class="line">223</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr class="gap"><td class="line">224</td><td></td><td></td></tr>
+<tr tabindex="0" data-line="225"><td class="line">225</td><td class="code"><pre class="cmtline">    /** 数页面里订单卡片数量。 */</pre></td><td class="explain"></td></tr>
+<tr tabindex="0" data-line="226"><td class="line">226</td><td class="code"><pre>    <span class="kw">private</span> <span class="kw">int</span> countCards(String html) {</pre></td><td class="explain">数页面里订单卡片数量。</td></tr>
+<tr tabindex="0" data-line="227"><td class="line">227</td><td class="code"><pre>        <span class="kw">int</span> count = 0;</pre></td><td class="explain">计数器。</td></tr>
+<tr tabindex="0" data-line="228"><td class="line">228</td><td class="code"><pre>        <span class="kw">int</span> index = 0;</pre></td><td class="explain">查找位置。</td></tr>
+<tr tabindex="0" data-line="229"><td class="line">229</td><td class="code"><pre>        while ((index = html.indexOf("class=\"order-card\"", index)) &gt;= 0) {</pre></td><td class="explain">每次命中一张卡。</td></tr>
+<tr tabindex="0" data-line="230"><td class="line">230</td><td class="code"><pre>            count++;</pre></td><td class="explain">计数。</td></tr>
+<tr tabindex="0" data-line="231"><td class="line">231</td><td class="code"><pre>            index += 18;</pre></td><td class="explain">越过当前匹配。</td></tr>
+<tr tabindex="0" data-line="232"><td class="line">232</td><td class="code"><pre>        }</pre></td><td class="explain">结构闭合：结束内部代码块；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="233"><td class="line">233</td><td class="code"><pre>        <span class="kw">return</span> count;</pre></td><td class="explain">返回卡片数。</td></tr>
+<tr tabindex="0" data-line="234"><td class="line">234</td><td class="code"><pre>    }</pre></td><td class="explain">结构闭合：结束方法；不产生新的业务行为。</td></tr>
+<tr tabindex="0" data-line="235"><td class="line">235</td><td class="code"><pre>}</pre></td><td class="explain">结构闭合：结束类定义；不产生新的业务行为。</td></tr>
+</tbody></table>
+</section>
+</main>
+<footer>2026-11-16 · M05-04 · 订单列表与详情补全 · 8 个文件、784 行。完整汇报见同目录的 Markdown 汇报。</footer>
+</body></html>

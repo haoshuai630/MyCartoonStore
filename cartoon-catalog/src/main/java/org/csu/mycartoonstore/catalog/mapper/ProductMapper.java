@@ -39,4 +39,8 @@ public interface ProductMapper extends BaseMapper<Product> {
     @Update("UPDATE product SET stock = stock - #{qty}, version = version + 1 "
             + "WHERE id = #{id} AND stock >= #{qty}")
     int deductStock(@Param("id") Long id, @Param("qty") int qty);
+
+    /** 取消订单时恢复库存并递增版本：与 deductStock 成对，保证每次取消只加一次 */
+    @Update("UPDATE product SET stock = stock + #{qty}, version = version + 1 WHERE id = #{id}")
+    int restoreStock(@Param("id") Long id, @Param("qty") int qty);
 }

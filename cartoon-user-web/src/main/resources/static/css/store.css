@@ -430,3 +430,59 @@ button{font-family:inherit}
   .order-row{grid-template-columns:48px 1fr 80px}
   .order-row span:nth-child(4){display:none}
 }
+/* ===== M05-04：订单列表 / 时间线 ===== */
+/* 状态页签：当前页签反色，角标是真实数量 */
+.order-tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:3px solid var(--ink);margin:18px 0 0}
+.order-tabs a{padding:10px 16px;border:2px solid var(--ink);border-bottom:0;margin-right:-2px;background:#fff;
+  font-size:13px;font-weight:800;color:#4a4237}
+.order-tabs a:hover{background:var(--paper-2)}
+.order-tabs a.on{background:var(--ink);color:var(--yellow)}
+/* 搜索：完整单号 + 搜索/清空 */
+.order-search{display:flex;gap:10px;align-items:center;margin:18px 0 6px}
+.order-search input[type=text]{flex:1;max-width:360px;border:2px solid var(--ink);padding:9px 12px;font-size:14px;background:#fff}
+.order-search .btn{padding:9px 18px}
+.order-search .link-btn{font-size:12px;font-weight:800;color:#4a4237;background:none;border:0;cursor:pointer;text-decoration:underline}
+/* 卡片：顶部订单号/时间/状态，底部缩略图与查看 */
+.order-list{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.order-card{border:3px solid var(--ink);background:#fff;box-shadow:5px 5px 0 var(--ink)}
+.order-card-top{display:flex;align-items:center;gap:14px;padding:10px 14px;border-bottom:2px solid #e6ddc9;background:var(--paper-2)}
+.order-card-top .no{font-size:13px;letter-spacing:.06em}
+.order-card-top .time{font-size:12px;color:var(--muted)}
+.order-badge{margin-left:auto;border:2px solid var(--ink);padding:3px 10px;font-size:12px;font-weight:800;background:var(--yellow)}
+.order-badge.s-CANCELLED{background:#e9e2d2;color:var(--muted)}
+.order-badge.s-PAID{background:#cfe8d5}
+.order-badge.s-SHIPPED{background:#cfe0f2}
+.order-badge.s-COMPLETED{background:var(--ink);color:var(--yellow)}
+.order-card-body{display:grid;grid-template-columns:64px 1fr 110px 80px;gap:14px;align-items:center;padding:14px}
+.order-card-body img{width:64px;height:64px;object-fit:cover;border:2px solid var(--ink);background:var(--paper-2)}
+.order-card-text b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order-card-text small{font-size:12px;color:var(--muted)}
+.order-card-amount{text-align:right;font-weight:900;color:var(--red);font-size:17px}
+.order-card-body .btn{justify-content:center}
+/* 空状态 */
+.order-empty{border:3px dashed var(--ink);background:#fff;padding:36px 20px;text-align:center;margin-top:14px}
+.order-empty p{margin:0 0 16px;font-size:14px;color:#4a4237}
+/* 分页 */
+.pager{display:flex;gap:16px;align-items:center;justify-content:center;margin-top:22px;font-size:13px;font-weight:800}
+.pager a{border:2px solid var(--ink);padding:6px 14px;background:#fff}
+.pager a:hover{background:var(--yellow)}
+/* 时间线：只显示已发生节点，未发生的不占位 */
+.timeline{display:flex;flex-wrap:wrap;gap:0;list-style:none;margin:20px 0 0;padding:0}
+.timeline li{position:relative;padding:8px 20px 8px 26px;border-left:3px solid var(--ink);margin-right:26px;background:#fff}
+.timeline li b{display:block;font-size:13px;letter-spacing:.08em}
+.timeline li span{font-size:12px;color:var(--muted)}
+.timeline li.on::before{content:"";position:absolute;left:-9px;top:50%;transform:translateY(-50%);width:12px;height:12px;border:3px solid var(--ink);background:var(--yellow);border-radius:50%}
+.timeline li.cancel{border-left-color:var(--red)}
+.timeline li.cancel::before{background:var(--red);border-color:var(--red)}
+/* 危险操作：取消订单 */
+.btn-danger{background:var(--red);color:#fff;border-color:var(--ink)}
+.btn-danger:hover{background:#b3352b}
+.order-action{margin-top:14px}
+.order-action .btn{width:100%;justify-content:center}
+@media(max-width:900px){
+  .order-card-body{grid-template-columns:56px 1fr 80px;gap:10px}
+  .order-card-amount{grid-column:2;text-align:left}
+  .order-card-body .btn{grid-column:3;grid-row:1}
+  .order-search{flex-wrap:wrap}
+  .order-search input[type=text]{max-width:none;width:100%}
+}
