@@ -177,8 +177,61 @@ class ProductAdminServiceTest {
                 .hasMessageContaining("封面");
     }
 
-    // ---------------------------------------------------------------- 编辑
+    @Test // 描述超长：400，不写库（M09-05）。
+    @DisplayName("新增：描述超 2000 字 → 400")
+    void createTooLongDescription() {
+        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本")); // 分类合法，让校验走到描述。
+        ProductForm form = form("S-4", "商品", "8", "10.00", "0", 0); // 常规表单。
+        form.setDescription("描".repeat(2001)); // 刚好超一个字符。
 
+        assertThatThrownBy(() -> service.create(form))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("2000"); // 文案带上限值。
+        verify(productMapper, never()).insert(any(Product.class)); // 不写库。
+    }
+
+    @Test // 空白描述：存 NULL，而不是空串。
+    @DisplayName("新增：空白描述存 NULL")
+    void createBlankDescriptionStoredAsNull() {
+        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本"));
+        when(productMapper.selectCount(any())).thenReturn(0L); // SKU 不重复。
+        ProductForm form = form("S-5", "商品", "8", "10.00", "0", 0);
+        form.setDescription("   "); // 只有空白。
+        ArgumentCaptor<Product> saved = ArgumentCaptor.forClass(Product.class);
+
+        service.create(form);
+
+        verify(productMapper).insert(saved.capture());
+        assertThat(saved.getValue().getDescription()).isNull(); // 空描述不入库为空串。
+    }
+
+    @Test // 外链封面：400（外链留到 docs/12）。
+    @DisplayName("新增：外链封面 → 400")
+    void createExternalCover() {
+        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本")); // 分类合法。
+        ProductForm form = form("S-6", "商品", "8", "10.00", "0", 0);
+        form.setCoverImage("https://evil.example.com/a.png"); // 外部地址。
+
+        assertThatThrownBy(() -> service.create(form))
+                .isInstanceOf(BizException.class)
+                .hasMessageContaining("站内路径"); // 文案说明只收站内路径。
+        verify(productMapper, never()).insert(any(Product.class));
+    }
+
+    @Test // 目录上跳与缺前缀：都按非站内路径拒绝。
+    @DisplayName("新增：封面含 .. 或缺少 images/ 前缀 → 400")
+    void createBadCoverPath() {
+        when(categoryMapper.selectById(8L)).thenReturn(leaf(8L, 7L, "单行本")); // 分类合法。
+        ProductForm traversal = form("S-7", "商品", "8", "10.00", "0", 0);
+        traversal.setCoverImage("images/../secret.svg"); // 上跳目录。
+        ProductForm noPrefix = form("S-8", "商品", "8", "10.00", "0", 0);
+        noPrefix.setCoverImage("products/S/cover.svg"); // 少了 images/ 前缀。
+
+        assertThatThrownBy(() -> service.create(traversal)).isInstanceOf(BizException.class);
+        assertThatThrownBy(() -> service.create(noPrefix)).isInstanceOf(BizException.class);
+    }
+
+    // ---------------------------------------------------------------- 编辑
     @Test // 编辑：只写资料列，版本进条件，SKU 与库存不写。
     @DisplayName("编辑：版本进条件，SKU 与库存不写")
     void updateWritesProfileOnly() {

@@ -128,6 +128,43 @@ class ProductAdminPageTest extends AdminIntegrationTest {
         assertThat(count("SELECT COUNT(*) FROM product WHERE sku = 'lower-case'")).isZero(); // 未写库。
     }
 
+    @Test // M09-05：描述上限 2000，超了回表单。
+    @DisplayName("新增：描述超 2000 字 → 400 回表单")
+    void createTooLongDescription() throws Exception {
+        long leaf = seedLeaf(); // 二级分类。
+
+        mockMvc.perform(post("/products").with(csrf())
+                        .param("sku", "LONG-DESC")
+                        .param("name", "新商品")
+                        .param("categoryId", String.valueOf(leaf))
+                        .param("price", "28.50")
+                        .param("description", "描".repeat(2001)) // 刚好超一个字符。
+                        .param("coverImage", "images/x.svg")
+                        .session(adminSession()))
+                .andExpect(status().isBadRequest()) // 400。
+                .andExpect(content().string(containsString("2000"))); // 文案带上限。
+
+        assertThat(count("SELECT COUNT(*) FROM product WHERE sku = 'LONG-DESC'")).isZero(); // 未写库。
+    }
+
+    @Test // M09-05：封面只收站内路径。
+    @DisplayName("新增：外链封面 → 400 回表单")
+    void createExternalCover() throws Exception {
+        long leaf = seedLeaf(); // 二级分类。
+
+        mockMvc.perform(post("/products").with(csrf())
+                        .param("sku", "EXT-COVER")
+                        .param("name", "新商品")
+                        .param("categoryId", String.valueOf(leaf))
+                        .param("price", "28.50")
+                        .param("coverImage", "https://evil.example.com/a.png") // 外链。
+                        .session(adminSession()))
+                .andExpect(status().isBadRequest()) // 400。
+                .andExpect(content().string(containsString("站内路径"))); // 文案说明口径。
+
+        assertThat(count("SELECT COUNT(*) FROM product WHERE sku = 'EXT-COVER'")).isZero(); // 未写库。
+    }
+
     @Test // 价格三位小数：400。
     @DisplayName("新增：价格三位小数 → 400")
     void createBadPrice() throws Exception {

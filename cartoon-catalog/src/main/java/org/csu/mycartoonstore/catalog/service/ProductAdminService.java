@@ -51,6 +51,9 @@ public class ProductAdminService {
     /** 封面上限：VARCHAR(255) */
     private static final int COVER_MAX = 255; // 必填。
 
+    /** 描述上限：TEXT 列本身能存 65535 字节，2000 是后台录入口径 */
+    private static final int DESCRIPTION_MAX = 2000; // 防误填，也防详情页整页渲染过重。
+
     /** 关键字上限：与前台列表一致 */
     private static final int KEYWORD_MAX = 120; // 超长 400。
 
@@ -121,7 +124,8 @@ public class ProductAdminService {
         BigDecimal price = parsePrice(form.getPrice()); // >0、两位小数。
         int stock = parseStock(form.getStock(), 0); // 新增时的初始库存。
         String summary = normalizeSummary(form.getSummary()); // 可空 ≤500。
-        String coverImage = normalizeCover(form.getCoverImage()); // 必填 ≤255。
+        String description = normalizeDescription(form.getDescription()); // 可空 ≤2000。
+        String coverImage = normalizeCover(form.getCoverImage()); // 必填、站内路径 ≤255。
         int sortOrder = normalizeSort(form.getSortOrder()); // 非负，缺省 0。
 
         if (skuExists(sku)) { // 先查一次，给出可读文案。
@@ -135,7 +139,7 @@ public class ProductAdminService {
         product.setPrice(price); // 价格。
         product.setStock(stock); // 初始库存。
         product.setSummary(summary); // 简介。
-        product.setDescription(form.getDescription()); // 描述：纯文本，模板转义。
+        product.setDescription(description); // 描述：校验后的纯文本，模板转义输出。
         product.setCoverImage(coverImage); // 封面路径。
         product.setSortOrder(sortOrder); // 排序。
         product.setStatus(STATUS_DRAFT); // 新增默认下架，完善后显式上架。
@@ -160,6 +164,7 @@ public class ProductAdminService {
         Category category = requireLeafCategory(form.getCategoryId()); // 分类必须是二级。
         BigDecimal price = parsePrice(form.getPrice()); // 价格。
         String summary = normalizeSummary(form.getSummary()); // 简介。
+        String description = normalizeDescription(form.getDescription()); // 描述。
         String coverImage = normalizeCover(form.getCoverImage()); // 封面。
         int sortOrder = normalizeSort(form.getSortOrder()); // 排序。
         long version = parseVersion(form.getVersion()); // 隐藏域带回的版本。
@@ -171,7 +176,7 @@ public class ProductAdminService {
         update.setCategoryId(category.getId()); // 分类。
         update.setPrice(price); // 价格。
         update.setSummary(summary); // 简介。
-        update.setDescription(form.getDescription()); // 描述：允许清空。
+        update.setDescription(description); // 描述：允许清空。
         update.setCoverImage(coverImage); // 封面。
         update.setSortOrder(sortOrder); // 排序。
         int rows = productMapper.updateProfile(update); // WHERE id=? AND version=?
@@ -331,7 +336,19 @@ public class ProductAdminService {
         return summary; // 通过校验。
     }
 
-    /** 封面：必填、≤255。 */
+    /** 描述：可空，去首尾空白后 ≤2000，空串存 NULL。 */
+    private String normalizeDescription(String raw) {
+        if (raw == null || raw.isBlank()) { // 不填按没有描述处理。
+            return null; // 存 NULL，页面自然不渲染空段落。
+        }
+        String description = raw.trim(); // 去掉首尾空白，保留内部换行。
+        if (description.length() > DESCRIPTION_MAX) {
+            throw BizException.badRequest("描述不能超过 " + DESCRIPTION_MAX + " 个字符"); // 400，不静默截断。
+        }
+        return description; // 通过校验。
+    }
+
+    /** 封面：必填、站内路径、≤255。 */
     private String normalizeCover(String raw) {
         String cover = raw == null ? "" : raw.trim(); // 容忍首尾空格。
         if (cover.isEmpty()) {
@@ -339,6 +356,15 @@ public class ProductAdminService {
         }
         if (cover.length() > COVER_MAX) {
             throw BizException.badRequest("封面路径不能超过 " + COVER_MAX + " 个字符"); // 400。
+        }
+        if (cover.contains("://") || cover.startsWith("//")) { // 外链与协议相对地址。
+            throw BizException.badRequest("封面只接受站内路径（以 images/ 开头）"); // 外链留到 docs/12。
+        }
+        if (cover.contains("..")) { // 上跳目录：可能指到静态目录之外。
+            throw BizException.badRequest("封面只接受站内路径（以 images/ 开头）"); // 与 ImageForm 同一口径。
+        }
+        if (!cover.startsWith("images/")) { // 站内静态资源都在 images/ 下。
+            throw BizException.badRequest("封面只接受站内路径（以 images/ 开头）"); // 缺前缀的路径渲染出来是 404。
         }
         return cover; // 通过校验。
     }
