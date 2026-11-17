@@ -24,6 +24,9 @@ ACC = "cartoon-account/src/main/java/org/csu/mycartoonstore/account/"
 ACC_TEST = "cartoon-account/src/test/java/org/csu/mycartoonstore/account/"
 WEB = "cartoon-user-web/src/main/java/org/csu/mycartoonstore/web/"
 WEB_TEST = "cartoon-user-web/src/test/java/org/csu/mycartoonstore/web/"
+ADM = "cartoon-admin-web/src/main/java/org/csu/mycartoonstore/admin/"
+ADM_RES = "cartoon-admin-web/src/main/resources/templates/"
+ADM_TEST = "cartoon-admin-web/src/test/java/org/csu/mycartoonstore/admin/"
 
 TASKS = {
     "01": {
@@ -57,9 +60,152 @@ TASKS = {
              "夹具支持造指定角色与状态的账号", "java", [(20, 30)]),
         ],
     },
+    "02": {
+        "title": "M07-02 · 管理端登录与控制台",
+        "out": "M07-02-逐行验收.html",
+        "date": "2026-11-17",
+        "note": "内容：管理端身份拦截器（每请求重读 ADMIN + ENABLED，路径全站覆盖 + 白名单）、"
+                "登录/退出（只接受启用 ADMIN、登录后换会话 ID、失败统一文案）、控制台（当前管理员 + 三个待接入入口）、"
+                "管理端样式与错误页、管理端测试基座与 12 个用例。"
+                "验证：mvn -pl cartoon-admin-web -am test → Tests run: 12, Failures: 0；"
+                "手工冒烟：/admin/login 200、未登录 /admin/ → 302 登录页、admin 登录后 200 并显示控制台、"
+                "顾客与停用账号登录 → 200 同一句失败文案且不建会话、/admin/css/admin.css 免登录 200。"
+                "admin.css 属于样式，不逐行对照（按 docs/10 §5 的'配置与样式按配置项说明'），"
+                "pom.xml 只新增 spring-boot-webmvc-test 一个测试依赖，也不单独成节。",
+        "files": [
+            (ADM + "interceptor/AdminAuthInterceptor.java", "AdminAuthInterceptor.java",
+             "每请求重读 ADMIN + ENABLED", "java", None),
+            (ADM + "config/AdminWebConfig.java", "AdminWebConfig.java",
+             "全站拦截 + 登录/静态白名单", "java", None),
+            (ADM + "controller/AdminAuthController.java", "AdminAuthController.java",
+             "登录、退出与会话 ID 轮换", "java", None),
+            (ADM + "controller/AdminHomeController.java", "AdminHomeController.java",
+             "控制台：身份与入口", "java", None),
+            (ADM + "controller/AdminExceptionHandler.java", "AdminExceptionHandler.java",
+             "业务异常转管理端错误页", "java", None),
+            (ADM_RES + "admin/fragments.html", "admin/fragments.html",
+             "管理端公共片段：head / topbar / header / footer", "html", None),
+            (ADM_RES + "admin/login.html", "admin/login.html",
+             "登录页：只接受管理员 + 统一失败文案", "html", None),
+            (ADM_RES + "admin/main.html", "admin/main.html",
+             "控制台：身份卡 + 三个待接入入口", "html", None),
+            (ADM_RES + "error/error.html", "error/error.html",
+             "管理端错误页", "html", None),
+            (ADM_TEST + "AdminLoginTest.java", "AdminLoginTest.java",
+             "12 个登录/拦截/控制台用例", "java", None),
+            (ADM_TEST + "support/AdminFixture.java", "AdminFixture.java",
+             "管理端夹具：账号、会话、商品", "java", None),
+            (ADM_TEST + "support/AdminIntegrationTest.java", "AdminIntegrationTest.java",
+             "管理端集成测试基座", "java", None),
+        ],
+    },
 }
 
 # 只有"没有行尾注释、规则解释器也认不出"的行才需要登记。
+# LINE_NOTES 按 (文件, 行号) 登记：模板行没有注释可抓，用行号最稳。
+LINE_NOTES: dict[tuple[str, int], str] = {
+    (ADM_RES + "admin/fragments.html", 3): "公共 head：标题后缀与后台样式表。",
+    (ADM_RES + "admin/fragments.html", 4): "统一 UTF-8，中文不乱码。",
+    (ADM_RES + "admin/fragments.html", 5): "1366 宽下验收，缩放交给浏览器。",
+    (ADM_RES + "admin/fragments.html", 6): "标题统一加「 | 漫屿管理端」后缀。",
+    (ADM_RES + "admin/fragments.html", 7): "后台只引 admin.css，不引用户端样式。",
+    (ADM_RES + "admin/fragments.html", 9): "公共片段集中在一个文件，各页按需 replace。",
+    (ADM_RES + "admin/fragments.html", 12): "顶部条：声明这是管理端与演示数据。",
+    (ADM_RES + "admin/fragments.html", 13): "内容宽度与页头对齐。",
+    (ADM_RES + "admin/fragments.html", 14): "明确写「教学演示站点，商品与订单均为虚构数据」。",
+    (ADM_RES + "admin/fragments.html", 16): "没有登录态时不渲染退出按钮。",
+    (ADM_RES + "admin/fragments.html", 17): "显示当前管理员，只读。",
+    (ADM_RES + "admin/fragments.html", 18): "退出必须走 POST，避免被链接预取。",
+    (ADM_RES + "admin/fragments.html", 19): "样式做成链接，行为是提交表单。",
+    (ADM_RES + "admin/fragments.html", 26): "页头：品牌 + 后台导航。",
+    (ADM_RES + "admin/fragments.html", 27): "页头也用同一内容宽度。",
+    (ADM_RES + "admin/fragments.html", 28): "点品牌回控制台。",
+    (ADM_RES + "admin/fragments.html", 29): "品牌方框字，与用户端一致。",
+    (ADM_RES + "admin/fragments.html", 30): "中文名 + 英文小字。",
+    (ADM_RES + "admin/fragments.html", 32): "后台导航；入口随后续任务增加。",
+    (ADM_RES + "admin/fragments.html", 33): "只有一个入口时也高亮当前页。",
+    (ADM_RES + "admin/fragments.html", 35): "页头右侧显示当前管理员。",
+    (ADM_RES + "admin/fragments.html", 36): "显示名来自会话，不额外查库。",
+    (ADM_RES + "admin/fragments.html", 41): "页脚：品牌与演示声明。",
+    (ADM_RES + "admin/fragments.html", 42): "页脚同一宽度。",
+    (ADM_RES + "admin/fragments.html", 43): "页脚品牌名。",
+    (ADM_RES + "admin/fragments.html", 44): "写明不涉及真实资金与物流。",
+    (ADM_RES + "admin/login.html", 3): "复用公共 head，标题「管理员登录」。",
+    (ADM_RES + "admin/login.html", 4): "登录页单独的背景与居中布局。",
+    (ADM_RES + "admin/login.html", 7): "整页居中，页脚贴底。",
+    (ADM_RES + "admin/login.html", 8): "登录卡片：硬阴影 + 粗描边。",
+    (ADM_RES + "admin/login.html", 9): "英文小标题，与用户端同一套视觉。",
+    (ADM_RES + "admin/login.html", 10): "页面标题写「管理员登录」，与用户端区分。",
+    (ADM_RES + "admin/login.html", 11): "一句话说明这是后台、顾客请去用户端。",
+    (ADM_RES + "admin/login.html", 14): "失败提示：文案由 AccountService 统一给出。",
+    (ADM_RES + "admin/login.html", 16): "POST 到 /login；页面不传角色，角色由服务端判断。",
+    (ADM_RES + "admin/login.html", 17): "用户名标签。",
+    (ADM_RES + "admin/login.html", 18): "标签文案用「管理员账号」。",
+    (ADM_RES + "admin/login.html", 20): "失败时回显用户名；浏览器可记住。",
+    (ADM_RES + "admin/login.html", 22): "密码标签。",
+    (ADM_RES + "admin/login.html", 23): "密码不回显。",
+    (ADM_RES + "admin/login.html", 24): "密码不回显、不记日志。",
+    (ADM_RES + "admin/login.html", 26): "提交登录。",
+    (ADM_RES + "admin/login.html", 29): "教学账号写在页面上，方便验收。",
+    (ADM_RES + "admin/login.html", 30): "写明两端身份互斥。",
+    (ADM_RES + "admin/login.html", 34): "页脚复用公共片段。",
+    (ADM_RES + "admin/main.html", 3): "控制台标题。",
+    (ADM_RES + "admin/main.html", 4): "控制台用公共页头。",
+    (ADM_RES + "admin/main.html", 6): "顶部条：当前管理员与退出。",
+    (ADM_RES + "admin/main.html", 7): "页头：品牌与导航。",
+    (ADM_RES + "admin/main.html", 9): "主内容区。",
+    (ADM_RES + "admin/main.html", 10): "控制台整块。",
+    (ADM_RES + "admin/main.html", 11): "内容宽度。",
+    (ADM_RES + "admin/main.html", 13): "标题区与身份卡左右排布。",
+    (ADM_RES + "admin/main.html", 14): "左侧：标题与说明。",
+    (ADM_RES + "admin/main.html", 15): "英文小标题。",
+    (ADM_RES + "admin/main.html", 16): "页面标题。",
+    (ADM_RES + "admin/main.html", 17): "说明不展示统计数字，数据以列表为准。",
+    (ADM_RES + "admin/main.html", 19): "身份卡：只显示当前管理员。",
+    (ADM_RES + "admin/main.html", 20): "字段名。",
+    (ADM_RES + "admin/main.html", 21): "显示名来自会话。",
+    (ADM_RES + "admin/main.html", 22): "身份卡里也给一个退出入口。",
+    (ADM_RES + "admin/main.html", 23): "退出后回登录页。",
+    (ADM_RES + "admin/main.html", 29): "三个业务入口。",
+    (ADM_RES + "admin/main.html", 30): "分类入口：未接入，显示为待接入。",
+    (ADM_RES + "admin/main.html", 31): "英文小标题。",
+    (ADM_RES + "admin/main.html", 32): "入口名。",
+    (ADM_RES + "admin/main.html", 33): "一句话说明这个入口能做什么。",
+    (ADM_RES + "admin/main.html", 34): "标明接入任务，避免点了打不开。",
+    (ADM_RES + "admin/main.html", 36): "商品入口：未接入。",
+    (ADM_RES + "admin/main.html", 37): "英文小标题。",
+    (ADM_RES + "admin/main.html", 38): "入口名。",
+    (ADM_RES + "admin/main.html", 39): "说明包含版本冲突检测。",
+    (ADM_RES + "admin/main.html", 40): "标明接入任务。",
+    (ADM_RES + "admin/main.html", 42): "订单入口：未接入。",
+    (ADM_RES + "admin/main.html", 43): "英文小标题。",
+    (ADM_RES + "admin/main.html", 44): "入口名。",
+    (ADM_RES + "admin/main.html", 45): "说明只对已支付订单发货。",
+    (ADM_RES + "admin/main.html", 46): "标明接入任务。",
+    (ADM_RES + "admin/main.html", 50): "解释为什么是待接入状态。",
+    (ADM_RES + "admin/main.html", 55): "页脚复用公共片段。",
+    (ADM_RES + "error/error.html", 3): "错误页标题。",
+    (ADM_RES + "error/error.html", 4): "错误页也用公共页头。",
+    (ADM_RES + "error/error.html", 6): "顶部条。",
+    (ADM_RES + "error/error.html", 7): "页头。",
+    (ADM_RES + "error/error.html", 9): "主内容区。",
+    (ADM_RES + "error/error.html", 11): "错误盒子：状态码 + 文案 + 返回入口。",
+    (ADM_RES + "error/error.html", 12): "英文小标题。",
+    (ADM_RES + "error/error.html", 13): "显示 HTTP 状态码；没有就写「操作未完成」。",
+    (ADM_RES + "error/error.html", 14): "业务异常的可读文案。",
+    (ADM_RES + "error/error.html", 15): "错误页永远给一个出口。",
+    (ADM_RES + "error/error.html", 19): "页脚复用公共片段。",
+    (ADM_RES + "admin/fragments.html", 1): "HTML5 文档声明。",
+    (ADM_RES + "admin/fragments.html", 2): "lang=zh-CN + Thymeleaf 命名空间。",
+    (ADM_RES + "admin/login.html", 1): "HTML5 文档声明。",
+    (ADM_RES + "admin/login.html", 2): "lang=zh-CN + Thymeleaf 命名空间。",
+    (ADM_RES + "admin/main.html", 1): "HTML5 文档声明。",
+    (ADM_RES + "admin/main.html", 2): "lang=zh-CN + Thymeleaf 命名空间。",
+    (ADM_RES + "error/error.html", 1): "HTML5 文档声明。",
+    (ADM_RES + "error/error.html", 2): "lang=zh-CN + Thymeleaf 命名空间。",
+}
+
+
 NOTES: dict[tuple[str, str], str] = {
     (ACC + "service/AccountService.java", "public StoreUser authenticateCustomer(String username, String rawPassword) { // 用户端登录入口专用。"):
         "用户端登录：只接受启用 CUSTOMER。",
@@ -161,6 +307,89 @@ NOTES: dict[tuple[str, str], str] = {
         "准备：手工会话，用来检查登录被拒后没写 userId。",
     (WEB_TEST + "support/CartFixture.java", 'return createUser(jdbc, username, "CUSTOMER", "ENABLED");'):
         "老签名转调新签名：默认启用 CUSTOMER。",
+    # ---- M07-02：类声明与规则解释器给不出"为什么"的行 ----
+    (ADM + "interceptor/AdminAuthInterceptor.java", "public class AdminAuthInterceptor implements HandlerInterceptor {"):
+        "管理端拦截器：只放行启用 ADMIN，其余回登录页。",
+    (ADM + "interceptor/AdminAuthInterceptor.java", "if (session != null) {"):
+        "有会话但身份不合格：作废它。",
+    (ADM + "interceptor/AdminAuthInterceptor.java", "if (path.isBlank()) {"):
+        "访问 /admin 本身时按根路径处理。",
+    (ADM + "config/AdminWebConfig.java", "public class AdminWebConfig implements WebMvcConfigurer {"):
+        "管理端拦截器注册：全站受保护，登录与静态资源放行。",
+    (ADM + "controller/AdminAuthController.java", "public class AdminAuthController {"):
+        "管理端登录与退出；角色判断交给 AccountService。",
+    (ADM + "controller/AdminAuthController.java", "StoreUser admin;"):
+        "登录成功后的管理员；失败时直接回表单，不会走到这里。",
+    (ADM + "controller/AdminAuthController.java", "try {"):
+        "登录失败抛 BizException，在这里转成表单提示。",
+    (ADM + "controller/AdminAuthController.java", "if (session != null) {"):
+        "没有会话时不必作废。",
+    (ADM + "controller/AdminHomeController.java", "public class AdminHomeController {"):
+        "控制台：只给身份与入口，不显示统计数字。",
+    (ADM + "controller/AdminHomeController.java", '@GetMapping({"", "/"})'):
+        "/admin 与 /admin/ 都落到控制台。",
+    (ADM + "controller/AdminExceptionHandler.java", "public class AdminExceptionHandler {"):
+        "管理端业务异常统一转错误页；技术异常不在这里处理。",
+    (ADM_TEST + "AdminLoginTest.java", "class AdminLoginTest extends AdminIntegrationTest {"):
+        "管理端登录与拦截的集成用例。",
+    (ADM_TEST + "AdminLoginTest.java", "void loggedInAdminGoesToConsole() throws Exception {"):
+        "用例：已登录管理员访问登录页，直接去控制台。",
+    (ADM_TEST + "AdminLoginTest.java", "void customerCannotLogIn() throws Exception {"):
+        "用例：顾客登录管理端被拒，且不建会话（AC-05）。",
+    (ADM_TEST + "AdminLoginTest.java", "void disabledAdminCannotLogIn() throws Exception {"):
+        "用例：停用管理员登录被拒，文案与密码错一致。",
+    (ADM_TEST + "AdminLoginTest.java", "void wrongPassword() throws Exception {"):
+        "用例：密码错不透露账号是否存在。",
+    (ADM_TEST + "AdminLoginTest.java", 'seed("ad_pwd", "Cartoon123!", "ADMIN", "ENABLED");'):
+        "准备：启用的管理员 ad_pwd。",
+    (ADM_TEST + "AdminLoginTest.java", "void consoleRequiresLogin() throws Exception {"):
+        "用例：未登录访问控制台，跳登录页并记住地址。",
+    (ADM_TEST + "AdminLoginTest.java", "void consoleRendersForAdmin() throws Exception {"):
+        "用例：控制台显示当前管理员与待接入入口。",
+    (ADM_TEST + "AdminLoginTest.java", "void customerSessionRejected() throws Exception {"):
+        "用例：顾客会话进不了后台，旧会话被作废（AC-05）。",
+    (ADM_TEST + "AdminLoginTest.java", "void disabledAfterLoginRejected() throws Exception {"):
+        "用例：登录后被停用，下一个请求即被拒（AC-07）。",
+    (ADM_TEST + "AdminLoginTest.java", "void cssIsOpen() throws Exception {"):
+        "用例：静态资源不需要登录。",
+    (ADM_TEST + "AdminLoginTest.java", ".andReturn();"):
+        "取回结果，以便检查登录后的会话。",
+    (ADM_TEST + "AdminLoginTest.java", "void loginSucceeds() throws Exception {"):
+        "用例：管理员登录成功，会话写入 id 与显示名。",
+    (ADM_TEST + "AdminLoginTest.java", "void logoutClearsSession() throws Exception {"):
+        "用例：退出销毁管理端会话。",
+    (ADM_TEST + "AdminLoginTest.java", "void loginPageRenders() throws Exception {"):
+        "用例：登录页可匿名访问，并写明这是管理员入口。",
+    (ADM_TEST + "AdminLoginTest.java", 'username, passwordEncoder.encode(rawPassword), "测试管理员", role, status);'):
+        "续行：真实 BCrypt 散列 + 用例指定的角色与状态。",
+    (ADM_TEST + "support/AdminFixture.java", "public final class AdminFixture {"):
+        "管理端用例的准备数据：账号、会话、商品、库存。",
+    (ADM_TEST + "support/AdminFixture.java", "private AdminFixture() {"):
+        "工具类不实例化。",
+    (ADM_TEST + "support/AdminFixture.java", 'return createUser(jdbc, username, "CUSTOMER", "ENABLED");'):
+        "顾客：启用状态，用于'顾客不能进后台'。",
+    (ADM_TEST + "support/AdminFixture.java", "MockHttpSession session = new MockHttpSession();"):
+        "准备：手工会话，只放拦截器认的键。",
+    (ADM_TEST + "support/AdminFixture.java", "return session;"):
+        "交给请求构造器。",
+    (ADM_TEST + "support/AdminFixture.java", "return stock == null ? 0 : stock;"):
+        "空值按 0，断言时不必再判空。",
+    (ADM_TEST + "support/AdminFixture.java", 'workCode, "作品" + workCode);'):
+        "一级分类：作品名带编码，便于识别。",
+    (ADM_TEST + "support/AdminFixture.java", 'workCode + "-COMIC", workId, "单行本");'):
+        "二级分类必须是 -COMIC 结尾，商品只能挂二级。",
+    (ADM_TEST + "support/AdminFixture.java", 'workCode + "-COMIC");'):
+        "取回二级分类 id。",
+    (ADM_TEST + "support/AdminFixture.java",
+     '+ "price, stock, status, sort_order) VALUES (?,?,?,?,?,?,?,?,?,1)",'):
+        "商品列清单：价格、库存、状态由用例给，排序固定 1。",
+    (ADM_TEST + "support/AdminFixture.java", 'sku, categoryId, "商品" + sku, "一句话简介", "商品说明",'):
+        "值：SKU、分类、名称与文案。",
+    (ADM_TEST + "support/AdminFixture.java",
+     '"images/products/" + sku + "/cover.svg", new BigDecimal(price), stock, status);'):
+        "封面路径按 SKU 拼；价格用 BigDecimal。",
+    (ADM_TEST + "support/AdminIntegrationTest.java", "public abstract class AdminIntegrationTest {"):
+        "管理端集成测试基座：真实 MySQL + 每例重建表。",
 }
 
 
@@ -191,7 +420,7 @@ def render(task_id: str, meta: dict) -> None:
                 continue
             display, trailing = g5.split_trailing(line)  # 左列代码 / 右列注释。
             code = display.strip()  # 用于查说明的代码文本。
-            text = NOTES.get((rel, s)) or NOTES.get((rel, code)) or trailing  # 手写 > 行尾注释。
+            text = LINE_NOTES.get((rel, i)) or NOTES.get((rel, s)) or NOTES.get((rel, code)) or trailing  # 行号 > 手写 > 行尾注释。
             if not text and kind == "java":
                 text = g5.g4.m04_explainer.explain(code, g5.g4.javadoc_above(lines, i - 1))
             if not text and kind == "html":

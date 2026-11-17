@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments :: head('操作未完成')}"></head>
+<body>
+
+<div th:replace="~{admin/fragments :: topbar}"></div>
+<header th:replace="~{admin/fragments :: header}"></header>
+
+<main>
+    <!-- 业务失败：状态码取 BizException 的 code，文案由 Service 给出 -->
+    <div class="error-box">
+        <span class="kicker">ERROR</span>
+        <h1 th:text="${status} ?: '操作未完成'">操作未完成</h1>
+        <p class="error-message" th:text="${message} ?: '请返回后重试'">请返回后重试</p>
+        <a class="btn" th:href="@{/}">返回控制台</a>
+    </div>
+</main>
+
+<footer th:replace="~{admin/fragments :: footer}"></footer>
+
+</body>
+</html>
